@@ -4,7 +4,7 @@ import math
 
 NUM_FIGHTS = 3
 NUM_TURNS = 5
-NUM_SIMS = 500
+NUM_SIMS = 100
 
 weapon_hits = 0
 pam_used = 0
@@ -407,23 +407,22 @@ class Barbarian:
 
     def hit(self, target, crit=False, brutal_strike=False, pam=False):
         target.damage(self.weapon(pam=pam) + self.str + self.rage_dmg + self.magic_weapon)
+        if crit:
+            target.damage(self.weapon(pam=pam))
         if not self.used_gwm_dmg:
             target.damage(self.prof)
             self.used_gwm_dmg = True
         if not self.used_beserker:
             for _ in range(self.rage_dmg):
                 target.damage(random.randint(1,6))
+            if crit:
+                for _ in range(self.rage_dmg):
+                    target.damage(random.randint(1,6))
             self.used_beserker = True
         if brutal_strike:
             target.damage(self.brutal_strike_dmg())
-        if crit:
-            target.damage(self.weapon(pam=pam))
-            if brutal_strike:
+            if crit:
                 target.damage(self.brutal_strike_dmg())
-            if not self.used_beserker:
-                for _ in range(self.rage_dmg):
-                    target.damage(random.randint(1,6))
-                self.used_beserker = True
 
     def short_rest(self):
         pass
@@ -515,6 +514,94 @@ class Paladin:
         elif self.level >= 3:
             self.channel_divinity = 2
 
+class Ranger:
+    def __init__(self, level):
+        self.level = level
+        self.prof = prof_bonus(level)
+        if level >= 8:
+            self.dex = 5
+        elif level >= 4:
+            self.dex = 4
+        else:
+            self.dex = 3
+        self.magic_weapon = magic_weapon(level)
+        self.to_hit = self.prof + self.dex + self.magic_weapon + 2
+        if level >= 5:
+            self.max_attacks = 2
+        else:
+            self.max_attacks = 1
+
+    def weapon(self):
+        return random.randint(1,6)
+    
+    def hunters_mark(self):
+        if self.level >= 20:
+            return random.randint(1,10)
+        return random.randint(1,6)
+
+    def begin_turn(self):
+        self.used_bonus = False
+        self.attacks = self.max_attacks
+        self.used_natures_veil = False
+
+    def turn(self, target):
+        self.begin_turn()
+        if not self.used_bonus and not self.used_hunters_mark:
+            self.used_bonus = True
+            self.used_hunters_mark = True
+        # if self.level >= 14 and self.level < 17 and not self.used_bonus and not self.used_natures_veil:
+        #     self.used_bonus = True
+        #     self.used_natures_veil = True
+        while self.attacks > 0:
+            self.attack(target)
+            self.attacks -= 1
+        if self.level >= 3 and not self.used_gloom_attack:
+            self.used_gloom_attack = True
+            self.attack(target, gloom=True)
+        if not self.used_bonus and self.level >= 4:
+            self.used_bonus = True
+            self.attack(target, bonus=True)
+
+    def attack(self, target, bonus=False, gloom=False):
+        adv = False
+        if self.level >= 17 and self.used_hunters_mark:
+            adv = True
+        if self.used_natures_veil:
+            adv = True
+        if self.vex:
+            adv = True
+            self.vex = False
+        roll = do_roll(adv=adv)
+        if roll == 20:
+            self.hit(target, crit=True, bonus=bonus, gloom=gloom)
+        elif roll + self.to_hit >= target.ac:
+            self.hit(target, bonus=bonus, gloom=gloom)
+
+    def hit(self, target, crit=False, bonus=False, gloom=False):
+        self.vex = True
+        target.damage(self.weapon() + self.magic_weapon)
+        if not bonus or self.level >= 4:
+            target.damage(self.dex)
+        if crit:
+            target.damage(self.weapon())
+        if gloom:
+            target.damage(random.randint(1,8))
+            if crit:
+                target.damage(random.randint(1,8))
+        if self.used_hunters_mark:
+            target.damage(self.hunters_mark())
+            if crit:
+                target.damage(self.hunters_mark())
+
+    def long_rest(self):
+        self.used_hunters_mark = False
+        self.short_rest()
+        self.slots = spell_slots(level)
+
+    def short_rest(self):
+        self.vex = False
+        self.used_gloom_attack = False
+
 
 def simulate(character, level, fights, turns):
     dmg = 0
@@ -541,7 +628,8 @@ if __name__ == "__main__":
         barbarian_damage = test_dpr(Barbarian(level))
         monk_damage = test_dpr(Monk(level))
         paladin_damage = test_dpr(Paladin(level))
-        print(f"Level {level} -- Fighter: {fighter_damage:0.2f} DPR - Monk: {monk_damage:0.2f} DPR - Barbarian: {barbarian_damage:0.2f} DPR - Paladin: {paladin_damage:0.2f} DPR")
+        ranger_dmage = test_dpr(Ranger(level))
+        print(f"Level {level} -- Fighter: {fighter_damage:0.2f} DPR - Monk: {monk_damage:0.2f} DPR - Barbarian: {barbarian_damage:0.2f} DPR - Paladin: {paladin_damage:0.2f} DPR - Ranger: {ranger_dmage:0.2f} DPR")
 
 
         # fighter_damage = test_dpr(Fighter(level))
