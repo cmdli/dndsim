@@ -6,6 +6,8 @@ NUM_FIGHTS = 3
 NUM_TURNS = 5
 NUM_SIMS = 100
 
+fey_dmg = 0
+
 SPELL_SLOTS_ARR = [
     [0,0,0,0,0,0,0,0,0,0], # 0
     [0,2,0,0,0,0,0,0,0,0], # 1
@@ -372,6 +374,7 @@ class Barbarian:
             self.rage_dmg = 3
         else:
             self.rage_dmg = 2
+        self.long_rest()
 
     def weapon(self, pam=False):
         if pam:
@@ -396,6 +399,9 @@ class Barbarian:
 
     def turn(self, target):
         self.begin_turn()
+        if not self.raging and not self.used_bonus:
+            self.raging = True
+            self.used_bonus = True
         while self.attacks > 0:
             self.attack(target)
             self.attacks -= 1
@@ -424,7 +430,9 @@ class Barbarian:
             target.damage(self.str)
 
     def hit(self, target, crit=False, brutal_strike=False, pam=False):
-        target.damage(self.weapon(pam=pam) + self.str + self.rage_dmg + self.magic_weapon)
+        target.damage(self.weapon(pam=pam) + self.str + self.magic_weapon)
+        if self.raging:
+            target.damage(self.rage_dmg)
         if crit:
             target.damage(self.weapon(pam=pam))
         if not self.used_gwm_dmg:
@@ -443,9 +451,9 @@ class Barbarian:
                 target.damage(self.brutal_strike_dmg())
 
     def short_rest(self):
-        pass
+        self.raging = False
     def long_rest(self):
-        pass
+        self.short_rest()
 
 class Paladin:
     def __init__(self, level):
@@ -542,8 +550,15 @@ class Ranger:
             self.dex = 4
         else:
             self.dex = 3
+        if level >= 16:
+            self.wis = 5
+        elif level >= 12:
+            self.wis = 4
+        else:
+            self.wis = 3
         self.magic_weapon = magic_weapon(level)
         self.to_hit = self.prof + self.dex + self.magic_weapon + 2
+        self.spell_hit = self.prof + self.wis + self.magic_weapon
         if level >= 5:
             self.max_attacks = 2
         else:
@@ -564,21 +579,31 @@ class Ranger:
 
     def turn(self, target):
         self.begin_turn()
-        if not self.used_bonus and not self.used_hunters_mark:
-            self.used_bonus = True
-            self.used_hunters_mark = True
-        # if self.level >= 14 and self.level < 17 and not self.used_bonus and not self.used_natures_veil:
-        #     self.used_bonus = True
-        #     self.used_natures_veil = True
-        while self.attacks > 0:
-            self.attack(target)
-            self.attacks -= 1
-        if self.level >= 3 and not self.used_gloom_attack:
-            self.used_gloom_attack = True
-            self.attack(target, gloom=True)
-        if not self.used_bonus and self.level >= 4:
-            self.used_bonus = True
-            self.attack(target, bonus=True)
+        slot = highest_spell_slot(self.slots)
+        if slot >= 4 and not self.concentration:
+            self.fey_summon = slot
+            self.concentration = True
+            self.slots[slot] -= 1
+        else:
+            if not self.used_bonus and not self.used_hunters_mark and not self.concentration:
+                self.used_bonus = True
+                self.used_hunters_mark = True
+                self.concentration = True
+            # Nature's Veil is DPR loss
+            # if self.level >= 14 and self.level < 17 and not self.used_bonus and not self.used_natures_veil:
+            #     self.used_bonus = True
+            #     self.used_natures_veil = True
+            while self.attacks > 0:
+                self.attack(target)
+                self.attacks -= 1
+            if self.level >= 3 and not self.used_gloom_attack:
+                self.used_gloom_attack = True
+                self.attack(target, gloom=True)
+            if not self.used_bonus and self.level >= 4:
+                self.used_bonus = True
+                self.attack(target, bonus=True)
+        if self.fey_summon > 0:
+            self.summon_fey(target)
 
     def attack(self, target, bonus=False, gloom=False):
         adv = False
@@ -611,14 +636,34 @@ class Ranger:
             if crit:
                 target.damage(self.hunters_mark())
 
+    
+    def summon_fey(self, target):
+        global fey_dmg
+        adv = True # Advantage on first attack
+        num_attacks = self.fey_summon//2
+        before = target.dmg
+        for _ in range(num_attacks):
+            roll = do_roll(adv=adv)
+            adv = False
+            if roll == 20:
+                target.damage(roll_dice(4,6)+3+self.fey_summon)
+            elif roll + self.to_hit >= target.ac:
+                target.damage(roll_dice(2,6)+3+self.fey_summon)
+        fey_dmg += target.dmg - before
+
     def long_rest(self):
-        self.used_hunters_mark = False
         self.short_rest()
+        # level = self.level
+        # if level == 20: # Ranger multiclass at 20
+        #     level += 2
         self.slots = spell_slots(level, half=True)
 
     def short_rest(self):
         self.vex = False
         self.used_gloom_attack = False
+        self.used_hunters_mark = False
+        self.concentration = False
+        self.fey_summon = 0
 
 class Rogue:
     def __init__(self, level):
@@ -873,9 +918,11 @@ def simulate(character, level, fights, turns):
     return dmg
 
 def test_dpr(character):
+    global fey_dmg
     damage = 0
     for _ in range(NUM_SIMS):
         damage += simulate(character, level, NUM_FIGHTS, NUM_TURNS)
+    # print(f"Damage: {damage} Fey Damage: {fey_dmg}")
     return damage/(NUM_SIMS*NUM_FIGHTS*NUM_TURNS)
 
 
