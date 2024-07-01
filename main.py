@@ -6,8 +6,6 @@ NUM_FIGHTS = 3
 NUM_TURNS = 5
 NUM_SIMS = 100
 
-fey_dmg = 0
-
 SPELL_SLOTS_ARR = [
     [0,0,0,0,0,0,0,0,0,0], # 0
     [0,2,0,0,0,0,0,0,0,0], # 1
@@ -638,10 +636,8 @@ class Ranger:
 
     
     def summon_fey(self, target):
-        global fey_dmg
         adv = True # Advantage on first attack
         num_attacks = self.fey_summon//2
-        before = target.dmg
         for _ in range(num_attacks):
             roll = do_roll(adv=adv)
             adv = False
@@ -649,7 +645,6 @@ class Ranger:
                 target.damage(roll_dice(4,6)+3+self.fey_summon)
             elif roll + self.to_hit >= target.ac:
                 target.damage(roll_dice(2,6)+3+self.fey_summon)
-        fey_dmg += target.dmg - before
 
     def long_rest(self):
         self.short_rest()
@@ -918,24 +913,23 @@ def simulate(character, level, fights, turns):
     return dmg
 
 def test_dpr(character):
-    global fey_dmg
     damage = 0
     for _ in range(NUM_SIMS):
         damage += simulate(character, level, NUM_FIGHTS, NUM_TURNS)
-    # print(f"Damage: {damage} Fey Damage: {fey_dmg}")
     return damage/(NUM_SIMS*NUM_FIGHTS*NUM_TURNS)
 
 
 if __name__ == "__main__":
     for level in range(1,21):
-        fighter_damage = test_dpr(Fighter(level))
-        barbarian_damage = test_dpr(Barbarian(level))
-        monk_damage = test_dpr(Monk(level))
-        paladin_damage = test_dpr(Paladin(level))
-        ranger_dmage = test_dpr(Ranger(level))
-        rogue_damage = test_dpr(Rogue(level))
-        wizard_damage = test_dpr(Wizard(level))
-        print(f"Level {level} -- Fighter: {fighter_damage:0.2f} DPR - Monk: {monk_damage:0.2f} DPR - Barbarian: {barbarian_damage:0.2f} DPR - Paladin: {paladin_damage:0.2f} DPR - Ranger: {ranger_dmage:0.2f} DPR - Rogue: {rogue_damage:0.2f} DPR - Wizard: {wizard_damage:0.2f} DPR")
+        lines = []
+        lines.append(f"Fighter {level}: {test_dpr(Fighter(level)):0.2f} DPR")
+        lines.append(f"Barbarian {level}: {test_dpr(Barbarian(level)):0.2f} DPR")
+        lines.append(f"Monk {level}: {test_dpr(Monk(level)):0.2f} DPR")
+        lines.append(f"Paladin {level}: {test_dpr(Paladin(level)):0.2f} DPR")
+        lines.append(f"Ranger {level}: {test_dpr(Ranger(level)):0.2f} DPR")
+        lines.append(f"Rogue {level}: {test_dpr(Rogue(level)):0.2f} DPR")
+        lines.append(f"Wizard {level}: {test_dpr(Wizard(level)):0.2f} DPR")
+        print(" - ".join(lines))
 
 
         # fighter_damage = test_dpr(Fighter(level))
