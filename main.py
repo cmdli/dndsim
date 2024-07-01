@@ -6,33 +6,33 @@ NUM_FIGHTS = 3
 NUM_TURNS = 5
 NUM_SIMS = 100
 
-weapon_hits = 0
-pam_used = 0
-
 SPELL_SLOTS_ARR = [
-    [2,0,0,0,0,0,0,0,0], # 1
-    [3,0,0,0,0,0,0,0,0], # 2
-    [4,2,0,0,0,0,0,0,0], # 3
-    [4,3,0,0,0,0,0,0,0], # 4
-    [4,3,2,0,0,0,0,0,0], # 5
-    [4,3,3,0,0,0,0,0,0], # 6
-    [4,3,3,1,0,0,0,0,0], # 7
-    [4,3,3,2,0,0,0,0,0], # 8
-    [4,3,3,3,1,0,0,0,0], # 9
-    [4,3,3,3,2,0,0,0,0], # 10
-    [4,3,3,3,2,1,0,0,0], # 11
-    [4,3,3,3,2,1,0,0,0], # 12
-    [4,3,3,3,2,1,1,0,0], # 13
-    [4,3,3,3,2,1,1,0,0], # 14
-    [4,3,3,3,2,1,1,1,0], # 15
-    [4,3,3,3,2,1,1,1,0], # 16
-    [4,3,3,3,2,1,1,1,1], # 17
-    [4,3,3,3,3,1,1,1,1], # 18
-    [4,3,3,3,3,2,1,1,1], # 19
-    [4,3,3,3,3,2,2,1,1], # 20
+    [0,0,0,0,0,0,0,0,0,0], # 0
+    [0,2,0,0,0,0,0,0,0,0], # 1
+    [0,3,0,0,0,0,0,0,0,0], # 2
+    [0,4,2,0,0,0,0,0,0,0], # 3
+    [0,4,3,0,0,0,0,0,0,0], # 4
+    [0,4,3,2,0,0,0,0,0,0], # 5
+    [0,4,3,3,0,0,0,0,0,0], # 6
+    [0,4,3,3,1,0,0,0,0,0], # 7
+    [0,4,3,3,2,0,0,0,0,0], # 8
+    [0,4,3,3,3,1,0,0,0,0], # 9
+    [0,4,3,3,3,2,0,0,0,0], # 10
+    [0,4,3,3,3,2,1,0,0,0], # 11
+    [0,4,3,3,3,2,1,0,0,0], # 12
+    [0,4,3,3,3,2,1,1,0,0], # 13
+    [0,4,3,3,3,2,1,1,0,0], # 14
+    [0,4,3,3,3,2,1,1,1,0], # 15
+    [0,4,3,3,3,2,1,1,1,0], # 16
+    [0,4,3,3,3,2,1,1,1,1], # 17
+    [0,4,3,3,3,3,1,1,1,1], # 18
+    [0,4,3,3,3,3,2,1,1,1], # 19
+    [0,4,3,3,3,3,2,2,1,1], # 20
 ]
-def spell_slots(level):
-    return SPELL_SLOTS_ARR[(level - 1) // 2].copy()
+def spell_slots(level, half=False):
+    if half:
+        level = math.ceil(level / 2)
+    return SPELL_SLOTS_ARR[level].copy()
 
 def prof_bonus(level):
     return ((level-1) // 4) + 2
@@ -69,6 +69,15 @@ def highest_spell_slot(slots):
             return slot
         slot -= 1
     return -1
+
+def cantrip_dice(level):
+    if level >= 17:
+        return 4
+    elif level >= 11:
+        return 3
+    elif level >= 5:
+        return 2
+    return 1
 
 def polearm_master(gwf=False):
     r = random.randint(1,4)
@@ -504,18 +513,18 @@ class Paladin:
             self.used_gwm_dmg = True
             target.damage(self.prof)
         slot = highest_spell_slot(self.slots)
-        if not self.used_smite and not self.used_bonus and slot >= 0:
+        if not self.used_smite and not self.used_bonus and slot >= 1:
             self.used_bonus = True
             self.used_smite = True
             self.slots[slot] -= 1
-            num_d8s = 2 + slot
+            num_d8s = 1 + slot
             target.damage(gwf(num_d8s, 8))
             if crit:
                 target.damage(gwf(num_d8s, 8))
 
     def long_rest(self):
         self.short_rest()
-        self.slots = spell_slots(level)
+        self.slots = spell_slots(level, half=True)
 
     def short_rest(self):
         if self.level >= 11:
@@ -605,7 +614,7 @@ class Ranger:
     def long_rest(self):
         self.used_hunters_mark = False
         self.short_rest()
-        self.slots = spell_slots(level)
+        self.slots = spell_slots(level, half=True)
 
     def short_rest(self):
         self.vex = False
@@ -702,6 +711,154 @@ class Rogue:
     def long_rest(self):
         self.short_rest()
 
+class Wizard:
+    def __init__(self, level):
+        self.level = level
+        self.prof = prof_bonus(level)
+        if level >= 8:
+            self.int = 5
+        elif level >= 4:
+            self.int = 4
+        else:
+            self.int = 3
+        self.dc = 8 + self.prof + self.int
+        self.magic_weapon = magic_weapon(level)
+        self.to_hit = self.prof + self.int + self.magic_weapon
+        self.cantrip_dice = cantrip_dice(level)
+        self.long_rest()
+
+    def long_rest(self):
+        self.short_rest()
+        self.slots = spell_slots(level)
+        self.used_arcane_recovery = False
+        self.used_overchannel = self.level < 14
+
+    def short_rest(self):
+        # TODO: use arcane recovery
+        self.concentration = False
+        self.fey_summon = 0
+
+    def turn(self, target):
+        slot = highest_spell_slot(self.slots)
+        if slot >= 3 and not self.concentration:
+            self.fey_summon = slot
+            self.concentration = True
+        else:
+            if slot >= 9:
+                self.meteor_swarm(target)
+            elif slot >= 7:
+                self.finger_of_death(target)
+            elif slot >= 6:
+                self.chain_lightning(target)
+            elif slot >= 5 and not self.used_overchannel:
+                self.blight(target, slot, overchannel=True)
+                self.used_overchannel = True
+            elif slot >= 4:
+                self.blight(target, slot)
+            elif slot >= 3:
+                self.fireball(target, slot)
+            elif slot >= 2 and self.level < 11:
+                self.scorching_ray(target, slot)
+            elif slot >= 1 and self.level < 5:
+                self.magic_missile(target, slot)
+            else:
+                self.firebolt(target)
+        if slot >= 1:
+            self.slots[slot] -= 1
+        if self.fey_summon > 0:
+            self.summon_fey(target)
+
+    def meteor_swarm(self, target):
+        dmg = roll_dice(40,6)+self.int
+        if target.save(self.dc):
+            target.damage(dmg // 2)
+        else:
+            target.damage(dmg)
+
+    def finger_of_death(self, target):
+        dmg = roll_dice(7,8)+30
+        if target.save(self.dc):
+            target.damage(dmg // 2)
+        else:
+            target.damage(dmg)
+
+    def chain_lightning(self, target):
+        dmg = roll_dice(10,8)+self.int
+        if target.save(self.dc):
+            target.damage(dmg//2)
+        else:
+            target.damage(dmg)
+
+    def disintegrate(self, target, slot):
+        if not target.save(self.dc):
+            target.damage(40+roll_dice(10 + (slot-6),6))
+
+    def steel_wind_strike(self, target):
+        roll = do_roll()
+        if roll == 20:
+            target.damage(roll_dice(12,10))
+        elif roll + self.to_hit >= target.ac:
+            target.damage(roll_dice(6,10))
+
+    def blight(self, target, slot, overchannel=False):
+        num_dice = 8 + (slot - 4)
+        if overchannel:
+            dmg = num_dice * 8
+        else:
+            dmg = roll_dice(num_dice,8)
+        if target.save(self.dc):
+            target.damage(dmg//2)
+        else:
+            target.damage(dmg)
+
+    def scorching_ray(self, target, slot):
+        for _ in range(3+(slot - 2)):
+            roll = do_roll()
+            if roll == 20:
+                target.damage(roll_dice(4,6))
+            elif roll + self.to_hit >= target.ac:
+                target.damage(roll_dice(2,6))
+        target.damage(self.int)
+
+    def fireball(self, target, slot):
+        dmg = roll_dice(8 + (slot - 3),6)+self.int
+        if not target.save(self.dc):
+            target.damage(dmg)
+        else:
+            target.damage(dmg // 2)
+    
+    def erupting_earth(self, target, slot):
+        dmg = roll_dice(3 + (slot - 3),12)
+        if target.save(self.dc):
+            target.damage(dmg)
+        else:
+            target.damage(dmg//2)
+
+    def magic_missile(self, target, slot):
+        target.damage(roll_dice(3+(slot-1),4)+self.int)
+
+    def firebolt(self, target, adv=False):
+        roll = do_roll(adv=adv)
+        num_dice = self.cantrip_dice
+        if roll == 20:
+            num_dice *= 2
+        dmg = roll_dice(num_dice,10)+self.int
+        if roll + self.to_hit >= target.ac:
+            target.damage(dmg)
+        elif self.level >= 2:
+            target.damage(dmg//2)
+
+    def summon_fey(self, target):
+        adv = True # Advantage on first attack
+        num_attacks = self.fey_summon//2
+        for _ in range(num_attacks):
+            roll = do_roll(adv=adv)
+            adv = False
+            if roll == 20:
+                target.damage(roll_dice(4,6)+3+self.fey_summon)
+            elif roll + self.to_hit >= target.ac:
+                target.damage(roll_dice(2,6)+3+self.fey_summon)
+
 
 def simulate(character, level, fights, turns):
     dmg = 0
@@ -730,7 +887,8 @@ if __name__ == "__main__":
         paladin_damage = test_dpr(Paladin(level))
         ranger_dmage = test_dpr(Ranger(level))
         rogue_damage = test_dpr(Rogue(level))
-        print(f"Level {level} -- Fighter: {fighter_damage:0.2f} DPR - Monk: {monk_damage:0.2f} DPR - Barbarian: {barbarian_damage:0.2f} DPR - Paladin: {paladin_damage:0.2f} DPR - Ranger: {ranger_dmage:0.2f} DPR - Rogue: {rogue_damage:0.2f} DPR")
+        wizard_damage = test_dpr(Wizard(level))
+        print(f"Level {level} -- Fighter: {fighter_damage:0.2f} DPR - Monk: {monk_damage:0.2f} DPR - Barbarian: {barbarian_damage:0.2f} DPR - Paladin: {paladin_damage:0.2f} DPR - Ranger: {ranger_dmage:0.2f} DPR - Rogue: {rogue_damage:0.2f} DPR - Wizard: {wizard_damage:0.2f} DPR")
 
 
         # fighter_damage = test_dpr(Fighter(level))
@@ -740,3 +898,6 @@ if __name__ == "__main__":
         # barbarian_damage = test_dpr(Barbarian(level))
         # barbarian_pam_damage = test_dpr(Barbarian(level, True))
         # print(f"Barbarian (greatsword) {level}: {barbarian_damage:0.2f} DPR - Barbarian (glaive) {level}: {barbarian_pam_damage:0.2f} DPR")
+
+        # wizard_damage = test_dpr(Wizard(level))
+        # print(f"Level {level} -- Wizard: {wizard_damage:0.2f} DPR")
