@@ -49,12 +49,11 @@ class Monk:
             r = random.randint(1, self.weapon_die)
         return r
 
-    def begin_turn(self):
+    def begin_turn(self, target):
         self.used_stun = self.level < 5
         self.used_grappler = self.level < 4
 
     def turn(self, target):
-        self.begin_turn()
         for _ in range(self.action_attacks):
             self.attack(target, main_action=True)
         if self.ki > 0:
@@ -63,6 +62,12 @@ class Monk:
                 self.attack(target)
         else:
             self.attack(target)
+
+    def end_turn(self, target):
+        pass
+
+    def enemy_turn(self, target):
+        pass
 
     def attack(self, target, main_action=False):
         roll = do_roll(target.stunned or target.grappled)

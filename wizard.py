@@ -36,6 +36,9 @@ class Wizard:
         self.concentration = False
         self.fey_summon = 0
 
+    def begin_turn(self, target):
+        pass
+
     def turn(self, target):
         slot = highest_spell_slot(self.slots)
         if slot >= 3 and not self.concentration:
@@ -65,6 +68,12 @@ class Wizard:
             self.slots[slot] -= 1
         if self.fey_summon > 0:
             self.summon_fey(target)
+
+    def end_turn(self, target):
+        pass
+
+    def enemy_turn(self, target):
+        pass
 
     def meteor_swarm(self, target):
         dmg = roll_dice(40, 6) + self.int

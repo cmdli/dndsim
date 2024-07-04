@@ -57,7 +57,7 @@ class Fighter:
         else:
             return greatsword(gwf=True)
 
-    def begin_turn(self):
+    def begin_turn(self, target):
         self.actions = 1
         if self.action_surge >= 1:
             self.action_surge -= 1
@@ -69,7 +69,6 @@ class Fighter:
         self.heroic_advantage = self.level >= 10
 
     def turn(self, target):
-        self.begin_turn()
         for _ in range(self.actions):
             self.attacks = self.max_attacks
             while self.attacks > 0:
@@ -79,6 +78,12 @@ class Fighter:
         if self.level >= 8 and self.use_pam and not self.used_bonus:
             pam_used += 1
             self.attack(target, pam=True)
+
+    def end_turn(self, target):
+        pass
+
+    def enemy_turn(self, target):
+        pass
 
     def attack(self, target, pam=False):
         roll = do_roll(adv=self.studied_attacks)

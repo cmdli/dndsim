@@ -10,8 +10,8 @@ from ranger import Ranger
 from cleric import Cleric
 from target import Target
 
-NUM_FIGHTS = 2
-NUM_TURNS = 6
+NUM_FIGHTS = 3
+NUM_TURNS = 5
 NUM_SIMS = 500
 
 
@@ -21,7 +21,10 @@ def simulate(character, level, fights, turns):
     for _ in range(fights):
         target = Target(level)
         for _ in range(turns):
+            character.begin_turn(target)
             character.turn(target)
+            character.end_turn(target)
+            character.enemy_turn(target)
             target.turn()
         character.short_rest()
         dmg += target.dmg

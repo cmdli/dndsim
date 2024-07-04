@@ -1,116 +1,180 @@
 import random
-from util import (
-    prof_bonus,
-    magic_weapon,
-    do_roll,
+from util import magic_weapon, do_roll, roll_dice
+from character import (
+    Character,
+    Feat,
+    AttackRollArgs,
+)
+from feats import (
+    ASI,
+    GreatWeaponMaster,
+    Greatsword,
+    Glaive,
+    PolearmMaster,
 )
 
 
-class Barbarian:
-    def __init__(self, level, use_pam=False):
-        self.level = level
-        self.use_pam = use_pam
-        self.prof = prof_bonus(level)
-        if level >= 5:
-            self.max_attacks = 2
-        else:
-            self.max_attacks = 1
-        if level >= 20:
-            self.str = 7
-        elif level >= 12:
-            self.str = 5
-        elif level >= 8 and not use_pam:
-            self.str = 5
-        elif level >= 4:
-            self.str = 4
-        else:
-            self.str = 3
-        self.magic_weapon = magic_weapon(level)
-        self.to_hit = self.prof + self.str + self.magic_weapon
-        if level >= 16:
-            self.rage_dmg = 4
-        elif level >= 9:
-            self.rage_dmg = 3
-        else:
-            self.rage_dmg = 2
-        self.long_rest()
+class Beserker(Feat):
+    def __init__(self, num_dice):
+        self.name = "Berserker"
+        self.used = False
+        self.num_dice = num_dice
 
-    def weapon(self, pam=False):
-        if pam:
-            return random.randint(1, 4)
-        elif self.use_pam:
-            return random.randint(1, 10)
-        else:
-            return random.randint(1, 6) + random.randint(1, 6)
+    def begin_turn(self, target):
+        self.used = False
 
-    def brutal_strike_dmg(self):
-        if self.level >= 17:
-            return random.randint(1, 10) + random.randint(1, 10)
-        return random.randint(1, 10)
-
-    def begin_turn(self):
-        self.used_brutal_strike = self.level < 9
-        self.used_gwm_dmg = self.level < 4
-        self.used_gwm_bonus = self.level < 4
-        self.used_bonus = False
-        self.used_beserker = self.level < 3
-        self.attacks = self.max_attacks
-
-    def turn(self, target):
-        self.begin_turn()
-        if not self.raging and not self.used_bonus:
-            self.raging = True
-            self.used_bonus = True
-        while self.attacks > 0:
-            self.attack(target)
-            self.attacks -= 1
-        # Retaliation
-        if self.level >= 10:
-            self.attack(target, adv=False)
-        if self.level >= 8 and self.use_pam and not self.used_bonus:
-            self.attack(target, pam=True)
-
-    def attack(self, target, adv=True, pam=False):
-        brutal_strike = False
-        if not self.used_brutal_strike:
-            brutal_strike = True
-            adv = False
-            self.used_brutal_strike = True
-        roll = do_roll(adv=adv)
-        if roll == 20:
-            self.hit(target, crit=True, brutal_strike=brutal_strike, pam=pam)
-            if not self.used_bonus and not self.used_gwm_bonus:
-                self.attacks += 1
-                self.used_gwm_bonus = True
-                self.used_bonus = True
-        elif roll + self.to_hit >= target.ac:
-            self.hit(target, brutal_strike=brutal_strike, pam=pam)
-        else:
-            target.damage(self.str)
-
-    def hit(self, target, crit=False, brutal_strike=False, pam=False):
-        target.damage(self.weapon(pam=pam) + self.str + self.magic_weapon)
-        if self.raging:
-            target.damage(self.rage_dmg)
-        if crit:
-            target.damage(self.weapon(pam=pam))
-        if not self.used_gwm_dmg:
-            target.damage(self.prof)
-            self.used_gwm_dmg = True
-        if not self.used_beserker:
-            for _ in range(self.rage_dmg):
-                target.damage(random.randint(1, 6))
+    def hit(self, target, crit=False, **kwargs):
+        if not self.used:
+            self.used = True
+            target.damage(roll_dice(self.num_dice, 6))
             if crit:
-                for _ in range(self.rage_dmg):
-                    target.damage(random.randint(1, 6))
-            self.used_beserker = True
-        if brutal_strike:
-            target.damage(self.brutal_strike_dmg())
+                target.damage(roll_dice(self.num_dice, 6))
+
+
+class BrutalStrike(Feat):
+    def __init__(self, num_dice):
+        self.name = "BrutalStrike"
+        self.num_dice = num_dice
+
+    def begin_turn(self, target):
+        self.used = False
+
+    def roll_attack(self, args: AttackRollArgs, **kwargs):
+        if not self.used and args.adv:
+            args.adv = False
+            self.enabled = True
+            self.used = True
+
+    def hit(self, target, crit=False, **kwargs):
+        if self.enabled:
+            target.damage(roll_dice(self.num_dice, 10))
             if crit:
-                target.damage(self.brutal_strike_dmg())
+                target.damage(roll_dice(self.num_dice, 10))
+        self.enabled = False
+
+    def miss(self, target, **kwargs):
+        self.enabled = False
+
+
+class Retaliation(Feat):
+    def __init__(self):
+        self.name = "Retaliation"
+
+    def apply(self, character):
+        self.character = character
+
+    def enemy_turn(self, target):
+        self.character.attack(target)
+
+
+class PrimalChampion(Feat):
+    def __init__(self):
+        self.name = "PrimalChampion"
+
+    def apply(self, character):
+        character.str += 4
+
+
+class Rage(Feat):
+    def __init__(self, dmg):
+        self.name = "Rage"
+        self.raging = False
+        self.dmg = dmg
+
+    def apply(self, character):
+        self.character = character
 
     def short_rest(self):
         self.raging = False
 
-    def long_rest(self):
-        self.short_rest()
+    def begin_turn(self, target):
+        if not self.raging and not self.character.used_bonus:
+            self.character.used_bonus = True
+            self.raging = True
+
+    def hit(self, target, **kwargs):
+        if self.raging:
+            target.damage(self.dmg)
+
+
+class RecklessAttack(Feat):
+    def __init__(self):
+        self.name = "RecklessAttack"
+
+    def begin_turn(self, target):
+        self.enabled = True
+
+    def roll_attack(self, args: AttackRollArgs = None):
+        args.adv = self.enabled
+
+    def end_turn(self, target):
+        self.enabled = False
+
+
+class Barbarian(Character):
+    def __init__(self, level, use_pam=False):
+        if level >= 16:
+            rage_dmg = 4
+        elif level >= 9:
+            rage_dmg = 3
+        else:
+            rage_dmg = 2
+        self.magic_weapon = magic_weapon(level)
+        base_feats = []
+        base_feats.append(Rage(rage_dmg))
+        base_feats.append(RecklessAttack())
+        if level >= 3:
+            base_feats.append(Beserker(rage_dmg))
+        if level >= 17:
+            base_feats.append(BrutalStrike(2))
+        elif level >= 9:
+            base_feats.append(BrutalStrike(1))
+        if use_pam:
+            base_feats.append(Glaive(self.magic_weapon))
+        else:
+            base_feats.append(Greatsword(self.magic_weapon))
+        if level >= 10:
+            base_feats.append(Retaliation())
+        if level >= 20:
+            base_feats.append(PrimalChampion())
+        if use_pam:
+            feats = [
+                GreatWeaponMaster(),
+                PolearmMaster(),
+                ASI([["str", 1], ["con", 1]]),
+                ASI(),
+                ASI(),
+            ]
+        else:
+            feats = [GreatWeaponMaster(), ASI([["str", 2]]), ASI(), ASI(), ASI()]
+        super().init(
+            level=level,
+            stats=[17, 10, 10, 10, 10, 10],
+            feats=feats,
+            base_feats=base_feats,
+        )
+        if level >= 5:
+            self.max_attacks = 2
+        else:
+            self.max_attacks = 1
+        self.long_rest()
+
+    def begin_turn(self, target):
+        super().begin_turn(target)
+        self.used_brutal_strike = False
+
+    def turn(self, target):
+        self.attacks = self.max_attacks
+        while self.attacks > 0:
+            self.attack(target)
+            self.attacks -= 1
+
+    def attack(self, target, pam=False):
+        to_hit = self.prof + self.mod("str") + self.magic_weapon
+        roll = self.roll_attack()
+        if roll == 20:
+            self.hit(target, crit=True, pam=pam)
+        elif roll + to_hit >= target.ac:
+            self.hit(target, pam=pam)
+        else:
+            self.miss(target)
