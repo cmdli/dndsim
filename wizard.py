@@ -1,4 +1,3 @@
-import random
 from util import (
     prof_bonus,
     magic_weapon,

@@ -1,11 +1,8 @@
-import random
 from util import (
     prof_bonus,
     magic_weapon,
-    cantrip_dice,
     highest_spell_slot,
     spell_slots,
-    roll_dice,
     do_roll,
     greatsword,
     gwf,
