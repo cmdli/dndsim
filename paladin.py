@@ -1,6 +1,15 @@
-
 import random
-from util import prof_bonus, magic_weapon, cantrip_dice, highest_spell_slot, spell_slots, roll_dice, do_roll, greatsword, gwf
+from util import (
+    prof_bonus,
+    magic_weapon,
+    cantrip_dice,
+    highest_spell_slot,
+    spell_slots,
+    roll_dice,
+    do_roll,
+    greatsword,
+    gwf,
+)
 
 
 class Paladin:
@@ -64,7 +73,7 @@ class Paladin:
         if self.level >= 11:
             target.damage(gwf(1, 8))
             if crit:
-                target.damage(gwf(1,8))
+                target.damage(gwf(1, 8))
         if not self.used_gwm_dmg:
             self.used_gwm_dmg = True
             target.damage(self.prof)

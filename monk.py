@@ -1,6 +1,13 @@
-
 import random
-from util import prof_bonus, magic_weapon, cantrip_dice, highest_spell_slot, spell_slots, roll_dice, do_roll
+from util import (
+    prof_bonus,
+    magic_weapon,
+    cantrip_dice,
+    highest_spell_slot,
+    spell_slots,
+    roll_dice,
+    do_roll,
+)
 
 
 class Monk:
@@ -45,7 +52,7 @@ class Monk:
             # Tavern brawler
             r = random.randint(1, self.weapon_die)
         return r
-    
+
     def begin_turn(self):
         self.used_stun = self.level < 5
         self.used_grappler = self.level < 4
@@ -85,5 +92,6 @@ class Monk:
 
     def short_rest(self):
         self.ki = self.max_ki
+
     def long_rest(self):
         pass

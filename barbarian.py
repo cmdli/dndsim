@@ -1,6 +1,14 @@
-
 import random
-from util import prof_bonus, magic_weapon, cantrip_dice, highest_spell_slot, spell_slots, roll_dice, do_roll
+from util import (
+    prof_bonus,
+    magic_weapon,
+    cantrip_dice,
+    highest_spell_slot,
+    spell_slots,
+    roll_dice,
+    do_roll,
+)
+
 
 class Barbarian:
     def __init__(self, level, use_pam=False):
@@ -33,16 +41,16 @@ class Barbarian:
 
     def weapon(self, pam=False):
         if pam:
-            return random.randint(1,4)
+            return random.randint(1, 4)
         elif self.use_pam:
-            return random.randint(1,10)
+            return random.randint(1, 10)
         else:
-            return random.randint(1,6) + random.randint(1,6)
-    
+            return random.randint(1, 6) + random.randint(1, 6)
+
     def brutal_strike_dmg(self):
         if self.level >= 17:
-            return random.randint(1,10) + random.randint(1,10)
-        return random.randint(1,10)
+            return random.randint(1, 10) + random.randint(1, 10)
+        return random.randint(1, 10)
 
     def begin_turn(self):
         self.used_brutal_strike = self.level < 9
@@ -95,10 +103,10 @@ class Barbarian:
             self.used_gwm_dmg = True
         if not self.used_beserker:
             for _ in range(self.rage_dmg):
-                target.damage(random.randint(1,6))
+                target.damage(random.randint(1, 6))
             if crit:
                 for _ in range(self.rage_dmg):
-                    target.damage(random.randint(1,6))
+                    target.damage(random.randint(1, 6))
             self.used_beserker = True
         if brutal_strike:
             target.damage(self.brutal_strike_dmg())
@@ -107,5 +115,6 @@ class Barbarian:
 
     def short_rest(self):
         self.raging = False
+
     def long_rest(self):
         self.short_rest()

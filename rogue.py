@@ -1,7 +1,14 @@
-
 import random
 import math
-from util import prof_bonus, magic_weapon, cantrip_dice, highest_spell_slot, spell_slots, roll_dice, do_roll
+from util import (
+    prof_bonus,
+    magic_weapon,
+    cantrip_dice,
+    highest_spell_slot,
+    spell_slots,
+    roll_dice,
+    do_roll,
+)
 
 
 class Rogue:
@@ -15,14 +22,14 @@ class Rogue:
         else:
             self.dex = 3
         self.num_sneak_attack = math.ceil(level / 2)
-        self.max_attacks = 2 # One plus dagger nick
+        self.max_attacks = 2  # One plus dagger nick
         self.magic_weapon = magic_weapon(level)
         self.to_hit = self.prof + self.dex + self.magic_weapon
         self.dc = 8 + self.prof + self.dex
         self.long_rest()
 
     def weapon(self):
-        return random.randint(1,6)
+        return random.randint(1, 6)
 
     def begin_turn(self):
         self.used_bonus = False
@@ -75,13 +82,11 @@ class Rogue:
         if not self.used_death_strike and used_sneak_attack:
             self.used_death_strike = True
             if not target.save(self.dc):
-                target.damage(dmg*2)
+                target.damage(dmg * 2)
             else:
                 target.damage(dmg)
         else:
             target.damage(dmg)
-
-
 
     def short_rest(self):
         self.used_stroke_of_luck = self.level < 20
@@ -92,5 +97,6 @@ class Rogue:
             self.assassinate_adv = True
         self.used_death_strike = self.level < 17
         self.vex = False
+
     def long_rest(self):
         self.short_rest()

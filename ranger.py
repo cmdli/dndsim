@@ -1,8 +1,13 @@
-
-
 import random
-from util import prof_bonus, magic_weapon, cantrip_dice, highest_spell_slot, spell_slots, roll_dice, do_roll
-
+from util import (
+    prof_bonus,
+    magic_weapon,
+    cantrip_dice,
+    highest_spell_slot,
+    spell_slots,
+    roll_dice,
+    do_roll,
+)
 
 
 class Ranger:
@@ -30,12 +35,12 @@ class Ranger:
             self.max_attacks = 1
 
     def weapon(self):
-        return random.randint(1,6)
-    
+        return random.randint(1, 6)
+
     def hunters_mark(self):
         if self.level >= 20:
-            return random.randint(1,10)
-        return random.randint(1,6)
+            return random.randint(1, 10)
+        return random.randint(1, 6)
 
     def begin_turn(self):
         self.used_bonus = False
@@ -50,7 +55,11 @@ class Ranger:
             self.concentration = True
             self.slots[slot] -= 1
         else:
-            if not self.used_bonus and not self.used_hunters_mark and not self.concentration:
+            if (
+                not self.used_bonus
+                and not self.used_hunters_mark
+                and not self.concentration
+            ):
                 self.used_bonus = True
                 self.used_hunters_mark = True
                 self.concentration = True
@@ -93,25 +102,24 @@ class Ranger:
         if crit:
             target.damage(self.weapon())
         if gloom:
-            target.damage(random.randint(1,8))
+            target.damage(random.randint(1, 8))
             if crit:
-                target.damage(random.randint(1,8))
+                target.damage(random.randint(1, 8))
         if self.used_hunters_mark:
             target.damage(self.hunters_mark())
             if crit:
                 target.damage(self.hunters_mark())
 
-    
     def summon_fey(self, target):
-        adv = True # Advantage on first attack
-        num_attacks = self.fey_summon//2
+        adv = True  # Advantage on first attack
+        num_attacks = self.fey_summon // 2
         for _ in range(num_attacks):
             roll = do_roll(adv=adv)
             adv = False
             if roll == 20:
-                target.damage(roll_dice(4,6)+3+self.fey_summon)
+                target.damage(roll_dice(4, 6) + 3 + self.fey_summon)
             elif roll + self.to_hit >= target.ac:
-                target.damage(roll_dice(2,6)+3+self.fey_summon)
+                target.damage(roll_dice(2, 6) + 3 + self.fey_summon)
 
     def long_rest(self):
         self.short_rest()

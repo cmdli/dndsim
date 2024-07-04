@@ -1,5 +1,14 @@
 import random
-from util import prof_bonus, magic_weapon, cantrip_dice, highest_spell_slot, spell_slots, roll_dice, do_roll
+from util import (
+    prof_bonus,
+    magic_weapon,
+    cantrip_dice,
+    highest_spell_slot,
+    spell_slots,
+    roll_dice,
+    do_roll,
+)
+
 
 class Cleric:
     def __init__(self, level):
@@ -34,7 +43,7 @@ class Cleric:
         self.slots = spell_slots(self.level)
         self.channel_divinity = self.max_channel_divinity
         self.short_rest()
-    
+
     def short_rest(self):
         self.concentration = False
         self.spirit_weap = 0
@@ -91,9 +100,9 @@ class Cleric:
             self.attack(target)
 
     def harm(self, target, slot):
-        dmg = roll_dice(14,6)
+        dmg = roll_dice(14, 6)
         if target.save(self.dc):
-            target.damage(dmg//2)
+            target.damage(dmg // 2)
         else:
             target.damage(dmg)
 
@@ -103,12 +112,12 @@ class Cleric:
         if roll == 20:
             num_dice *= 2
         if roll + self.spell_hit >= target.ac:
-            target.damage(roll_dice(num_dice,10)+roll_dice(1,8))
+            target.damage(roll_dice(num_dice, 10) + roll_dice(1, 8))
         elif self.level >= 3 and not self.used_reaction and self.channel_divinity > 0:
             self.channel_divinity -= 1
             self.used_reaction = True
             if roll + self.spell_hit + 10 >= target.ac:
-                target.damage(roll_dice(num_dice,10)+roll_dice(1,8))
+                target.damage(roll_dice(num_dice, 10) + roll_dice(1, 8))
 
     def spiritual_weapon(self, target, slot):
         num_dice = slot // 2
@@ -116,39 +125,38 @@ class Cleric:
         if roll == 20:
             num_dice *= 2
         if roll + self.spell_hit >= target.ac:
-            target.damage(roll_dice(num_dice,8)+self.wis)
-    
+            target.damage(roll_dice(num_dice, 8) + self.wis)
+
     def spirit_guardians(self, target, slot):
-        dmg = roll_dice(2+slot,8)
+        dmg = roll_dice(2 + slot, 8)
         if target.save(self.dc):
-            target.damage(dmg//2)
+            target.damage(dmg // 2)
         else:
             target.damage(dmg)
 
     def summon_celestial(self, target, slot):
-        for _ in range(slot//2):
+        for _ in range(slot // 2):
             roll = do_roll()
             if roll == 20:
-                target.damage(roll_dice(4,6)+2+slot)
+                target.damage(roll_dice(4, 6) + 2 + slot)
             elif roll + self.spell_hit >= target.ac:
-                target.damage(roll_dice(2,6)+2+slot)
-    
+                target.damage(roll_dice(2, 6) + 2 + slot)
+
     def toll_the_dead(self, target):
         if not target.save(self.dc):
-            target.damage(roll_dice(self.cantrip_dice, 12)+roll_dice(1,8))
-    
+            target.damage(roll_dice(self.cantrip_dice, 12) + roll_dice(1, 8))
+
     def attack(self, target):
         roll = do_roll()
         if roll == 20:
-            target.damage(random.randint(4,6)+self.str+self.magic_weapon)
+            target.damage(random.randint(4, 6) + self.str + self.magic_weapon)
             if not self.used_gwm_dmg:
                 target.damage(self.prof)
                 self.used_gwm_dmg = True
         elif roll + self.to_hit >= target.ac:
-            target.damage(random.randint(2,6)+self.str+self.magic_weapon)
+            target.damage(random.randint(2, 6) + self.str + self.magic_weapon)
             if not self.used_gwm_dmg:
                 target.damage(self.prof)
                 self.used_gwm_dmg = True
         else:
             target.damage(self.str)
-

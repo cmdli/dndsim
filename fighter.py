@@ -1,5 +1,17 @@
 import random
-from util import prof_bonus, magic_weapon, cantrip_dice, highest_spell_slot, spell_slots, roll_dice, do_roll, polearm_master, glaive, greatsword
+from util import (
+    prof_bonus,
+    magic_weapon,
+    cantrip_dice,
+    highest_spell_slot,
+    spell_slots,
+    roll_dice,
+    do_roll,
+    polearm_master,
+    glaive,
+    greatsword,
+)
+
 
 class Fighter:
     def __init__(self, level, use_pam=False):
@@ -48,7 +60,7 @@ class Fighter:
             return glaive(gwf=True)
         else:
             return greatsword(gwf=True)
-    
+
     def begin_turn(self):
         self.actions = 1
         if self.action_surge >= 1:
@@ -77,7 +89,7 @@ class Fighter:
         if self.studied_attacks:
             self.studied_attacks = False
         if self.heroic_advantage and roll + self.to_hit < target.ac:
-            roll = random.randint(1,20)
+            roll = random.randint(1, 20)
         if roll >= self.min_crit:
             if not self.used_gwm_bonus and not self.used_bonus:
                 self.attacks += 1
@@ -90,7 +102,6 @@ class Fighter:
             target.damage(self.str)
             if self.level >= 13:
                 self.studied_attacks = True
-
 
     def hit(self, target, crit=False, pam=False):
         weapon_roll = self.weapon(pam=pam)
@@ -106,5 +117,6 @@ class Fighter:
 
     def short_rest(self):
         self.action_surge = self.num_action_surge(self.level)
+
     def long_rest(self):
         pass
