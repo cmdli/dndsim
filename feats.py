@@ -87,3 +87,38 @@ class ASI(Feat):
     def apply(self, character):
         for [stat, increase] in self.stat_increases:
             character.__setattr__(stat, character.__getattribute__(stat) + increase)
+
+
+class AttackAction(Feat):
+    def __init__(self, num_attacks):
+        self.name = "AttackAction"
+        self.num_attacks = num_attacks
+
+    def apply(self, character):
+        self.character = character
+
+    def turn(self, target):
+        self.character.attacks = self.num_attacks
+        while self.character.attacks > 0:
+            self.character.attack(target)
+            self.character.attacks -= 1
+
+
+class Attack(Feat):
+    def __init__(self, mod="str", bonus=0):
+        self.name = "Attack"
+        self.mod = mod
+        self.bonus = bonus
+
+    def apply(self, character):
+        self.character = character
+
+    def attack(self, target, **kwargs):
+        roll = self.character.roll_attack()
+        to_hit = self.character.prof + self.character.mod(self.mod) + self.bonus
+        if roll == 20:
+            self.character.hit(target, crit=True, **kwargs)
+        elif roll + to_hit >= target.ac:
+            self.character.hit(target, **kwargs)
+        else:
+            self.character.miss(target)

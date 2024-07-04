@@ -11,6 +11,8 @@ from feats import (
     Greatsword,
     Glaive,
     PolearmMaster,
+    AttackAction,
+    Attack,
 )
 
 
@@ -123,6 +125,11 @@ class Barbarian(Character):
         base_feats = []
         base_feats.append(Rage(rage_dmg))
         base_feats.append(RecklessAttack())
+        if level >= 5:
+            base_feats.append(AttackAction(2))
+        else:
+            base_feats.append(AttackAction(1))
+        base_feats.append(Attack("str", self.magic_weapon))
         if level >= 3:
             base_feats.append(Beserker(rage_dmg))
         if level >= 17:
@@ -153,28 +160,3 @@ class Barbarian(Character):
             feats=feats,
             base_feats=base_feats,
         )
-        if level >= 5:
-            self.max_attacks = 2
-        else:
-            self.max_attacks = 1
-        self.long_rest()
-
-    def begin_turn(self, target):
-        super().begin_turn(target)
-        self.used_brutal_strike = False
-
-    def turn(self, target):
-        self.attacks = self.max_attacks
-        while self.attacks > 0:
-            self.attack(target)
-            self.attacks -= 1
-
-    def attack(self, target, pam=False):
-        to_hit = self.prof + self.mod("str") + self.magic_weapon
-        roll = self.roll_attack()
-        if roll == 20:
-            self.hit(target, crit=True, pam=pam)
-        elif roll + to_hit >= target.ac:
-            self.hit(target, pam=pam)
-        else:
-            self.miss(target)

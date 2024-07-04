@@ -8,6 +8,12 @@ class Feat:
     def begin_turn(self, target):
         pass
 
+    def turn(self, target, **kwargs):
+        pass
+
+    def attack(self, target, **kwargs):
+        pass
+
     def roll_attack(self, args, **kwargs):
         pass
 
@@ -96,6 +102,14 @@ class Character:
         self.used_bonus = False
         for feat in self.feats:
             feat.begin_turn(target)
+
+    def turn(self, target, **kwargs):
+        for feat in self.feats:
+            feat.turn(target, **kwargs)
+
+    def attack(self, target, **kwargs):
+        for feat in self.feats:
+            feat.attack(target, **kwargs)
 
     def end_turn(self, target):
         for feat in self.feats:
