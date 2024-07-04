@@ -1,10 +1,34 @@
 
 import random
 import math
+import csv
 
-NUM_FIGHTS = 3
-NUM_TURNS = 5
+NUM_FIGHTS = 2
+NUM_TURNS = 6
 NUM_SIMS = 500
+
+TARGET_AC = [
+    13, # 1
+    13, # 2
+    13, # 3
+    14, # 4
+    15, # 5
+    15, # 6
+    15, # 7
+    16, # 8
+    16, # 9
+    17, # 10
+    17, # 11
+    17, # 12
+    18, # 13
+    18, # 14
+    18, # 15
+    18, # 16
+    19, # 17
+    19, # 18
+    19, # 19
+    19, # 20
+]
 
 SPELL_SLOTS_ARR = [
     [0,0,0,0,0,0,0,0,0,0], # 0
@@ -112,7 +136,7 @@ def gwf(count, size):
 
 class Target:
     def __init__(self, level):
-        self.ac = 12 + (level // 2)
+        self.ac = TARGET_AC[level-1]
         self.prof = prof_bonus(level)
         if level >= 8:
             self.ability = 5
@@ -530,7 +554,7 @@ class Paladin:
 
     def long_rest(self):
         self.short_rest()
-        self.slots = spell_slots(level, half=True)
+        self.slots = spell_slots(self.level, half=True)
 
     def short_rest(self):
         if self.level >= 11:
@@ -651,7 +675,7 @@ class Ranger:
         # level = self.level
         # if level == 20: # Ranger multiclass at 20
         #     level += 2
-        self.slots = spell_slots(level, half=True)
+        self.slots = spell_slots(self.level, half=True)
 
     def short_rest(self):
         self.vex = False
@@ -769,7 +793,7 @@ class Wizard:
 
     def long_rest(self):
         self.short_rest()
-        self.slots = spell_slots(level)
+        self.slots = spell_slots(self.level)
         self.used_arcane_recovery = False
         self.used_overchannel = self.level < 14
 
@@ -929,7 +953,7 @@ class Cleric:
         self.long_rest()
 
     def long_rest(self):
-        self.slots = spell_slots(level)
+        self.slots = spell_slots(self.level)
         self.channel_divinity = self.max_channel_divinity
         self.short_rest()
     
@@ -1063,25 +1087,47 @@ def simulate(character, level, fights, turns):
         dmg += target.dmg
     return dmg
 
-def test_dpr(character):
+def test_dpr(character, level):
     damage = 0
     for _ in range(NUM_SIMS):
         damage += simulate(character, level, NUM_FIGHTS, NUM_TURNS)
     return damage/(NUM_SIMS*NUM_FIGHTS*NUM_TURNS)
 
+def write_data(file, data):
+    with open(file, "w") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(data)
+
+def test_characters(characters):
+    data = [["Level","Character","DPR"]]
+    for level in range(1,21):
+        for [name, Creator] in characters:
+            data.append([level,name,test_dpr(Creator(level),level)])
+    return data
 
 if __name__ == "__main__":
-    for level in range(1,21):
-        lines = []
-        # lines.append(f"Fighter {level}: {test_dpr(Fighter(level)):0.2f} DPR")
-        # lines.append(f"Barbarian {level}: {test_dpr(Barbarian(level)):0.2f} DPR")
-        lines.append(f"Monk {level}: {test_dpr(Monk(level)):0.2f} DPR")
-        lines.append(f"Paladin {level}: {test_dpr(Paladin(level)):0.2f} DPR")
-        # lines.append(f"Ranger {level}: {test_dpr(Ranger(level)):0.2f} DPR")
-        # lines.append(f"Rogue {level}: {test_dpr(Rogue(level)):0.2f} DPR")
-        lines.append(f"Wizard {level}: {test_dpr(Wizard(level)):0.2f} DPR")
-        lines.append(f"Cleric {level}: {test_dpr(Cleric(level)):0.2f} DPR")
-        print(" - ".join(lines))
+    data = test_characters([
+        ["Monk", Monk], 
+        ["Figher", Fighter], 
+        ["Barbarian",Barbarian], 
+        ["Paladin",Paladin], 
+        ["Ranger",Ranger], 
+        ["Rogue",Rogue],
+        ["Wizard",Wizard],
+        ["Cleric",Cleric],
+    ])
+    write_data("data.csv", data)
+    # for level in range(1,21):
+    #     lines = []
+    #     # lines.append(f"Fighter {level}: {test_dpr(Fighter(level)):0.2f} DPR")
+    #     # lines.append(f"Barbarian {level}: {test_dpr(Barbarian(level)):0.2f} DPR")
+    #     lines.append(f"Monk {level}: {test_dpr(Monk(level)):0.2f} DPR")
+    #     lines.append(f"Paladin {level}: {test_dpr(Paladin(level)):0.2f} DPR")
+    #     # lines.append(f"Ranger {level}: {test_dpr(Ranger(level)):0.2f} DPR")
+    #     # lines.append(f"Rogue {level}: {test_dpr(Rogue(level)):0.2f} DPR")
+    #     lines.append(f"Wizard {level}: {test_dpr(Wizard(level)):0.2f} DPR")
+    #     lines.append(f"Cleric {level}: {test_dpr(Cleric(level)):0.2f} DPR")
+    #     print(" - ".join(lines))
 
 
         # fighter_damage = test_dpr(Fighter(level))
