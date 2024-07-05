@@ -53,12 +53,13 @@ class Cleric:
             self.channel_divinity += 1
         self.war_priest = self.wis
 
-    def begin_turn(self, target):
+    def begin_turn(self):
         self.used_bonus = False
         self.used_reaction = False
         self.used_gwm_dmg = self.level < 12
 
     def turn(self, target):
+        self.begin_turn()
         slot = highest_spell_slot(self.slots)
         if not self.concentration and slot >= 3:
             if slot >= 5 and self.celestial_summon == 0:
@@ -97,9 +98,6 @@ class Cleric:
             self.used_bonus = True
             self.war_priest -= 1
             self.attack(target)
-
-    def end_turn(self, target):
-        pass
 
     def enemy_turn(self, target):
         pass

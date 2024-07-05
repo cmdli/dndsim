@@ -137,9 +137,9 @@ class Barbarian(Character):
         elif level >= 9:
             base_feats.append(BrutalStrike(1))
         if use_pam:
-            base_feats.append(Glaive(self.magic_weapon))
+            base_feats.append(Glaive(bonus=self.magic_weapon, savage_attacker=True))
         else:
-            base_feats.append(Greatsword(self.magic_weapon))
+            base_feats.append(Greatsword(bonus=self.magic_weapon, savage_attacker=True))
         if level >= 10:
             base_feats.append(Retaliation())
         if level >= 20:

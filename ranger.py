@@ -41,12 +41,13 @@ class Ranger:
             return random.randint(1, 10)
         return random.randint(1, 6)
 
-    def begin_turn(self, target):
+    def begin_turn(self):
         self.used_bonus = False
         self.attacks = self.max_attacks
         self.used_natures_veil = False
 
     def turn(self, target):
+        self.begin_turn()
         slot = highest_spell_slot(self.slots)
         if slot >= 4 and not self.concentration:
             self.fey_summon = slot
@@ -76,9 +77,6 @@ class Ranger:
                 self.attack(target, bonus=True)
         if self.fey_summon > 0:
             self.summon_fey(target)
-
-    def end_turn(self, target):
-        pass
 
     def enemy_turn(self, target):
         pass

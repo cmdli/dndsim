@@ -28,12 +28,13 @@ class Rogue:
     def weapon(self):
         return random.randint(1, 6)
 
-    def begin_turn(self, target):
+    def begin_turn(self):
         self.used_bonus = False
         self.used_steady_aim = self.level < 3
         self.used_sneak_attack = False
 
     def turn(self, target):
+        self.begin_turn()
         adv = self.assassinate_adv
         if not adv and not self.used_bonus and not self.used_steady_aim:
             adv = True
@@ -44,9 +45,6 @@ class Rogue:
         self.used_assassinate = True
         self.used_death_strike = True
         self.assassinate_adv = False
-
-    def end_turn(self, target):
-        pass
 
     def enemy_turn(self, target):
         pass

@@ -7,117 +7,121 @@ from util import (
     glaive,
     greatsword,
 )
+from feats import (
+    GreatWeaponMaster,
+    Greatsword,
+    Glaive,
+    Attack,
+    AttackAction,
+    ASI,
+    PolearmMaster,
+)
+from character import Character, Feat
 
 
-class Fighter:
-    def __init__(self, level, use_pam=False):
-        self.level = level
-        self.use_pam = use_pam
-        self.prof = prof_bonus(level)
-        if level >= 6:
-            self.str = 5
-        elif level >= 4:
-            self.str = 4
-        else:
-            self.str = 3
-        self.magic_weapon = magic_weapon(self.level)
-        self.to_hit = self.prof + self.str + self.magic_weapon
-        self.gwm = self.prof
-        if level >= 20:
-            self.max_attacks = 4
-        elif level >= 11:
-            self.max_attacks = 3
-        elif level >= 5:
-            self.max_attacks = 2
-        else:
-            self.max_attacks = 1
-        if level >= 15:
-            self.min_crit = 18
-        elif level >= 3:
-            self.min_crit = 19
-        else:
-            self.min_crit = 20
-        self.studied_attacks = False
-        self.short_rest()
+class StudiedAttacks(Feat):
+    def __init__(self) -> None:
+        self.name = "StudiedAttacks"
+        self.enabled = False
 
-    def num_action_surge(self, level):
-        if level >= 17:
-            return 2
-        elif level >= 2:
-            return 1
-        else:
-            return 0
+    def roll_attack(self, args, **kwargs):
+        args.adv = self.enabled
 
-    def weapon(self, pam=False):
-        if pam:
-            # Polearm bonus attack
-            return polearm_master(gwf=True)
-        elif self.use_pam:
-            return glaive(gwf=True)
-        else:
-            return greatsword(gwf=True)
+    def hit(self, target, **kwargs):
+        self.enabled = False
+
+    def miss(self, target, **kwargs):
+        self.enabled = True
+
+
+class HeroicAdvantage(Feat):
+    def __init__(self):
+        self.name = "HeroicAdvantage"
 
     def begin_turn(self, target):
-        self.actions = 1
-        if self.action_surge >= 1:
-            self.action_surge -= 1
-            self.actions += 1
-        self.used_savage_attacker = False
-        self.used_bonus = False
-        self.used_gwm_dmg = self.level < 4
-        self.used_gwm_bonus = self.level < 4
-        self.heroic_advantage = self.level >= 10
+        self.used = False
 
-    def turn(self, target):
-        for _ in range(self.actions):
-            self.attacks = self.max_attacks
-            while self.attacks > 0:
-                self.attack(target)
-                self.attacks -= 1
-        global pam_used
-        if self.level >= 8 and self.use_pam and not self.used_bonus:
-            pam_used += 1
-            self.attack(target, pam=True)
-
-    def end_turn(self, target):
-        pass
-
-    def enemy_turn(self, target):
-        pass
-
-    def attack(self, target, pam=False):
-        roll = do_roll(adv=self.studied_attacks)
-        if self.studied_attacks:
-            self.studied_attacks = False
-        if self.heroic_advantage and roll + self.to_hit < target.ac:
-            roll = random.randint(1, 20)
-        if roll >= self.min_crit:
-            if not self.used_gwm_bonus and not self.used_bonus:
-                self.attacks += 1
-                self.used_bonus = True
-                self.used_gwm_bonus = True
-            self.hit(target, crit=True, pam=pam)
-        elif roll + self.to_hit >= target.ac:
-            self.hit(target)
+    def roll_attack(self, args, **kwargs):
+        if self.used or args.adv:
+            return
+        if args.disadv:
+            roll = min(args.roll1, args.roll2)
+            if roll < 8:
+                self.used = True
+                self.adv = True
+                args.roll1 = random.randint(1, 20)
         else:
-            target.damage(self.str)
-            if self.level >= 13:
-                self.studied_attacks = True
+            roll = args.roll1
+            if roll < 8:
+                self.used = True
+                args.adv = True
 
-    def hit(self, target, crit=False, pam=False):
-        weapon_roll = self.weapon(pam=pam)
-        if not self.used_savage_attacker and weapon_roll <= 7:
-            weapon_roll = self.weapon(pam=pam)
-            self.used_savage_attacker = True
-        target.damage(weapon_roll + self.str + self.magic_weapon)
-        if crit:
-            target.damage(self.weapon(pam=pam))
-        if not self.used_gwm_dmg:
-            target.damage(self.gwm)
-            self.used_gwm_dmg = True
+
+class ActionSurge(Feat):
+    def __init__(self, max_surges) -> None:
+        self.name = "ActionSurge"
+        self.max_surges = max_surges
+
+    def apply(self, character):
+        self.character = character
+
+    def begin_turn(self, target):
+        if self.surges > 0:
+            self.character.actions += 1
+            self.surges -= 1
 
     def short_rest(self):
-        self.action_surge = self.num_action_surge(self.level)
+        self.surges = self.max_surges
 
-    def long_rest(self):
-        pass
+
+class Fighter(Character):
+    def __init__(self, level, use_pam=False):
+        base_feats = []
+        self.use_pam = use_pam
+        self.magic_weapon = magic_weapon(level)
+        if level >= 20:
+            base_feats.append(AttackAction(4))
+        elif level >= 11:
+            base_feats.append(AttackAction(3))
+        elif level >= 5:
+            base_feats.append(AttackAction(2))
+        else:
+            base_feats.append(AttackAction(1))
+        if level >= 15:
+            base_feats.append(Attack(mod="str", bonus=self.magic_weapon, min_crit=18))
+        elif level >= 3:
+            base_feats.append(Attack(mod="str", bonus=self.magic_weapon, min_crit=19))
+        else:
+            base_feats.append(Attack(mod="str", bonus=self.magic_weapon, min_crit=20))
+        if level >= 13:
+            base_feats.append(StudiedAttacks())
+        if level >= 17:
+            base_feats.append(ActionSurge(2))
+        elif level >= 2:
+            base_feats.append(ActionSurge(1))
+        if use_pam:
+            base_feats.append(
+                Glaive(bonus=self.magic_weapon, savage_attacker=True, gwf=True)
+            )
+        else:
+            base_feats.append(
+                Greatsword(bonus=self.magic_weapon, savage_attacker=True, gwf=True)
+            )
+        if level >= 10:
+            base_feats.append(HeroicAdvantage())
+        feats = [
+            GreatWeaponMaster(),
+            ASI([["str", 2]]) if not use_pam else PolearmMaster(),
+            ASI() if not use_pam else ASI([["str", 1]]),
+            ASI(),
+            ASI(),
+            ASI(),
+            ASI(),
+        ]
+        super().init(
+            level=level,
+            stats=[17, 10, 10, 10, 10, 10],
+            feat_schedule=[4, 6, 8, 12, 14, 16, 19],
+            feats=feats,
+            base_feats=base_feats,
+        )

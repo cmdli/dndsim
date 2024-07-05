@@ -21,9 +21,7 @@ def simulate(character, level, fights, turns):
     for _ in range(fights):
         target = Target(level)
         for _ in range(turns):
-            character.begin_turn(target)
             character.turn(target)
-            character.end_turn(target)
             character.enemy_turn(target)
             target.turn()
         character.short_rest()
@@ -50,6 +48,10 @@ def test_characters(characters):
         for [name, Creator] in characters:
             data.append([level, name, test_dpr(Creator(level), level)])
     return data
+
+
+def PAMBarbarian(level):
+    return Barbarian(level, use_pam=True)
 
 
 if __name__ == "__main__":

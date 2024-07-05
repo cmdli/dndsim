@@ -1,4 +1,5 @@
 from util import prof_bonus, do_roll
+import random
 
 
 class Feat:
@@ -8,7 +9,7 @@ class Feat:
     def begin_turn(self, target):
         pass
 
-    def turn(self, target, **kwargs):
+    def action(self, target, **kwargs):
         pass
 
     def attack(self, target, **kwargs):
@@ -82,9 +83,18 @@ class Character:
 
     def roll_attack(self, adv=False, disadv=False):
         args = AttackRollArgs(adv=adv, disadv=disadv)
+        args.roll1 = random.randint(1, 20)
+        args.roll2 = random.randint(1, 20)
         for feat in self.feats:
             feat.roll_attack(args)
-        return do_roll(adv=args.adv, disadv=args.disadv)
+        if args.adv and args.disadv:
+            return args.roll1
+        elif args.adv:
+            return max(args.roll1, args.roll2)
+        elif args.disadv:
+            return min(args.roll1, args.roll2)
+        else:
+            return args.roll1
 
     def hit(self, target, **kwargs):
         for feat in self.feats:
@@ -99,13 +109,21 @@ class Character:
             feat.enemy_turn(target)
 
     def begin_turn(self, target):
+        self.actions = 1
         self.used_bonus = False
         for feat in self.feats:
             feat.begin_turn(target)
 
     def turn(self, target, **kwargs):
+        self.begin_turn(target)
+        while self.actions > 0:
+            self.action(target, **kwargs)
+            self.actions -= 1
+        self.end_turn(target)
+
+    def action(self, target, **kwargs):
         for feat in self.feats:
-            feat.turn(target, **kwargs)
+            feat.action(target, **kwargs)
 
     def attack(self, target, **kwargs):
         for feat in self.feats:

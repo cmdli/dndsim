@@ -3,26 +3,49 @@ from util import roll_dice
 
 
 class Weapon(Feat):
-    def __init__(self, num_dice=0, size=6, mod="str", bonus=0, graze=False):
+    def __init__(
+        self,
+        num_dice=0,
+        size=6,
+        mod="str",
+        bonus=0,
+        graze=False,
+        savage_attacker=False,
+        gwf=False,
+    ):
         self.name = "Weapon"
         self.num_dice = num_dice
         self.size = size
         self.mod = mod
         self.bonus = bonus
         self.graze = graze
+        self.savage_attacker = savage_attacker
+        self.gwf = gwf
 
     def apply(self, character):
         self.character = character
 
+    def begin_turn(self, target):
+        self.used_savage_attacker = False
+
     def weapon(self, pam=False):
         if pam:
-            return roll_dice(1, 4)
-        return roll_dice(self.num_dice, self.size)
+            return roll_dice(1, 4, gwf=self.gwf)
+        return roll_dice(self.num_dice, self.size, gwf=self.gwf)
+
+    def damage(self, crit=False, pam=False):
+        dmg = self.weapon(pam=pam)
+        if crit:
+            dmg += self.weapon(pam=pam)
+        return dmg
 
     def hit(self, target, crit=False, pam=False, **kwargs):
-        target.damage(self.weapon(pam=pam) + self.character.mod(self.mod) + self.bonus)
-        if crit:
-            target.damage(self.weapon(pam=pam))
+        dmg = self.damage(crit=crit, pam=pam)
+        if not self.used_savage_attacker and self.savage_attacker:
+            self.used_savage_attacker = True
+            dmg2 = self.damage(crit=crit, pam=pam)
+            dmg = max(dmg, dmg2)
+        target.damage(dmg + self.character.mod(self.mod) + self.bonus)
 
     def miss(self, target, **kwargs):
         if self.graze:
@@ -30,13 +53,13 @@ class Weapon(Feat):
 
 
 class Glaive(Weapon):
-    def __init__(self, bonus=0):
-        super().__init__(num_dice=1, size=10, mod="str", bonus=bonus, graze=True)
+    def __init__(self, **kwargs):
+        super().__init__(num_dice=1, size=10, mod="str", graze=True, **kwargs)
 
 
 class Greatsword(Weapon):
-    def __init__(self, bonus=0):
-        super().__init__(num_dice=2, size=6, mod="str", bonus=bonus, graze=True)
+    def __init__(self, **kwargs):
+        super().__init__(num_dice=2, size=6, mod="str", graze=True, **kwargs)
 
 
 class PolearmMaster(Feat):
@@ -97,7 +120,7 @@ class AttackAction(Feat):
     def apply(self, character):
         self.character = character
 
-    def turn(self, target):
+    def action(self, target):
         self.character.attacks = self.num_attacks
         while self.character.attacks > 0:
             self.character.attack(target)
@@ -105,10 +128,11 @@ class AttackAction(Feat):
 
 
 class Attack(Feat):
-    def __init__(self, mod="str", bonus=0):
+    def __init__(self, mod="str", bonus=0, min_crit=20):
         self.name = "Attack"
         self.mod = mod
         self.bonus = bonus
+        self.min_crit = min_crit
 
     def apply(self, character):
         self.character = character
@@ -116,7 +140,7 @@ class Attack(Feat):
     def attack(self, target, **kwargs):
         roll = self.character.roll_attack()
         to_hit = self.character.prof + self.character.mod(self.mod) + self.bonus
-        if roll == 20:
+        if roll >= self.min_crit:
             self.character.hit(target, crit=True, **kwargs)
         elif roll + to_hit >= target.ac:
             self.character.hit(target, **kwargs)

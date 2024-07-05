@@ -36,7 +36,7 @@ class Paladin:
     def weapon(self):
         return greatsword(gwf=self.level > 1)
 
-    def begin_turn(self, target):
+    def begin_turn(self):
         self.used_bonus = False
         self.used_smite = self.level < 2
         self.attacks = self.max_attacks
@@ -44,12 +44,10 @@ class Paladin:
         self.used_gwm_bonus = self.level < 4
 
     def turn(self, target):
+        self.begin_turn()
         while self.attacks > 0:
             self.attack(target)
             self.attacks -= 1
-
-    def end_turn(self, target):
-        pass
 
     def enemy_turn(self, target):
         pass
