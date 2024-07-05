@@ -38,28 +38,32 @@ class Feat:
 
 
 class AttackRollArgs:
-    def __init__(self, adv=False, disadv=False):
+    def __init__(self, adv=False, disadv=False, target=None):
         self.adv = adv
         self.disadv = disadv
+        self.target = target
 
 
 class Character:
     def init(
-        self, level=None, stats=None, feats=None, base_feats=None, feat_schedule=None
+        self,
+        level=None,
+        stats=None,
+        feats=None,
+        base_feats=None,
+        feat_schedule=[4, 8, 12, 16, 19],
     ):
         self.level = level
         self.prof = prof_bonus(level)
         self.str = stats[0]
         self.dex = stats[1]
         self.con = stats[2]
-        self.wis = stats[3]
-        self.int = stats[4]
+        self.int = stats[3]
+        self.wis = stats[4]
         self.cha = stats[5]
         self.feats = base_feats
         for feat in base_feats:
             feat.apply(self)
-        if feat_schedule is None:
-            feat_schedule = [4, 8, 12, 16, 19]
         for [target, feat] in zip(feat_schedule, feats):
             if level >= target:
                 feat.apply(self)
@@ -75,14 +79,11 @@ class Character:
     def mod(self, stat):
         return (self.__getattribute__(stat) - 10) // 2
 
-    def short_rest(self):
-        pass
+    def dc(self, stat):
+        return self.mod(stat) + self.prof + 8
 
-    def long_rest(self):
-        pass
-
-    def roll_attack(self, adv=False, disadv=False):
-        args = AttackRollArgs(adv=adv, disadv=disadv)
+    def roll_attack(self, target=None, adv=False, disadv=False):
+        args = AttackRollArgs(adv=adv, disadv=disadv, target=target)
         args.roll1 = random.randint(1, 20)
         args.roll2 = random.randint(1, 20)
         for feat in self.feats:

@@ -101,11 +101,11 @@ class Fighter(Character):
             base_feats.append(ActionSurge(1))
         if use_pam:
             base_feats.append(
-                Glaive(bonus=self.magic_weapon, savage_attacker=True, gwf=True)
+                Glaive(bonus=self.magic_weapon, savage_attacker=True, max_reroll=2)
             )
         else:
             base_feats.append(
-                Greatsword(bonus=self.magic_weapon, savage_attacker=True, gwf=True)
+                Greatsword(bonus=self.magic_weapon, savage_attacker=True, max_reroll=2)
             )
         if level >= 10:
             base_feats.append(HeroicAdvantage())

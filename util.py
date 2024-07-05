@@ -56,11 +56,11 @@ def do_roll(adv=False, disadv=False):
     return random.randint(1, 20)
 
 
-def roll_dice(num, size, gwf=False):
+def roll_dice(num, size, max_reroll=0):
     total = 0
     for _ in range(num):
         roll = random.randint(1, size)
-        if gwf and (roll == 1 or roll == 2):
+        if roll <= max_reroll:
             roll = random.randint(1, size)
         total += roll
     return total

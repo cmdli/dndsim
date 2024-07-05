@@ -11,7 +11,7 @@ class Weapon(Feat):
         bonus=0,
         graze=False,
         savage_attacker=False,
-        gwf=False,
+        max_reroll=0,
     ):
         self.name = "Weapon"
         self.num_dice = num_dice
@@ -20,7 +20,7 @@ class Weapon(Feat):
         self.bonus = bonus
         self.graze = graze
         self.savage_attacker = savage_attacker
-        self.gwf = gwf
+        self.max_reroll = max_reroll
 
     def apply(self, character):
         self.character = character
@@ -30,8 +30,8 @@ class Weapon(Feat):
 
     def weapon(self, pam=False):
         if pam:
-            return roll_dice(1, 4, gwf=self.gwf)
-        return roll_dice(self.num_dice, self.size, gwf=self.gwf)
+            return roll_dice(1, 4, max_reroll=self.max_reroll)
+        return roll_dice(self.num_dice, self.size, max_reroll=self.max_reroll)
 
     def damage(self, crit=False, pam=False):
         dmg = self.weapon(pam=pam)
@@ -123,7 +123,7 @@ class AttackAction(Feat):
     def action(self, target):
         self.character.attacks = self.num_attacks
         while self.character.attacks > 0:
-            self.character.attack(target)
+            self.character.attack(target, main_action=True)
             self.character.attacks -= 1
 
 
@@ -138,7 +138,7 @@ class Attack(Feat):
         self.character = character
 
     def attack(self, target, **kwargs):
-        roll = self.character.roll_attack()
+        roll = self.character.roll_attack(target=target)
         to_hit = self.character.prof + self.character.mod(self.mod) + self.bonus
         if roll >= self.min_crit:
             self.character.hit(target, crit=True, **kwargs)
