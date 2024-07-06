@@ -88,7 +88,8 @@ class ASI(Feat):
 
     def apply(self, character):
         for [stat, increase] in self.stat_increases:
-            character.__setattr__(stat, character.__getattribute__(stat) + increase)
+            new_stat = min(20, character.__getattribute__(stat) + increase)
+            character.__setattr__(stat, new_stat)
 
 
 class AttackAction(Feat):
