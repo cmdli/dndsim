@@ -193,6 +193,9 @@ class EquipWeapon(Feat):
         args.add_damage(f"WeaponBonus:{args.weapon.name}", self.weapon.bonus)
         if self.weapon.vex:
             args.target.vexed = True
+        if self.weapon.topple:
+            if not args.target.save(self.character.dc(args.weapon.mod)):
+                args.target.prone = True
 
     def miss(self, args):
         if args.weapon.name != self.weapon.name:

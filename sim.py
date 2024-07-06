@@ -61,23 +61,19 @@ def test_characters(characters):
 if __name__ == "__main__":
     data = test_characters(
         [
-            # ["Monk", Monk],
+            ["Monk", Monk],
             ["Champion Figher", ChampionFighter],
-            [
-                "Polearm Champion Fighter",
-                lambda level: ChampionFighter(level, use_pam=True),
-            ],
             ["Battlemaster Fighter", PrecisionTrippingFighter],
             [
-                "Polearm Battlemaster Fighter",
-                lambda level: PrecisionTrippingFighter(level, use_pam=True),
+                "Topple Battlemaster Fighter",
+                lambda level: PrecisionTrippingFighter(level, use_topple=True),
             ],
-            # ["Barbarian", Barbarian],
-            # ["Paladin", Paladin],
-            # ["Ranger", Ranger],
-            # ["Rogue", Rogue],
-            # ["Wizard", Wizard],
-            # ["Cleric", Cleric],
+            ["Barbarian", Barbarian],
+            ["Paladin", Paladin],
+            ["Ranger", Ranger],
+            ["Rogue", Rogue],
+            ["Wizard", Wizard],
+            ["Cleric", Cleric],
         ]
     )
     write_data("data.csv", data)

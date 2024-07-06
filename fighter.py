@@ -11,7 +11,7 @@ from feats import (
     EquipWeapon,
 )
 from character import Character
-from weapons import Glaive, Greatsword, GlaiveButt
+from weapons import Glaive, Greatsword, GlaiveButt, Maul
 from log import log
 
 
@@ -21,7 +21,8 @@ class StudiedAttacks(Feat):
         self.enabled = False
 
     def roll_attack(self, args):
-        args.adv = self.enabled
+        if self.enabled:
+            args.adv = True
 
     def hit(self, args):
         self.enabled = False
@@ -144,9 +145,24 @@ class Maneuvers(Feat):
         return 0
 
 
+class ToppleIfNecessaryAttackAction(Feat):
+    def __init__(self, num_attacks, topple_weapon, default_weapon) -> None:
+        self.name = "ToppleIfNecessaryAttackAction"
+        self.topple_weapon = topple_weapon
+        self.default_weapon = default_weapon
+        self.num_attacks = num_attacks
+
+    def action(self, target: Target):
+        for i in range(self.num_attacks):
+            weapon = self.default_weapon
+            if not target.prone and i < self.num_attacks - 1:
+                weapon = self.topple_weapon
+            self.character.attack(target, weapon, main_action=True)
+
+
 class Fighter(Character):
     def __init__(
-        self, level, use_pam=False, subclass_feats=[], min_crit=20, use_topple=False
+        self, level, use_pam=False, subclass_feats=[], min_crit=20, use_topple=True
     ):
         base_feats = []
         self.use_pam = use_pam
@@ -157,14 +173,19 @@ class Fighter(Character):
             weapon = Greatsword(bonus=self.magic_weapon, min_crit=min_crit)
         base_feats.append(EquipWeapon(weapon, savage_attacker=True, max_reroll=2))
         if level >= 20:
-            attacks = 4 * [weapon]
+            num_attacks = 4
         elif level >= 11:
-            attacks = 3 * [weapon]
+            num_attacks = 3
         elif level >= 5:
-            attacks = 2 * [weapon]
+            num_attacks = 2
         else:
-            attacks = [weapon]
-        base_feats.append(AttackAction(attacks=attacks))
+            num_attacks = 1
+        if use_topple and level >= 5:
+            maul = Maul(bonus=self.magic_weapon, min_crit=min_crit)
+            base_feats.append(EquipWeapon(maul, savage_attacker=True, max_reroll=2))
+            base_feats.append(ToppleIfNecessaryAttackAction(num_attacks, maul, weapon))
+        else:
+            base_feats.append(AttackAction(attacks=(num_attacks * [weapon])))
         if level >= 13:
             base_feats.append(StudiedAttacks())
         if level >= 17:
@@ -204,7 +225,7 @@ class Fighter(Character):
 
 
 class ChampionFighter(Fighter):
-    def __init__(self, level, use_pam=False):
+    def __init__(self, level, **kwargs):
         feats = []
         if level >= 10:
             feats.append(HeroicAdvantage())
@@ -215,51 +236,44 @@ class ChampionFighter(Fighter):
         else:
             min_crit = 20
         super().__init__(
-            level, use_pam=use_pam, subclass_feats=feats, min_crit=min_crit
+            level,
+            subclass_feats=feats,
+            min_crit=min_crit,
+            **kwargs,
         )
 
 
 class TrippingFighter(Fighter):
-    def __init__(self, level, use_pam=False):
+    def __init__(self, level, **kwargs):
         feats = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(TrippingAttack())
-        super().__init__(level, use_pam=use_pam, subclass_feats=feats)
+        super().__init__(level, subclass_feats=feats, **kwargs)
 
 
 class BattlemasterFighter(Fighter):
-    def __init__(self, level, use_pam=False):
+    def __init__(self, level, **kwargs):
         feats = []
         if level >= 3:
             feats.append(Maneuvers(level))
-        super().__init__(level, use_pam=use_pam, subclass_feats=feats)
+        super().__init__(level, subclass_feats=feats, **kwargs)
 
 
 class PrecisionFighter(Fighter):
-    def __init__(
-        self,
-        level,
-        use_pam=False,
-        low=8,
-    ):
+    def __init__(self, level, low=8, **kwargs):
         feats = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(PrecisionAttack(low=low))
-        super().__init__(level, use_pam=use_pam, subclass_feats=feats)
+        super().__init__(level, subclass_feats=feats, **kwargs)
 
 
 class PrecisionTrippingFighter(Fighter):
-    def __init__(
-        self,
-        level,
-        low=1,
-        use_pam=False,
-    ):
+    def __init__(self, level, low=1, **kwargs):
         feats = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(TrippingAttack())
             feats.append(PrecisionAttack(low=low))
-        super().__init__(level, use_pam=use_pam, subclass_feats=feats)
+        super().__init__(level, subclass_feats=feats, **kwargs)
