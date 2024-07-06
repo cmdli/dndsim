@@ -9,6 +9,7 @@ class Weapon:
         graze=False,
         vex=False,
         min_crit=20,
+        ranged=False,
     ) -> None:
         self.name = name
         self.num_dice = num_dice
@@ -18,12 +19,20 @@ class Weapon:
         self.graze = graze
         self.vex = vex
         self.min_crit = min_crit
+        self.ranged = ranged
 
 
 class Glaive(Weapon):
     def __init__(self, **kwargs):
         super().__init__(
             name="Glaive", num_dice=1, die=10, mod="str", graze=True, **kwargs
+        )
+
+
+class GlaiveButt(Weapon):
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="GlaiveButt", num_dice=1, die=4, mod="str", graze=True, **kwargs
         )
 
 
@@ -44,8 +53,3 @@ class Shortsword(Weapon):
 class Scimitar(Weapon):
     def __init__(self, **kwargs):
         super().__init__(name="Scimitar", num_dice=1, die=6, mod="dex", **kwargs)
-
-
-class GlaiveButt(Weapon):
-    def __init__(self, **kwargs):
-        super().__init__(name="GlaiveButt", num_dice=1, die=4, graze=True, **kwargs)

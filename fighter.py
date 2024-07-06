@@ -1,7 +1,7 @@
 import random
-from util import (
-    magic_weapon,
-)
+from events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
+from target import Target
+from util import magic_weapon, roll_dice
 from feats import (
     GreatWeaponMaster,
     AttackAction,
@@ -12,6 +12,7 @@ from feats import (
 )
 from character import Character
 from weapons import Glaive, Greatsword, GlaiveButt
+from log import log
 
 
 class StudiedAttacks(Feat):
@@ -69,17 +70,87 @@ class ActionSurge(Feat):
         self.surges = self.max_surges
 
 
+class PrecisionAttack(Feat):
+    def __init__(self, low=5) -> None:
+        self.name = "PrecisionAttack"
+        self.low = low
+
+    def roll_attack(self, args: AttackRollArgs):
+        maneuvers = self.character.feat("Maneuvers")
+        if maneuvers.used_maneuver:
+            return
+        if not args.hits() and args.roll() >= self.low:
+            roll = maneuvers.roll()
+            args.situational_bonus += roll
+
+
+class TrippingAttack(Feat):
+    def __init__(self) -> None:
+        self.name = "TrippingAttack"
+
+    def hit(self, args: HitArgs):
+        maneuvers = self.character.feat("Maneuvers")
+        if maneuvers.used_maneuver:
+            return
+        if args.target.prone:
+            return
+        roll = maneuvers.roll()
+        if roll > 0:
+            args.add_damage("TrippingAttack", roll)
+            if not args.target.save(self.character.dc("str")):
+                args.target.prone = True
+
+
+class Maneuvers(Feat):
+    def __init__(self, level) -> None:
+        self.name = "Maneuvers"
+        if level >= 15:
+            self.max_dice = 6
+        elif level >= 7:
+            self.max_dice = 5
+        else:
+            self.max_dice = 4
+        if level >= 18:
+            self.superiority_size = 12
+        elif level >= 10:
+            self.superiority_size = 10
+        else:
+            self.superiority_size = 8
+        self.enabled_relentless = level >= 15
+        self.used_maneuver = False
+        self.superiority_dice = 0
+
+    def apply(self, character):
+        self.character = character
+
+    def short_rest(self):
+        self.superiority_dice = self.max_dice
+
+    def begin_turn(self, target: Target):
+        self.used_relentless = False
+
+    def before_attack(self):
+        self.used_maneuver = False
+
+    def roll(self):
+        if self.superiority_dice > 0:
+            self.used_maneuver = True
+            self.superiority_dice -= 1
+            return roll_dice(1, self.superiority_size)
+        elif self.enabled_relentless and self.used_relentless:
+            self.used_maneuver = True
+            self.used_relentless = True
+            return roll_dice(1, 8)
+        return 0
+
+
 class Fighter(Character):
-    def __init__(self, level, use_pam=False):
+    def __init__(
+        self, level, use_pam=False, subclass_feats=[], min_crit=20, use_topple=False
+    ):
         base_feats = []
         self.use_pam = use_pam
         self.magic_weapon = magic_weapon(level)
-        if level >= 15:
-            min_crit = 18
-        elif level >= 3:
-            min_crit = 19
-        else:
-            min_crit = 20
         if use_pam:
             weapon = Glaive(bonus=self.magic_weapon, min_crit=min_crit)
         else:
@@ -100,12 +171,13 @@ class Fighter(Character):
             base_feats.append(ActionSurge(2))
         elif level >= 2:
             base_feats.append(ActionSurge(1))
-        if level >= 10:
-            base_feats.append(HeroicAdvantage())
+        base_feats.extend(subclass_feats)
         if use_pam:
+            butt = GlaiveButt(bonus=self.magic_weapon, min_crit=min_crit)
+            base_feats.append(EquipWeapon(butt, savage_attacker=True, max_reroll=2))
             feats = [
                 GreatWeaponMaster(),
-                PolearmMaster(GlaiveButt(bonus=self.magic_weapon)),
+                PolearmMaster(butt),
                 ASI([["str", 1]]),
                 ASI(),
                 ASI(),
@@ -129,3 +201,65 @@ class Fighter(Character):
             feats=feats,
             base_feats=base_feats,
         )
+
+
+class ChampionFighter(Fighter):
+    def __init__(self, level, use_pam=False):
+        feats = []
+        if level >= 10:
+            feats.append(HeroicAdvantage())
+        if level >= 15:
+            min_crit = 18
+        elif level >= 3:
+            min_crit = 19
+        else:
+            min_crit = 20
+        super().__init__(
+            level, use_pam=use_pam, subclass_feats=feats, min_crit=min_crit
+        )
+
+
+class TrippingFighter(Fighter):
+    def __init__(self, level, use_pam=False):
+        feats = []
+        if level >= 3:
+            feats.append(Maneuvers(level))
+            feats.append(TrippingAttack())
+        super().__init__(level, use_pam=use_pam, subclass_feats=feats)
+
+
+class BattlemasterFighter(Fighter):
+    def __init__(self, level, use_pam=False):
+        feats = []
+        if level >= 3:
+            feats.append(Maneuvers(level))
+        super().__init__(level, use_pam=use_pam, subclass_feats=feats)
+
+
+class PrecisionFighter(Fighter):
+    def __init__(
+        self,
+        level,
+        use_pam=False,
+        low=8,
+    ):
+        feats = []
+        if level >= 3:
+            feats.append(Maneuvers(level))
+            feats.append(PrecisionAttack(low=low))
+        super().__init__(level, use_pam=use_pam, subclass_feats=feats)
+
+
+class PrecisionTrippingFighter(Fighter):
+    def __init__(
+        self,
+        level,
+        low=1,
+        use_pam=False,
+    ):
+        feats = []
+        if level >= 3:
+            feats.append(Maneuvers(level))
+            feats.append(TrippingAttack())
+            feats.append(PrecisionAttack(low=low))
+        super().__init__(level, use_pam=use_pam, subclass_feats=feats)

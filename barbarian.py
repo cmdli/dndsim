@@ -18,7 +18,7 @@ class Beserker(Feat):
         if not self.used:
             self.used = True
             num = 2 * self.num_dice if args.crit else self.num_dice
-            args.dmg += roll_dice(num, 6)
+            args.add_damage("Berserker", roll_dice(num, 6))
 
 
 class BrutalStrike(Feat):
@@ -38,7 +38,7 @@ class BrutalStrike(Feat):
     def hit(self, args):
         if self.enabled:
             num = 2 * self.num_dice if args.crit else self.num_dice
-            args.dmg += roll_dice(num, 10)
+            args.add_damage("BrutalStrike", roll_dice(num, 10))
         self.enabled = False
 
     def miss(self, args):
@@ -78,13 +78,12 @@ class Rage(Feat):
         self.raging = False
 
     def begin_turn(self, target):
-        if not self.raging and not self.character.used_bonus:
-            self.character.used_bonus = True
+        if not self.raging and self.character.use_bonus("rage"):
             self.raging = True
 
     def hit(self, args):
         if self.raging:
-            args.dmg += self.dmg
+            args.add_damage("Rage", self.dmg)
 
 
 class RecklessAttack(Feat):

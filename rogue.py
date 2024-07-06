@@ -22,7 +22,7 @@ class SneakAttack(Feat):
         if not self.used:
             self.used = True
             num = 2 * self.num if args.crit else self.num
-            args.dmg += roll_dice(num, 6)
+            args.add_damage("SneakAttack", roll_dice(num, 6))
 
 
 class SteadyAim(Feat):
@@ -33,8 +33,7 @@ class SteadyAim(Feat):
         self.character = character
 
     def begin_turn(self, target):
-        if not self.character.used_bonus:
-            self.character.used_bonus = True
+        if self.character.use_bonus("SteadyAim"):
             self.enabled = True
 
     def roll_attack(self, args):
@@ -87,7 +86,7 @@ class Assassinate(Feat):
     def hit(self, args):
         if self.first_turn and not self.used_dmg:
             self.used_dmg = True
-            args.dmg += self.dmg
+            args.add_damage("Assassinate", self.dmg)
 
     def end_turn(self, target):
         self.adv = False
@@ -108,7 +107,7 @@ class DeathStrike(Feat):
         if self.enabled:
             self.enabled = False
             if not args.target.save(self.character.dc("dex")):
-                args.dmg *= 2
+                args.add_damage("DeathStrike", args.total_damage())
 
     def end_turn(self, target):
         self.enabled = False

@@ -7,12 +7,15 @@ from log import log
 
 class Feat:
     def apply(self, character):
-        pass
+        self.character = character
 
     def begin_turn(self, target: Target):
         pass
 
     def action(self, target: Target):
+        pass
+
+    def before_attack(self):
         pass
 
     def attack(self, args: AttackArgs):
@@ -53,9 +56,8 @@ class PolearmMaster(Feat):
         self.used = False
 
     def end_turn(self, target):
-        if not self.used and not self.character.used_bonus:
+        if not self.used and self.character.use_bonus("PAM"):
             self.used = True
-            self.character.used_bonus = True
             self.character.attack(target, self.weapon)
 
 
@@ -74,10 +76,9 @@ class GreatWeaponMaster(Feat):
     def hit(self, args):
         if not self.used_dmg:
             self.used_dmg = True
-            args.dmg += self.character.prof
-        if args.crit and not self.character.used_bonus:
+            args.add_damage("GreatWeaponMaster", self.character.prof)
+        if args.crit and self.character.use_bonus("GWM"):
             self.bonus_attack_enabled = True
-            self.character.used_bonus = True
             self.character.attack(args.target, args.weapon)
 
 
@@ -122,20 +123,26 @@ class Attack(Feat):
             args.target.vexed = False
         if args.target.stunned:
             args.adv = True
+        if args.target.prone:
+            if args.weapon.ranged:
+                args.disadv = True
+            else:
+                args.adv = True
 
     def attack(self, args):
-        result = self.character.roll_attack(args.target)
+        log.record(f"Attack:{args.weapon.name}", 1)
+        self.character.before_attack()
         to_hit = (
             self.character.prof
             + self.character.mod(args.weapon.mod)
             + args.weapon.bonus
-            + result.situational_bonus
         )
+        result = self.character.roll_attack(args.target, args.weapon, to_hit)
         roll = result.roll()
         crit = False
         if roll >= args.weapon.min_crit:
             crit = True
-        if roll + to_hit >= args.target.ac:
+        if roll + to_hit + result.situational_bonus >= args.target.ac:
             self.character.hit(args.target, args.weapon, crit=crit, attack_args=args)
         else:
             self.character.miss(args.target, args.weapon)
@@ -173,12 +180,17 @@ class EquipWeapon(Feat):
     def hit(self, args):
         if args.weapon.name != self.weapon.name:
             return
+        log.record(f"Hit:{args.weapon.name}", 1)
         dmg = self.damage(crit=args.crit)
         if not self.used_savage_attacker and self.savage_attacker:
             self.used_savage_attacker = True
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
-        args.dmg += dmg + self.character.mod(self.weapon.mod) + self.weapon.bonus
+        args.add_damage(f"Weapon:{args.weapon.name}", dmg)
+        args.add_damage(
+            f"WeaponMod:{args.weapon.name}", self.character.mod(self.weapon.mod)
+        )
+        args.add_damage(f"WeaponBonus:{args.weapon.name}", self.weapon.bonus)
         if self.weapon.vex:
             args.target.vexed = True
 
@@ -186,7 +198,7 @@ class EquipWeapon(Feat):
         if args.weapon.name != self.weapon.name:
             return
         if self.weapon.graze:
-            args.target.damage(self.character.mod(self.weapon.mod))
+            args.target.damage_source("Graze", self.character.mod(self.weapon.mod))
 
 
 class SpellSlots(Feat):

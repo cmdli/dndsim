@@ -23,14 +23,13 @@ class DivineSmite(Feat):
 
     def hit(self, args: HitArgs):
         slot = highest_spell_slot(self.character.slots)
-        if not self.used and not self.character.used_bonus and slot >= 1:
-            self.character.used_bonus = True
+        if not self.used and slot >= 1 and self.character.use_bonus("DivineSmite"):
             self.used = True
             self.character.slots[slot] -= 1
             num = 1 + slot
             if args.crit:
                 num *= 2
-            args.dmg += roll_dice(num, 8, max_reroll=2)
+            args.add_damage("DivineSmite", roll_dice(num, 8, max_reroll=2))
 
 
 class ImprovedDivineSmite(Feat):
@@ -39,7 +38,7 @@ class ImprovedDivineSmite(Feat):
 
     def hit(self, args: HitArgs):
         num = 2 if args.crit else 1
-        args.dmg += roll_dice(num, 8, max_reroll=2)
+        args.add_damage("ImprovedDivineSmite", roll_dice(num, 8, max_reroll=2))
 
 
 class SacredWeapon(Feat):
@@ -53,8 +52,7 @@ class SacredWeapon(Feat):
         self.enabled = False
 
     def begin_turn(self, target: Target):
-        if not self.enabled and not self.character.used_bonus:
-            self.character.used_bonus = True
+        if not self.enabled and self.character.use_bonus("SacredWeapon"):
             self.enabled = True
 
     def roll_attack(self, args: AttackRollArgs):

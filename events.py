@@ -1,6 +1,7 @@
 import random
 from target import Target
 from weapons import Weapon
+from collections import defaultdict
 
 
 class AttackArgs:
@@ -11,8 +12,10 @@ class AttackArgs:
 
 
 class AttackRollArgs:
-    def __init__(self, target):
+    def __init__(self, target: Target, weapon: Weapon, to_hit: int):
         self.target = target
+        self.weapon = weapon
+        self.to_hit = to_hit
         self.adv = False
         self.disadv = False
         self.roll1 = random.randint(1, 20)
@@ -31,6 +34,9 @@ class AttackRollArgs:
         else:
             return min(self.roll1, self.roll2)
 
+    def hits(self):
+        return self.roll() + self.to_hit + self.situational_bonus >= self.target.ac
+
 
 class HitArgs:
     def __init__(
@@ -40,11 +46,20 @@ class HitArgs:
         crit: bool = False,
         main_action: bool = False,
     ):
-        self.dmg = 0
+        self._dmg = defaultdict(int)
         self.crit = crit
         self.target = target
         self.weapon = weapon
         self.main_action = main_action
+
+    def add_damage(self, source: str, dmg: int):
+        self._dmg[source] += dmg
+
+    def total_damage(self):
+        total = 0
+        for key in self._dmg:
+            total += self._dmg[key]
+        return total
 
 
 class MissArgs:

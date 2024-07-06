@@ -1,5 +1,7 @@
 import random
 from util import prof_bonus
+from collections import defaultdict
+from log import log
 
 TARGET_AC = [
     13,  # 1
@@ -37,6 +39,7 @@ class Target:
             self.ability = 3
         self.save_bonus = self.prof + self.ability
         self.dmg = 0
+        self._dmg_log = defaultdict(int)
         self.stunned = False
         self.stun_turns = 0
         self.grappled = False
@@ -48,6 +51,22 @@ class Target:
 
     def damage(self, damage):
         self.dmg += damage
+
+    def damage_source(self, source: str, damage: int):
+        self._dmg_log[source] += damage
+
+    def add_damage_sources(self, sources):
+        for key in sources:
+            self._dmg_log[key] += sources[key]
+            self.dmg += sources[key]
+
+    def print_damage_log(self):
+        for key in self._dmg_log:
+            print(f"Source: {key} - Damage: {self._dmg_log[key]}")
+
+    def log_damage_sources(self):
+        for key in self._dmg_log:
+            log.record(f"Damage ({key})", self._dmg_log[key])
 
     def save(self, dc):
         return random.randint(1, 20) + self.save_bonus >= dc

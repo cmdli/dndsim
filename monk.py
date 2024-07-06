@@ -24,8 +24,7 @@ class FlurryOfBlows(Feat):
         self.character = character
 
     def end_turn(self, target):
-        if not self.character.used_bonus and self.character.ki > 0:
-            self.character.used_bonus = True
+        if self.character.ki > 0 and self.character.use_bonus("FlurryOfBlows"):
             self.character.ki -= 1
             for _ in range(self.num_attacks):
                 self.character.attack(target, self.weapon)
@@ -40,8 +39,7 @@ class BonusAttack(Feat):
         self.character = character
 
     def end_turn(self, target):
-        if not self.character.used_bonus:
-            self.character.used_bonus = True
+        if self.character.use_bonus("BonusAttack"):
             self.character.attack(target, self.weapon)
 
 
@@ -83,7 +81,10 @@ class StunningStrike(Feat):
             if not args.target.save(self.character.dc("wis")):
                 args.target.stun()
             else:
-                args.dmg += roll_dice(1, self.weapon_die) + self.character.mod("wis")
+                args.add_damage(
+                    "StunningStrike",
+                    roll_dice(1, self.weapon_die) + self.character.mod("wis"),
+                )
 
 
 class Ki(Feat):

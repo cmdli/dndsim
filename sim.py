@@ -2,7 +2,14 @@ import csv
 
 from monk import Monk
 from barbarian import Barbarian
-from fighter import Fighter
+from fighter import (
+    Fighter,
+    ChampionFighter,
+    TrippingFighter,
+    PrecisionFighter,
+    BattlemasterFighter,
+    PrecisionTrippingFighter,
+)
 from rogue import Rogue
 from wizard import Wizard
 from paladin import Paladin
@@ -54,14 +61,23 @@ def test_characters(characters):
 if __name__ == "__main__":
     data = test_characters(
         [
-            ["Monk", Monk],
-            ["Figher", Fighter],
-            ["Barbarian", Barbarian],
-            ["Paladin", Paladin],
-            ["Ranger", Ranger],
-            ["Rogue", Rogue],
-            ["Wizard", Wizard],
-            ["Cleric", Cleric],
+            # ["Monk", Monk],
+            ["Champion Figher", ChampionFighter],
+            [
+                "Polearm Champion Fighter",
+                lambda level: ChampionFighter(level, use_pam=True),
+            ],
+            ["Battlemaster Fighter", PrecisionTrippingFighter],
+            [
+                "Polearm Battlemaster Fighter",
+                lambda level: PrecisionTrippingFighter(level, use_pam=True),
+            ],
+            # ["Barbarian", Barbarian],
+            # ["Paladin", Paladin],
+            # ["Ranger", Ranger],
+            # ["Rogue", Rogue],
+            # ["Wizard", Wizard],
+            # ["Cleric", Cleric],
         ]
     )
     write_data("data.csv", data)

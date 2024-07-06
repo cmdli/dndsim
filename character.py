@@ -41,14 +41,24 @@ class Character:
                 return True
         return False
 
+    def feat(self, name: str):
+        for feat in self.feats:
+            if feat.name == name:
+                return feat
+        return None
+
     def mod(self, stat: str):
         return (self.__getattribute__(stat) - 10) // 2
 
     def dc(self, stat: str):
         return self.mod(stat) + self.prof + 8
 
-    def roll_attack(self, target: Target):
-        args = AttackRollArgs(target=target)
+    def before_attack(self):
+        for feat in self.feats:
+            feat.before_attack()
+
+    def roll_attack(self, target: Target, weapon: Weapon, to_hit: int):
+        args = AttackRollArgs(target=target, weapon=weapon, to_hit=to_hit)
         for feat in self.feats:
             feat.roll_attack(args)
         return args
@@ -63,7 +73,7 @@ class Character:
         args = HitArgs(target, weapon, crit=crit, main_action=attack_args.main_action)
         for feat in self.feats:
             feat.hit(args)
-        target.damage(args.dmg)
+        target.add_damage_sources(args._dmg)
 
     def miss(self, target: Target, weapon: Weapon):
         args = MissArgs(target, weapon)
@@ -75,6 +85,7 @@ class Character:
             feat.enemy_turn(target)
 
     def begin_turn(self, target: Target):
+        log.record("Turn", 1)
         self.actions = 1
         self.used_bonus = False
         for feat in self.feats:
@@ -99,6 +110,8 @@ class Character:
     def end_turn(self, target: Target):
         for feat in self.feats:
             feat.end_turn(target)
+        if not self.used_bonus:
+            log.record(f"Bonus (None)", 1)
 
     def short_rest(self):
         for feat in self.feats:
@@ -108,3 +121,10 @@ class Character:
         self.short_rest()
         for feat in self.feats:
             feat.long_rest()
+
+    def use_bonus(self, source: str):
+        if not self.used_bonus:
+            log.record(f"Bonus ({source})", 1)
+            self.used_bonus = True
+            return True
+        return False
