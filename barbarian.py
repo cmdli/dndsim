@@ -14,7 +14,7 @@ class Beserker(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if not self.used:
             self.used = True
             num = 2 * self.num_dice if args.crit else self.num_dice
@@ -29,19 +29,19 @@ class BrutalStrike(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         if not self.used and args.adv:
             args.adv = False
             self.enabled = True
             self.used = True
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if self.enabled:
             num = 2 * self.num_dice if args.crit else self.num_dice
             args.dmg += roll_dice(num, 10)
         self.enabled = False
 
-    def miss(self, target, weapon, **kwargs):
+    def miss(self, args):
         self.enabled = False
 
 
@@ -82,7 +82,7 @@ class Rage(Feat):
             self.character.used_bonus = True
             self.raging = True
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if self.raging:
             args.dmg += self.dmg
 

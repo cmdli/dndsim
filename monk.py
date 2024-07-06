@@ -23,7 +23,7 @@ class FlurryOfBlows(Feat):
     def apply(self, character):
         self.character = character
 
-    def end_turn(self, target, **kwargs):
+    def end_turn(self, target):
         if not self.character.used_bonus and self.character.ki > 0:
             self.character.used_bonus = True
             self.character.ki -= 1
@@ -39,7 +39,7 @@ class BonusAttack(Feat):
     def apply(self, character):
         self.character = character
 
-    def end_turn(self, target, **kwargs):
+    def end_turn(self, target):
         if not self.character.used_bonus:
             self.character.used_bonus = True
             self.character.attack(target, self.weapon)
@@ -52,11 +52,11 @@ class Grappler(Feat):
     def apply(self, character):
         character.dex += 1
 
-    def hit(self, args, main_action=False, **kwargs):
-        if main_action:
+    def hit(self, args):
+        if args.main_action:
             args.target.grapple()
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         if args.target.grappled:
             args.adv = True
 
@@ -72,11 +72,11 @@ class StunningStrike(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         if args.target.stunned:
             args.adv = True
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if not self.used and self.character.ki > 0:
             self.used = True
             self.character.ki -= 1

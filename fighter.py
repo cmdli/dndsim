@@ -19,13 +19,13 @@ class StudiedAttacks(Feat):
         self.name = "StudiedAttacks"
         self.enabled = False
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         args.adv = self.enabled
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         self.enabled = False
 
-    def miss(self, target, weapon, **kwargs):
+    def miss(self, args):
         self.enabled = True
 
 
@@ -36,7 +36,7 @@ class HeroicAdvantage(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         if self.used or args.adv:
             return
         if args.disadv:

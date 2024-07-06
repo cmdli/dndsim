@@ -18,7 +18,7 @@ class SneakAttack(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if not self.used:
             self.used = True
             num = 2 * self.num if args.crit else self.num
@@ -37,7 +37,7 @@ class SteadyAim(Feat):
             self.character.used_bonus = True
             self.enabled = True
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         if self.enabled:
             args.adv = True
 
@@ -52,7 +52,7 @@ class StrokeOfLuck(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         if not self.used and args.roll() < 10:
             self.used = True
             args.roll1 = 20
@@ -80,11 +80,11 @@ class Assassinate(Feat):
             if do_roll(adv=True) + self.character.mod("dex") > do_roll():
                 self.adv = True
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         if self.adv:
             args.adv = True
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if self.first_turn and not self.used_dmg:
             self.used_dmg = True
             args.dmg += self.dmg
@@ -104,7 +104,7 @@ class DeathStrike(Feat):
     def short_rest(self):
         self.enabled = True
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if self.enabled:
             self.enabled = False
             if not args.target.save(self.character.dc("dex")):

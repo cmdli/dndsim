@@ -1,4 +1,4 @@
-from events import HitArgs, AttackRollArgs
+from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
 from util import roll_dice
 from target import Target
 from weapons import Weapon
@@ -11,19 +11,19 @@ class Feat:
     def begin_turn(self, target: Target):
         pass
 
-    def action(self, target: Target, **kwargs):
+    def action(self, target: Target):
         pass
 
-    def attack(self, target: Target, weapon: Weapon, **kwargs):
+    def attack(self, args: AttackArgs):
         pass
 
-    def roll_attack(self, args: AttackRollArgs, **kwargs):
+    def roll_attack(self, args: AttackRollArgs):
         pass
 
-    def hit(self, args: HitArgs, **kwargs):
+    def hit(self, args: HitArgs):
         pass
 
-    def miss(self, target: Target, weapon: Weapon, **kwargs):
+    def miss(self, args: MissArgs):
         pass
 
     def end_turn(self, target):
@@ -70,7 +70,7 @@ class GreatWeaponMaster(Feat):
         self.used_dmg = False
         self.bonus_attack_enabled = False
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if not self.used_dmg:
             self.used_dmg = True
             args.dmg += self.character.prof
@@ -114,22 +114,27 @@ class Attack(Feat):
     def apply(self, character):
         self.character = character
 
-    def roll_attack(self, args, **kwargs):
+    def roll_attack(self, args):
         if args.target.vexed:
             args.adv = True
             args.target.vexed = False
         if args.target.stunned:
             args.adv = True
 
-    def attack(self, target, weapon, **kwargs):
-        roll = self.character.roll_attack(target)
-        to_hit = self.character.prof + self.character.mod(weapon.mod) + weapon.bonus
-        if roll >= weapon.min_crit:
-            self.character.hit(target, weapon, crit=True, **kwargs)
-        elif roll + to_hit >= target.ac:
-            self.character.hit(target, weapon, **kwargs)
+    def attack(self, args):
+        roll = self.character.roll_attack(args.target)
+        to_hit = (
+            self.character.prof
+            + self.character.mod(args.weapon.mod)
+            + args.weapon.bonus
+        )
+        crit = False
+        if roll >= args.weapon.min_crit:
+            crit = True
+        if roll + to_hit >= args.target.ac:
+            self.character.hit(args.target, args.weapon, crit=crit, attack_args=args)
         else:
-            self.character.miss(target, weapon, **kwargs)
+            self.character.miss(args.target, args.weapon)
 
 
 class EquipWeapon(Feat):
@@ -161,7 +166,7 @@ class EquipWeapon(Feat):
             dmg += self.weapon_dmg()
         return dmg
 
-    def hit(self, args, **kwargs):
+    def hit(self, args):
         if args.weapon.name != self.weapon.name:
             return
         dmg = self.damage(crit=args.crit)
@@ -173,8 +178,8 @@ class EquipWeapon(Feat):
         if self.weapon.vex:
             args.target.vexed = True
 
-    def miss(self, target, weapon, **kwargs):
-        if weapon.name != self.weapon.name:
+    def miss(self, args):
+        if args.weapon.name != self.weapon.name:
             return
         if self.weapon.graze:
-            target.damage(self.character.mod(self.weapon.mod))
+            args.target.damage(self.character.mod(self.weapon.mod))

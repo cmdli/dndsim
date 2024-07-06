@@ -9,7 +9,6 @@ class Weapon:
         graze=False,
         vex=False,
         min_crit=20,
-        **kwargs
     ) -> None:
         self.name = name
         self.num_dice = num_dice
