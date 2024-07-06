@@ -1,47 +1,9 @@
-from util import prof_bonus, do_roll
-import random
-
-
-class Feat:
-    def apply(self, character):
-        pass
-
-    def begin_turn(self, target):
-        pass
-
-    def action(self, target, **kwargs):
-        pass
-
-    def attack(self, target, **kwargs):
-        pass
-
-    def roll_attack(self, args, **kwargs):
-        pass
-
-    def hit(self, target, **kwargs):
-        pass
-
-    def miss(self, target, **kwargs):
-        pass
-
-    def end_turn(self, target):
-        pass
-
-    def enemy_turn(self, target):
-        pass
-
-    def short_rest(self):
-        pass
-
-    def long_rest(self):
-        pass
-
-
-class AttackRollArgs:
-    def __init__(self, adv=False, disadv=False, target=None):
-        self.adv = adv
-        self.disadv = disadv
-        self.target = target
+from util import prof_bonus
+from feats import Attack
+from target import Target
+from weapons import Weapon
+from events import HitArgs, AttackRollArgs
+from log import log
 
 
 class Character:
@@ -61,14 +23,17 @@ class Character:
         self.int = stats[3]
         self.wis = stats[4]
         self.cha = stats[5]
-        self.feats = base_feats
+        self.feats = []
+        self.add_feat(Attack())
         for feat in base_feats:
-            feat.apply(self)
+            self.add_feat(feat)
         for [target, feat] in zip(feat_schedule, feats):
             if level >= target:
-                feat.apply(self)
-                self.feats.append(feat)
-        self.used_bonus = False
+                self.add_feat(feat)
+
+    def add_feat(self, feat):
+        feat.apply(self)
+        self.feats.append(feat)
 
     def has_feat(self, name):
         for feat in self.feats:
@@ -82,28 +47,23 @@ class Character:
     def dc(self, stat):
         return self.mod(stat) + self.prof + 8
 
-    def roll_attack(self, target=None, adv=False, disadv=False):
-        args = AttackRollArgs(adv=adv, disadv=disadv, target=target)
-        args.roll1 = random.randint(1, 20)
-        args.roll2 = random.randint(1, 20)
+    def roll_attack(self, target: Target = None):
+        args = AttackRollArgs(target=target)
         for feat in self.feats:
             feat.roll_attack(args)
-        if args.adv and args.disadv:
-            return args.roll1
-        elif args.adv:
-            return max(args.roll1, args.roll2)
-        elif args.disadv:
-            return min(args.roll1, args.roll2)
-        else:
-            return args.roll1
+        if args.adv:
+            log.record("adv", 1)
+        return args.roll()
 
-    def hit(self, target, **kwargs):
+    def hit(self, target: Target, weapon: Weapon, crit: bool = False, **kwargs):
+        args = HitArgs(target=target, crit=crit, weapon=weapon)
         for feat in self.feats:
-            feat.hit(target, **kwargs)
+            feat.hit(args, **kwargs)
+        target.damage(args.dmg)
 
-    def miss(self, target, **kwargs):
+    def miss(self, target, weapon, **kwargs):
         for feat in self.feats:
-            feat.miss(target, **kwargs)
+            feat.miss(target, weapon, **kwargs)
 
     def enemy_turn(self, target):
         for feat in self.feats:
@@ -126,9 +86,9 @@ class Character:
         for feat in self.feats:
             feat.action(target, **kwargs)
 
-    def attack(self, target, **kwargs):
+    def attack(self, target, weapon, **kwargs):
         for feat in self.feats:
-            feat.attack(target, **kwargs)
+            feat.attack(target, weapon, **kwargs)
 
     def end_turn(self, target):
         for feat in self.feats:

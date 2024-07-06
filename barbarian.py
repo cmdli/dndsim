@@ -1,19 +1,8 @@
 import random
 from util import magic_weapon, do_roll, roll_dice
-from character import (
-    Character,
-    Feat,
-    AttackRollArgs,
-)
-from feats import (
-    ASI,
-    GreatWeaponMaster,
-    Greatsword,
-    Glaive,
-    PolearmMaster,
-    AttackAction,
-    Attack,
-)
+from character import Character
+from feats import ASI, GreatWeaponMaster, PolearmMaster, AttackAction, Feat, EquipWeapon
+from weapons import Glaive, Greatsword, GlaiveButt
 
 
 class Beserker(Feat):
@@ -25,12 +14,11 @@ class Beserker(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def hit(self, target, crit=False, **kwargs):
+    def hit(self, args, **kwargs):
         if not self.used:
             self.used = True
-            target.damage(roll_dice(self.num_dice, 6))
-            if crit:
-                target.damage(roll_dice(self.num_dice, 6))
+            num = 2 * self.num_dice if args.crit else self.num_dice
+            args.dmg += roll_dice(num, 6)
 
 
 class BrutalStrike(Feat):
@@ -41,32 +29,32 @@ class BrutalStrike(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def roll_attack(self, args: AttackRollArgs, **kwargs):
+    def roll_attack(self, args, **kwargs):
         if not self.used and args.adv:
             args.adv = False
             self.enabled = True
             self.used = True
 
-    def hit(self, target, crit=False, **kwargs):
+    def hit(self, args, **kwargs):
         if self.enabled:
-            target.damage(roll_dice(self.num_dice, 10))
-            if crit:
-                target.damage(roll_dice(self.num_dice, 10))
+            num = 2 * self.num_dice if args.crit else self.num_dice
+            args.dmg += roll_dice(num, 10)
         self.enabled = False
 
-    def miss(self, target, **kwargs):
+    def miss(self, target, weapon, **kwargs):
         self.enabled = False
 
 
 class Retaliation(Feat):
-    def __init__(self):
+    def __init__(self, weapon):
         self.name = "Retaliation"
+        self.weapon = weapon
 
     def apply(self, character):
         self.character = character
 
     def enemy_turn(self, target):
-        self.character.attack(target)
+        self.character.attack(target, weapon=self.weapon)
 
 
 class PrimalChampion(Feat):
@@ -94,9 +82,9 @@ class Rage(Feat):
             self.character.used_bonus = True
             self.raging = True
 
-    def hit(self, target, **kwargs):
+    def hit(self, args, **kwargs):
         if self.raging:
-            target.damage(self.dmg)
+            args.dmg += self.dmg
 
 
 class RecklessAttack(Feat):
@@ -106,8 +94,9 @@ class RecklessAttack(Feat):
     def begin_turn(self, target):
         self.enabled = True
 
-    def roll_attack(self, args: AttackRollArgs = None):
-        args.adv = self.enabled
+    def roll_attack(self, args):
+        if self.enabled:
+            args.adv = True
 
     def end_turn(self, target):
         self.enabled = False
@@ -125,29 +114,30 @@ class Barbarian(Character):
         base_feats = []
         base_feats.append(Rage(rage_dmg))
         base_feats.append(RecklessAttack())
-        if level >= 5:
-            base_feats.append(AttackAction(2))
+        if use_pam:
+            weapon = Glaive(bonus=self.magic_weapon)
         else:
-            base_feats.append(AttackAction(1))
-        base_feats.append(Attack("str", self.magic_weapon))
+            weapon = Greatsword(bonus=self.magic_weapon)
+        base_feats.append(EquipWeapon(weapon, savage_attacker=True))
+        if level >= 5:
+            attacks = 2 * [weapon]
+        else:
+            attacks = [weapon]
+        base_feats.append(AttackAction(attacks=attacks))
         if level >= 3:
             base_feats.append(Beserker(rage_dmg))
         if level >= 17:
             base_feats.append(BrutalStrike(2))
         elif level >= 9:
             base_feats.append(BrutalStrike(1))
-        if use_pam:
-            base_feats.append(Glaive(bonus=self.magic_weapon, savage_attacker=True))
-        else:
-            base_feats.append(Greatsword(bonus=self.magic_weapon, savage_attacker=True))
         if level >= 10:
-            base_feats.append(Retaliation())
+            base_feats.append(Retaliation(weapon))
         if level >= 20:
             base_feats.append(PrimalChampion())
         if use_pam:
             feats = [
                 GreatWeaponMaster(),
-                PolearmMaster(),
+                PolearmMaster(GlaiveButt(bonus=self.magic_weapon)),
                 ASI([["str", 1], ["con", 1]]),
                 ASI(),
                 ASI(),

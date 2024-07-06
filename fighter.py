@@ -1,22 +1,17 @@
 import random
 from util import (
-    prof_bonus,
     magic_weapon,
-    do_roll,
-    polearm_master,
-    glaive,
-    greatsword,
 )
 from feats import (
     GreatWeaponMaster,
-    Greatsword,
-    Glaive,
-    Attack,
     AttackAction,
     ASI,
     PolearmMaster,
+    Feat,
+    EquipWeapon,
 )
-from character import Character, Feat
+from character import Character
+from weapons import Glaive, Greatsword, GlaiveButt
 
 
 class StudiedAttacks(Feat):
@@ -27,10 +22,10 @@ class StudiedAttacks(Feat):
     def roll_attack(self, args, **kwargs):
         args.adv = self.enabled
 
-    def hit(self, target, **kwargs):
+    def hit(self, args, **kwargs):
         self.enabled = False
 
-    def miss(self, target, **kwargs):
+    def miss(self, target, weapon, **kwargs):
         self.enabled = True
 
 
@@ -79,45 +74,54 @@ class Fighter(Character):
         base_feats = []
         self.use_pam = use_pam
         self.magic_weapon = magic_weapon(level)
-        if level >= 20:
-            base_feats.append(AttackAction(4))
-        elif level >= 11:
-            base_feats.append(AttackAction(3))
-        elif level >= 5:
-            base_feats.append(AttackAction(2))
-        else:
-            base_feats.append(AttackAction(1))
         if level >= 15:
-            base_feats.append(Attack(mod="str", bonus=self.magic_weapon, min_crit=18))
+            min_crit = 18
         elif level >= 3:
-            base_feats.append(Attack(mod="str", bonus=self.magic_weapon, min_crit=19))
+            min_crit = 19
         else:
-            base_feats.append(Attack(mod="str", bonus=self.magic_weapon, min_crit=20))
+            min_crit = 20
+        if use_pam:
+            weapon = Glaive(bonus=self.magic_weapon, min_crit=min_crit)
+        else:
+            weapon = Greatsword(bonus=self.magic_weapon, min_crit=min_crit)
+        base_feats.append(EquipWeapon(weapon, savage_attacker=True, max_reroll=2))
+        if level >= 20:
+            attacks = 4 * [weapon]
+        elif level >= 11:
+            attacks = 3 * [weapon]
+        elif level >= 5:
+            attacks = 2 * [weapon]
+        else:
+            attacks = [weapon]
+        base_feats.append(AttackAction(attacks=attacks))
         if level >= 13:
             base_feats.append(StudiedAttacks())
         if level >= 17:
             base_feats.append(ActionSurge(2))
         elif level >= 2:
             base_feats.append(ActionSurge(1))
-        if use_pam:
-            base_feats.append(
-                Glaive(bonus=self.magic_weapon, savage_attacker=True, max_reroll=2)
-            )
-        else:
-            base_feats.append(
-                Greatsword(bonus=self.magic_weapon, savage_attacker=True, max_reroll=2)
-            )
         if level >= 10:
             base_feats.append(HeroicAdvantage())
-        feats = [
-            GreatWeaponMaster(),
-            ASI([["str", 2]]) if not use_pam else PolearmMaster(),
-            ASI() if not use_pam else ASI([["str", 1]]),
-            ASI(),
-            ASI(),
-            ASI(),
-            ASI(),
-        ]
+        if use_pam:
+            feats = [
+                GreatWeaponMaster(),
+                PolearmMaster(GlaiveButt(bonus=self.magic_weapon)),
+                ASI([["str", 1]]),
+                ASI(),
+                ASI(),
+                ASI(),
+                ASI(),
+            ]
+        else:
+            feats = [
+                GreatWeaponMaster(),
+                ASI([["str", 2]]),
+                ASI(),
+                ASI(),
+                ASI(),
+                ASI(),
+                ASI(),
+            ]
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 10],

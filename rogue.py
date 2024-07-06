@@ -1,102 +1,140 @@
-import random
 import math
 from util import (
-    prof_bonus,
     magic_weapon,
     roll_dice,
     do_roll,
 )
+from character import Character
+from feats import ASI, AttackAction, Feat, EquipWeapon
+from weapons import Shortsword, Scimitar
+from log import log
 
 
-class Rogue:
-    def __init__(self, level):
-        self.level = level
-        self.prof = prof_bonus(level)
-        if level >= 8:
-            self.dex = 5
-        elif level >= 4:
-            self.dex = 4
-        else:
-            self.dex = 3
-        self.num_sneak_attack = math.ceil(level / 2)
-        self.max_attacks = 2  # One plus dagger nick
-        self.magic_weapon = magic_weapon(level)
-        self.to_hit = self.prof + self.dex + self.magic_weapon
-        self.dc = 8 + self.prof + self.dex
-        self.long_rest()
+class SneakAttack(Feat):
+    def __init__(self, num):
+        self.name = "SneakAttack"
+        self.num = num
 
-    def weapon(self):
-        return random.randint(1, 6)
+    def begin_turn(self, target):
+        self.used = False
 
-    def begin_turn(self):
-        self.used_bonus = False
-        self.used_steady_aim = self.level < 3
-        self.used_sneak_attack = False
+    def hit(self, args, **kwargs):
+        if not self.used:
+            self.used = True
+            num = 2 * self.num if args.crit else self.num
+            args.dmg += roll_dice(num, 6)
 
-    def turn(self, target):
-        self.begin_turn()
-        adv = self.assassinate_adv
-        if not adv and not self.used_bonus and not self.used_steady_aim:
-            adv = True
-            self.used_bonus = True
-            self.used_steady_aim = True
-        self.attack(target, adv=adv, can_vex=True)
-        self.attack(target, adv=adv)
-        self.used_assassinate = True
-        self.used_death_strike = True
-        self.assassinate_adv = False
 
-    def enemy_turn(self, target):
-        pass
+class SteadyAim(Feat):
+    def __init__(self) -> None:
+        self.name = "SteadyAim"
 
-    def attack(self, target, adv=False, can_vex=False):
-        if self.vex:
-            adv = True
-            self.vex = False
-        roll = do_roll(adv=adv)
-        if roll == 20:
-            self.hit(target, crit=True, can_vex=can_vex)
-        elif roll + self.to_hit >= target.ac:
-            self.hit(target, can_vex=can_vex)
-        else:
-            if not self.used_stroke_of_luck:
-                self.used_stroke_of_luck = True
-                self.hit(target, crit=True, can_vex=can_vex)
+    def apply(self, character):
+        self.character = character
 
-    def hit(self, target, crit=False, can_vex=False):
-        if can_vex:
-            self.vex = True
-        dmg = 0
-        dmg += self.weapon() + self.dex + self.magic_weapon
-        if crit:
-            dmg += self.weapon()
-        used_sneak_attack = False
-        if not self.used_sneak_attack:
-            used_sneak_attack = True
-            self.used_sneak_attack = True
-            dmg += roll_dice(self.num_sneak_attack, 6)
-            if crit:
-                dmg += roll_dice(self.num_sneak_attack, 6)
-            if not self.used_assassinate:
-                dmg += self.level
-        if not self.used_death_strike and used_sneak_attack:
-            self.used_death_strike = True
-            if not target.save(self.dc):
-                target.damage(dmg * 2)
-            else:
-                target.damage(dmg)
-        else:
-            target.damage(dmg)
+    def begin_turn(self, target):
+        if not self.character.used_bonus:
+            self.character.used_bonus = True
+            self.enabled = True
+
+    def roll_attack(self, args, **kwargs):
+        if self.enabled:
+            args.adv = True
+
+    def end_turn(self, target):
+        self.enabled = False
+
+
+class StrokeOfLuck(Feat):
+    def __init__(self) -> None:
+        self.name = "StrokeOfLuck"
+
+    def begin_turn(self, target):
+        self.used = False
+
+    def roll_attack(self, args, **kwargs):
+        if not self.used and args.roll() < 10:
+            self.used = True
+            args.roll1 = 20
+            args.roll2 = 20
+
+
+class Assassinate(Feat):
+    def __init__(self, dmg):
+        self.name = "Assassinate"
+        self.dmg = dmg
+        self.first_turn = False
+        self.used_dmg = False
+        self.adv = False
+
+    def apply(self, character):
+        self.character = character
 
     def short_rest(self):
-        self.used_stroke_of_luck = self.level < 20
-        self.used_assassinate = self.level < 3
-        self.assassinate_adv = False
-        if self.level >= 3 and do_roll(adv=True) + self.dex > do_roll():
-            # We beat the target on initiative
-            self.assassinate_adv = True
-        self.used_death_strike = self.level < 17
-        self.vex = False
+        log.record("short_rest", 1)
+        self.first_turn = True
+        self.used_dmg = False
 
-    def long_rest(self):
-        self.short_rest()
+    def begin_turn(self, target):
+        if self.first_turn:
+            if do_roll(adv=True) + self.character.mod("dex") > do_roll():
+                self.adv = True
+
+    def roll_attack(self, args, **kwargs):
+        if self.adv:
+            args.adv = True
+
+    def hit(self, args, **kwargs):
+        if self.first_turn and not self.used_dmg:
+            self.used_dmg = True
+            args.dmg += self.dmg
+
+    def end_turn(self, target):
+        self.adv = False
+        self.first_turn = False
+
+
+class DeathStrike(Feat):
+    def __init__(self) -> None:
+        self.name = "DeathStrike"
+
+    def apply(self, character):
+        self.character = character
+
+    def short_rest(self):
+        self.enabled = True
+
+    def hit(self, args, **kwargs):
+        if self.enabled:
+            self.enabled = False
+            if not args.target.save(self.character.dc("dex")):
+                args.dmg *= 2
+
+    def end_turn(self, target):
+        self.enabled = False
+
+
+class Rogue(Character):
+    def __init__(self, level):
+        self.magic_weapon = magic_weapon(level)
+        sneak_attack = math.ceil(level / 2)
+        base_feats = []
+        shortsword = Shortsword(bonus=self.magic_weapon)
+        scimitar = Scimitar(bonus=self.magic_weapon)
+        base_feats.append(EquipWeapon(shortsword))
+        base_feats.append(EquipWeapon(scimitar))
+        base_feats.append(AttackAction(attacks=[shortsword, scimitar]))
+        base_feats.append(SneakAttack(sneak_attack))
+        if level >= 3:
+            base_feats.append(SteadyAim())
+            base_feats.append(Assassinate(level))
+        if level >= 17:
+            base_feats.append(DeathStrike())
+        if level >= 20:
+            base_feats.append(StrokeOfLuck())
+        super().init(
+            level=level,
+            stats=[10, 17, 10, 10, 10, 10],
+            feats=[ASI([["dex", 2]]), ASI([["dex", 1]])],
+            base_feats=base_feats,
+        )

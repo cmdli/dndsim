@@ -1,5 +1,6 @@
 import random
 import math
+from collections import defaultdict
 
 SPELL_SLOTS_ARR = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 0

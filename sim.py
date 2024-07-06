@@ -9,6 +9,7 @@ from paladin import Paladin
 from ranger import Ranger
 from cleric import Cleric
 from target import Target
+from log import log
 
 NUM_FIGHTS = 3
 NUM_TURNS = 5
@@ -50,10 +51,6 @@ def test_characters(characters):
     return data
 
 
-def PAMBarbarian(level):
-    return Barbarian(level, use_pam=True)
-
-
 if __name__ == "__main__":
     data = test_characters(
         [
@@ -68,6 +65,7 @@ if __name__ == "__main__":
         ]
     )
     write_data("data.csv", data)
+    log.printReport()
     # for level in range(1,21):
     #     lines = []
     #     # lines.append(f"Fighter {level}: {test_dpr(Fighter(level)):0.2f} DPR")

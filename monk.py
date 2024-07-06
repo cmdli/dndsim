@@ -1,7 +1,8 @@
 import random
-from util import magic_weapon, do_roll, roll_dice
-from character import Character, Feat
-from feats import ASI, AttackAction, Attack, Weapon
+from util import magic_weapon, roll_dice
+from character import Character
+from feats import ASI, AttackAction, Feat, EquipWeapon
+from weapons import Weapon
 
 
 class BodyAndMind(Feat):
@@ -14,9 +15,10 @@ class BodyAndMind(Feat):
 
 
 class FlurryOfBlows(Feat):
-    def __init__(self, num_attacks):
+    def __init__(self, num_attacks, weapon):
         self.name = "FlurryOfBlows"
         self.num_attacks = num_attacks
+        self.weapon = weapon
 
     def apply(self, character):
         self.character = character
@@ -26,12 +28,13 @@ class FlurryOfBlows(Feat):
             self.character.used_bonus = True
             self.character.ki -= 1
             for _ in range(self.num_attacks):
-                self.character.attack(target)
+                self.character.attack(target, self.weapon)
 
 
 class BonusAttack(Feat):
-    def __init__(self):
+    def __init__(self, weapon):
         self.name = "BonusAttack"
+        self.weapon = weapon
 
     def apply(self, character):
         self.character = character
@@ -39,7 +42,7 @@ class BonusAttack(Feat):
     def end_turn(self, target, **kwargs):
         if not self.character.used_bonus:
             self.character.used_bonus = True
-            self.character.attack(target)
+            self.character.attack(target, self.weapon)
 
 
 class Grappler(Feat):
@@ -49,9 +52,9 @@ class Grappler(Feat):
     def apply(self, character):
         character.dex += 1
 
-    def hit(self, target, main_action=False, **kwargs):
+    def hit(self, args, main_action=False, **kwargs):
         if main_action:
-            target.grapple()
+            args.target.grapple()
 
     def roll_attack(self, args, **kwargs):
         if args.target.grappled:
@@ -73,15 +76,14 @@ class StunningStrike(Feat):
         if args.target.stunned:
             args.adv = True
 
-    def hit(self, target, **kwargs):
-        global stun
+    def hit(self, args, **kwargs):
         if not self.used and self.character.ki > 0:
             self.used = True
             self.character.ki -= 1
-            if not target.save(self.character.dc("wis")):
-                target.stun()
+            if not args.target.save(self.character.dc("wis")):
+                args.target.stun()
             else:
-                target.damage(roll_dice(1, self.weapon_die) + self.character.mod("wis"))
+                args.dmg += roll_dice(1, self.weapon_die) + self.character.mod("wis")
 
 
 class Ki(Feat):
@@ -99,7 +101,7 @@ class Ki(Feat):
 class Fists(Weapon):
     def __init__(self, weapon_die, bonus=0):
         super().__init__(
-            num_dice=1, size=weapon_die, mod="dex", bonus=bonus, max_reroll=1
+            name="Fists", num_dice=1, die=weapon_die, mod="dex", bonus=bonus
         )
 
 
@@ -107,8 +109,6 @@ class Monk(Character):
     def __init__(self, level):
         self.magic_weapon = magic_weapon(level)
         base_feats = []
-        if level >= 20:
-            base_feats.append(BodyAndMind())
         if level >= 17:
             weapon_die = 12
         elif level >= 11:
@@ -117,20 +117,23 @@ class Monk(Character):
             weapon_die = 8
         else:
             weapon_die = 6
-        base_feats.append(Fists(weapon_die, bonus=self.magic_weapon))
-        base_feats.append(Attack(mod="dex", bonus=self.magic_weapon))
+        fists = Fists(weapon_die, bonus=self.magic_weapon)
+        base_feats.append(EquipWeapon(weapon=fists, max_reroll=1))
         if level >= 5:
-            base_feats.append(AttackAction(2))
+            attacks = 2 * [fists]
         else:
-            base_feats.append(AttackAction(1))
+            attacks = [fists]
+        base_feats.append(AttackAction(attacks=attacks))
         if level >= 10:
-            base_feats.append(FlurryOfBlows(3))
+            base_feats.append(FlurryOfBlows(num_attacks=3, weapon=fists))
         elif level >= 2:
-            base_feats.append(FlurryOfBlows(2))
-        base_feats.append(BonusAttack())
+            base_feats.append(FlurryOfBlows(num_attacks=2, weapon=fists))
+        base_feats.append(BonusAttack(weapon=fists))
+        base_feats.append(Ki(level if level >= 2 else 0))
         if level >= 5:
             base_feats.append(StunningStrike(weapon_die))
-        base_feats.append(Ki(level if level >= 2 else 0))
+        if level >= 20:
+            base_feats.append(BodyAndMind())
         feats = [
             Grappler(),
             ASI([["dex", 2]]),
@@ -144,4 +147,3 @@ class Monk(Character):
             base_feats=base_feats,
             feats=feats,
         )
-        print(self.dc("wis"))
