@@ -51,7 +51,7 @@ class Character:
         args = AttackRollArgs(target=target)
         for feat in self.feats:
             feat.roll_attack(args)
-        return args.roll()
+        return args
 
     def hit(
         self,

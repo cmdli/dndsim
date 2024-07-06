@@ -1,98 +1,95 @@
+from events import AttackRollArgs, HitArgs
+from target import Target
 from util import (
-    prof_bonus,
     magic_weapon,
     highest_spell_slot,
-    spell_slots,
-    do_roll,
-    greatsword,
-    gwf,
+    roll_dice,
 )
+from character import Character
+from feats import ASI, AttackAction, EquipWeapon, GreatWeaponMaster, Feat, SpellSlots
+from weapons import Greatsword
+from log import log
 
 
-class Paladin:
-    def __init__(self, level):
-        self.level = level
-        self.prof = prof_bonus(level)
-        if level >= 5:
-            self.max_attacks = 2
-        else:
-            self.max_attacks = 1
-        if level >= 8:
-            self.str = 5
-        elif level >= 4:
-            self.str = 4
-        else:
-            self.str = 3
-        if level >= 16:
-            self.cha = 5
-        elif level >= 12:
-            self.cha = 4
-        else:
-            self.cha = 3
-        self.magic_weapon = magic_weapon(level)
-        self.to_hit = self.prof + self.str + self.magic_weapon + self.cha
-        self.long_rest()
+class DivineSmite(Feat):
+    def __init__(self) -> None:
+        self.name = "DivineSmite"
 
-    def weapon(self):
-        return greatsword(gwf=self.level > 1)
+    def apply(self, character):
+        self.character = character
 
-    def begin_turn(self):
-        self.used_bonus = False
-        self.used_smite = self.level < 2
-        self.attacks = self.max_attacks
-        self.used_gwm_dmg = self.level < 4
-        self.used_gwm_bonus = self.level < 4
+    def begin_turn(self, target: Target):
+        self.used = False
 
-    def turn(self, target):
-        self.begin_turn()
-        while self.attacks > 0:
-            self.attack(target)
-            self.attacks -= 1
+    def hit(self, args: HitArgs):
+        slot = highest_spell_slot(self.character.slots)
+        if not self.used and not self.character.used_bonus and slot >= 1:
+            self.character.used_bonus = True
+            self.used = True
+            self.character.slots[slot] -= 1
+            num = 1 + slot
+            if args.crit:
+                num *= 2
+            args.dmg += roll_dice(num, 8, max_reroll=2)
 
-    def enemy_turn(self, target):
-        pass
 
-    def attack(self, target):
-        roll = do_roll()
-        if roll == 20:
-            self.hit(target, crit=True)
-            if not self.used_gwm_bonus and not self.used_bonus:
-                self.used_bonus = True
-                self.used_gwm_bonus = True
-                self.attacks += 1
-        elif roll + self.to_hit >= target.ac:
-            self.hit(target)
-        else:
-            # Graze
-            target.damage(self.str)
+class ImprovedDivineSmite(Feat):
+    def __init__(self) -> None:
+        self.name = "ImprovedDivineSmite"
 
-    def hit(self, target, crit=False):
-        target.damage(self.weapon() + self.str + self.magic_weapon)
-        if crit:
-            target.damage(self.weapon())
-        if self.level >= 11:
-            target.damage(gwf(1, 8))
-            if crit:
-                target.damage(gwf(1, 8))
-        if not self.used_gwm_dmg:
-            self.used_gwm_dmg = True
-            target.damage(self.prof)
-        slot = highest_spell_slot(self.slots)
-        if not self.used_smite and not self.used_bonus and slot >= 1:
-            self.used_bonus = True
-            self.used_smite = True
-            self.slots[slot] -= 1
-            num_d8s = 1 + slot
-            target.damage(gwf(num_d8s, 8))
-            if crit:
-                target.damage(gwf(num_d8s, 8))
+    def hit(self, args: HitArgs):
+        num = 2 if args.crit else 1
+        args.dmg += roll_dice(num, 8, max_reroll=2)
 
-    def long_rest(self):
-        self.short_rest()
-        self.slots = spell_slots(self.level, half=True)
+
+class SacredWeapon(Feat):
+    def __init__(self) -> None:
+        self.name = "SacredWeapon"
+
+    def apply(self, character):
+        self.character = character
 
     def short_rest(self):
-        if self.level >= 11:
-            self.channel_divinity = 3
-        elif self.level >= 3:
-            self.channel_divinity = 2
+        self.enabled = False
+
+    def begin_turn(self, target: Target):
+        if not self.enabled and not self.character.used_bonus:
+            self.character.used_bonus = True
+            self.enabled = True
+
+    def roll_attack(self, args: AttackRollArgs):
+        if self.enabled:
+            args.situational_bonus += self.character.mod("cha")
+
+
+class Paladin(Character):
+    def __init__(self, level):
+        self.magic_weapon = magic_weapon(level)
+        base_feats = []
+        weapon = Greatsword(bonus=self.magic_weapon)
+        base_feats.append(EquipWeapon(weapon=weapon, max_reroll=2))
+        if level >= 5:
+            attacks = 2 * [weapon]
+        else:
+            attacks = [weapon]
+        base_feats.append(AttackAction(attacks))
+        base_feats.append(SpellSlots(level, half=True))
+        if level >= 2:
+            base_feats.append(DivineSmite())
+        if level >= 11:
+            base_feats.append(ImprovedDivineSmite())
+        if level >= 3:
+            base_feats.append(SacredWeapon())
+        feats = [
+            GreatWeaponMaster(),
+            ASI([["str", 2]]),
+            ASI([["cha", 2]]),
+            ASI([["cha", 2]]),
+            ASI(),
+        ]
+        super().init(
+            level=level,
+            stats=[17, 10, 10, 10, 10, 16],
+            feats=feats,
+            base_feats=base_feats,
+        )

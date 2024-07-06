@@ -1,7 +1,8 @@
 from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
-from util import roll_dice
+from util import roll_dice, spell_slots
 from target import Target
 from weapons import Weapon
+from log import log
 
 
 class Feat:
@@ -122,12 +123,14 @@ class Attack(Feat):
             args.adv = True
 
     def attack(self, args):
-        roll = self.character.roll_attack(args.target)
+        result = self.character.roll_attack(args.target)
         to_hit = (
             self.character.prof
             + self.character.mod(args.weapon.mod)
             + args.weapon.bonus
+            + result.situational_bonus
         )
+        roll = result.roll()
         crit = False
         if roll >= args.weapon.min_crit:
             crit = True
@@ -183,3 +186,16 @@ class EquipWeapon(Feat):
             return
         if self.weapon.graze:
             args.target.damage(self.character.mod(self.weapon.mod))
+
+
+class SpellSlots(Feat):
+    def __init__(self, level, half=False) -> None:
+        self.name = "SpellSlots"
+        self.level = level
+        self.half = half
+
+    def apply(self, character):
+        self.character = character
+
+    def long_rest(self):
+        self.character.slots = spell_slots(self.level, half=self.half)
