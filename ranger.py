@@ -112,15 +112,15 @@ class BeastMaul(Weapon):
 
 
 class BeastChargeFeat(Feat):
-    def __init__(self, dc: int):
+    def __init__(self, character: Character):
         self.name = "BeastChargeFeat"
-        self.dc = dc
+        self.character = Character
 
     def hit(self, args: HitArgs):
-        if (isinstance(args.weapon, BeastMaul)):
+        if isinstance(args.weapon, BeastMaul):
             num = 2 if args.crit else 1
             args.add_damage("Charge", roll_dice(num, 6))
-            if not args.target.prone and not args.target.save(self.dc):
+            if not args.target.prone and not args.target.save(self.character.dc("wis")):
                 args.target.prone = True
                 log.output(lambda: "Knocked prone by Charge")
 
@@ -199,7 +199,7 @@ class BeastMasterRanger(Character):
                     yield scimitar
         base_feats.append(RangerAction(attacks=attacks))
         base_feats.append(Spellcasting(level, half=True))
-        base_feats.append(BeastChargeFeat(dc = 8 + prof_bonus(level) + 3))
+        base_feats.append(BeastChargeFeat(character = self))
 
         def filter(args: HitArgs) -> bool:
             return (not isinstance(args.weapon, BeastMaul)) or (level >= 11)
