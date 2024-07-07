@@ -6,14 +6,15 @@ from util import (
 )
 from character import Character
 from feats import ASI, AttackAction, EquipWeapon, GreatWeaponMaster, Feat, Spellcasting
-from weapons import Greatsword
+from weapons import Greatsword, Shortsword, Scimitar
 from log import log
-from spells import DivineSmite
+from spells import DivineSmite, DivineFavor
 
 
 class DivineSmiteFeat(Feat):
-    def __init__(self) -> None:
+    def __init__(self, max_reroll: int = 0) -> None:
         self.name = "DivineSmite"
+        self.max_reroll = max_reroll
 
     def begin_turn(self, target: Target):
         self.used = False
@@ -27,16 +28,21 @@ class DivineSmiteFeat(Feat):
             num = 1 + slot
             if args.crit:
                 num *= 2
-            args.add_damage("DivineSmite", roll_dice(num, 8, max_reroll=2))
+            args.add_damage(
+                "DivineSmite", roll_dice(num, 8, max_reroll=self.max_reroll)
+            )
 
 
 class ImprovedDivineSmite(Feat):
-    def __init__(self) -> None:
+    def __init__(self, max_reroll: int) -> None:
         self.name = "ImprovedDivineSmite"
+        self.max_reroll = max_reroll
 
     def hit(self, args: HitArgs):
         num = 2 if args.crit else 1
-        args.add_damage("ImprovedDivineSmite", roll_dice(num, 8, max_reroll=2))
+        args.add_damage(
+            "ImprovedDivineSmite", roll_dice(num, 8, max_reroll=self.max_reroll)
+        )
 
 
 class SacredWeapon(Feat):
@@ -55,31 +61,75 @@ class SacredWeapon(Feat):
             args.situational_bonus += self.character.mod("cha")
 
 
+class DivineFavorFeat(Feat):
+    def __init__(self) -> None:
+        self.name = "DivineFavor"
+
+    def begin_turn(self, target: Target):
+        spellcasting = self.character.feat("Spellcasting")
+        slot = spellcasting.lowest_slot()
+        if (
+            not spellcasting.is_concentrating()
+            and slot >= 1
+            and self.character.use_bonus("DivineFavor")
+        ):
+            spellcasting.cast(DivineFavor(slot))
+
+    def hit(self, args: HitArgs):
+        spellcasting = self.character.feat("Spellcasting")
+        if not spellcasting.concentrating_on("DivineFavor"):
+            return
+        args.add_damage("DivineFavor", roll_dice(1, 4))
+
+
 class Paladin(Character):
-    def __init__(self, level):
+    def __init__(self, level, use_twf=False):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
-        weapon = Greatsword(bonus=magic_weapon)
-        base_feats.append(EquipWeapon(weapon=weapon, max_reroll=2))
-        if level >= 5:
-            attacks = 2 * [weapon]
+        if use_twf:
+            shortsword = Shortsword("str", bonus=magic_weapon)
+            scimitar = Scimitar("str", bonus=magic_weapon)
+            base_feats.append(EquipWeapon(shortsword))
+            base_feats.append(EquipWeapon(scimitar))
+            if level >= 5:
+                attacks = [shortsword, shortsword, scimitar]
+            else:
+                attacks = [shortsword, scimitar]
+            base_feats.append(AttackAction(attacks))
+            max_reroll = 0
         else:
-            attacks = [weapon]
-        base_feats.append(AttackAction(attacks))
+            weapon = Greatsword(bonus=magic_weapon)
+            max_reroll = 2
+            base_feats.append(EquipWeapon(weapon=weapon, max_reroll=max_reroll))
+            if level >= 5:
+                attacks = 2 * [weapon]
+            else:
+                attacks = [weapon]
+            base_feats.append(AttackAction(attacks))
         base_feats.append(Spellcasting(level, half=True))
         if level >= 2:
-            base_feats.append(DivineSmiteFeat())
+            base_feats.append(DivineSmiteFeat(max_reroll=0))
         if level >= 11:
-            base_feats.append(ImprovedDivineSmite())
+            base_feats.append(ImprovedDivineSmite(max_reroll=0))
         if level >= 3:
             base_feats.append(SacredWeapon())
-        feats = [
-            GreatWeaponMaster(weapon),
-            ASI([["str", 2]]),
-            ASI([["cha", 2]]),
-            ASI([["cha", 2]]),
-            ASI(),
-        ]
+        base_feats.append(DivineFavorFeat())
+        if use_twf:
+            feats = [
+                ASI([["str", 1]]),
+                ASI([["str", 2]]),
+                ASI([["cha", 2]]),
+                ASI([["cha", 2]]),
+                ASI(),
+            ]
+        else:
+            feats = [
+                GreatWeaponMaster(weapon),
+                ASI([["str", 2]]),
+                ASI([["cha", 2]]),
+                ASI([["cha", 2]]),
+                ASI(),
+            ]
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 16],

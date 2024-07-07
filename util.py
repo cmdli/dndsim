@@ -74,7 +74,16 @@ def highest_spell_slot(slots, max=9):
         if slots[slot] > 0:
             return slot
         slot -= 1
-    return -1
+    return 0
+
+
+def lowest_spell_slot(slots, min=1):
+    slot = min
+    while slot <= 9:
+        if slots[slot] > 0:
+            return slot
+        slot += 1
+    return 0
 
 
 def cantrip_dice(level):

@@ -1,4 +1,4 @@
-from events import AttackArgs, AttackRollArgs, HitArgs
+from events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
 from target import Target
 from util import (
     get_magic_weapon,
@@ -98,6 +98,22 @@ class Gloomstalker(Feat):
         self.used_attack = False
 
 
+class StalkersFlurry(Feat):
+    def __init__(self, weapon: Weapon) -> None:
+        self.name = "StalkersFlurry"
+        self.weapon = weapon
+
+    def begin_turn(self, target: Target):
+        self.missed_attack = False
+
+    def miss(self, args: MissArgs):
+        self.missed_attack = True
+
+    def after_action(self, target):
+        if self.missed_attack:
+            self.character.attack(target, self.weapon)
+
+
 class Ranger(Character):
     def __init__(self, level):
         magic_weapon = get_magic_weapon(level)
@@ -119,6 +135,8 @@ class Ranger(Character):
             base_feats.append(HuntersMarkFeat(6, False))
         if level >= 3:
             base_feats.append(Gloomstalker(weapon))
+        if level >= 11:
+            base_feats.append(StalkersFlurry(weapon))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],

@@ -1,5 +1,5 @@
 from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
-from util import roll_dice, spell_slots, highest_spell_slot
+from util import roll_dice, spell_slots, highest_spell_slot, lowest_spell_slot
 from target import Target
 from weapons import Weapon
 from log import log
@@ -247,6 +247,9 @@ class Spellcasting(Feat):
 
     def highest_slot(self):
         return highest_spell_slot(self.slots)
+
+    def lowest_slot(self):
+        return lowest_spell_slot(self.slots)
 
     def cast(self, spell: Spell):
         self.slots[spell.slot] -= 1
