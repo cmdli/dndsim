@@ -20,6 +20,25 @@ from summons import FeySummon, SummonFey
 from log import log
 
 
+# ranger casts either summon fey or hunter's mark, returns true if ranger still has action
+def cast_spell(character: Character, summon_fey: int) -> bool:
+    spellcasting = character.feat("Spellcasting")
+    slot = spellcasting.highest_slot()
+    if summon_fey and slot >= summon_fey and not spellcasting.is_concentrating():
+        spell = SummonFey(
+            slot,
+            caster_level=character.level,
+            to_hit=character.prof + character.mod("wis"),
+        )
+        spellcasting.cast(spell)
+        return False
+    else:
+        if not spellcasting.is_concentrating() and character.use_bonus(
+                "HuntersMark"
+        ):
+            spellcasting.cast(HuntersMark(slot))
+        return True
+
 class RangerAction(Feat):
     def __init__(self, attacks, summon_fey: int = None) -> None:
         self.name = "RangerAction"
@@ -27,21 +46,9 @@ class RangerAction(Feat):
         self.summon_fey = summon_fey
 
     def action(self, target: Target):
-        spellcasting = self.character.feat("Spellcasting")
-        slot = spellcasting.highest_slot()
-        if self.summon_fey and slot >= self.summon_fey and not spellcasting.is_concentrating():
-            spell = SummonFey(
-                slot,
-                caster_level=self.character.level,
-                to_hit=self.character.prof + self.character.mod("wis"),
-            )
-            spellcasting.cast(spell)
-        else:
-            if not spellcasting.is_concentrating() and self.character.use_bonus(
-                    "HuntersMark"
-            ):
-                spellcasting.cast(HuntersMark(slot))
-            for weapon in self.attacks():
+        has_action = cast_spell(self.character, self.summon_fey)
+        if has_action:
+            for weapon in self.attacks:
                 log.record("main attack", 1)
                 self.character.attack(target, weapon, tags=["main_action"])
 
@@ -57,8 +64,6 @@ class HuntersMarkFeat(Feat):
         spellcasting = self.character.feat("Spellcasting")
         if not spellcasting.concentrating_on("HuntersMark"):
             return
-        if args.attack.weapon.is_other_creature:
-            return
         if self.adv:
             args.adv = True
 
@@ -70,7 +75,6 @@ class HuntersMarkFeat(Feat):
             return
         num = 2 if args.crit else 1
         args.add_damage("HuntersMark", roll_dice(num, self.die))
-
 
 class Gloomstalker(Feat):
     def __init__(self, weapon: Weapon) -> None:
@@ -103,13 +107,6 @@ class Gloomstalker(Feat):
             self.using = False
         self.first_turn = False
         self.used_attack = False
-
-
-class BeastMaul(Weapon):
-    def __init__(self, base, **kwargs):
-        super().__init__(
-            name="Beast Maul", num_dice=1, die=8, mod="wis", base=base, is_other_creature=True, **kwargs
-        )
 
 
 class BeastChargeFeat(Feat):
@@ -153,7 +150,7 @@ class GloomstalkerRanger(Character):
         else:
             attacks = [weapon]
         base_feats.append(EquipWeapon(weapon))
-        base_feats.append(RangerAction(attacks=lambda: attacks, summon_fey=4))
+        base_feats.append(RangerAction(attacks=attacks, summon_fey=4))
         base_feats.append(Spellcasting(level, half=True))
         if level >= 20:
             base_feats.append(HuntersMarkFeat(10, True, ))
@@ -178,52 +175,84 @@ class GloomstalkerRanger(Character):
             base_feats=base_feats,
         )
 
+class PrimalCompanion(Character):
+    def __init__(self, level: int, ranger: Character, attack: Weapon):
+        self.ranger = ranger
+        super().init(
+            level=level,
+            stats=[10, 10, 10, 10, 10, 10],
+            feats=[],
+            base_feats=[BeastChargeFeat(self), EquipWeapon(attack)],
+        )
+
+
+class BeastMaul(Weapon):
+    def __init__(self, base, **kwargs):
+        super().__init__(
+            name="Beast Maul", num_dice=1, die=8, mod="wis", base=base, **kwargs
+        )
+
+
+class BeastMasterAction(Feat):
+    def __init__(self, beast: Character, maul: Weapon, main_hand: Weapon, off_hand_nick: Weapon, off_hand_other: Weapon) -> None:
+        self.maul = maul
+        self.beast = beast
+        self.off_hand_other = off_hand_other
+        self.off_hand_nick = off_hand_nick
+        self.main_hand = main_hand
+        self.name = "BeastMasterAction"
+
+    def action(self, target: Target):
+        has_action = cast_spell(self.character, None)
+        if has_action:
+            if self.character.level >= 3:
+                if self.character.use_bonus("beast"):
+                    log.output(lambda: "Use bonus action for beast attack")
+                    self.beast.attack(target, self.maul)
+                    if self.character.level >= 11:
+                        self.beast.attack(target, self.maul)
+                    self.character.attack(target, self.main_hand)
+                else:
+                    if self.character.level >= 5:
+                        self.beast.attack(target, self.maul)
+                        if self.character.level >= 11:
+                            self.beast.attack(target, self.maul)
+                self.character.attack(target, self.main_hand)
+                self.character.attack(target, self.off_hand_nick)
+            else:
+                self.character.attack(target, self.main_hand)
+                if self.character.use_bonus("light weapon"):
+                    self.character.attack(target, self.off_hand_other)
+                else:
+                    self.character.attack(target, self.off_hand_nick)
+
 
 class BeastMasterRanger(Character):
     def __init__(self, level):
         self.magic_weapon = get_magic_weapon(level)
         base_feats = []
         maul = BeastMaul(base=2 + prof_bonus(level))
+        beast = PrimalCompanion(level, self, attack=maul)
         shortsword = Shortsword(bonus=self.magic_weapon)
         rapier = Rapier(bonus = self.magic_weapon)
-        other_shortsword = Shortsword(bonus=self.magic_weapon, name="Offhand Shortsword", base="dex" if level >= 2 else 0)
+        other_shortsword = Shortsword(
+            bonus=self.magic_weapon,
+            name="Offhand Shortsword",
+            base="dex" if level >= 2 else 0,
+        )
         scimitar = Scimitar(bonus=self.magic_weapon, base="dex" if level >= 2 else 0)
         base_feats.append(EquipWeapon(maul))
         base_feats.append(EquipWeapon(shortsword))
         base_feats.append(EquipWeapon(rapier))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(EquipWeapon(other_shortsword))
-        def attacks():
-            if self.has_feat("DualWielder"):
-                main_weapon = rapier
-            else:
-                main_weapon = shortsword
-
-            if self.level >= 3:
-                if self.use_bonus("beast"):
-                    yield maul
-                    if level >= 11:
-                        yield maul
-                    yield main_weapon
-                    yield main_weapon
-                    yield scimitar
-                else:
-                    if level >= 5:
-                        yield maul
-                        if level >= 11:
-                            yield maul
-                        yield main_weapon
-                        yield scimitar
-                    else:
-                        yield main_weapon
-                        yield scimitar
-            else:
-                yield main_weapon
-                if self.use_bonus("light weapon"):
-                    yield other_shortsword
-                else:
-                    yield scimitar
-        base_feats.append(RangerAction(attacks=attacks))
+        base_feats.append(BeastMasterAction(
+            beast=beast,
+            maul=maul,
+            main_hand=shortsword if level < 4 else rapier,
+            off_hand_nick=scimitar,
+            off_hand_other=other_shortsword,
+        ))
         base_feats.append(Spellcasting(level, half=True))
         base_feats.append(BeastChargeFeat(character=self))
 
@@ -248,3 +277,4 @@ class BeastMasterRanger(Character):
             ],
             base_feats=base_feats,
         )
+        self.add_minion(beast)

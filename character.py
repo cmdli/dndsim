@@ -65,46 +65,6 @@ class Character:
     def remove_minion(self, minion):
         self.minions.remove(minion)
 
-    def before_attack(self):
-        for feat in self.feats:
-            feat.before_attack()
-
-    def roll_attack(self, target: Target, weapon: Weapon, to_hit: int):
-        args = AttackRollArgs(target=target, weapon=weapon, to_hit=to_hit)
-        for feat in self.feats:
-            feat.roll_attack(args)
-        return args
-
-    def hit(
-        self,
-        target: Target,
-        weapon: Weapon,
-        crit: bool = False,
-        attack_args: AttackArgs = None,
-    ):
-        log.output(lambda: "Hit with " + weapon.name + ", args " + str(attack_args))
-        args = HitArgs(
-            target,
-            weapon,
-            crit=crit,
-            main_action=attack_args.main_action,
-            light_attack=attack_args.light_attack,
-        )
-        for feat in self.feats:
-            feat.hit(args)
-        log.output(lambda: str(args._dmg))
-        target.add_damage_sources(args._dmg)
-
-    def miss(self, target: Target, weapon: Weapon):
-        log.output(lambda: "Missed with " + weapon.name)
-        args = MissArgs(target, weapon)
-        for feat in self.feats:
-            feat.miss(args)
-
-    def enemy_turn(self, target: Target):
-        for feat in self.feats:
-            feat.enemy_turn(target)
-
     def use_bonus(self, source: str):
         if not self.used_bonus:
             log.record(f"Bonus ({source})", 1)
@@ -183,6 +143,7 @@ class Character:
         args = HitArgs(attack=attack, crit=crit, roll=roll)
         for feat in self.feats:
             feat.hit(args)
+        log.output(lambda: str(args._dmg))
         attack.target.add_damage_sources(args._dmg)
 
     def miss(self, attack: AttackArgs):

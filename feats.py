@@ -177,7 +177,9 @@ class Attack(Feat):
         crit = False
         if roll >= args.weapon.min_crit:
             crit = True
-        if roll + to_hit + result.situational_bonus >= args.target.ac:
+        roll_total = roll + to_hit + result.situational_bonus
+        log.output(lambda: args.weapon.name + " total " + str(roll_total) + " vs " + str(args.target.ac))
+        if roll_total >= args.target.ac:
             self.character.hit(attack=args, crit=crit, roll=roll)
         else:
             self.character.miss(attack=args)
@@ -291,7 +293,7 @@ class Vex(Feat):
         self.vexing = False
 
     def roll_attack(self, args: AttackRollArgs):
-        if self.vexing and not args.attack.weapon.is_other_creature:
+        if self.vexing:
             args.adv = True
             self.vexing = False
 
