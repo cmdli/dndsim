@@ -57,8 +57,7 @@ def do_roll(adv=False, disadv=False):
     return random.randint(1, 20)
 
 
-def roll_dice(num, size, max_reroll=0):
-    total = 0
+def roll_dice(num: int, size: int, max_reroll: int = 0) -> float:
     for _ in range(num):
         roll = random.randint(1, size)
         if roll <= max_reroll:
@@ -85,37 +84,3 @@ def cantrip_dice(level):
     elif level >= 5:
         return 2
     return 1
-
-
-def polearm_master(gwf=False):
-    r = random.randint(1, 4)
-    if gwf and (r == 1 or r == 2):
-        r = random.randint(1, 4)
-    return r
-
-
-def glaive(gwf=False):
-    r = random.randint(1, 10)
-    if gwf and (r == 1 or r == 2):
-        r = random.randint(1, 10)
-    return r
-
-
-def greatsword(gwf=False):
-    r1 = random.randint(1, 6)
-    if gwf and (r1 == 1 or r1 == 2):
-        r1 = random.randint(1, 6)
-    r2 = random.randint(1, 6)
-    if gwf and (r2 == 1 or r2 == 2):
-        r2 = random.randint(1, 6)
-    return r1 + r2
-
-
-def gwf(count, size):
-    total = 0
-    for _ in range(count):
-        r = random.randint(1, size)
-        if r == 1 or r == 2:
-            r = random.randint(1, size)
-        total += r
-    return total
