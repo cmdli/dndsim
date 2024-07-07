@@ -41,7 +41,7 @@ class RangerAction(Feat):
                     "HuntersMark"
             ):
                 spellcasting.cast(HuntersMark(slot))
-            for weapon in self.attacks(self.character):
+            for weapon in self.attacks():
                 log.record("main attack", 1)
                 self.character.attack(target, weapon, tags=["main_action"])
 
@@ -153,7 +153,7 @@ class GloomstalkerRanger(Character):
         else:
             attacks = [weapon]
         base_feats.append(EquipWeapon(weapon))
-        base_feats.append(RangerAction(attacks=lambda c: attacks, summon_fey=4))
+        base_feats.append(RangerAction(attacks=lambda: attacks, summon_fey=4))
         base_feats.append(Spellcasting(level, half=True))
         if level >= 20:
             base_feats.append(HuntersMarkFeat(10, True, ))
@@ -194,7 +194,7 @@ class BeastMasterRanger(Character):
         base_feats.append(EquipWeapon(main_weapon))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(EquipWeapon(other_shortsword))
-        def attacks(character):
+        def attacks():
             if self.level >= 3:
                 if self.use_bonus("beast"):
                     yield maul
