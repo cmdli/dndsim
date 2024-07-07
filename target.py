@@ -44,7 +44,6 @@ class Target:
         self.stun_turns = 0
         self.grappled = False
         self.prone = False
-        self.vexed = False
 
     def try_attack(self, to_hit):
         return random.randint(1, 20) + to_hit >= self.ac

@@ -50,7 +50,7 @@ class PolearmMaster(Feat):
         self.weapon = weapon
 
     def apply(self, character):
-        self.character = character
+        super().apply(character)
         character.str += 1
 
     def begin_turn(self, target):
@@ -67,8 +67,8 @@ class GreatWeaponMaster(Feat):
         self.name = "GreatWeaponMaster"
 
     def apply(self, character):
+        super().apply(character)
         character.str += 1
-        self.character = character
 
     def begin_turn(self, target):
         self.used_dmg = False
@@ -80,7 +80,7 @@ class GreatWeaponMaster(Feat):
             args.add_damage("GreatWeaponMaster", self.character.prof)
         if args.crit and self.character.use_bonus("GWM"):
             self.bonus_attack_enabled = True
-            self.character.attack(args.target, args.weapon)
+            self.character.attack(args.attack.target, args.attack.weapon)
 
 
 class Archery(Feat):
@@ -88,7 +88,7 @@ class Archery(Feat):
         self.name = "Archery"
 
     def roll_attack(self, args: AttackRollArgs):
-        if args.weapon.ranged:
+        if args.attack.weapon.ranged:
             args.situational_bonus += 2
 
 
@@ -119,6 +119,7 @@ class ASI(Feat):
         self.stat_increases = stat_increases
 
     def apply(self, character):
+        super().apply(character)
         for [stat, increase] in self.stat_increases:
             new_stat = min(20, character.__getattribute__(stat) + increase)
             character.__setattr__(stat, new_stat)
@@ -128,9 +129,6 @@ class AttackAction(Feat):
     def __init__(self, attacks):
         self.name = "AttackAction"
         self.base_attacks = attacks
-
-    def apply(self, character):
-        self.character = character
 
     def action(self, target):
         for weapon in self.base_attacks:
@@ -145,17 +143,11 @@ class Attack(Feat):
     def __init__(self):
         self.name = "Attack"
 
-    def apply(self, character):
-        self.character = character
-
     def roll_attack(self, args):
-        if args.target.vexed:
+        if args.attack.target.stunned:
             args.adv = True
-            args.target.vexed = False
-        if args.target.stunned:
-            args.adv = True
-        if args.target.prone:
-            if args.weapon.ranged:
+        if args.attack.target.prone:
+            if args.attack.weapon.ranged:
                 args.disadv = True
             else:
                 args.adv = True
@@ -168,31 +160,28 @@ class Attack(Feat):
             + self.character.mod(args.weapon.mod)
             + args.weapon.bonus
         )
-        result = self.character.roll_attack(args.target, args.weapon, to_hit)
+        result = self.character.roll_attack(attack=args, to_hit=to_hit)
         roll = result.roll()
         crit = False
         if roll >= args.weapon.min_crit:
             crit = True
         if roll + to_hit + result.situational_bonus >= args.target.ac:
-            self.character.hit(args.target, args.weapon, crit=crit, attack_args=args)
+            self.character.hit(attack=args, crit=crit)
         else:
-            self.character.miss(args.target, args.weapon)
+            self.character.miss(attack=args)
 
 
 class EquipWeapon(Feat):
     def __init__(
         self,
-        weapon=None,
-        savage_attacker=False,
-        max_reroll=0,
+        weapon: Weapon = None,
+        savage_attacker: bool = False,
+        max_reroll: int = 0,
     ):
         self.name = weapon.name
         self.weapon = weapon
         self.savage_attacker = savage_attacker
         self.max_reroll = max_reroll
-
-    def apply(self, character):
-        self.character = character
 
     def begin_turn(self, target):
         self.used_savage_attacker = False
@@ -209,29 +198,31 @@ class EquipWeapon(Feat):
         return dmg
 
     def hit(self, args):
-        if args.weapon.name != self.weapon.name:
+        target = args.attack.target
+        weapon = args.attack.weapon
+        if weapon.name != self.weapon.name:
             return
-        log.record(f"Hit:{args.weapon.name}", 1)
+        log.record(f"Hit:{weapon.name}", 1)
         dmg = self.damage(crit=args.crit)
         if not self.used_savage_attacker and self.savage_attacker:
             self.used_savage_attacker = True
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
-        total_dmg = dmg + self.weapon.bonus
-        if not args.light_attack:
-            total_dmg += self.character.mod(self.weapon.mod)
-        args.add_damage(f"Weapon:{args.weapon.name}", total_dmg)
-        if self.weapon.vex:
-            args.target.vexed = True
-        if self.weapon.topple:
-            if not args.target.save(self.character.dc(args.weapon.mod)):
-                args.target.prone = True
+        total_dmg = dmg + weapon.bonus
+        if not args.attack.light_attack:
+            total_dmg += args.attack.character.mod(weapon.mod)
+        args.add_damage(f"Weapon:{weapon.name}", total_dmg)
+        if weapon.topple:
+            if not target.save(args.attack.character.dc(weapon.mod)):
+                target.prone = True
 
     def miss(self, args):
-        if args.weapon.name != self.weapon.name:
+        if args.attack.weapon.name != self.weapon.name:
             return
         if self.weapon.graze:
-            args.target.damage_source("Graze", self.character.mod(self.weapon.mod))
+            args.attack.target.damage_source(
+                "Graze", args.attack.character.mod(self.weapon.mod)
+            )
 
 
 class Spellcasting(Feat):
@@ -273,3 +264,21 @@ class LightWeaponBonusAttack(Feat):
     def end_turn(self, target):
         if self.character.use_bonus("LightWeaponBonusAttack"):
             self.character.attack(target, self.weapon, light_attack=True)
+
+
+class Vex(Feat):
+    def __init__(self) -> None:
+        self.name = "Vex"
+        self.vexing = False
+
+    def short_rest(self):
+        self.vexing = False
+
+    def roll_attack(self, args: AttackRollArgs):
+        if self.vexing:
+            args.adv = True
+            self.vexing = False
+
+    def hit(self, args: HitArgs):
+        if args.attack.weapon.vex:
+            self.vexing = True

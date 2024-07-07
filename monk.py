@@ -10,6 +10,7 @@ class BodyAndMind(Feat):
         self.name = "BodyAndMind"
 
     def apply(self, character):
+        super().apply(character)
         character.dex += 4
         character.wis += 4
 
@@ -19,9 +20,6 @@ class FlurryOfBlows(Feat):
         self.name = "FlurryOfBlows"
         self.num_attacks = num_attacks
         self.weapon = weapon
-
-    def apply(self, character):
-        self.character = character
 
     def end_turn(self, target):
         if self.character.ki > 0 and self.character.use_bonus("FlurryOfBlows"):
@@ -35,9 +33,6 @@ class BonusAttack(Feat):
         self.name = "BonusAttack"
         self.weapon = weapon
 
-    def apply(self, character):
-        self.character = character
-
     def end_turn(self, target):
         if self.character.use_bonus("BonusAttack"):
             self.character.attack(target, self.weapon)
@@ -48,14 +43,15 @@ class Grappler(Feat):
         self.name = "Grappler"
 
     def apply(self, character):
+        super().apply(character)
         character.dex += 1
 
     def hit(self, args):
-        if args.main_action:
-            args.target.grapple()
+        if args.attack.main_action:
+            args.attack.target.grapple()
 
     def roll_attack(self, args):
-        if args.target.grappled:
+        if args.attack.target.grappled:
             args.adv = True
 
 
@@ -64,22 +60,15 @@ class StunningStrike(Feat):
         self.name = "StunningStrike"
         self.weapon_die = weapon_die
 
-    def apply(self, character):
-        self.character = character
-
     def begin_turn(self, target):
         self.used = False
-
-    def roll_attack(self, args):
-        if args.target.stunned:
-            args.adv = True
 
     def hit(self, args):
         if not self.used and self.character.ki > 0:
             self.used = True
             self.character.ki -= 1
-            if not args.target.save(self.character.dc("wis")):
-                args.target.stun()
+            if not args.attack.target.save(self.character.dc("wis")):
+                args.attack.target.stun()
             else:
                 args.add_damage(
                     "StunningStrike",
@@ -91,9 +80,6 @@ class Ki(Feat):
     def __init__(self, max_ki):
         self.name = "Ki"
         self.max_ki = max_ki
-
-    def apply(self, character):
-        self.character = character
 
     def short_rest(self):
         self.character.ki = self.max_ki

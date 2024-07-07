@@ -59,9 +59,6 @@ class ActionSurge(Feat):
         self.name = "ActionSurge"
         self.max_surges = max_surges
 
-    def apply(self, character):
-        self.character = character
-
     def begin_turn(self, target):
         if self.surges > 0:
             self.character.actions += 1
@@ -120,9 +117,6 @@ class Maneuvers(Feat):
         self.enabled_relentless = level >= 15
         self.used_maneuver = False
         self.superiority_dice = 0
-
-    def apply(self, character):
-        self.character = character
 
     def short_rest(self):
         self.superiority_dice = self.max_dice

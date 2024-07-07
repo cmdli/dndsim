@@ -15,12 +15,12 @@ class SummonHit(Feat):
         self.slot = slot
 
     def hit(self, args: HitArgs):
-        num = args.weapon.num_dice
+        num = args.attack.weapon.num_dice
         if args.crit:
             num *= 2
-        args.target.damage_source(
+        args.attack.target.damage_source(
             self.name,
-            roll_dice(num, args.weapon.die) + self.bonus_dmg + self.slot,
+            roll_dice(num, args.attack.weapon.die) + self.bonus_dmg + self.slot,
         )
 
 
@@ -31,16 +31,12 @@ class SummonAttack(Feat):
         self.to_hit = to_hit
 
     def attack(self, args: AttackArgs):
-        result = self.character.roll_attack(
-            target=args.target, weapon=args.weapon, to_hit=self.to_hit
-        )
+        result = self.character.roll_attack(attack=args, to_hit=self.to_hit)
         roll = result.roll()
         if roll == 20:
-            self.character.hit(
-                target=args.target, crit=True, weapon=args.weapon, attack_args=args
-            )
+            self.character.hit(attack=args, crit=True)
         elif roll + self.to_hit >= args.target.ac:
-            self.character.hit(target=args.target, weapon=args.weapon, attack_args=args)
+            self.character.hit(attack=args)
 
 
 class SummonAction(Feat):
@@ -74,7 +70,7 @@ class Summon(Character):
             base_feats=base_feats,
             feats=[],
             feat_schedule=[],
-            attack_feat=SummonAttack(slot, to_hit),
+            default_feats=[SummonAttack(slot, to_hit)],
         )
 
 

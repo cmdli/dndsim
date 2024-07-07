@@ -50,9 +50,6 @@ class Retaliation(Feat):
         self.name = "Retaliation"
         self.weapon = weapon
 
-    def apply(self, character):
-        self.character = character
-
     def enemy_turn(self, target):
         self.character.attack(target, weapon=self.weapon)
 
@@ -62,6 +59,7 @@ class PrimalChampion(Feat):
         self.name = "PrimalChampion"
 
     def apply(self, character):
+        super().apply(character)
         character.str += 4
 
 
@@ -70,9 +68,6 @@ class Rage(Feat):
         self.name = "Rage"
         self.raging = False
         self.dmg = dmg
-
-    def apply(self, character):
-        self.character = character
 
     def short_rest(self):
         self.raging = False

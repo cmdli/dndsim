@@ -15,9 +15,6 @@ class DivineSmiteFeat(Feat):
     def __init__(self) -> None:
         self.name = "DivineSmite"
 
-    def apply(self, character):
-        self.character = character
-
     def begin_turn(self, target: Target):
         self.used = False
 
@@ -45,9 +42,6 @@ class ImprovedDivineSmite(Feat):
 class SacredWeapon(Feat):
     def __init__(self) -> None:
         self.name = "SacredWeapon"
-
-    def apply(self, character):
-        self.character = character
 
     def short_rest(self):
         self.enabled = False
