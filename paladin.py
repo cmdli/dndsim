@@ -1,7 +1,7 @@
 from events import AttackRollArgs, HitArgs
 from target import Target
 from util import (
-    magic_weapon,
+    get_magic_weapon,
     roll_dice,
 )
 from character import Character
@@ -57,9 +57,9 @@ class SacredWeapon(Feat):
 
 class Paladin(Character):
     def __init__(self, level):
-        self.magic_weapon = magic_weapon(level)
+        magic_weapon = get_magic_weapon(level)
         base_feats = []
-        weapon = Greatsword(bonus=self.magic_weapon)
+        weapon = Greatsword(bonus=magic_weapon)
         base_feats.append(EquipWeapon(weapon=weapon, max_reroll=2))
         if level >= 5:
             attacks = 2 * [weapon]

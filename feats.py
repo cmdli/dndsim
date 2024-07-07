@@ -13,7 +13,13 @@ class Feat:
     def begin_turn(self, target: Target):
         pass
 
+    def before_action(self, target: Target):
+        pass
+
     def action(self, target: Target):
+        pass
+
+    def after_action(self, target: Target):
         pass
 
     def before_attack(self):

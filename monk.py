@@ -1,5 +1,5 @@
 import random
-from util import magic_weapon, roll_dice
+from util import get_magic_weapon, roll_dice
 from character import Character
 from feats import ASI, AttackAction, Feat, EquipWeapon
 from weapons import Weapon
@@ -21,7 +21,7 @@ class FlurryOfBlows(Feat):
         self.num_attacks = num_attacks
         self.weapon = weapon
 
-    def end_turn(self, target):
+    def after_action(self, target):
         if self.character.ki > 0 and self.character.use_bonus("FlurryOfBlows"):
             self.character.ki -= 1
             for _ in range(self.num_attacks):
@@ -33,7 +33,7 @@ class BonusAttack(Feat):
         self.name = "BonusAttack"
         self.weapon = weapon
 
-    def end_turn(self, target):
+    def after_action(self, target):
         if self.character.use_bonus("BonusAttack"):
             self.character.attack(target, self.weapon)
 
@@ -59,6 +59,7 @@ class StunningStrike(Feat):
     def __init__(self, weapon_die):
         self.name = "StunningStrike"
         self.weapon_die = weapon_die
+        self.stuns = []
 
     def begin_turn(self, target):
         self.used = False
@@ -68,12 +69,18 @@ class StunningStrike(Feat):
             self.used = True
             self.character.ki -= 1
             if not args.attack.target.save(self.character.dc("wis")):
-                args.attack.target.stun()
+                args.attack.target.stunned = True
+                self.stuns.append(1)
             else:
                 args.add_damage(
                     "StunningStrike",
                     roll_dice(1, self.weapon_die) + self.character.mod("wis"),
                 )
+
+    def end_turn(self, target):
+        self.stuns = [stun - 1 for stun in self.stuns if stun > 0]
+        if len(self.stuns) == 0:
+            target.stunned = False
 
 
 class Ki(Feat):
@@ -94,7 +101,7 @@ class Fists(Weapon):
 
 class Monk(Character):
     def __init__(self, level):
-        self.magic_weapon = magic_weapon(level)
+        magic_weapon = get_magic_weapon(level)
         base_feats = []
         if level >= 17:
             weapon_die = 12
@@ -104,7 +111,7 @@ class Monk(Character):
             weapon_die = 8
         else:
             weapon_die = 6
-        fists = Fists(weapon_die, bonus=self.magic_weapon)
+        fists = Fists(weapon_die, bonus=magic_weapon)
         base_feats.append(EquipWeapon(weapon=fists, max_reroll=1))
         if level >= 5:
             attacks = 2 * [fists]

@@ -71,16 +71,7 @@ class Target:
     def save(self, dc):
         return random.randint(1, 20) + self.save_bonus >= dc
 
-    def stun(self):
-        self.stun_turns = 1
-        self.stunned = True
-
     def turn(self):
-        if self.stunned:
-            if self.stun_turns == 0:
-                self.stunned = False
-            else:
-                self.stun_turns -= 1
         if self.prone:
             self.prone = False
 

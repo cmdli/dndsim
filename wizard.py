@@ -1,6 +1,6 @@
 from util import (
     prof_bonus,
-    magic_weapon,
+    get_magic_weapon,
     cantrip_dice,
     highest_spell_slot,
     spell_slots,
@@ -20,8 +20,7 @@ class Wizard:
         else:
             self.int = 3
         self.dc = 8 + self.prof + self.int
-        self.magic_weapon = magic_weapon(level)
-        self.to_hit = self.prof + self.int + self.magic_weapon
+        self.to_hit = self.prof + self.int + get_magic_weapon(level)
         self.cantrip_dice = cantrip_dice(level)
         self.long_rest()
 

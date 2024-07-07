@@ -1,6 +1,6 @@
 import math
 from util import (
-    magic_weapon,
+    get_magic_weapon,
     roll_dice,
     do_roll,
 )
@@ -29,7 +29,7 @@ class SteadyAim(Feat):
     def __init__(self) -> None:
         self.name = "SteadyAim"
 
-    def begin_turn(self, target):
+    def before_action(self, target):
         if self.character.use_bonus("SteadyAim"):
             self.enabled = True
 
@@ -106,11 +106,11 @@ class DeathStrike(Feat):
 
 class Rogue(Character):
     def __init__(self, level):
-        self.magic_weapon = magic_weapon(level)
+        magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
-        shortsword = Shortsword(bonus=self.magic_weapon)
-        scimitar = Scimitar(bonus=self.magic_weapon)
+        shortsword = Shortsword(bonus=magic_weapon)
+        scimitar = Scimitar(bonus=magic_weapon)
         base_feats.append(EquipWeapon(shortsword))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(AttackAction(attacks=[shortsword, scimitar]))

@@ -87,16 +87,26 @@ class Character:
 
     def turn(self, target: Target):
         self.begin_turn(target)
+        self.before_action(target)
         while self.actions > 0:
             self.action(target)
             self.actions -= 1
+        self.after_action(target)
         self.end_turn(target)
         for minion in self.minions:
             minion.turn(target)
 
+    def before_action(self, target: Target):
+        for feat in self.feats:
+            feat.before_action(target)
+
     def action(self, target: Target):
         for feat in self.feats:
             feat.action(target)
+
+    def after_action(self, target: Target):
+        for feat in self.feats:
+            feat.after_action(target)
 
     def attack(
         self,

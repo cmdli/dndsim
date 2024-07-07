@@ -37,7 +37,7 @@ def prof_bonus(level):
     return ((level - 1) // 4) + 2
 
 
-def magic_weapon(level):
+def get_magic_weapon(level):
     if level >= 15:
         return 3
     elif level >= 10:
@@ -58,6 +58,7 @@ def do_roll(adv=False, disadv=False):
 
 
 def roll_dice(num: int, size: int, max_reroll: int = 0) -> float:
+    total = 0
     for _ in range(num):
         roll = random.randint(1, size)
         if roll <= max_reroll:

@@ -1,7 +1,7 @@
 import random
 from util import (
     prof_bonus,
-    magic_weapon,
+    get_magic_weapon,
     cantrip_dice,
     highest_spell_slot,
     spell_slots,
@@ -26,7 +26,7 @@ class Cleric:
             self.str = 4
         else:
             self.str = 3
-        self.magic_weapon = magic_weapon(level)
+        self.magic_weapon = get_magic_weapon(level)
         self.spell_hit = self.prof + self.wis
         self.to_hit = self.prof + self.str + self.magic_weapon
         self.dc = 8 + self.prof + self.wis

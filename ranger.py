@@ -1,7 +1,7 @@
 from events import AttackArgs, AttackRollArgs, HitArgs
 from target import Target
 from util import (
-    magic_weapon,
+    get_magic_weapon,
     roll_dice,
 )
 from character import Character
@@ -100,10 +100,10 @@ class Gloomstalker(Feat):
 
 class Ranger(Character):
     def __init__(self, level):
-        self.magic_weapon = magic_weapon(level)
+        magic_weapon = get_magic_weapon(level)
         base_feats = []
         base_feats.append(Archery())
-        weapon = HandCrossbow(bonus=self.magic_weapon)
+        weapon = HandCrossbow(bonus=magic_weapon)
         if level >= 5:
             attacks = 2 * [weapon]
         else:
