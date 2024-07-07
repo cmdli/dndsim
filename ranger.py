@@ -20,14 +20,15 @@ from log import log
 
 
 class RangerAction(Feat):
-    def __init__(self, attacks) -> None:
+    def __init__(self, attacks, summon_fey: int = None) -> None:
         self.name = "RangerAction"
         self.attacks = attacks
+        self.summon_fey = summon_fey
 
     def action(self, target: Target):
         spellcasting = self.character.feat("Spellcasting")
         slot = spellcasting.highest_slot()
-        if slot >= 4 and not spellcasting.is_concentrating():
+        if self.summon_fey and slot >= self.summon_fey and not spellcasting.is_concentrating():
             spell = SummonFey(
                 slot,
                 caster_level=self.character.level,
@@ -55,7 +56,7 @@ class HuntersMarkFeat(Feat):
         spellcasting = self.character.feat("Spellcasting")
         if not spellcasting.concentrating_on("HuntersMark"):
             return
-        if self.filter and not self.filter(args):
+        if args.weapon.is_other_creature:
             return
         if self.adv:
             args.adv = True
@@ -106,18 +107,22 @@ class Gloomstalker(Feat):
 class BeastMaul(Weapon):
     def __init__(self, base, **kwargs):
         super().__init__(
-            name="Beast Maul", num_dice=1, die=8, mod="wis", base=base, **kwargs
+            name="Beast Maul", num_dice=1, die=8, mod="wis", base=base, is_other_creature=True, **kwargs
         )
 
 
 class BeastChargeFeat(Feat):
-    def __init__(self):
+    def __init__(self, dc: int):
         self.name = "BeastChargeFeat"
+        self.dc = dc
 
     def hit(self, args: HitArgs):
         if (isinstance(args.weapon, BeastMaul)):
             num = 2 if args.crit else 1
             args.add_damage("Charge", roll_dice(num, 6))
+            if not args.target.prone and not args.target.save(self.dc):
+                args.target.prone = True
+                log.output(lambda: "Knocked prone by Charge")
 
 
 class GloomstalkerRanger(Character):
@@ -131,7 +136,7 @@ class GloomstalkerRanger(Character):
         else:
             attacks = [weapon]
         base_feats.append(EquipWeapon(weapon))
-        base_feats.append(RangerAction(attacks=lambda c: attacks))
+        base_feats.append(RangerAction(attacks=lambda c: attacks, summon_fey=4))
         base_feats.append(Spellcasting(level, half=True))
         if level >= 20:
             base_feats.append(HuntersMarkFeat(10, True, ))
@@ -166,6 +171,7 @@ class BeastMasterRanger(Character):
         base_feats.append(EquipWeapon(maul))
         base_feats.append(EquipWeapon(shortsword))
         base_feats.append(EquipWeapon(scimitar))
+        base_feats.append(EquipWeapon(other_shortsword))
         def attacks(character):
             if self.level >= 3:
                 if self.use_bonus("beast"):
@@ -193,6 +199,7 @@ class BeastMasterRanger(Character):
                     yield scimitar
         base_feats.append(RangerAction(attacks=attacks))
         base_feats.append(Spellcasting(level, half=True))
+        base_feats.append(BeastChargeFeat(dc = 8 + prof_bonus(level) + 3))
 
         def filter(args: HitArgs) -> bool:
             return (not isinstance(args.weapon, BeastMaul)) or (level >= 11)

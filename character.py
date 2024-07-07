@@ -80,7 +80,7 @@ class Character:
         crit: bool = False,
         attack_args: AttackArgs = None,
     ):
-        log.output("Hit with " + weapon.name + ", args " + str(attack_args))
+        log.output(lambda: "Hit with " + weapon.name + ", args " + str(attack_args))
         args = HitArgs(
             target,
             weapon,
@@ -90,11 +90,11 @@ class Character:
         )
         for feat in self.feats:
             feat.hit(args)
-        log.output("\t" + str(args._dmg))
+        log.output(lambda: str(args._dmg))
         target.add_damage_sources(args._dmg)
 
     def miss(self, target: Target, weapon: Weapon):
-        log.output("Missed with " + weapon.name)
+        log.output(lambda: "Missed with " + weapon.name)
         args = MissArgs(target, weapon)
         for feat in self.feats:
             feat.miss(args)
@@ -144,7 +144,7 @@ class Character:
             feat.end_turn(target)
         if not self.used_bonus:
             log.record(f"Bonus (None)", 1)
-        log.output("")
+        log.output(lambda: "")
 
     def short_rest(self):
         for feat in self.feats:

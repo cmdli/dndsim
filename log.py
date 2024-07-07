@@ -15,6 +15,6 @@ class Log:
 
     def output(self, message):
         if (self.detailed):
-            print(message)
+            print(message())
 
 log = Log(detailed=False)

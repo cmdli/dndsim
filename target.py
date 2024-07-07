@@ -70,7 +70,9 @@ class Target:
             log.record(f"Damage ({key})", self._dmg_log[key])
 
     def save(self, dc):
-        return random.randint(1, 20) + self.save_bonus >= dc
+        roll = random.randint(1, 20)
+        log.output(lambda : "Save roll: " + str(roll))
+        return roll + self.save_bonus >= dc
 
     def stun(self):
         self.stun_turns = 1

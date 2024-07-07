@@ -12,6 +12,7 @@ class Weapon:
         ranged=False,
         topple=False,
         base=None,
+        is_other_creature=False,
     ) -> None:
         self.name = name
         self.num_dice = num_dice
@@ -24,7 +25,7 @@ class Weapon:
         self.ranged = ranged
         self.topple = topple
         self.base = base
-
+        self.is_other_creature = is_other_creature
 
 class Glaive(Weapon):
     def __init__(self, **kwargs):

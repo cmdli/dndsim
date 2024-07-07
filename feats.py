@@ -149,7 +149,7 @@ class Attack(Feat):
         self.character = character
 
     def roll_attack(self, args):
-        if args.target.vexed:
+        if not args.weapon.is_other_creature and args.target.vexed:
             args.adv = True
             args.target.vexed = False
         if args.target.stunned:
@@ -171,7 +171,6 @@ class Attack(Feat):
         result = self.character.roll_attack(args.target, args.weapon, to_hit)
         roll = result.roll()
         crit = False
-        log.output("Attack roll: " + str(roll) + ", bonus " + str(to_hit) + ", situational: " + str(result.situational_bonus))
         if roll >= args.weapon.min_crit:
             crit = True
         if roll + to_hit + result.situational_bonus >= args.target.ac:
@@ -228,8 +227,9 @@ class EquipWeapon(Feat):
         args.add_damage(f"Weapon:{args.weapon.name}", total_dmg)
         if self.weapon.vex:
             args.target.vexed = True
-        if self.weapon.topple:
+        if self.weapon.topple and not args.target.prone:
             if not args.target.save(self.character.dc(args.weapon.mod)):
+                log.output(lambda: "Knocked prone")
                 args.target.prone = True
 
     def miss(self, args):

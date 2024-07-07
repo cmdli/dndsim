@@ -37,13 +37,13 @@ class AttackRollArgs:
 
     def roll(self):
         if self.adv == self.disadv:
-            log.output("\tRoll: " + str(self.roll1))
+            log.output(lambda: "Roll: " + str(self.roll1))
             return self.roll1
         elif self.adv:
-            log.output("\tRoll ADV: " + str(self.roll1) + ", " + str(self.roll2))
+            log.output(lambda: "Roll ADV: " + str(self.roll1) + ", " + str(self.roll2))
             return max(self.roll1, self.roll2)
         else:
-            log.output("\tRoll DIS: " + str(self.roll1) + ", " + str(self.roll2))
+            log.output(lambda: "Roll DIS: " + str(self.roll1) + ", " + str(self.roll2))
             return min(self.roll1, self.roll2)
 
     def hits(self):
@@ -68,6 +68,7 @@ class HitArgs:
 
     def add_damage(self, source: str, dmg: int):
         self._dmg[source] += dmg
+
 
     def total_damage(self):
         total = 0
