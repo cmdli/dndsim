@@ -2,6 +2,7 @@ import random
 from target import Target
 from weapons import Weapon
 from collections import defaultdict
+from typing import List
 
 
 class AttackArgs:
@@ -10,14 +11,18 @@ class AttackArgs:
         character,
         target: Target,
         weapon: Weapon,
-        main_action=False,
-        light_attack: bool = False,
+        tags: List[str] = [],
     ):
         self.character = character
         self.target = target
         self.weapon = weapon
-        self.main_action = main_action
-        self.light_attack = light_attack
+        self.tags = tags
+
+    def has_tag(self, tag: str):
+        return tag in self.tags
+
+    def add_tag(self, tag: str):
+        self.tags.append(tag)
 
 
 class AttackRollArgs:

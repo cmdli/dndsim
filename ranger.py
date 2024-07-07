@@ -41,7 +41,7 @@ class RangerAction(Feat):
                 spellcasting.cast(HuntersMark(slot))
             for weapon in self.attacks:
                 log.record("main attack", 1)
-                self.character.attack(target, weapon, main_action=True)
+                self.character.attack(target, weapon, tags=["main_action"])
 
 
 class HuntersMarkFeat(Feat):

@@ -4,6 +4,7 @@ from target import Target
 from weapons import Weapon
 from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
 from log import log
+from typing import List
 
 
 class Character:
@@ -101,15 +102,13 @@ class Character:
         self,
         target: Target,
         weapon: Weapon,
-        main_action: bool = False,
-        light_attack: bool = False,
+        tags: List[str] = [],
     ):
         args = AttackArgs(
             character=self,
             target=target,
             weapon=weapon,
-            main_action=main_action,
-            light_attack=light_attack,
+            tags=tags,
         )
         for feat in self.feats:
             feat.attack(args)

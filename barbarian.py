@@ -32,17 +32,13 @@ class BrutalStrike(Feat):
     def roll_attack(self, args):
         if not self.used and args.adv:
             args.adv = False
-            self.enabled = True
+            args.attack.add_tag("brutal_strike")
             self.used = True
 
     def hit(self, args):
-        if self.enabled:
+        if args.attack.has_tag("brutal_strike"):
             num = 2 * self.num_dice if args.crit else self.num_dice
             args.add_damage("BrutalStrike", roll_dice(num, 10))
-        self.enabled = False
-
-    def miss(self, args):
-        self.enabled = False
 
 
 class Retaliation(Feat):

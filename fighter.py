@@ -151,7 +151,7 @@ class ToppleIfNecessaryAttackAction(Feat):
             weapon = self.default_weapon
             if not target.prone and i < self.num_attacks - 1:
                 weapon = self.topple_weapon
-            self.character.attack(target, weapon, main_action=True)
+            self.character.attack(target, weapon, tags=["main_action"])
 
 
 class Fighter(Character):

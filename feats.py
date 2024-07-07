@@ -132,11 +132,7 @@ class AttackAction(Feat):
 
     def action(self, target):
         for weapon in self.base_attacks:
-            self.character.attack(
-                target,
-                weapon,
-                main_action=True,
-            )
+            self.character.attack(target, weapon, tags=["main_action"])
 
 
 class Attack(Feat):
@@ -209,7 +205,7 @@ class EquipWeapon(Feat):
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
         total_dmg = dmg + weapon.bonus
-        if not args.attack.light_attack:
+        if not args.attack.has_tag("light"):
             total_dmg += args.attack.character.mod(weapon.mod)
         args.add_damage(f"Weapon:{weapon.name}", total_dmg)
         if weapon.topple:
@@ -263,7 +259,7 @@ class LightWeaponBonusAttack(Feat):
 
     def end_turn(self, target):
         if self.character.use_bonus("LightWeaponBonusAttack"):
-            self.character.attack(target, self.weapon, light_attack=True)
+            self.character.attack(target, self.weapon, tags=["light"])
 
 
 class Vex(Feat):

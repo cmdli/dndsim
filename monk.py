@@ -47,7 +47,7 @@ class Grappler(Feat):
         character.dex += 1
 
     def hit(self, args):
-        if args.attack.main_action:
+        if args.attack.has_tag("main_action"):
             args.attack.target.grapple()
 
     def roll_attack(self, args):
