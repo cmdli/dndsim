@@ -239,13 +239,15 @@ class Spellcasting(Feat):
         self.name = "Spellcasting"
         self.level = level
         self.half = half
-        self.concentration = None
+        self.concentration: Spell = None
 
     def long_rest(self):
         self.slots = spell_slots(self.level, half=self.half)
 
     def short_rest(self):
-        self.concentration = None
+        if self.concentration is not None:
+            self.concentration.end()
+            self.concentration = None
 
     def highest_slot(self):
         return highest_spell_slot(self.slots)
@@ -254,9 +256,13 @@ class Spellcasting(Feat):
         self.slots[spell.slot] -= 1
         if spell.concentration:
             self.concentration = spell
+        spell.begin()
 
     def concentrating_on(self, name: str):
         return self.concentration is not None and self.concentration.name is name
+
+    def is_concentrating(self):
+        return self.concentration is not None
 
 
 class LightWeaponBonusAttack(Feat):

@@ -23,6 +23,7 @@ class Character:
         self.int = stats[3]
         self.wis = stats[4]
         self.cha = stats[5]
+        self.minions = []
         self.feats = []
         self.add_feat(Attack())
         for feat in base_feats:
@@ -52,6 +53,12 @@ class Character:
 
     def dc(self, stat: str):
         return self.mod(stat) + self.prof + 8
+
+    def add_minion(self, minion):
+        self.minions.append(minion)
+
+    def remove_minion(self, minion):
+        self.minions.remove(minion)
 
     def before_attack(self):
         for feat in self.feats:
@@ -103,6 +110,8 @@ class Character:
             self.action(target)
             self.actions -= 1
         self.end_turn(target)
+        for minion in self.minions:
+            minion.turn(target)
 
     def action(self, target: Target):
         for feat in self.feats:

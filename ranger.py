@@ -1,28 +1,21 @@
-import random
 from events import AttackArgs, AttackRollArgs, HitArgs
 from target import Target
 from util import (
-    prof_bonus,
     magic_weapon,
-    highest_spell_slot,
-    spell_slots,
     roll_dice,
-    do_roll,
 )
 from character import Character
 from feats import (
     ASI,
-    AttackAction,
     Archery,
     CrossbowExpert,
     Feat,
     Spellcasting,
     EquipWeapon,
-    LightWeaponBonusAttack,
 )
 from weapons import HandCrossbow, Weapon
-from spells import HuntersMark, SummonFey
-from summons import FeySummon
+from spells import HuntersMark
+from summons import FeySummon, SummonFey
 from log import log
 
 
@@ -34,10 +27,15 @@ class RangerAction(Feat):
     def action(self, target: Target):
         spellcasting = self.character.feat("Spellcasting")
         slot = spellcasting.highest_slot()
-        if slot >= 4 and spellcasting.concentration is None:
-            spellcasting.cast(SummonFey(slot))
+        if slot >= 4 and not spellcasting.is_concentrating():
+            spell = SummonFey(
+                slot,
+                caster_level=self.character.level,
+                to_hit=self.character.prof + self.character.mod("wis"),
+            )
+            spellcasting.cast(spell)
         else:
-            if spellcasting.concentration is None and self.character.use_bonus(
+            if not spellcasting.is_concentrating() and self.character.use_bonus(
                 "HuntersMark"
             ):
                 spellcasting.cast(HuntersMark(slot))

@@ -23,12 +23,12 @@ NUM_TURNS = 5
 NUM_SIMS = 500
 
 
-def simulate(character, level, fights, turns):
+def simulate(character, level, fights, rounds):
     dmg = 0
     character.long_rest()
     for _ in range(fights):
         target = Target(level)
-        for _ in range(turns):
+        for _ in range(rounds):
             character.turn(target)
             character.enemy_turn(target)
             target.turn()

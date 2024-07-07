@@ -1,74 +1,137 @@
-from events import AttackRollArgs, HitArgs
+from events import AttackArgs, AttackRollArgs, HitArgs
 from feats import Feat
 from util import do_roll, roll_dice
 from target import Target
 from log import log
+from character import Character
+from weapons import Weapon
+from spells import Spell
 
 
-class Summon(Feat):
+class SummonHit(Feat):
+    def __init__(self, slot: int, bonus_dmg: int) -> None:
+        self.name = "SummonHit"
+        self.bonus_dmg = bonus_dmg
+        self.slot = slot
+
+    def hit(self, args: HitArgs):
+        num = args.weapon.num_dice
+        if args.crit:
+            num *= 2
+        args.target.damage_source(
+            self.name,
+            roll_dice(num, args.weapon.die) + self.bonus_dmg + self.slot,
+        )
+
+
+class SummonAttack(Feat):
+    def __init__(self, slot: int, to_hit: int) -> None:
+        self.name = "SummonAttack"
+        self.slot = slot
+        self.to_hit = to_hit
+
+    def attack(self, args: AttackArgs):
+        roll = self.character.roll_attack()
+        if roll == 20:
+            self.hit(self.slot, args.target, crit=True)
+        elif roll + self.to_hit >= args.target.ac:
+            self.hit(self.slot, args.target)
+
+
+class SummonAction(Feat):
+    def __init__(self, slot: int, weapon: Weapon) -> None:
+        self.name = "SummonAction"
+        self.slot = slot
+        self.weapon = weapon
+
+    def action(self, target: Target):
+        for _ in range(self.slot // 2):
+            self.character.attack(target, self.weapon)
+
+
+class Summon(Character):
     def __init__(
         self,
-        name: str,
-        spell_name: str,
-        num_dice: int = 0,
-        die: int = 6,
-        base_dmg: int = 0,
-        mod: str = "wis",
-    ) -> None:
-        self.name = name
-        self.spell_name = spell_name
-        self.num_dice = num_dice
-        self.die = die
-        self.base_dmg = base_dmg
-        self.mod = mod
+        slot: int,
+        caster_level: int,
+        to_hit: int,
+        weapon: Weapon,
+        bonus_dmg: int,
+        feats=[],
+    ):
+        base_feats = []
+        base_feats.append(SummonAction(slot, weapon))
+        base_feats.append(SummonAttack(slot, to_hit))
+        base_feats.append(SummonHit(slot, bonus_dmg))
+        base_feats.extend(feats)
+        super().init(
+            level=caster_level,
+            stats=[10, 10, 10, 10, 10, 10],
+            base_feats=base_feats,
+            feats=[],
+            feat_schedule=[],
+        )
 
-    def end_turn(self, target):
-        spellcasting = self.character.feat("Spellcasting")
-        if not spellcasting.concentrating_on(self.spell_name):
-            return
-        self.summon_action(target)
 
-    def summon_begin_turn(self):
-        pass
+class FeyWeapon(Weapon):
+    def __init__(self, **kwargs):
+        super().__init__(name="FeyWeapon", num_dice=2, die=6, **kwargs)
 
-    def summon_action(self, target: Target):
-        log.record("Summon Action", 1)
-        self.summon_begin_turn()
-        spellcasting = self.character.feat("Spellcasting")
-        slot = spellcasting.concentration.slot
-        for _ in range(slot // 2):
-            to_hit = self.character.prof + self.character.mod(self.mod)
-            roll = self.summon_roll_attack()
-            if roll == 20:
-                self.summon_hit(slot, target, crit=True)
-            elif roll + to_hit >= target.ac:
-                self.summon_hit(slot, target)
 
-    def summon_roll_attack(self):
-        return do_roll()
+class Mirthful(Feat):
+    def __init__(self) -> None:
+        self.name = "Mirthful"
 
-    def summon_hit(self, slot: int, target: Target, crit: bool = False):
-        num = self.num_dice
-        if crit:
-            num *= 2
-        target.damage_source(self.name, roll_dice(num, self.die) + self.base_dmg + slot)
+    def begin_turn(self, target: Target):
+        self.used = False
+
+    def roll_attack(self, args: AttackRollArgs):
+        if not self.used:
+            args.adv = True
+            self.used = True
 
 
 class FeySummon(Summon):
-    def __init__(self):
+    def __init__(self, slot: int, caster_level: int, to_hit: int):
         super().__init__(
-            name="FeySummon",
-            spell_name="SummonFey",
-            num_dice=2,
-            die=6,
-            base_dmg=3,
-            mod="wis",
+            caster_level=caster_level,
+            slot=slot,
+            to_hit=to_hit,
+            bonus_dmg=3,
+            weapon=FeyWeapon(bonus=3 + slot),
+            feats=[Mirthful()],
         )
 
-    def summon_begin_turn(self):
-        self.adv_used = False
 
-    def summon_roll_attack(self):
-        roll = do_roll(adv=not self.adv_used)
-        self.adv_used = True
-        return roll
+class SummonSpell(Spell):
+    def __init__(self, name: str, slot: int, caster_level: int, to_hit: int):
+        super().__init__(name, slot, concentration=True)
+        self.caster_level = caster_level
+        self.to_hit = to_hit
+
+    def summon(self):
+        return None
+
+    def begin(self, character):
+        self.minion = self.summon()
+        character.add_minion(self.minion)
+        self.character = character
+
+    def end(self):
+        if self.character is not None:
+            self.character.remove_minion(self.minion)
+
+
+class SummonFey(SummonSpell):
+    def __init__(self, slot: int, caster_level: int, to_hit: int):
+        super().__init__(
+            "SummonFey",
+            slot,
+            caster_level=caster_level,
+            to_hit=to_hit,
+        )
+
+    def summon(self):
+        return FeySummon(
+            caster_level=self.caster_level, slot=self.slot, to_hit=self.to_hit
+        )
