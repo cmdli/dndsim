@@ -256,7 +256,7 @@ class Spellcasting(Feat):
         self.slots[spell.slot] -= 1
         if spell.concentration:
             self.concentration = spell
-        spell.begin()
+        spell.begin(self.character)
 
     def concentrating_on(self, name: str):
         return self.concentration is not None and self.concentration.name is name

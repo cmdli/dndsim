@@ -31,11 +31,16 @@ class SummonAttack(Feat):
         self.to_hit = to_hit
 
     def attack(self, args: AttackArgs):
-        roll = self.character.roll_attack()
+        result = self.character.roll_attack(
+            target=args.target, weapon=args.weapon, to_hit=self.to_hit
+        )
+        roll = result.roll()
         if roll == 20:
-            self.hit(self.slot, args.target, crit=True)
+            self.character.hit(
+                target=args.target, crit=True, weapon=args.weapon, attack_args=args
+            )
         elif roll + self.to_hit >= args.target.ac:
-            self.hit(self.slot, args.target)
+            self.character.hit(target=args.target, weapon=args.weapon, attack_args=args)
 
 
 class SummonAction(Feat):
@@ -61,7 +66,6 @@ class Summon(Character):
     ):
         base_feats = []
         base_feats.append(SummonAction(slot, weapon))
-        base_feats.append(SummonAttack(slot, to_hit))
         base_feats.append(SummonHit(slot, bonus_dmg))
         base_feats.extend(feats)
         super().init(
@@ -70,6 +74,7 @@ class Summon(Character):
             base_feats=base_feats,
             feats=[],
             feat_schedule=[],
+            attack_feat=SummonAttack(slot, to_hit),
         )
 
 

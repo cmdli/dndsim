@@ -14,6 +14,7 @@ class Character:
         feats=None,
         base_feats=None,
         feat_schedule=[4, 8, 12, 16, 19],
+        attack_feat=Attack(),
     ):
         self.level = level
         self.prof = prof_bonus(level)
@@ -25,7 +26,7 @@ class Character:
         self.cha = stats[5]
         self.minions = []
         self.feats = []
-        self.add_feat(Attack())
+        self.add_feat(attack_feat)
         for feat in base_feats:
             self.add_feat(feat)
         for [target, feat] in zip(feat_schedule, feats):
@@ -49,6 +50,8 @@ class Character:
         return None
 
     def mod(self, stat: str):
+        if stat == "none":
+            return 0
         return (self.__getattribute__(stat) - 10) // 2
 
     def dc(self, stat: str):

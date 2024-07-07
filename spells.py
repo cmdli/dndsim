@@ -4,7 +4,7 @@ class Spell:
         self.slot = slot
         self.concentration = concentration
 
-    def begin(self):
+    def begin(self, character):
         pass
 
     def end(self):

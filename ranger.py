@@ -119,7 +119,6 @@ class Ranger(Character):
             base_feats.append(HuntersMarkFeat(6, False))
         if level >= 3:
             base_feats.append(Gloomstalker(weapon))
-        base_feats.append(FeySummon())
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
