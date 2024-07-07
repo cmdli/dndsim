@@ -14,7 +14,7 @@ from feats import (
     Spellcasting,
     EquipWeapon,
 )
-from weapons import HandCrossbow, Weapon, Shortsword, Scimitar
+from weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells import HuntersMark
 from summons import FeySummon, SummonFey
 from log import log
@@ -184,11 +184,14 @@ class BeastMasterRanger(Character):
         self.magic_weapon = get_magic_weapon(level)
         base_feats = []
         maul = BeastMaul(base=2 + prof_bonus(level))
-        shortsword = Shortsword(bonus=self.magic_weapon)
+        if level < 4:
+            main_weapon = Shortsword(bonus=self.magic_weapon)
+        else:
+            main_weapon = Rapier(bonus = self.magic_weapon)
         other_shortsword = Shortsword(bonus=self.magic_weapon, name="Offhand Shortsword", base="dex" if level >= 2 else 0)
         scimitar = Scimitar(bonus=self.magic_weapon, base="dex" if level >= 2 else 0)
         base_feats.append(EquipWeapon(maul))
-        base_feats.append(EquipWeapon(shortsword))
+        base_feats.append(EquipWeapon(main_weapon))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(EquipWeapon(other_shortsword))
         def attacks(character):
@@ -197,21 +200,21 @@ class BeastMasterRanger(Character):
                     yield maul
                     if level >= 11:
                         yield maul
-                    yield shortsword
-                    yield shortsword
+                    yield main_weapon
+                    yield main_weapon
                     yield scimitar
                 else:
                     if level >= 5:
                         yield maul
                         if level >= 11:
                             yield maul
-                        yield shortsword
+                        yield main_weapon
                         yield scimitar
                     else:
-                        yield shortsword
+                        yield main_weapon
                         yield scimitar
             else:
-                yield shortsword
+                yield main_weapon
                 if self.use_bonus("light weapon"):
                     yield other_shortsword
                 else:
@@ -220,7 +223,7 @@ class BeastMasterRanger(Character):
         base_feats.append(Spellcasting(level, half=True))
         base_feats.append(BeastChargeFeat(character=self))
 
-        def filter(args: HitArgs) -> bool:
+        def beast_only_level_11(args: HitArgs) -> bool:
             return (not isinstance(args.attack.weapon, BeastMaul)) or (level >= 11)
 
         if level >= 20:
@@ -228,7 +231,7 @@ class BeastMasterRanger(Character):
         elif level >= 17:
             base_feats.append(HuntersMarkFeat(6, True, ))
         else:
-            base_feats.append(HuntersMarkFeat(6, False, filter=filter))
+            base_feats.append(HuntersMarkFeat(6, False, filter=beast_only_level_11))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],

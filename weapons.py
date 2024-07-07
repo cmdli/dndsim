@@ -54,6 +54,11 @@ class Shortsword(Weapon):
             name=name, num_dice=1, die=6, mod=mod, vex=True, **kwargs
         )
 
+class Rapier(Weapon):
+    def __init__(self, mod="dex", name="Rapier", **kwargs):
+        super().__init__(
+            name=name, num_dice=1, die=8, mod=mod, vex=True, **kwargs
+        )
 
 class Scimitar(Weapon):
     def __init__(self, mod="dex", **kwargs):
