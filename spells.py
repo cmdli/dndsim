@@ -19,3 +19,8 @@ class HuntersMark(Spell):
 class DivineSmite(Spell):
     def __init__(self, slot: int):
         super().__init__("DivineSmite", slot)
+
+
+class DivineFavor(Spell):
+    def __init__(self, slot: int):
+        super().__init__("DivineFavor", slot, concentration=True)

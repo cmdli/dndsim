@@ -44,7 +44,6 @@ class Target:
         self.stun_turns = 0
         self.grappled = False
         self.prone = False
-        self.vexed = False
 
     def try_attack(self, to_hit):
         return random.randint(1, 20) + to_hit >= self.ac
@@ -74,16 +73,7 @@ class Target:
         log.output(lambda : "Save roll: " + str(roll))
         return roll + self.save_bonus >= dc
 
-    def stun(self):
-        self.stun_turns = 1
-        self.stunned = True
-
     def turn(self):
-        if self.stunned:
-            if self.stun_turns == 0:
-                self.stunned = False
-            else:
-                self.stun_turns -= 1
         if self.prone:
             self.prone = False
 

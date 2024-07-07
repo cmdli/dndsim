@@ -1,7 +1,7 @@
 import random
 from events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
 from target import Target
-from util import magic_weapon, roll_dice
+from util import get_magic_weapon, roll_dice
 from feats import (
     GreatWeaponMaster,
     AttackAction,
@@ -9,6 +9,8 @@ from feats import (
     PolearmMaster,
     Feat,
     EquipWeapon,
+    CombatProwess,
+    IrresistibleOffense,
 )
 from character import Character
 from weapons import Glaive, Greatsword, GlaiveButt, Maul
@@ -23,9 +25,7 @@ class StudiedAttacks(Feat):
     def roll_attack(self, args):
         if self.enabled:
             args.adv = True
-
-    def hit(self, args):
-        self.enabled = False
+            self.enabled = False
 
     def miss(self, args):
         self.enabled = True
@@ -42,7 +42,7 @@ class HeroicAdvantage(Feat):
         if self.used or args.adv:
             return
         if args.disadv:
-            roll = min(args.roll1, args.roll2)
+            roll = args.roll()
             if roll < 8:
                 self.used = True
                 self.adv = True
@@ -59,10 +59,7 @@ class ActionSurge(Feat):
         self.name = "ActionSurge"
         self.max_surges = max_surges
 
-    def apply(self, character):
-        self.character = character
-
-    def begin_turn(self, target):
+    def before_action(self, target):
         if self.surges > 0:
             self.character.actions += 1
             self.surges -= 1
@@ -77,12 +74,13 @@ class PrecisionAttack(Feat):
         self.low = low
 
     def roll_attack(self, args: AttackRollArgs):
-        maneuvers = self.character.feat("Maneuvers")
-        if maneuvers.used_maneuver:
+        if args.attack.has_tag("used_maneuver"):
             return
+        maneuvers = self.character.feat("Maneuvers")
         if not args.hits() and args.roll() >= self.low:
             roll = maneuvers.roll()
             args.situational_bonus += roll
+            args.attack.add_tag("used_maneuver")
 
 
 class TrippingAttack(Feat):
@@ -90,16 +88,17 @@ class TrippingAttack(Feat):
         self.name = "TrippingAttack"
 
     def hit(self, args: HitArgs):
+        if args.attack.has_tag("used_maneuver"):
+            return
+        if args.attack.target.prone:
+            return
         maneuvers = self.character.feat("Maneuvers")
-        if maneuvers.used_maneuver:
-            return
-        if args.target.prone:
-            return
         roll = maneuvers.roll()
         if roll > 0:
             args.add_damage("TrippingAttack", roll)
-            if not args.target.save(self.character.dc("str")):
-                args.target.prone = True
+            if not args.attack.target.save(self.character.dc("str")):
+                args.attack.target.prone = True
+            args.attack.add_tag("used_maneuver")
 
 
 class Maneuvers(Feat):
@@ -118,11 +117,7 @@ class Maneuvers(Feat):
         else:
             self.superiority_size = 8
         self.enabled_relentless = level >= 15
-        self.used_maneuver = False
         self.superiority_dice = 0
-
-    def apply(self, character):
-        self.character = character
 
     def short_rest(self):
         self.superiority_dice = self.max_dice
@@ -130,16 +125,11 @@ class Maneuvers(Feat):
     def begin_turn(self, target: Target):
         self.used_relentless = False
 
-    def before_attack(self):
-        self.used_maneuver = False
-
     def roll(self):
         if self.superiority_dice > 0:
-            self.used_maneuver = True
             self.superiority_dice -= 1
             return roll_dice(1, self.superiority_size)
         elif self.enabled_relentless and self.used_relentless:
-            self.used_maneuver = True
             self.used_relentless = True
             return roll_dice(1, 8)
         return 0
@@ -157,7 +147,7 @@ class ToppleIfNecessaryAttackAction(Feat):
             weapon = self.default_weapon
             if not target.prone and i < self.num_attacks - 1:
                 weapon = self.topple_weapon
-            self.character.attack(target, weapon, main_action=True)
+            self.character.attack(target, weapon, tags=["main_action"])
 
 
 class Fighter(Character):
@@ -165,12 +155,11 @@ class Fighter(Character):
         self, level, use_pam=False, subclass_feats=[], min_crit=20, use_topple=True
     ):
         base_feats = []
-        self.use_pam = use_pam
-        self.magic_weapon = magic_weapon(level)
+        magic_weapon = get_magic_weapon(level)
         if use_pam:
-            weapon = Glaive(bonus=self.magic_weapon, min_crit=min_crit)
+            weapon = Glaive(bonus=magic_weapon, min_crit=min_crit)
         else:
-            weapon = Greatsword(bonus=self.magic_weapon, min_crit=min_crit)
+            weapon = Greatsword(bonus=magic_weapon, min_crit=min_crit)
         base_feats.append(EquipWeapon(weapon, savage_attacker=True, max_reroll=2))
         if level >= 20:
             num_attacks = 4
@@ -181,7 +170,7 @@ class Fighter(Character):
         else:
             num_attacks = 1
         if use_topple and level >= 5:
-            maul = Maul(bonus=self.magic_weapon, min_crit=min_crit)
+            maul = Maul(bonus=magic_weapon, min_crit=min_crit)
             base_feats.append(EquipWeapon(maul, savage_attacker=True, max_reroll=2))
             base_feats.append(ToppleIfNecessaryAttackAction(num_attacks, maul, weapon))
         else:
@@ -194,26 +183,26 @@ class Fighter(Character):
             base_feats.append(ActionSurge(1))
         base_feats.extend(subclass_feats)
         if use_pam:
-            butt = GlaiveButt(bonus=self.magic_weapon, min_crit=min_crit)
+            butt = GlaiveButt(bonus=magic_weapon, min_crit=min_crit)
             base_feats.append(EquipWeapon(butt, savage_attacker=True, max_reroll=2))
             feats = [
-                GreatWeaponMaster(),
+                GreatWeaponMaster(weapon),
                 PolearmMaster(butt),
                 ASI([["str", 1]]),
                 ASI(),
                 ASI(),
                 ASI(),
-                ASI(),
+                IrresistibleOffense("str"),
             ]
         else:
             feats = [
-                GreatWeaponMaster(),
+                GreatWeaponMaster(weapon),
                 ASI([["str", 2]]),
                 ASI(),
                 ASI(),
                 ASI(),
                 ASI(),
-                ASI(),
+                IrresistibleOffense("str"),
             ]
         super().init(
             level=level,

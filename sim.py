@@ -76,25 +76,3 @@ if __name__ == "__main__":
     )
     write_data("data.csv", data)
     log.printReport()
-    # for level in range(1,21):
-    #     lines = []
-    #     # lines.append(f"Fighter {level}: {test_dpr(Fighter(level)):0.2f} DPR")
-    #     # lines.append(f"Barbarian {level}: {test_dpr(Barbarian(level)):0.2f} DPR")
-    #     lines.append(f"Monk {level}: {test_dpr(Monk(level)):0.2f} DPR")
-    #     lines.append(f"Paladin {level}: {test_dpr(Paladin(level)):0.2f} DPR")
-    #     # lines.append(f"Ranger {level}: {test_dpr(Ranger(level)):0.2f} DPR")
-    #     # lines.append(f"Rogue {level}: {test_dpr(Rogue(level)):0.2f} DPR")
-    #     lines.append(f"Wizard {level}: {test_dpr(Wizard(level)):0.2f} DPR")
-    #     lines.append(f"Cleric {level}: {test_dpr(Cleric(level)):0.2f} DPR")
-    #     print(" - ".join(lines))
-
-    # fighter_damage = test_dpr(Fighter(level))
-    # fighter_pam_damage = test_dpr(Fighter(level, True))
-    # print(f"Fighter (greatsword) {level}: {fighter_damage:0.2f} DPR - Fighter (glaive) {level}: {fighter_pam_damage:0.2f} DPR")
-
-    # barbarian_damage = test_dpr(Barbarian(level))
-    # barbarian_pam_damage = test_dpr(Barbarian(level, True))
-    # print(f"Barbarian (greatsword) {level}: {barbarian_damage:0.2f} DPR - Barbarian (glaive) {level}: {barbarian_pam_damage:0.2f} DPR")
-
-    # wizard_damage = test_dpr(Wizard(level))
-    # print(f"Level {level} -- Wizard: {wizard_damage:0.2f} DPR")

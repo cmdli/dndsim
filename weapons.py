@@ -49,15 +49,15 @@ class Greatsword(Weapon):
 
 
 class Shortsword(Weapon):
-    def __init__(self, name="Shortsword", **kwargs):
+    def __init__(self, mod="dex", name="Shortsword", **kwargs):
         super().__init__(
-            name=name, num_dice=1, die=6, mod="dex", vex=True, **kwargs
+            name=name, num_dice=1, die=6, mod=mod, vex=True, **kwargs
         )
 
 
 class Scimitar(Weapon):
-    def __init__(self, **kwargs):
-        super().__init__(name="Scimitar", num_dice=1, die=6, mod="dex", **kwargs)
+    def __init__(self, mod="dex", **kwargs):
+        super().__init__(name="Scimitar", num_dice=1, die=6, mod=mod, **kwargs)
 
 
 class Maul(Weapon):

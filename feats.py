@@ -1,5 +1,5 @@
 from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
-from util import roll_dice, spell_slots, highest_spell_slot
+from util import roll_dice, spell_slots, highest_spell_slot, lowest_spell_slot
 from target import Target
 from weapons import Weapon
 from log import log
@@ -13,7 +13,13 @@ class Feat:
     def begin_turn(self, target: Target):
         pass
 
+    def before_action(self, target: Target):
+        pass
+
     def action(self, target: Target):
+        pass
+
+    def after_action(self, target: Target):
         pass
 
     def before_attack(self):
@@ -50,7 +56,7 @@ class PolearmMaster(Feat):
         self.weapon = weapon
 
     def apply(self, character):
-        self.character = character
+        super().apply(character)
         character.str += 1
 
     def begin_turn(self, target):
@@ -63,12 +69,13 @@ class PolearmMaster(Feat):
 
 
 class GreatWeaponMaster(Feat):
-    def __init__(self):
+    def __init__(self, weapon: Weapon):
         self.name = "GreatWeaponMaster"
+        self.weapon = weapon
 
     def apply(self, character):
+        super().apply(character)
         character.str += 1
-        self.character = character
 
     def begin_turn(self, target):
         self.used_dmg = False
@@ -78,9 +85,12 @@ class GreatWeaponMaster(Feat):
         if not self.used_dmg:
             self.used_dmg = True
             args.add_damage("GreatWeaponMaster", self.character.prof)
-        if args.crit and self.character.use_bonus("GWM"):
+        if args.crit:
             self.bonus_attack_enabled = True
-            self.character.attack(args.target, args.weapon)
+
+    def after_action(self, target: Target):
+        if self.bonus_attack_enabled and self.character.use_bonus("GreatWeaponMaster"):
+            self.character.attack(target, self.weapon)
 
 
 class Archery(Feat):
@@ -88,7 +98,7 @@ class Archery(Feat):
         self.name = "Archery"
 
     def roll_attack(self, args: AttackRollArgs):
-        if args.weapon.ranged:
+        if args.attack.weapon.ranged:
             args.situational_bonus += 2
 
 
@@ -119,9 +129,9 @@ class ASI(Feat):
         self.stat_increases = stat_increases
 
     def apply(self, character):
+        super().apply(character)
         for [stat, increase] in self.stat_increases:
-            new_stat = min(20, character.__getattribute__(stat) + increase)
-            character.__setattr__(stat, new_stat)
+            character.__setattr__(stat, character.__getattribute__(stat) + increase)
 
 
 class AttackAction(Feat):
@@ -129,33 +139,20 @@ class AttackAction(Feat):
         self.name = "AttackAction"
         self.base_attacks = attacks
 
-    def apply(self, character):
-        self.character = character
-
     def action(self, target):
         for weapon in self.base_attacks:
-            self.character.attack(
-                target,
-                weapon,
-                main_action=True,
-            )
+            self.character.attack(target, weapon, tags=["main_action"])
 
 
 class Attack(Feat):
     def __init__(self):
         self.name = "Attack"
 
-    def apply(self, character):
-        self.character = character
-
     def roll_attack(self, args):
-        if not args.weapon.is_other_creature and args.target.vexed:
+        if args.attack.target.stunned:
             args.adv = True
-            args.target.vexed = False
-        if args.target.stunned:
-            args.adv = True
-        if args.target.prone:
-            if args.weapon.ranged:
+        if args.attack.target.prone:
+            if args.attack.weapon.ranged:
                 args.disadv = True
             else:
                 args.adv = True
@@ -168,31 +165,28 @@ class Attack(Feat):
             + self.character.mod(args.weapon.mod)
             + args.weapon.bonus
         )
-        result = self.character.roll_attack(args.target, args.weapon, to_hit)
+        result = self.character.roll_attack(attack=args, to_hit=to_hit)
         roll = result.roll()
         crit = False
         if roll >= args.weapon.min_crit:
             crit = True
         if roll + to_hit + result.situational_bonus >= args.target.ac:
-            self.character.hit(args.target, args.weapon, crit=crit, attack_args=args)
+            self.character.hit(attack=args, crit=crit, roll=roll)
         else:
-            self.character.miss(args.target, args.weapon)
+            self.character.miss(attack=args)
 
 
 class EquipWeapon(Feat):
     def __init__(
         self,
-        weapon=None,
-        savage_attacker=False,
-        max_reroll=0,
+        weapon: Weapon = None,
+        savage_attacker: bool = False,
+        max_reroll: int = 0,
     ):
         self.name = weapon.name
         self.weapon = weapon
         self.savage_attacker = savage_attacker
         self.max_reroll = max_reroll
-
-    def apply(self, character):
-        self.character = character
 
     def begin_turn(self, target):
         self.used_savage_attacker = False
@@ -209,34 +203,32 @@ class EquipWeapon(Feat):
         return dmg
 
     def hit(self, args):
-        if args.weapon.name != self.weapon.name:
+        target = args.attack.target
+        weapon = args.attack.weapon
+        if weapon.name != self.weapon.name:
             return
-        log.record(f"Hit:{args.weapon.name}", 1)
+        log.record(f"Hit:{weapon.name}", 1)
         dmg = self.damage(crit=args.crit)
         if not self.used_savage_attacker and self.savage_attacker:
             self.used_savage_attacker = True
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
-        total_dmg = dmg + self.weapon.bonus
-        base = self.weapon.base
-        if base == None:
-            base = self.character.mod(self.weapon.mod)
-        elif isinstance(base, str):
-            base = self.character.mod(base)
-        total_dmg += base
-        args.add_damage(f"Weapon:{args.weapon.name}", total_dmg)
-        if self.weapon.vex:
-            args.target.vexed = True
-        if self.weapon.topple and not args.target.prone:
-            if not args.target.save(self.character.dc(args.weapon.mod)):
+        total_dmg = dmg + weapon.bonus
+        if not args.attack.has_tag("light"):
+            total_dmg += args.attack.character.mod(weapon.mod)
+        args.add_damage(f"Weapon:{weapon.name}", total_dmg)
+        if weapon.topple:
+            if not target.save(args.attack.character.dc(weapon.mod)):
                 log.output(lambda: "Knocked prone")
-                args.target.prone = True
+                target.prone = True
 
     def miss(self, args):
-        if args.weapon.name != self.weapon.name:
+        if args.attack.weapon.name != self.weapon.name:
             return
         if self.weapon.graze:
-            args.target.damage_source("Graze", self.character.mod(self.weapon.mod))
+            args.attack.target.damage_source(
+                "Graze", args.attack.character.mod(self.weapon.mod)
+            )
 
 
 class Spellcasting(Feat):
@@ -256,6 +248,9 @@ class Spellcasting(Feat):
 
     def highest_slot(self):
         return highest_spell_slot(self.slots)
+
+    def lowest_slot(self):
+        return lowest_spell_slot(self.slots)
 
     def cast(self, spell: Spell):
         self.slots[spell.slot] -= 1
@@ -277,4 +272,53 @@ class LightWeaponBonusAttack(Feat):
 
     def end_turn(self, target):
         if self.character.use_bonus("LightWeaponBonusAttack"):
-            self.character.attack(target, self.weapon, light_attack=True)
+            self.character.attack(target, self.weapon, tags=["light"])
+
+
+class Vex(Feat):
+    def __init__(self) -> None:
+        self.name = "Vex"
+        self.vexing = False
+
+    def short_rest(self):
+        self.vexing = False
+
+    def roll_attack(self, args: AttackRollArgs):
+        if self.vexing and not args.attack.weapon.is_other_creature:
+            args.adv = True
+            self.vexing = False
+
+    def hit(self, args: HitArgs):
+        if args.attack.weapon.vex:
+            self.vexing = True
+
+
+class IrresistibleOffense(Feat):
+    def __init__(self, mod: str) -> None:
+        self.name = "IrresistibleOffense"
+        self.mod = mod
+
+    def apply(self, character):
+        super().apply(character)
+        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+
+    def hit(self, args: HitArgs):
+        if args.roll == 20:
+            args.add_damage("IrresistibleOffense", self.character.str)
+
+
+class CombatProwess(Feat):
+    def __init__(self) -> None:
+        self.name = "CombatProwess"
+
+    def apply(self, character):
+        super().apply(character)
+        character.str += 1
+
+    def begin_turn(self, target: Target):
+        self.used = False
+
+    def miss(self, args: MissArgs):
+        if not self.used:
+            self.used = True
+            self.character.hit(args.attack)

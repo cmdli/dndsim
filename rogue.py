@@ -1,6 +1,6 @@
 import math
 from util import (
-    magic_weapon,
+    get_magic_weapon,
     roll_dice,
     do_roll,
 )
@@ -29,10 +29,7 @@ class SteadyAim(Feat):
     def __init__(self) -> None:
         self.name = "SteadyAim"
 
-    def apply(self, character):
-        self.character = character
-
-    def begin_turn(self, target):
+    def before_action(self, target):
         if self.character.use_bonus("SteadyAim"):
             self.enabled = True
 
@@ -66,9 +63,6 @@ class Assassinate(Feat):
         self.used_dmg = False
         self.adv = False
 
-    def apply(self, character):
-        self.character = character
-
     def short_rest(self):
         log.record("short_rest", 1)
         self.first_turn = True
@@ -97,16 +91,13 @@ class DeathStrike(Feat):
     def __init__(self) -> None:
         self.name = "DeathStrike"
 
-    def apply(self, character):
-        self.character = character
-
     def short_rest(self):
         self.enabled = True
 
     def hit(self, args):
         if self.enabled:
             self.enabled = False
-            if not args.target.save(self.character.dc("dex")):
+            if not args.attack.target.save(self.character.dc("dex")):
                 args.add_damage("DeathStrike", args.total_damage())
 
     def end_turn(self, target):
@@ -115,11 +106,11 @@ class DeathStrike(Feat):
 
 class Rogue(Character):
     def __init__(self, level):
-        self.magic_weapon = magic_weapon(level)
+        magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
-        shortsword = Shortsword(bonus=self.magic_weapon)
-        scimitar = Scimitar(bonus=self.magic_weapon)
+        shortsword = Shortsword(bonus=magic_weapon)
+        scimitar = Scimitar(bonus=magic_weapon)
         base_feats.append(EquipWeapon(shortsword))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(AttackAction(attacks=[shortsword, scimitar]))

@@ -1,9 +1,10 @@
 from util import prof_bonus
-from feats import Attack
+from feats import Attack, Vex
 from target import Target
 from weapons import Weapon
 from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
 from log import log
+from typing import List
 
 
 class Character:
@@ -14,7 +15,7 @@ class Character:
         feats=None,
         base_feats=None,
         feat_schedule=[4, 8, 12, 16, 19],
-        attack_feat=Attack(),
+        default_feats=[Attack(), Vex()],
     ):
         self.level = level
         self.prof = prof_bonus(level)
@@ -26,7 +27,8 @@ class Character:
         self.cha = stats[5]
         self.minions = []
         self.feats = []
-        self.add_feat(attack_feat)
+        for feat in default_feats:
+            self.add_feat(feat)
         for feat in base_feats:
             self.add_feat(feat)
         for [target, feat] in zip(feat_schedule, feats):
@@ -103,6 +105,13 @@ class Character:
         for feat in self.feats:
             feat.enemy_turn(target)
 
+    def use_bonus(self, source: str):
+        if not self.used_bonus:
+            log.record(f"Bonus ({source})", 1)
+            self.used_bonus = True
+            return True
+        return False
+
     def begin_turn(self, target: Target):
         log.record("Turn", 1)
         self.actions = 1
@@ -110,41 +119,76 @@ class Character:
         for feat in self.feats:
             feat.begin_turn(target)
 
-    def turn(self, target: Target):
-        self.begin_turn(target)
-        while self.actions > 0:
-            self.action(target)
-            self.actions -= 1
-        self.end_turn(target)
-        for minion in self.minions:
-            minion.turn(target)
-
-    def action(self, target: Target):
-        for feat in self.feats:
-            feat.action(target)
-
-    def attack(
-        self,
-        target: Target,
-        weapon: Weapon,
-        main_action: bool = False,
-        light_attack: bool = False,
-    ):
-        args = AttackArgs(
-            target=target,
-            weapon=weapon,
-            main_action=main_action,
-            light_attack=light_attack,
-        )
-        for feat in self.feats:
-            feat.attack(args)
-
     def end_turn(self, target: Target):
         for feat in self.feats:
             feat.end_turn(target)
         if not self.used_bonus:
             log.record(f"Bonus (None)", 1)
         log.output(lambda: "")
+
+    def turn(self, target: Target):
+        self.begin_turn(target)
+        self.before_action(target)
+        while self.actions > 0:
+            self.action(target)
+            self.actions -= 1
+        self.after_action(target)
+        self.end_turn(target)
+        for minion in self.minions:
+            minion.turn(target)
+
+    def before_action(self, target: Target):
+        for feat in self.feats:
+            feat.before_action(target)
+
+    def action(self, target: Target):
+        for feat in self.feats:
+            feat.action(target)
+
+    def after_action(self, target: Target):
+        for feat in self.feats:
+            feat.after_action(target)
+
+    def attack(
+        self,
+        target: Target,
+        weapon: Weapon,
+        tags: List[str] = [],
+    ):
+        args = AttackArgs(
+            character=self,
+            target=target,
+            weapon=weapon,
+            tags=tags,
+        )
+        for feat in self.feats:
+            feat.attack(args)
+
+    def before_attack(self):
+        for feat in self.feats:
+            feat.before_attack()
+
+    def roll_attack(self, attack: AttackArgs, to_hit: int):
+        args = AttackRollArgs(attack=attack, to_hit=to_hit)
+        for feat in self.feats:
+            feat.roll_attack(args)
+        return args
+
+    def hit(
+        self,
+        attack: AttackArgs,
+        crit: bool = False,
+        roll: int = 0,
+    ):
+        args = HitArgs(attack=attack, crit=crit, roll=roll)
+        for feat in self.feats:
+            feat.hit(args)
+        attack.target.add_damage_sources(args._dmg)
+
+    def miss(self, attack: AttackArgs):
+        args = MissArgs(attack)
+        for feat in self.feats:
+            feat.miss(args)
 
     def short_rest(self):
         for feat in self.feats:
@@ -155,9 +199,6 @@ class Character:
         for feat in self.feats:
             feat.long_rest()
 
-    def use_bonus(self, source: str):
-        if not self.used_bonus:
-            log.record(f"Bonus ({source})", 1)
-            self.used_bonus = True
-            return True
-        return False
+    def enemy_turn(self, target: Target):
+        for feat in self.feats:
+            feat.enemy_turn(target)

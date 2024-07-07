@@ -1,8 +1,9 @@
-from events import AttackArgs, AttackRollArgs, HitArgs
+from events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
 from target import Target
 from util import (
-    magic_weapon,
-    roll_dice, prof_bonus,
+    roll_dice,
+    prof_bonus,
+    get_magic_weapon,
 )
 from character import Character
 from feats import (
@@ -42,7 +43,7 @@ class RangerAction(Feat):
                 spellcasting.cast(HuntersMark(slot))
             for weapon in self.attacks(self.character):
                 log.record("main attack", 1)
-                self.character.attack(target, weapon, main_action=True)
+                self.character.attack(target, weapon, tags=["main_action"])
 
 
 class HuntersMarkFeat(Feat):
@@ -56,7 +57,7 @@ class HuntersMarkFeat(Feat):
         spellcasting = self.character.feat("Spellcasting")
         if not spellcasting.concentrating_on("HuntersMark"):
             return
-        if args.weapon.is_other_creature:
+        if args.attack.weapon.is_other_creature:
             return
         if self.adv:
             args.adv = True
@@ -117,20 +118,36 @@ class BeastChargeFeat(Feat):
         self.character = Character
 
     def hit(self, args: HitArgs):
-        if isinstance(args.weapon, BeastMaul):
+        if isinstance(args.attack.weapon, BeastMaul):
             num = 2 if args.crit else 1
             args.add_damage("Charge", roll_dice(num, 6))
-            if not args.target.prone and not args.target.save(self.character.dc("wis")):
-                args.target.prone = True
+            if not args.attack.target.prone and not args.attack.target.save(self.character.dc("wis")):
+                args.attack.target.prone = True
                 log.output(lambda: "Knocked prone by Charge")
+
+
+class StalkersFlurry(Feat):
+    def __init__(self, weapon: Weapon) -> None:
+        self.name = "StalkersFlurry"
+        self.weapon = weapon
+
+    def begin_turn(self, target: Target):
+        self.missed_attack = False
+
+    def miss(self, args: MissArgs):
+        self.missed_attack = True
+
+    def after_action(self, target):
+        if self.missed_attack:
+            self.character.attack(target, self.weapon)
 
 
 class GloomstalkerRanger(Character):
     def __init__(self, level):
-        self.magic_weapon = magic_weapon(level)
+        magic_weapon = get_magic_weapon(level)
         base_feats = []
         base_feats.append(Archery())
-        weapon = HandCrossbow(bonus=self.magic_weapon)
+        weapon = HandCrossbow(bonus=magic_weapon)
         if level >= 5:
             attacks = 2 * [weapon]
         else:
@@ -146,6 +163,8 @@ class GloomstalkerRanger(Character):
             base_feats.append(HuntersMarkFeat(6, False, ))
         if level >= 3:
             base_feats.append(Gloomstalker(weapon))
+        if level >= 11:
+            base_feats.append(StalkersFlurry(weapon))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
@@ -162,7 +181,7 @@ class GloomstalkerRanger(Character):
 
 class BeastMasterRanger(Character):
     def __init__(self, level):
-        self.magic_weapon = magic_weapon(level)
+        self.magic_weapon = get_magic_weapon(level)
         base_feats = []
         maul = BeastMaul(base=2 + prof_bonus(level))
         shortsword = Shortsword(bonus=self.magic_weapon)
@@ -199,10 +218,10 @@ class BeastMasterRanger(Character):
                     yield scimitar
         base_feats.append(RangerAction(attacks=attacks))
         base_feats.append(Spellcasting(level, half=True))
-        base_feats.append(BeastChargeFeat(character = self))
+        base_feats.append(BeastChargeFeat(character=self))
 
         def filter(args: HitArgs) -> bool:
-            return (not isinstance(args.weapon, BeastMaul)) or (level >= 11)
+            return (not isinstance(args.attack.weapon, BeastMaul)) or (level >= 11)
 
         if level >= 20:
             base_feats.append(HuntersMarkFeat(10, True, ))

@@ -4,26 +4,32 @@ from log import log
 from target import Target
 from weapons import Weapon
 from collections import defaultdict
+from typing import List
 
 
 class AttackArgs:
     def __init__(
         self,
+        character,
         target: Target,
         weapon: Weapon,
-        main_action=False,
-        light_attack: bool = False,
+        tags: List[str] = [],
     ):
+        self.character = character
         self.target = target
         self.weapon = weapon
-        self.main_action = main_action
-        self.light_attack = light_attack
+        self.tags = tags
+
+    def has_tag(self, tag: str):
+        return tag in self.tags
+
+    def add_tag(self, tag: str):
+        self.tags.append(tag)
 
 
 class AttackRollArgs:
-    def __init__(self, target: Target, weapon: Weapon, to_hit: int):
-        self.target = target
-        self.weapon = weapon
+    def __init__(self, attack: AttackArgs, to_hit: int):
+        self.attack = attack
         self.to_hit = to_hit
         self.adv = False
         self.disadv = False
@@ -47,24 +53,20 @@ class AttackRollArgs:
             return min(self.roll1, self.roll2)
 
     def hits(self):
-        return self.roll() + self.to_hit + self.situational_bonus >= self.target.ac
+        return self.roll() + self.to_hit + self.situational_bonus >= self.attack.target.ac
 
 
 class HitArgs:
     def __init__(
         self,
-        target: Target,
-        weapon: Weapon,
+        attack: AttackArgs,
         crit: bool = False,
-        main_action: bool = False,
-        light_attack: bool = False,
+        roll: int = 0,
     ):
         self._dmg = defaultdict(int)
+        self.attack = attack
         self.crit = crit
-        self.target = target
-        self.weapon = weapon
-        self.main_action = main_action
-        self.light_attack = light_attack
+        self.roll = roll
 
     def add_damage(self, source: str, dmg: int):
         self._dmg[source] += dmg
@@ -78,6 +80,5 @@ class HitArgs:
 
 
 class MissArgs:
-    def __init__(self, target: Target, weapon: Weapon):
-        self.target = target
-        self.weapon = weapon
+    def __init__(self, attack: AttackArgs):
+        self.attack = attack
