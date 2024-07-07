@@ -1,8 +1,9 @@
 from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
-from util import roll_dice, spell_slots
+from util import roll_dice, spell_slots, highest_spell_slot
 from target import Target
 from weapons import Weapon
 from log import log
+from spells import Spell
 
 
 class Feat:
@@ -80,6 +81,36 @@ class GreatWeaponMaster(Feat):
         if args.crit and self.character.use_bonus("GWM"):
             self.bonus_attack_enabled = True
             self.character.attack(args.target, args.weapon)
+
+
+class Archery(Feat):
+    def __init__(self) -> None:
+        self.name = "Archery"
+
+    def roll_attack(self, args: AttackRollArgs):
+        if args.weapon.ranged:
+            args.situational_bonus += 2
+
+
+class CrossbowExpert(Feat):
+    def __init__(self, weapon: Weapon) -> None:
+        self.name = "CrossbowExpert"
+        self.weapon = weapon
+
+    def apply(self, character):
+        super().apply(character)
+        character.dex += 1
+
+    def begin_turn(self, target: Target):
+        self.used_attack = False
+
+    def attack(self, args: AttackArgs):
+        self.used_attack = True
+
+    def end_turn(self, target):
+        if self.used_attack and self.character.use_bonus("CrossbowExpert"):
+            log.record("bonus attack", 1)
+            self.character.attack(target, self.weapon)
 
 
 class ASI(Feat):
@@ -186,11 +217,10 @@ class EquipWeapon(Feat):
             self.used_savage_attacker = True
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
-        args.add_damage(f"Weapon:{args.weapon.name}", dmg)
-        args.add_damage(
-            f"WeaponMod:{args.weapon.name}", self.character.mod(self.weapon.mod)
-        )
-        args.add_damage(f"WeaponBonus:{args.weapon.name}", self.weapon.bonus)
+        total_dmg = dmg + self.weapon.bonus
+        if not args.light_attack:
+            total_dmg += self.character.mod(self.weapon.mod)
+        args.add_damage(f"Weapon:{args.weapon.name}", total_dmg)
         if self.weapon.vex:
             args.target.vexed = True
         if self.weapon.topple:
@@ -204,14 +234,36 @@ class EquipWeapon(Feat):
             args.target.damage_source("Graze", self.character.mod(self.weapon.mod))
 
 
-class SpellSlots(Feat):
+class Spellcasting(Feat):
     def __init__(self, level, half=False) -> None:
-        self.name = "SpellSlots"
+        self.name = "Spellcasting"
         self.level = level
         self.half = half
-
-    def apply(self, character):
-        self.character = character
+        self.concentration = None
 
     def long_rest(self):
-        self.character.slots = spell_slots(self.level, half=self.half)
+        self.slots = spell_slots(self.level, half=self.half)
+
+    def short_rest(self):
+        self.concentration = None
+
+    def highest_slot(self):
+        return highest_spell_slot(self.slots)
+
+    def cast(self, spell: Spell):
+        self.slots[spell.slot] -= 1
+        if spell.concentration:
+            self.concentration = spell
+
+    def concentrating_on(self, name: str):
+        return self.concentration is not None and self.concentration.name is name
+
+
+class LightWeaponBonusAttack(Feat):
+    def __init__(self, weapon: Weapon) -> None:
+        self.name = "LightWeaponBonusAttack"
+        self.weapon = weapon
+
+    def end_turn(self, target):
+        if self.character.use_bonus("LightWeaponBonusAttack"):
+            self.character.attack(target, self.weapon, light_attack=True)

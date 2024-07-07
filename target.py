@@ -53,6 +53,7 @@ class Target:
         self.dmg += damage
 
     def damage_source(self, source: str, damage: int):
+        self.dmg += damage
         self._dmg_log[source] += damage
 
     def add_damage_sources(self, sources):

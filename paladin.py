@@ -2,16 +2,16 @@ from events import AttackRollArgs, HitArgs
 from target import Target
 from util import (
     magic_weapon,
-    highest_spell_slot,
     roll_dice,
 )
 from character import Character
-from feats import ASI, AttackAction, EquipWeapon, GreatWeaponMaster, Feat, SpellSlots
+from feats import ASI, AttackAction, EquipWeapon, GreatWeaponMaster, Feat, Spellcasting
 from weapons import Greatsword
 from log import log
+from spells import DivineSmite
 
 
-class DivineSmite(Feat):
+class DivineSmiteFeat(Feat):
     def __init__(self) -> None:
         self.name = "DivineSmite"
 
@@ -22,10 +22,11 @@ class DivineSmite(Feat):
         self.used = False
 
     def hit(self, args: HitArgs):
-        slot = highest_spell_slot(self.character.slots)
+        spellcasting = self.character.feat("Spellcasting")
+        slot = spellcasting.highest_slot()
         if not self.used and slot >= 1 and self.character.use_bonus("DivineSmite"):
             self.used = True
-            self.character.slots[slot] -= 1
+            spellcasting.cast(DivineSmite(slot))
             num = 1 + slot
             if args.crit:
                 num *= 2
@@ -71,9 +72,9 @@ class Paladin(Character):
         else:
             attacks = [weapon]
         base_feats.append(AttackAction(attacks))
-        base_feats.append(SpellSlots(level, half=True))
+        base_feats.append(Spellcasting(level, half=True))
         if level >= 2:
-            base_feats.append(DivineSmite())
+            base_feats.append(DivineSmiteFeat())
         if level >= 11:
             base_feats.append(ImprovedDivineSmite())
         if level >= 3:

@@ -70,7 +70,13 @@ class Character:
         crit: bool = False,
         attack_args: AttackArgs = None,
     ):
-        args = HitArgs(target, weapon, crit=crit, main_action=attack_args.main_action)
+        args = HitArgs(
+            target,
+            weapon,
+            crit=crit,
+            main_action=attack_args.main_action,
+            light_attack=attack_args.light_attack,
+        )
         for feat in self.feats:
             feat.hit(args)
         target.add_damage_sources(args._dmg)
@@ -102,8 +108,19 @@ class Character:
         for feat in self.feats:
             feat.action(target)
 
-    def attack(self, target: Target, weapon: Weapon, main_action: bool = False):
-        args = AttackArgs(target=target, weapon=weapon, main_action=main_action)
+    def attack(
+        self,
+        target: Target,
+        weapon: Weapon,
+        main_action: bool = False,
+        light_attack: bool = False,
+    ):
+        args = AttackArgs(
+            target=target,
+            weapon=weapon,
+            main_action=main_action,
+            light_attack=light_attack,
+        )
         for feat in self.feats:
             feat.attack(args)
 

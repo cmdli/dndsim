@@ -33,6 +33,7 @@ def simulate(character, level, fights, turns):
             character.enemy_turn(target)
             target.turn()
         character.short_rest()
+        target.log_damage_sources()
         dmg += target.dmg
     return dmg
 
@@ -63,11 +64,7 @@ if __name__ == "__main__":
         [
             ["Monk", Monk],
             ["Champion Figher", ChampionFighter],
-            ["Battlemaster Fighter", PrecisionTrippingFighter],
-            [
-                "Topple Battlemaster Fighter",
-                lambda level: PrecisionTrippingFighter(level, use_topple=True),
-            ],
+            # ["Battlemaster Fighter", PrecisionTrippingFighter],
             ["Barbarian", Barbarian],
             ["Paladin", Paladin],
             ["Ranger", Ranger],

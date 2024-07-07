@@ -5,10 +5,17 @@ from collections import defaultdict
 
 
 class AttackArgs:
-    def __init__(self, target: Target, weapon: Weapon, main_action=False):
+    def __init__(
+        self,
+        target: Target,
+        weapon: Weapon,
+        main_action=False,
+        light_attack: bool = False,
+    ):
         self.target = target
         self.weapon = weapon
         self.main_action = main_action
+        self.light_attack = light_attack
 
 
 class AttackRollArgs:
@@ -45,12 +52,14 @@ class HitArgs:
         weapon: Weapon,
         crit: bool = False,
         main_action: bool = False,
+        light_attack: bool = False,
     ):
         self._dmg = defaultdict(int)
         self.crit = crit
         self.target = target
         self.weapon = weapon
         self.main_action = main_action
+        self.light_attack = light_attack
 
     def add_damage(self, source: str, dmg: int):
         self._dmg[source] += dmg

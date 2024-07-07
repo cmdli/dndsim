@@ -62,3 +62,16 @@ class Maul(Weapon):
         super().__init__(
             name="Maul", num_dice=2, die=6, mod="str", topple=True, **kwargs
         )
+
+
+class HandCrossbow(Weapon):
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="HandCrossbow",
+            num_dice=1,
+            die=6,
+            mod="dex",
+            vex=True,
+            ranged=True,
+            **kwargs
+        )

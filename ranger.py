@@ -1,4 +1,6 @@
 import random
+from events import AttackArgs, AttackRollArgs, HitArgs
+from target import Target
 from util import (
     prof_bonus,
     magic_weapon,
@@ -7,132 +9,128 @@ from util import (
     roll_dice,
     do_roll,
 )
+from character import Character
+from feats import (
+    ASI,
+    AttackAction,
+    Archery,
+    CrossbowExpert,
+    Feat,
+    Spellcasting,
+    EquipWeapon,
+    LightWeaponBonusAttack,
+)
+from weapons import HandCrossbow, Weapon
+from spells import HuntersMark, SummonFey
+from summons import FeySummon
+from log import log
 
 
-class Ranger:
-    def __init__(self, level):
-        self.level = level
-        self.prof = prof_bonus(level)
-        if level >= 8:
-            self.dex = 5
-        elif level >= 4:
-            self.dex = 4
+class RangerAction(Feat):
+    def __init__(self, attacks) -> None:
+        self.name = "RangerAction"
+        self.attacks = attacks
+
+    def action(self, target: Target):
+        spellcasting = self.character.feat("Spellcasting")
+        slot = spellcasting.highest_slot()
+        if slot >= 4 and spellcasting.concentration is None:
+            spellcasting.cast(SummonFey(slot))
         else:
-            self.dex = 3
-        if level >= 16:
-            self.wis = 5
-        elif level >= 12:
-            self.wis = 4
-        else:
-            self.wis = 3
-        self.magic_weapon = magic_weapon(level)
-        self.to_hit = self.prof + self.dex + self.magic_weapon + 2
-        self.spell_hit = self.prof + self.wis + self.magic_weapon
-        if level >= 5:
-            self.max_attacks = 2
-        else:
-            self.max_attacks = 1
-
-    def weapon(self):
-        return random.randint(1, 6)
-
-    def hunters_mark(self):
-        if self.level >= 20:
-            return random.randint(1, 10)
-        return random.randint(1, 6)
-
-    def begin_turn(self):
-        self.used_bonus = False
-        self.attacks = self.max_attacks
-        self.used_natures_veil = False
-
-    def turn(self, target):
-        self.begin_turn()
-        slot = highest_spell_slot(self.slots)
-        if slot >= 4 and not self.concentration:
-            self.fey_summon = slot
-            self.concentration = True
-            self.slots[slot] -= 1
-        else:
-            if (
-                not self.used_bonus
-                and not self.used_hunters_mark
-                and not self.concentration
+            if spellcasting.concentration is None and self.character.use_bonus(
+                "HuntersMark"
             ):
-                self.used_bonus = True
-                self.used_hunters_mark = True
-                self.concentration = True
-            # Nature's Veil is DPR loss
-            # if self.level >= 14 and self.level < 17 and not self.used_bonus and not self.used_natures_veil:
-            #     self.used_bonus = True
-            #     self.used_natures_veil = True
-            while self.attacks > 0:
-                self.attack(target)
-                self.attacks -= 1
-            if self.level >= 3 and not self.used_gloom_attack:
-                self.used_gloom_attack = True
-                self.attack(target, gloom=True)
-            if not self.used_bonus and self.level >= 4:
-                self.used_bonus = True
-                self.attack(target, bonus=True)
-        if self.fey_summon > 0:
-            self.summon_fey(target)
+                spellcasting.cast(HuntersMark(slot))
+            for weapon in self.attacks:
+                log.record("main attack", 1)
+                self.character.attack(target, weapon, main_action=True)
 
-    def enemy_turn(self, target):
-        pass
 
-    def attack(self, target, bonus=False, gloom=False):
-        adv = False
-        if self.level >= 17 and self.used_hunters_mark:
-            adv = True
-        if self.used_natures_veil:
-            adv = True
-        if self.vex:
-            adv = True
-            self.vex = False
-        roll = do_roll(adv=adv)
-        if roll == 20:
-            self.hit(target, crit=True, bonus=bonus, gloom=gloom)
-        elif roll + self.to_hit >= target.ac:
-            self.hit(target, bonus=bonus, gloom=gloom)
+class HuntersMarkFeat(Feat):
+    def __init__(self, die: int, adv: bool = False) -> None:
+        self.name = "HuntersMarkFeat"
+        self.die = die
+        self.adv = adv
 
-    def hit(self, target, crit=False, bonus=False, gloom=False):
-        self.vex = True
-        target.damage(self.weapon() + self.magic_weapon)
-        if not bonus or self.level >= 4:
-            target.damage(self.dex)
-        if crit:
-            target.damage(self.weapon())
-        if gloom:
-            target.damage(random.randint(1, 8))
-            if crit:
-                target.damage(random.randint(1, 8))
-        if self.used_hunters_mark:
-            target.damage(self.hunters_mark())
-            if crit:
-                target.damage(self.hunters_mark())
+    def roll_attack(self, args: AttackRollArgs):
+        spellcasting = self.character.feat("Spellcasting")
+        if not spellcasting.concentrating_on("HuntersMark"):
+            return
+        if self.adv:
+            args.adv = True
 
-    def summon_fey(self, target):
-        adv = True  # Advantage on first attack
-        num_attacks = self.fey_summon // 2
-        for _ in range(num_attacks):
-            roll = do_roll(adv=adv)
-            adv = False
-            if roll == 20:
-                target.damage(roll_dice(4, 6) + 3 + self.fey_summon)
-            elif roll + self.to_hit >= target.ac:
-                target.damage(roll_dice(2, 6) + 3 + self.fey_summon)
+    def hit(self, args: HitArgs):
+        spellcasting = self.character.feat("Spellcasting")
+        if not spellcasting.concentrating_on("HuntersMark"):
+            return
+        num = 2 if args.crit else 1
+        args.add_damage("HuntersMark", roll_dice(num, self.die))
 
-    def long_rest(self):
-        self.short_rest()
-        # level = self.level
-        # if level == 20: # Ranger multiclass at 20
-        #     level += 2
-        self.slots = spell_slots(self.level, half=True)
+
+class Gloomstalker(Feat):
+    def __init__(self, weapon: Weapon) -> None:
+        self.name = "Gloomstalker"
+        self.weapon = weapon
+        self.using = False
+        self.first_turn = False
+        self.used = False
 
     def short_rest(self):
-        self.vex = False
-        self.used_gloom_attack = False
-        self.used_hunters_mark = False
-        self.concentration = False
-        self.fey_summon = 0
+        self.first_turn = True
+        self.used = False
+
+    def begin_turn(self, target: Target):
+        self.used_attack = False
+
+    def attack(self, args: AttackArgs):
+        self.used_attack = True
+
+    def hit(self, args: HitArgs):
+        if self.using:
+            num = 2 if args.crit else 1
+            args.add_damage("Gloomstalker", roll_dice(num, 8))
+
+    def end_turn(self, target):
+        if self.first_turn and self.used_attack:
+            self.using = True
+            log.record("gloom attack", 1)
+            self.character.attack(target, self.weapon)
+            self.using = False
+        self.first_turn = False
+        self.used_attack = False
+
+
+class Ranger(Character):
+    def __init__(self, level):
+        self.magic_weapon = magic_weapon(level)
+        base_feats = []
+        base_feats.append(Archery())
+        weapon = HandCrossbow(bonus=self.magic_weapon)
+        if level >= 5:
+            attacks = 2 * [weapon]
+        else:
+            attacks = [weapon]
+        base_feats.append(EquipWeapon(weapon))
+        base_feats.append(RangerAction(attacks=attacks))
+        base_feats.append(Spellcasting(level, half=True))
+        if level >= 20:
+            base_feats.append(HuntersMarkFeat(10, True))
+        elif level >= 17:
+            base_feats.append(HuntersMarkFeat(6, True))
+        else:
+            base_feats.append(HuntersMarkFeat(6, False))
+        if level >= 3:
+            base_feats.append(Gloomstalker(weapon))
+        base_feats.append(FeySummon())
+        super().init(
+            level=level,
+            stats=[10, 17, 10, 10, 16, 10],
+            feats=[
+                CrossbowExpert(weapon),
+                ASI([["dex", 2]]),
+                ASI([["wis", 2]]),
+                ASI([["wis", 2]]),
+                ASI(),
+            ],
+            base_feats=base_feats,
+        )
