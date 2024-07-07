@@ -1,7 +1,7 @@
 import random
 from util import get_magic_weapon, roll_dice
 from character import Character
-from feats import ASI, AttackAction, Feat, EquipWeapon
+from feats import ASI, AttackAction, Feat, EquipWeapon, IrresistibleOffense
 from weapons import Weapon
 
 
@@ -72,10 +72,8 @@ class StunningStrike(Feat):
                 args.attack.target.stunned = True
                 self.stuns.append(1)
             else:
-                args.add_damage(
-                    "StunningStrike",
-                    roll_dice(1, self.weapon_die) + self.character.mod("wis"),
-                )
+                dmg = roll_dice(1, self.weapon_die) + self.character.mod("wis")
+                args.add_damage("StunningStrike", dmg)
 
     def end_turn(self, target):
         self.stuns = [stun - 1 for stun in self.stuns if stun > 0]
@@ -133,7 +131,7 @@ class Monk(Character):
             ASI([["dex", 2]]),
             ASI([["wis", 2]]),
             ASI([["wis", 2]]),
-            ASI(),
+            IrresistibleOffense("dex"),
         ]
         super().init(
             level=level,

@@ -74,7 +74,7 @@ class Paladin(Character):
         if level >= 3:
             base_feats.append(SacredWeapon())
         feats = [
-            GreatWeaponMaster(),
+            GreatWeaponMaster(weapon),
             ASI([["str", 2]]),
             ASI([["cha", 2]]),
             ASI([["cha", 2]]),

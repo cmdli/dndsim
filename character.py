@@ -137,11 +137,9 @@ class Character:
         self,
         attack: AttackArgs,
         crit: bool = False,
+        roll: int = 0,
     ):
-        args = HitArgs(
-            attack=attack,
-            crit=crit,
-        )
+        args = HitArgs(attack=attack, crit=crit, roll=roll)
         for feat in self.feats:
             feat.hit(args)
         attack.target.add_damage_sources(args._dmg)

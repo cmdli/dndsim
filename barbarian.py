@@ -1,7 +1,16 @@
 import random
 from util import get_magic_weapon, do_roll, roll_dice
 from character import Character
-from feats import ASI, GreatWeaponMaster, PolearmMaster, AttackAction, Feat, EquipWeapon
+from feats import (
+    ASI,
+    GreatWeaponMaster,
+    PolearmMaster,
+    AttackAction,
+    Feat,
+    EquipWeapon,
+    IrresistibleOffense,
+    CombatProwess,
+)
 from weapons import Glaive, Greatsword, GlaiveButt
 
 
@@ -57,6 +66,7 @@ class PrimalChampion(Feat):
     def apply(self, character):
         super().apply(character)
         character.str += 4
+        character.con += 4
 
 
 class Rage(Feat):
@@ -129,14 +139,20 @@ class Barbarian(Character):
             base_feats.append(PrimalChampion())
         if use_pam:
             feats = [
-                GreatWeaponMaster(),
+                GreatWeaponMaster(weapon),
                 PolearmMaster(GlaiveButt(bonus=magic_weapon)),
                 ASI([["str", 1], ["con", 1]]),
                 ASI(),
-                ASI(),
+                CombatProwess(),
             ]
         else:
-            feats = [GreatWeaponMaster(), ASI([["str", 2]]), ASI(), ASI(), ASI()]
+            feats = [
+                GreatWeaponMaster(weapon),
+                ASI([["str", 2]]),
+                ASI(),
+                ASI(),
+                CombatProwess(),
+            ]
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 10],

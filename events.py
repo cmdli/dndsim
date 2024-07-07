@@ -56,10 +56,12 @@ class HitArgs:
         self,
         attack: AttackArgs,
         crit: bool = False,
+        roll: int = 0,
     ):
         self._dmg = defaultdict(int)
         self.attack = attack
         self.crit = crit
+        self.roll = roll
 
     def add_damage(self, source: str, dmg: int):
         self._dmg[source] += dmg

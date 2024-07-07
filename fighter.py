@@ -9,6 +9,8 @@ from feats import (
     PolearmMaster,
     Feat,
     EquipWeapon,
+    CombatProwess,
+    IrresistibleOffense,
 )
 from character import Character
 from weapons import Glaive, Greatsword, GlaiveButt, Maul
@@ -184,23 +186,23 @@ class Fighter(Character):
             butt = GlaiveButt(bonus=magic_weapon, min_crit=min_crit)
             base_feats.append(EquipWeapon(butt, savage_attacker=True, max_reroll=2))
             feats = [
-                GreatWeaponMaster(),
+                GreatWeaponMaster(weapon),
                 PolearmMaster(butt),
                 ASI([["str", 1]]),
                 ASI(),
                 ASI(),
                 ASI(),
-                ASI(),
+                IrresistibleOffense("str"),
             ]
         else:
             feats = [
-                GreatWeaponMaster(),
+                GreatWeaponMaster(weapon),
                 ASI([["str", 2]]),
                 ASI(),
                 ASI(),
                 ASI(),
                 ASI(),
-                ASI(),
+                IrresistibleOffense("str"),
             ]
         super().init(
             level=level,
