@@ -1,4 +1,6 @@
 import random
+
+from log import log
 from target import Target
 from weapons import Weapon
 from collections import defaultdict
@@ -35,10 +37,13 @@ class AttackRollArgs:
 
     def roll(self):
         if self.adv == self.disadv:
+            log.output("\tRoll: " + str(self.roll1))
             return self.roll1
         elif self.adv:
+            log.output("\tRoll ADV: " + str(self.roll1) + ", " + str(self.roll2))
             return max(self.roll1, self.roll2)
         else:
+            log.output("\tRoll DIS: " + str(self.roll1) + ", " + str(self.roll2))
             return min(self.roll1, self.roll2)
 
     def hits(self):

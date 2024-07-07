@@ -171,6 +171,7 @@ class Attack(Feat):
         result = self.character.roll_attack(args.target, args.weapon, to_hit)
         roll = result.roll()
         crit = False
+        log.output("Attack roll: " + str(roll) + ", bonus " + str(to_hit) + ", situational: " + str(result.situational_bonus))
         if roll >= args.weapon.min_crit:
             crit = True
         if roll + to_hit + result.situational_bonus >= args.target.ac:
@@ -218,8 +219,12 @@ class EquipWeapon(Feat):
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
         total_dmg = dmg + self.weapon.bonus
-        if not args.light_attack:
-            total_dmg += self.character.mod(self.weapon.mod)
+        base = self.weapon.base
+        if base == None:
+            base = self.character.mod(self.weapon.mod)
+        elif isinstance(base, str):
+            base = self.character.mod(base)
+        total_dmg += base
         args.add_damage(f"Weapon:{args.weapon.name}", total_dmg)
         if self.weapon.vex:
             args.target.vexed = True
