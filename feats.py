@@ -101,6 +101,13 @@ class Archery(Feat):
         if args.attack.weapon.ranged:
             args.situational_bonus += 2
 
+class DualWielder(Feat):
+    def __init__(self):
+        self.name = "DualWielder"
+
+    def apply(selfself, character):
+        super().apply(character)
+        character.dex += 1
 
 class CrossbowExpert(Feat):
     def __init__(self, weapon: Weapon) -> None:

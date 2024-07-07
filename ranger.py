@@ -12,7 +12,7 @@ from feats import (
     CrossbowExpert,
     Feat,
     Spellcasting,
-    EquipWeapon,
+    EquipWeapon, DualWielder,
 )
 from weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells import HuntersMark
@@ -184,17 +184,21 @@ class BeastMasterRanger(Character):
         self.magic_weapon = get_magic_weapon(level)
         base_feats = []
         maul = BeastMaul(base=2 + prof_bonus(level))
-        if level < 4:
-            main_weapon = Shortsword(bonus=self.magic_weapon)
-        else:
-            main_weapon = Rapier(bonus = self.magic_weapon)
+        shortsword = Shortsword(bonus=self.magic_weapon)
+        rapier = Rapier(bonus = self.magic_weapon)
         other_shortsword = Shortsword(bonus=self.magic_weapon, name="Offhand Shortsword", base="dex" if level >= 2 else 0)
         scimitar = Scimitar(bonus=self.magic_weapon, base="dex" if level >= 2 else 0)
         base_feats.append(EquipWeapon(maul))
-        base_feats.append(EquipWeapon(main_weapon))
+        base_feats.append(EquipWeapon(shortsword))
+        base_feats.append(EquipWeapon(rapier))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(EquipWeapon(other_shortsword))
         def attacks():
+            if self.has_feat("DualWielder"):
+                main_weapon = rapier
+            else:
+                main_weapon = shortsword
+
             if self.level >= 3:
                 if self.use_bonus("beast"):
                     yield maul
@@ -236,7 +240,7 @@ class BeastMasterRanger(Character):
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
             feats=[
-                ASI([["dex", 1]]),
+                DualWielder(),
                 ASI([["dex", 2]]),
                 ASI([["wis", 2]]),
                 ASI([["wis", 2]]),
