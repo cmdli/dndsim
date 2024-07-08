@@ -1,13 +1,11 @@
 import csv
+import click
+from typing import Set
 
 from monk import Monk
 from barbarian import Barbarian
 from fighter import (
-    Fighter,
     ChampionFighter,
-    TrippingFighter,
-    PrecisionFighter,
-    BattlemasterFighter,
     PrecisionTrippingFighter,
 )
 from rogue import Rogue
@@ -52,29 +50,53 @@ def write_data(file, data):
         writer.writerows(data)
 
 
-def test_characters(characters):
+def test_characters(characters, start: int, end: int):
     data = [["Level", "Character", "DPR"]]
-    for level in range(1, 21):
+    for level in range(start, end + 1):
         for [name, Creator] in characters:
             data.append([level, name, test_dpr(Creator(level), level)])
     return data
 
 
-if __name__ == "__main__":
+CHARACTER_MAPPING = {
+    "monk": ["Monk", Monk],
+    "champion": ["Champion Fighter", ChampionFighter],
+    "battlemaster": ["Battlemaster Fighter", ChampionFighter],
+    "barbarian": ["Barbarian", Barbarian],
+    "Paladin": ["Paladin", Paladin],
+    "gloomstalker": ["Gloomstalker Ranger", GloomstalkerRanger],
+    "beastmaster": ["Beastmaster Ranger", BeastMasterRanger],
+    "rogue": ["Rogue", Rogue],
+    "wizard": ["Wizard", Wizard],
+    "cleric": ["Cleric", Cleric],
+    "au": ["Assault Unit 2 1", AssaultUnit],
+}
+
+
+def get_characters(names: Set[str]):
+    if "all" in names:
+        return list(CHARACTER_MAPPING.values())
+    else:
+        characters = []
+        for name in names:
+            characters.append(CHARACTER_MAPPING[name])
+        return characters
+
+
+@click.command()
+@click.option("-s", "--start", default=1, help="Start of the level range")
+@click.option("-e", "--end", default=20, help="End of the level range")
+@click.option("--characters", default="all", help="Characters to test")
+def run(start, end, characters):
+    characters = get_characters(characters.split(","))
     data = test_characters(
-        [
-            ["Monk", Monk],
-            ["Champion Figher", ChampionFighter],
-            ["Battlemaster Fighter", PrecisionTrippingFighter],
-            ["Barbarian", Barbarian],
-            ["Paladin", Paladin],
-            ["Gloomstalker", GloomstalkerRanger],
-            ["Beast Master", BeastMasterRanger],
-            ["Rogue", Rogue],
-            ["Wizard", Wizard],
-            ["Cleric", Cleric],
-            ["Assault Unit 2 1", AssaultUnit],
-        ]
+        characters,
+        start=start,
+        end=end,
     )
     write_data("data.csv", data)
     log.printReport()
+
+
+if __name__ == "__main__":
+    run()
