@@ -7,6 +7,7 @@ from util import (
 from character import Character
 from feats import ASI, AttackAction, Feat, EquipWeapon
 from weapons import Shortsword, Scimitar
+from events import HitArgs
 from log import log
 
 
@@ -36,6 +37,7 @@ class SteadyAim(Feat):
     def roll_attack(self, args):
         if self.enabled:
             args.adv = True
+            self.enabled = False
 
     def end_turn(self, target):
         self.enabled = False
@@ -94,11 +96,11 @@ class DeathStrike(Feat):
     def short_rest(self):
         self.enabled = True
 
-    def hit(self, args):
+    def hit(self, args: HitArgs):
         if self.enabled:
             self.enabled = False
             if not args.attack.target.save(self.character.dc("dex")):
-                args.add_damage("DeathStrike", args.total_damage())
+                args.dmg_multiplier *= 2
 
     def end_turn(self, target):
         self.enabled = False
@@ -113,7 +115,7 @@ class Rogue(Character):
         scimitar = Scimitar(bonus=magic_weapon)
         base_feats.append(EquipWeapon(shortsword))
         base_feats.append(EquipWeapon(scimitar))
-        base_feats.append(AttackAction(attacks=[shortsword, scimitar]))
+        base_feats.append(AttackAction(attacks=[shortsword], nick_attacks=[scimitar]))
         base_feats.append(SneakAttack(sneak_attack))
         if level >= 3:
             base_feats.append(SteadyAim())

@@ -5,7 +5,15 @@ from util import (
     roll_dice,
 )
 from character import Character
-from feats import ASI, AttackAction, EquipWeapon, GreatWeaponMaster, Feat, Spellcasting
+from feats import (
+    ASI,
+    AttackAction,
+    EquipWeapon,
+    GreatWeaponMaster,
+    Feat,
+    Spellcasting,
+    TwoWeaponFighting,
+)
 from weapons import Greatsword, Shortsword, Scimitar
 from log import log
 from spells import DivineSmite, DivineFavor
@@ -34,7 +42,7 @@ class DivineSmiteFeat(Feat):
 
 
 class ImprovedDivineSmite(Feat):
-    def __init__(self, max_reroll: int) -> None:
+    def __init__(self, max_reroll: int = 0) -> None:
         self.name = "ImprovedDivineSmite"
         self.max_reroll = max_reroll
 
@@ -87,30 +95,27 @@ class Paladin(Character):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         if use_twf:
-            shortsword = Shortsword("str", bonus=magic_weapon)
             scimitar = Scimitar("str", bonus=magic_weapon)
-            base_feats.append(EquipWeapon(shortsword))
+            base_feats.append(TwoWeaponFighting())
             base_feats.append(EquipWeapon(scimitar))
-            if level >= 5:
-                attacks = [shortsword, shortsword, scimitar]
-            else:
-                attacks = [shortsword, scimitar]
-            base_feats.append(AttackAction(attacks))
+            weapon = Shortsword("str", bonus=magic_weapon)
+            nick_attacks = [scimitar]
             max_reroll = 0
         else:
             weapon = Greatsword(bonus=magic_weapon)
+            nick_attacks = []
             max_reroll = 2
-            base_feats.append(EquipWeapon(weapon=weapon, max_reroll=max_reroll))
-            if level >= 5:
-                attacks = 2 * [weapon]
-            else:
-                attacks = [weapon]
-            base_feats.append(AttackAction(attacks))
+        base_feats.append(EquipWeapon(weapon=weapon, max_reroll=max_reroll))
+        if level >= 5:
+            attacks = 2 * [weapon]
+        else:
+            attacks = [weapon]
+        base_feats.append(AttackAction(attacks=attacks, nick_attacks=nick_attacks))
         base_feats.append(Spellcasting(level, half=True))
         if level >= 2:
-            base_feats.append(DivineSmiteFeat(max_reroll=0))
+            base_feats.append(DivineSmiteFeat())
         if level >= 11:
-            base_feats.append(ImprovedDivineSmite(max_reroll=0))
+            base_feats.append(ImprovedDivineSmite())
         if level >= 3:
             base_feats.append(SacredWeapon())
         base_feats.append(DivineFavorFeat())

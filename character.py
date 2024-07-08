@@ -14,7 +14,7 @@ class Character:
         level=None,
         stats=None,
         feats=None,
-        base_feats: List[Feat]=None,
+        base_feats: List[Feat] = None,
         feat_schedule=[4, 8, 12, 16, 19],
         default_feats=None,
     ):
@@ -154,7 +154,8 @@ class Character:
         for feat in self.feats_for_event("hit"):
             feat.hit(args)
         log.output(lambda: str(args._dmg))
-        attack.target.add_damage_sources(args._dmg)
+        for key in args._dmg:
+            attack.target.damage_source(key, args.dmg_multiplier * args._dmg[key])
 
     def miss(self, attack: AttackArgs):
         args = MissArgs(attack)

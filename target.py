@@ -55,11 +55,6 @@ class Target:
         self.dmg += damage
         self._dmg_log[source] += damage
 
-    def add_damage_sources(self, sources):
-        for key in sources:
-            self._dmg_log[key] += sources[key]
-            self.dmg += sources[key]
-
     def print_damage_log(self):
         for key in self._dmg_log:
             print(f"Source: {key} - Damage: {self._dmg_log[key]}")
@@ -71,7 +66,7 @@ class Target:
     def save(self, dc):
         roll = random.randint(1, 20)
         total = roll + self.save_bonus
-        log.output(lambda : f"Save roll: {roll} total {total} vs {dc}")
+        log.output(lambda: f"Save roll: {roll} total {total} vs {dc}")
         return total >= dc
 
     def turn(self):

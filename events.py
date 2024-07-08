@@ -72,6 +72,7 @@ class HitArgs:
         roll: int = 0,
     ):
         self._dmg = defaultdict(int)
+        self.dmg_multiplier = 1
         self.attack = attack
         self.crit = crit
         self.roll = roll

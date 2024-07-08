@@ -63,7 +63,7 @@ CHARACTER_MAPPING = {
     "champion": ["Champion Fighter", ChampionFighter],
     "battlemaster": ["Battlemaster Fighter", ChampionFighter],
     "barbarian": ["Barbarian", Barbarian],
-    "Paladin": ["Paladin", Paladin],
+    "paladin": ["Paladin", Paladin],
     "gloomstalker": ["Gloomstalker Ranger", GloomstalkerRanger],
     "beastmaster": ["Beastmaster Ranger", BeastMasterRanger],
     "rogue": ["Rogue", Rogue],
@@ -79,7 +79,7 @@ def get_characters(names: Set[str]):
     else:
         characters = []
         for name in names:
-            characters.append(CHARACTER_MAPPING[name])
+            characters.append(CHARACTER_MAPPING[name.lower()])
         return characters
 
 

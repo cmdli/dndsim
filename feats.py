@@ -136,13 +136,16 @@ class ASI(Feat):
 
 
 class AttackAction(Feat):
-    def __init__(self, attacks):
+    def __init__(self, attacks, nick_attacks=[]):
         self.name = "AttackAction"
         self.base_attacks = attacks
+        self.nick_attacks = nick_attacks
 
     def action(self, target):
         for weapon in self.base_attacks:
             self.character.attack(target, weapon, tags=["main_action"])
+        for weapon in self.nick_attacks:
+            self.character.attack(target, weapon, tags=["main_action", "light"])
 
 
 class Attack(Feat):
