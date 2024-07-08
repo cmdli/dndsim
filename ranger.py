@@ -23,10 +23,10 @@ from log import log
 
 
 # ranger casts either summon fey or hunter's mark, returns true if ranger still has action
-def cast_spell(character: Character, summon_fey: int) -> bool:
+def cast_spell(character: Character, summon_fey_threshold: int) -> bool:
     spellcasting = character.feat("Spellcasting")
     slot = spellcasting.highest_slot()
-    if summon_fey and slot >= summon_fey and not spellcasting.is_concentrating():
+    if summon_fey_threshold and slot >= summon_fey_threshold and not spellcasting.is_concentrating():
         spell = SummonFey(
             slot,
             caster_level=character.level,
@@ -42,13 +42,13 @@ def cast_spell(character: Character, summon_fey: int) -> bool:
         return True
 
 class RangerAction(Feat):
-    def __init__(self, attacks, summon_fey: int = None) -> None:
+    def __init__(self, attacks, summon_fey_threshold: int = None) -> None:
         self.name = "RangerAction"
         self.attacks = attacks
-        self.summon_fey = summon_fey
+        self.summon_fey_threshold = summon_fey_threshold
 
     def action(self, target: Target):
-        has_action = cast_spell(self.character, self.summon_fey)
+        has_action = cast_spell(self.character, self.summon_fey_threshold)
         if has_action:
             for weapon in self.attacks:
                 log.record("main attack", 1)
@@ -151,7 +151,7 @@ class GloomstalkerRanger(Character):
         else:
             attacks = [weapon]
         base_feats.append(EquipWeapon(weapon))
-        base_feats.append(RangerAction(attacks=attacks, summon_fey=4))
+        base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
         base_feats.append(Spellcasting(level, half=True))
         if level >= 20:
             base_feats.append(HuntersMarkFeat(10, True, ))
