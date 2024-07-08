@@ -28,6 +28,10 @@ class AttackArgs:
             self.tags = set()
         self.tags.add(tag)
 
+    def remove_tag(self, tag: str):
+        if self.tags is not None and tag in self.tags:
+            self.tags.remove(tag)
+
 
 class AttackRollArgs:
     def __init__(self, attack: AttackArgs, to_hit: int):
@@ -55,7 +59,9 @@ class AttackRollArgs:
             return min(self.roll1, self.roll2)
 
     def hits(self):
-        return self.roll() + self.to_hit + self.situational_bonus >= self.attack.target.ac
+        return (
+            self.roll() + self.to_hit + self.situational_bonus >= self.attack.target.ac
+        )
 
 
 class HitArgs:
@@ -72,7 +78,6 @@ class HitArgs:
 
     def add_damage(self, source: str, dmg: int):
         self._dmg[source] += dmg
-
 
     def total_damage(self):
         total = 0

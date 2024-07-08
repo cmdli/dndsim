@@ -17,6 +17,7 @@ from feats import (
     EquipWeapon,
     DualWielder,
     Attack,
+    TwoWeaponFighting,
 )
 from weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells import HuntersMark
@@ -157,7 +158,8 @@ class GloomstalkerRanger(Character):
     def __init__(self, level):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
-        base_feats.append(Archery())
+        if level >= 2:
+            base_feats.append(Archery())
         weapon = HandCrossbow(bonus=magic_weapon)
         if level >= 5:
             attacks = 2 * [weapon]
@@ -191,7 +193,7 @@ class GloomstalkerRanger(Character):
 
 
 class PrimalCompanion(Character):
-    def __init__(self, level: int, ranger: Character, to_hit: int):
+    def __init__(self, level: int, ranger: Character):
         self.ranger = ranger
         self.num_attacks = 2 if level >= 11 else 1
         self.weapon = BeastMaul(base=2 + prof_bonus(level))
@@ -246,21 +248,20 @@ class BeastMasterAction(Feat):
                 elif self.character.level >= 5:
                     self.beast.do_attack(target)
                 self.character.attack(target, self.main_hand)
-                self.character.attack(target, self.off_hand_nick)
+                self.character.attack(target, self.off_hand_nick, tags=["light"])
             else:
                 self.character.attack(target, self.main_hand)
-                tags = [] if self.character.level >= 2 else ["light"]
                 if self.character.use_bonus("light weapon"):
-                    self.character.attack(target, self.off_hand_other, tags=tags)
+                    self.character.attack(target, self.off_hand_other, tags=["light"])
                 else:
-                    self.character.attack(target, self.off_hand_nick, tags=tags)
+                    self.character.attack(target, self.off_hand_nick, tags=["light"])
 
 
 class BeastMasterRanger(Character):
     def __init__(self, level):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
-        beast = PrimalCompanion(level, ranger=self, to_hit=0)
+        beast = PrimalCompanion(level, ranger=self)
         shortsword = Shortsword(bonus=magic_weapon)
         rapier = Rapier(bonus=magic_weapon)
         other_shortsword = Shortsword(
@@ -273,6 +274,8 @@ class BeastMasterRanger(Character):
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(EquipWeapon(other_shortsword))
         base_feats.append(Spellcasting(level, half=True))
+        if level >= 2:
+            base_feats.append(TwoWeaponFighting())
         if level >= 20:
             base_feats.append(HuntersMarkFeat(10, True))
         elif level >= 17:

@@ -89,9 +89,15 @@ class DualWielder(Feat):
     def __init__(self):
         self.name = "DualWielder"
 
-    def apply(selfself, character):
+    def apply(self, character):
         super().apply(character)
         character.dex += 1
+
+class TwoWeaponFighting(Feat):
+    def __init__(self) -> None:
+        self.name = "TwoWeaponFighting"
+
+    def apply
 
 
 class CrossbowExpert(Feat):
