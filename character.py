@@ -1,5 +1,5 @@
 from util import prof_bonus
-from feats import Attack, Vex
+from feats import Attack, Vex, Feat
 from target import Target
 from weapons import Weapon
 from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
@@ -13,7 +13,7 @@ class Character:
         level=None,
         stats=None,
         feats=None,
-        base_feats=None,
+        base_feats: List[Feat]=None,
         feat_schedule=[4, 8, 12, 16, 19],
         default_feats=[Attack(), Vex()],
     ):
