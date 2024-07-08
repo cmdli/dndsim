@@ -1,5 +1,5 @@
 from events import AttackArgs, AttackRollArgs, HitArgs
-from feats import Feat
+from feats import Feat, Attack
 from util import do_roll, roll_dice
 from target import Target
 from log import log
@@ -22,21 +22,6 @@ class SummonHit(Feat):
             self.name,
             roll_dice(num, args.attack.weapon.die) + self.bonus_dmg + self.slot,
         )
-
-
-class SummonAttack(Feat):
-    def __init__(self, slot: int, to_hit: int) -> None:
-        self.name = "SummonAttack"
-        self.slot = slot
-        self.to_hit = to_hit
-
-    def attack(self, args: AttackArgs):
-        result = self.character.roll_attack(attack=args, to_hit=self.to_hit)
-        roll = result.roll()
-        if roll == 20:
-            self.character.hit(attack=args, crit=True)
-        elif roll + self.to_hit >= args.target.ac:
-            self.character.hit(attack=args)
 
 
 class SummonAction(Feat):
@@ -70,7 +55,7 @@ class Summon(Character):
             base_feats=base_feats,
             feats=[],
             feat_schedule=[],
-            default_feats=[SummonAttack(slot, to_hit)],
+            default_feats=[Attack(lambda: to_hit)],
         )
 
 

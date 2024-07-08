@@ -14,7 +14,9 @@ from feats import (
     CrossbowExpert,
     Feat,
     Spellcasting,
-    EquipWeapon, DualWielder,
+    EquipWeapon,
+    DualWielder,
+    Attack,
 )
 from weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells import HuntersMark
@@ -26,7 +28,11 @@ from log import log
 def cast_spell(character: Character, summon_fey_threshold: int) -> bool:
     spellcasting = character.feat("Spellcasting")
     slot = spellcasting.highest_slot()
-    if summon_fey_threshold and slot >= summon_fey_threshold and not spellcasting.is_concentrating():
+    if (
+        summon_fey_threshold
+        and slot >= summon_fey_threshold
+        and not spellcasting.is_concentrating()
+    ):
         spell = SummonFey(
             slot,
             caster_level=character.level,
@@ -35,11 +41,10 @@ def cast_spell(character: Character, summon_fey_threshold: int) -> bool:
         spellcasting.cast(spell)
         return False
     else:
-        if not spellcasting.is_concentrating() and character.use_bonus(
-                "HuntersMark"
-        ):
+        if not spellcasting.is_concentrating() and character.use_bonus("HuntersMark"):
             spellcasting.cast(HuntersMark(slot))
         return True
+
 
 class RangerAction(Feat):
     def __init__(self, attacks, summon_fey_threshold: int = None) -> None:
@@ -63,19 +68,25 @@ class HuntersMarkFeat(Feat):
         self.filter = filter
         self.caster = caster
 
+    def apply(self, character):
+        super().apply(character)
+        if self.caster is None:
+            self.caster = character
+
     def roll_attack(self, args: AttackRollArgs):
-        spellcasting = (self.caster or self.character).feat("Spellcasting")
+        spellcasting = self.caster.feat("Spellcasting")
         if not spellcasting.concentrating_on("HuntersMark"):
             return
         if self.adv:
             args.adv = True
 
     def hit(self, args: HitArgs):
-        spellcasting = self.character.feat("Spellcasting")
+        spellcasting = self.caster.feat("Spellcasting")
         if not spellcasting.concentrating_on("HuntersMark"):
             return
         num = 2 if args.crit else 1
         args.add_damage("HuntersMark", roll_dice(num, self.die))
+
 
 class Gloomstalker(Feat):
     def __init__(self, weapon: Weapon) -> None:
@@ -119,7 +130,9 @@ class BeastChargeFeat(Feat):
         if isinstance(args.attack.weapon, BeastMaul):
             num = 2 if args.crit else 1
             args.add_damage("Charge", roll_dice(num, 6))
-            if not args.attack.target.prone and not args.attack.target.save(self.character.dc("wis")):
+            if not args.attack.target.prone and not args.attack.target.save(
+                self.character.dc("wis")
+            ):
                 args.attack.target.prone = True
                 log.output(lambda: "Knocked prone by Charge")
 
@@ -154,11 +167,11 @@ class GloomstalkerRanger(Character):
         base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
         base_feats.append(Spellcasting(level, half=True))
         if level >= 20:
-            base_feats.append(HuntersMarkFeat(10, True, ))
+            base_feats.append(HuntersMarkFeat(10, True))
         elif level >= 17:
-            base_feats.append(HuntersMarkFeat(6, True, ))
+            base_feats.append(HuntersMarkFeat(6, True))
         else:
-            base_feats.append(HuntersMarkFeat(6, False, ))
+            base_feats.append(HuntersMarkFeat(6, False))
         if level >= 3:
             base_feats.append(Gloomstalker(weapon))
         if level >= 11:
@@ -176,13 +189,13 @@ class GloomstalkerRanger(Character):
             base_feats=base_feats,
         )
 
+
 class PrimalCompanion(Character):
-    def __init__(self, level: int, ranger: Character, attack: Weapon):
+    def __init__(self, level: int, ranger: Character, to_hit: int):
         self.ranger = ranger
-        base_feats: List[Feat] = [
-            BeastChargeFeat(),
-            EquipWeapon(attack)
-        ]
+        self.num_attacks = 2 if level >= 11 else 1
+        self.weapon = BeastMaul(base=2 + prof_bonus(level))
+        base_feats: List[Feat] = [BeastChargeFeat(), EquipWeapon(self.weapon)]
         if level >= 11:
             base_feats += [HuntersMarkFeat(die=10 if level >= 20 else 6, caster=ranger)]
         super().init(
@@ -190,7 +203,15 @@ class PrimalCompanion(Character):
             stats=[10, 10, 10, 10, 10, 10],
             feats=[],
             base_feats=base_feats,
+            default_feats=[Attack(lambda: self.get_to_hit())],
         )
+
+    def do_attack(self, target: Target):
+        for _ in range(self.num_attacks):
+            self.attack(target, self.weapon)
+
+    def get_to_hit(self):
+        return self.ranger.prof + self.ranger.mod("wis")
 
 
 class BeastMaul(Weapon):
@@ -201,13 +222,18 @@ class BeastMaul(Weapon):
 
 
 class BeastMasterAction(Feat):
-    def __init__(self, beast: Character, maul: Weapon, main_hand: Weapon, off_hand_nick: Weapon, off_hand_other: Weapon) -> None:
-        self.maul = maul
+    def __init__(
+        self,
+        beast: Character,
+        main_hand: Weapon,
+        off_hand_nick: Weapon,
+        off_hand_other: Weapon,
+    ) -> None:
+        self.name = "BeastMasterAction"
         self.beast = beast
         self.off_hand_other = off_hand_other
         self.off_hand_nick = off_hand_nick
         self.main_hand = main_hand
-        self.name = "BeastMasterAction"
 
     def action(self, target: Target):
         has_action = cast_spell(self.character, None)
@@ -215,15 +241,10 @@ class BeastMasterAction(Feat):
             if self.character.level >= 3:
                 if self.character.use_bonus("beast"):
                     log.output(lambda: "Use bonus action for beast attack")
-                    self.beast.attack(target, self.maul)
-                    if self.character.level >= 11:
-                        self.beast.attack(target, self.maul)
+                    self.beast.do_attack(target)
                     self.character.attack(target, self.main_hand)
-                else:
-                    if self.character.level >= 5:
-                        self.beast.attack(target, self.maul)
-                        if self.character.level >= 11:
-                            self.beast.attack(target, self.maul)
+                elif self.character.level >= 5:
+                    self.beast.do_attack(target)
                 self.character.attack(target, self.main_hand)
                 self.character.attack(target, self.off_hand_nick)
             else:
@@ -237,38 +258,35 @@ class BeastMasterAction(Feat):
 
 class BeastMasterRanger(Character):
     def __init__(self, level):
-        self.magic_weapon = get_magic_weapon(level)
+        magic_weapon = get_magic_weapon(level)
         base_feats = []
-        maul = BeastMaul(base=2 + prof_bonus(level))
-        beast = PrimalCompanion(level, self, attack=maul)
-        shortsword = Shortsword(bonus=self.magic_weapon)
-        rapier = Rapier(bonus = self.magic_weapon)
+        beast = PrimalCompanion(level, ranger=self, to_hit=0)
+        shortsword = Shortsword(bonus=magic_weapon)
+        rapier = Rapier(bonus=magic_weapon)
         other_shortsword = Shortsword(
-            bonus=self.magic_weapon,
+            bonus=magic_weapon,
             name="OffhandShortsword",
         )
-        scimitar = Scimitar(bonus=self.magic_weapon)
-        base_feats.append(EquipWeapon(maul))
+        scimitar = Scimitar(bonus=magic_weapon)
         base_feats.append(EquipWeapon(shortsword))
         base_feats.append(EquipWeapon(rapier))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(EquipWeapon(other_shortsword))
         base_feats.append(Spellcasting(level, half=True))
-        base_feats.append(BeastChargeFeat())
-
         if level >= 20:
-            base_feats.append(HuntersMarkFeat(10, True, ))
+            base_feats.append(HuntersMarkFeat(10, True))
         elif level >= 17:
-            base_feats.append(HuntersMarkFeat(6, True, ))
+            base_feats.append(HuntersMarkFeat(6, True))
         else:
-            base_feats.append(HuntersMarkFeat(6, False, ))
-        base_feats.append(BeastMasterAction(
-            beast=beast,
-            maul=maul,
-            main_hand=rapier if level >= 4 else shortsword,
-            off_hand_nick=scimitar,
-            off_hand_other=other_shortsword,
-        ))
+            base_feats.append(HuntersMarkFeat(6, False))
+        base_feats.append(
+            BeastMasterAction(
+                beast=beast,
+                main_hand=rapier if level >= 4 else shortsword,
+                off_hand_nick=scimitar,
+                off_hand_other=other_shortsword,
+            )
+        )
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],

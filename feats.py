@@ -84,6 +84,7 @@ class Archery(Feat):
         if args.attack.weapon.ranged:
             args.situational_bonus += 2
 
+
 class DualWielder(Feat):
     def __init__(self):
         self.name = "DualWielder"
@@ -91,6 +92,7 @@ class DualWielder(Feat):
     def apply(selfself, character):
         super().apply(character)
         character.dex += 1
+
 
 class CrossbowExpert(Feat):
     def __init__(self, weapon: Weapon) -> None:
@@ -135,8 +137,9 @@ class AttackAction(Feat):
 
 
 class Attack(Feat):
-    def __init__(self):
+    def __init__(self, custom_to_hit=None):
         self.name = "Attack"
+        self.custom_to_hit = custom_to_hit
 
     def roll_attack(self, args):
         if args.attack.target.stunned:
@@ -150,11 +153,14 @@ class Attack(Feat):
     def attack(self, args):
         log.record(f"Attack:{args.weapon.name}", 1)
         self.character.before_attack()
-        to_hit = (
-            self.character.prof
-            + self.character.mod(args.weapon.mod)
-            + args.weapon.bonus
-        )
+        if self.custom_to_hit:
+            to_hit = self.custom_to_hit()
+        else:
+            to_hit = (
+                self.character.prof
+                + self.character.mod(args.weapon.mod)
+                + args.weapon.bonus
+            )
         result = self.character.roll_attack(attack=args, to_hit=to_hit)
         roll = result.roll()
         crit = False
@@ -179,6 +185,7 @@ class EquipWeapon(Feat):
         self.weapon = weapon
         self.savage_attacker = savage_attacker
         self.max_reroll = max_reroll
+        self.used_savage_attacker = False
 
     def begin_turn(self, target):
         self.used_savage_attacker = False
@@ -201,7 +208,7 @@ class EquipWeapon(Feat):
             return
         log.record(f"Hit:{weapon.name}", 1)
         dmg = self.damage(crit=args.crit)
-        if not self.used_savage_attacker and self.savage_attacker:
+        if self.savage_attacker and not self.used_savage_attacker:
             self.used_savage_attacker = True
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
