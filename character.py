@@ -16,8 +16,10 @@ class Character:
         feats=None,
         base_feats=None,
         feat_schedule=[4, 8, 12, 16, 19],
-        default_feats=[Attack(), Vex()],
+        default_feats=None,
     ):
+        if default_feats is None:
+            default_feats = [Attack(), Vex()]
         self.level = level
         self.prof = prof_bonus(level)
         self.str = stats[0]
