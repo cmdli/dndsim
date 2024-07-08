@@ -1,5 +1,5 @@
 from util import prof_bonus
-from feats import Attack, Vex
+from feats import Attack, Vex, Feat
 from target import Target
 from weapons import Weapon
 from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
@@ -14,7 +14,7 @@ class Character:
         level=None,
         stats=None,
         feats=None,
-        base_feats=None,
+        base_feats: List[Feat]=None,
         feat_schedule=[4, 8, 12, 16, 19],
         default_feats=None,
     ):
@@ -94,6 +94,7 @@ class Character:
             feat.end_turn(target)
         if not self.used_bonus:
             log.record(f"Bonus (None)", 1)
+        log.output(lambda: "")
 
     def turn(self, target: Target):
         self.begin_turn(target)
@@ -152,6 +153,7 @@ class Character:
         args = HitArgs(attack=attack, crit=crit, roll=roll)
         for feat in self.feats_for_event("hit"):
             feat.hit(args)
+        log.output(lambda: str(args._dmg))
         attack.target.add_damage_sources(args._dmg)
 
     def miss(self, attack: AttackArgs):

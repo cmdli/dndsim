@@ -69,7 +69,10 @@ class Target:
             log.record(f"Damage ({key})", self._dmg_log[key])
 
     def save(self, dc):
-        return random.randint(1, 20) + self.save_bonus >= dc
+        roll = random.randint(1, 20)
+        total = roll + self.save_bonus
+        log.output(lambda : f"Save roll: {roll} total {total} vs {dc}")
+        return total >= dc
 
     def turn(self):
         if self.prone:

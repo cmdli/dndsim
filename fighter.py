@@ -90,14 +90,14 @@ class TrippingAttack(Feat):
     def hit(self, args: HitArgs):
         if args.attack.has_tag("used_maneuver"):
             return
-        if args.target.prone:
+        if args.attack.target.prone:
             return
         maneuvers = self.character.feat("Maneuvers")
         roll = maneuvers.roll()
         if roll > 0:
             args.add_damage("TrippingAttack", roll)
-            if not args.target.save(self.character.dc("str")):
-                args.target.prone = True
+            if not args.attack.target.save(self.character.dc("str")):
+                args.attack.target.prone = True
             args.attack.add_tag("used_maneuver")
 
 

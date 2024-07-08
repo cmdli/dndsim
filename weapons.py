@@ -11,6 +11,7 @@ class Weapon:
         min_crit=20,
         ranged=False,
         topple=False,
+        base=None,
     ) -> None:
         self.name = name
         self.num_dice = num_dice
@@ -22,7 +23,7 @@ class Weapon:
         self.min_crit = min_crit
         self.ranged = ranged
         self.topple = topple
-
+        self.base = base
 
 class Glaive(Weapon):
     def __init__(self, **kwargs):
@@ -46,11 +47,16 @@ class Greatsword(Weapon):
 
 
 class Shortsword(Weapon):
-    def __init__(self, mod="dex", **kwargs):
+    def __init__(self, mod="dex", name="Shortsword", **kwargs):
         super().__init__(
-            name="Shortsword", num_dice=1, die=6, mod=mod, vex=True, **kwargs
+            name=name, num_dice=1, die=6, mod=mod, vex=True, **kwargs
         )
 
+class Rapier(Weapon):
+    def __init__(self, mod="dex", name="Rapier", **kwargs):
+        super().__init__(
+            name=name, num_dice=1, die=8, mod=mod, vex=True, **kwargs
+        )
 
 class Scimitar(Weapon):
     def __init__(self, mod="dex", **kwargs):

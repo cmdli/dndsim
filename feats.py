@@ -84,6 +84,13 @@ class Archery(Feat):
         if args.attack.weapon.ranged:
             args.situational_bonus += 2
 
+class DualWielder(Feat):
+    def __init__(self):
+        self.name = "DualWielder"
+
+    def apply(selfself, character):
+        super().apply(character)
+        character.dex += 1
 
 class CrossbowExpert(Feat):
     def __init__(self, weapon: Weapon) -> None:
@@ -153,7 +160,9 @@ class Attack(Feat):
         crit = False
         if roll >= args.weapon.min_crit:
             crit = True
-        if roll + to_hit + result.situational_bonus >= args.target.ac:
+        roll_total = roll + to_hit + result.situational_bonus
+        log.output(lambda: f"{args.weapon.name} total {roll_total} vs {args.target.ac}")
+        if roll_total >= args.target.ac:
             self.character.hit(attack=args, crit=crit, roll=roll)
         else:
             self.character.miss(attack=args)
@@ -197,11 +206,14 @@ class EquipWeapon(Feat):
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
         total_dmg = dmg + weapon.bonus
-        if not args.attack.has_tag("light"):
+        if args.attack.weapon.base is not None:
+            total_dmg += args.attack.weapon.base
+        elif not args.attack.has_tag("light"):
             total_dmg += args.attack.character.mod(weapon.mod)
         args.add_damage(f"Weapon:{weapon.name}", total_dmg)
         if weapon.topple:
             if not target.save(args.attack.character.dc(weapon.mod)):
+                log.output(lambda: "Knocked prone")
                 target.prone = True
 
     def miss(self, args):

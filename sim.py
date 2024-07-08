@@ -13,7 +13,7 @@ from fighter import (
 from rogue import Rogue
 from wizard import Wizard
 from paladin import Paladin
-from ranger import Ranger
+from ranger import GloomstalkerRanger, BeastMasterRanger
 from cleric import Cleric
 from target import Target
 from log import log
@@ -68,7 +68,8 @@ if __name__ == "__main__":
             ["Battlemaster Fighter", PrecisionTrippingFighter],
             ["Barbarian", Barbarian],
             ["Paladin", Paladin],
-            ["Ranger", Ranger],
+            ["Gloomstalker", GloomstalkerRanger],
+            ["Beast Master", BeastMasterRanger],
             ["Rogue", Rogue],
             ["Wizard", Wizard],
             ["Cleric", Cleric],

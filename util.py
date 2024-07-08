@@ -2,6 +2,8 @@ import random
 import math
 from collections import defaultdict
 
+from log import log
+
 SPELL_SLOTS_ARR = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 0
     [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],  # 1
@@ -61,8 +63,10 @@ def roll_dice(num: int, size: int, max_reroll: int = 0) -> float:
     total = 0
     for _ in range(num):
         roll = random.randint(1, size)
+        log.output(lambda: f"\tRoll {roll} on d{size}")
         if roll <= max_reroll:
             roll = random.randint(1, size)
+            log.output(lambda: f"\t\tReroll {roll} on d{size}")
         total += roll
     return total
 
