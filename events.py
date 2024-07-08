@@ -2,7 +2,7 @@ import random
 from target import Target
 from weapons import Weapon
 from collections import defaultdict
-from typing import List
+from typing import Set, List
 
 
 class AttackArgs:
@@ -11,18 +11,20 @@ class AttackArgs:
         character,
         target: Target,
         weapon: Weapon,
-        tags: List[str] = [],
+        tags: List[str] = None,
     ):
         self.character = character
         self.target = target
         self.weapon = weapon
-        self.tags = tags
+        self.tags = set(tags) if tags is not None else None
 
     def has_tag(self, tag: str):
-        return tag in self.tags
+        return self.tags is not None and tag in self.tags
 
     def add_tag(self, tag: str):
-        self.tags.append(tag)
+        if self.tags is None:
+            self.tags = set()
+        self.tags.add(tag)
 
 
 class AttackRollArgs:

@@ -5,49 +5,32 @@ from weapons import Weapon
 from log import log
 from spells import Spell
 
+EVENT_NAMES = set(
+    [
+        "begin_turn",
+        "before_action",
+        "action",
+        "after_action",
+        "before_attack",
+        "attack",
+        "roll_attack",
+        "hit",
+        "miss",
+        "end_turn",
+        "enemy_turn",
+        "short_rest",
+        "long_rest",
+    ]
+)
+
 
 class Feat:
     def apply(self, character):
         self.character = character
 
-    def begin_turn(self, target: Target):
-        pass
-
-    def before_action(self, target: Target):
-        pass
-
-    def action(self, target: Target):
-        pass
-
-    def after_action(self, target: Target):
-        pass
-
-    def before_attack(self):
-        pass
-
-    def attack(self, args: AttackArgs):
-        pass
-
-    def roll_attack(self, args: AttackRollArgs):
-        pass
-
-    def hit(self, args: HitArgs):
-        pass
-
-    def miss(self, args: MissArgs):
-        pass
-
-    def end_turn(self, target):
-        pass
-
-    def enemy_turn(self, target):
-        pass
-
-    def short_rest(self):
-        pass
-
-    def long_rest(self):
-        pass
+    def events(self):
+        global EVENT_NAMES
+        return [name for name in self.__dir__() if name in EVENT_NAMES]
 
 
 class PolearmMaster(Feat):

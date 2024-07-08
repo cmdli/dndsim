@@ -17,6 +17,7 @@ from ranger import Ranger
 from cleric import Cleric
 from target import Target
 from log import log
+from au import AssaultUnit
 
 NUM_FIGHTS = 3
 NUM_TURNS = 5
@@ -62,15 +63,16 @@ def test_characters(characters):
 if __name__ == "__main__":
     data = test_characters(
         [
-            ["Monk", Monk],
+            # ["Monk", Monk],
             ["Champion Figher", ChampionFighter],
             # ["Battlemaster Fighter", PrecisionTrippingFighter],
-            ["Barbarian", Barbarian],
-            ["Paladin", Paladin],
+            # ["Barbarian", Barbarian],
+            # ["Paladin", Paladin],
             ["Ranger", Ranger],
-            ["Rogue", Rogue],
-            ["Wizard", Wizard],
-            ["Cleric", Cleric],
+            # ["Rogue", Rogue],
+            # ["Wizard", Wizard],
+            # ["Cleric", Cleric],
+            # ["Assault Unit 2 1", AssaultUnit],
         ]
     )
     write_data("data.csv", data)
