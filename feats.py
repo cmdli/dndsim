@@ -93,11 +93,14 @@ class DualWielder(Feat):
         super().apply(character)
         character.dex += 1
 
+
 class TwoWeaponFighting(Feat):
     def __init__(self) -> None:
         self.name = "TwoWeaponFighting"
 
-    def apply
+    def roll_attack(self, args: AttackRollArgs):
+        if args.attack.has_tag("light"):
+            args.attack.remove_tag("light")
 
 
 class CrossbowExpert(Feat):
