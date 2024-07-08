@@ -139,6 +139,7 @@ class ArcaneTricksterRogue(Character):
         base_feats.append(SneakAttack(sneak_attack))
         if level >= 3:
             base_feats.append(SteadyAim())
+        if level >= 5:
             rapier = Rapier(bonus=magic_weapon)
             base_feats.append(EquipWeapon(rapier))
             base_feats.append(BoomingBlade(self, rapier))
