@@ -63,16 +63,16 @@ def test_characters(characters):
 if __name__ == "__main__":
     data = test_characters(
         [
-            # ["Monk", Monk],
+            ["Monk", Monk],
             ["Champion Figher", ChampionFighter],
-            # ["Battlemaster Fighter", PrecisionTrippingFighter],
-            # ["Barbarian", Barbarian],
-            # ["Paladin", Paladin],
+            ["Battlemaster Fighter", PrecisionTrippingFighter],
+            ["Barbarian", Barbarian],
+            ["Paladin", Paladin],
             ["Ranger", Ranger],
-            # ["Rogue", Rogue],
-            # ["Wizard", Wizard],
-            # ["Cleric", Cleric],
-            # ["Assault Unit 2 1", AssaultUnit],
+            ["Rogue", Rogue],
+            ["Wizard", Wizard],
+            ["Cleric", Cleric],
+            ["Assault Unit 2 1", AssaultUnit],
         ]
     )
     write_data("data.csv", data)
