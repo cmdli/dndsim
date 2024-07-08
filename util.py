@@ -63,10 +63,10 @@ def roll_dice(num: int, size: int, max_reroll: int = 0) -> float:
     total = 0
     for _ in range(num):
         roll = random.randint(1, size)
-        log.output(lambda: "\tRoll " + str(roll) + " of " + str(size))
+        log.output(lambda: f"\tRoll {roll} on d{size}")
         if roll <= max_reroll:
             roll = random.randint(1, size)
-            log.output(lambda: "\t\tReroll " + str(roll) + " of " + str(size))
+            log.output(lambda: f"\t\tReroll {roll} on d{size}")
         total += roll
     return total
 

@@ -178,7 +178,7 @@ class Attack(Feat):
         if roll >= args.weapon.min_crit:
             crit = True
         roll_total = roll + to_hit + result.situational_bonus
-        log.output(lambda: args.weapon.name + " total " + str(roll_total) + " vs " + str(args.target.ac))
+        log.output(lambda: f"{args.weapon.name} total {roll_total} vs {args.target.ac}")
         if roll_total >= args.target.ac:
             self.character.hit(attack=args, crit=crit, roll=roll)
         else:

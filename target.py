@@ -70,8 +70,9 @@ class Target:
 
     def save(self, dc):
         roll = random.randint(1, 20)
-        log.output(lambda : "Save roll: " + str(roll))
-        return roll + self.save_bonus >= dc
+        total = roll + self.save_bonus
+        log.output(lambda : f"Save roll: {roll} total {total} vs {dc}")
+        return total >= dc
 
     def turn(self):
         if self.prone:
