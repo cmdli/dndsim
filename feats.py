@@ -223,7 +223,9 @@ class EquipWeapon(Feat):
             dmg2 = self.damage(crit=args.crit)
             dmg = max(dmg, dmg2)
         total_dmg = dmg + weapon.bonus
-        if not args.attack.has_tag("light"):
+        if args.attack.weapon.base is not None:
+            total_dmg += args.attack.weapon.base
+        elif not args.attack.has_tag("light"):
             total_dmg += args.attack.character.mod(weapon.mod)
         args.add_damage(f"Weapon:{weapon.name}", total_dmg)
         if weapon.topple:

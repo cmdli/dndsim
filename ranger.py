@@ -221,10 +221,11 @@ class BeastMasterAction(Feat):
                 self.character.attack(target, self.off_hand_nick)
             else:
                 self.character.attack(target, self.main_hand)
+                tags = [] if self.character.level >= 2 else ["light"]
                 if self.character.use_bonus("light weapon"):
-                    self.character.attack(target, self.off_hand_other)
+                    self.character.attack(target, self.off_hand_other, tags=tags)
                 else:
-                    self.character.attack(target, self.off_hand_nick)
+                    self.character.attack(target, self.off_hand_nick, tags=tags)
 
 
 class BeastMasterRanger(Character):
@@ -237,22 +238,14 @@ class BeastMasterRanger(Character):
         rapier = Rapier(bonus = self.magic_weapon)
         other_shortsword = Shortsword(
             bonus=self.magic_weapon,
-            name="Offhand Shortsword",
-            base="dex" if level >= 2 else 0,
+            name="OffhandShortsword",
         )
-        scimitar = Scimitar(bonus=self.magic_weapon, base="dex" if level >= 2 else 0)
+        scimitar = Scimitar(bonus=self.magic_weapon)
         base_feats.append(EquipWeapon(maul))
         base_feats.append(EquipWeapon(shortsword))
         base_feats.append(EquipWeapon(rapier))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(EquipWeapon(other_shortsword))
-        base_feats.append(BeastMasterAction(
-            beast=beast,
-            maul=maul,
-            main_hand=shortsword if level < 4 else rapier,
-            off_hand_nick=scimitar,
-            off_hand_other=other_shortsword,
-        ))
         base_feats.append(Spellcasting(level, half=True))
         base_feats.append(BeastChargeFeat(character=self))
 
@@ -265,6 +258,13 @@ class BeastMasterRanger(Character):
             base_feats.append(HuntersMarkFeat(6, True, ))
         else:
             base_feats.append(HuntersMarkFeat(6, False, filter=beast_only_level_11))
+        base_feats.append(BeastMasterAction(
+            beast=beast,
+            maul=maul,
+            main_hand=rapier if level >= 4 else shortsword,
+            off_hand_nick=scimitar,
+            off_hand_other=other_shortsword,
+        ))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
