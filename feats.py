@@ -147,6 +147,30 @@ class AttackAction(Feat):
         for weapon in self.nick_attacks:
             self.character.attack(target, weapon, tags=["main_action", "light"])
 
+class BoomingBlade(Feat):
+    def __init__(self, character, weapon: Weapon):
+        self.name = "BoomingBladeAction"
+        self.weapon = weapon
+        self.character = character
+
+    def action(self, target):
+        self.character.attack(target, self.weapon, tags=["main_action", "booming_blade"])
+
+    def hit(self, args: HitArgs):
+        if not args.attack.has_tag("booming_blade"):
+            return
+        if self.character.level >= 17:
+            extra_dice = 3
+        elif self.character.level >= 11:
+            extra_dice = 2
+        elif self.character.level >= 5:
+            extra_dice = 1
+        else:
+            return
+        if args.crit:
+            extra_dice *= 2
+        args.add_damage("BoomingBlade", roll_dice(extra_dice, 8))
+
 
 class Attack(Feat):
     def __init__(self, custom_to_hit=None):

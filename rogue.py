@@ -5,8 +5,8 @@ from util import (
     do_roll,
 )
 from character import Character
-from feats import ASI, AttackAction, Feat, EquipWeapon
-from weapons import Shortsword, Scimitar
+from feats import ASI, AttackAction, Feat, EquipWeapon, BoomingBlade
+from weapons import Shortsword, Scimitar, Rapier
 from events import HitArgs
 from log import log
 
@@ -106,7 +106,7 @@ class DeathStrike(Feat):
         self.enabled = False
 
 
-class Rogue(Character):
+class AssassinRogue(Character):
     def __init__(self, level):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
@@ -122,6 +122,33 @@ class Rogue(Character):
             base_feats.append(Assassinate(level))
         if level >= 17:
             base_feats.append(DeathStrike())
+        if level >= 20:
+            base_feats.append(StrokeOfLuck())
+        super().init(
+            level=level,
+            stats=[10, 17, 10, 10, 10, 10],
+            feats=[ASI([["dex", 2]]), ASI([["dex", 1]])],
+            base_feats=base_feats,
+        )
+
+class ArcaneTricksterRogue(Character):
+    def __init__(self, level):
+        magic_weapon = get_magic_weapon(level)
+        sneak_attack = math.ceil(level / 2)
+        base_feats = []
+        base_feats.append(SneakAttack(sneak_attack))
+        if level >= 3:
+            base_feats.append(SteadyAim())
+        if level >= 5:
+            rapier = Rapier(bonus=magic_weapon)
+            base_feats.append(EquipWeapon(rapier))
+            base_feats.append(BoomingBlade(self, rapier))
+        else:
+            shortsword = Shortsword(bonus=magic_weapon)
+            scimitar = Scimitar(bonus=magic_weapon)
+            base_feats.append(EquipWeapon(shortsword))
+            base_feats.append(EquipWeapon(scimitar))
+            base_feats.append(AttackAction(attacks=[shortsword], nick_attacks=[scimitar]))
         if level >= 20:
             base_feats.append(StrokeOfLuck())
         super().init(
