@@ -177,7 +177,7 @@ class Attack(Feat):
         self.name = "Attack"
         self.custom_to_hit = custom_to_hit
 
-    def roll_attack(self, args):
+    def roll_attack(self, args: AttackRollArgs):
         if args.attack.target.stunned:
             args.adv = True
         if args.attack.target.prone:
@@ -185,8 +185,11 @@ class Attack(Feat):
                 args.disadv = True
             else:
                 args.adv = True
+        if args.attack.target.semistunned:
+            args.adv = True
+            args.attack.target.semistunned = False
 
-    def attack(self, args):
+    def attack(self, args: AttackArgs):
         log.record(f"Attack:{args.weapon.name}", 1)
         self.character.before_attack()
         if self.custom_to_hit:

@@ -2,7 +2,20 @@ import random
 from util import get_magic_weapon, roll_dice
 from character import Character
 from feats import ASI, AttackAction, Feat, EquipWeapon, IrresistibleOffense
-from weapons import Weapon
+from weapons import Weapon, Quarterstaff
+from events import HitArgs
+from target import Target
+
+
+def martial_arts_die(level: int):
+    if level >= 17:
+        return 12
+    elif level >= 11:
+        return 10
+    elif level >= 5:
+        return 8
+    else:
+        return 6
 
 
 class BodyAndMind(Feat):
@@ -26,15 +39,7 @@ class FlurryOfBlows(Feat):
             self.character.ki -= 1
             for _ in range(self.num_attacks):
                 self.character.attack(target, self.weapon)
-
-
-class BonusAttack(Feat):
-    def __init__(self, weapon):
-        self.name = "BonusAttack"
-        self.weapon = weapon
-
-    def after_action(self, target):
-        if self.character.use_bonus("BonusAttack"):
+        elif self.character.use_bonus("BonusAttack"):
             self.character.attack(target, self.weapon)
 
 
@@ -64,7 +69,7 @@ class StunningStrike(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def hit(self, args):
+    def hit(self, args: HitArgs):
         if not self.used and self.character.ki > 0:
             self.used = True
             self.character.ki -= 1
@@ -72,10 +77,9 @@ class StunningStrike(Feat):
                 args.attack.target.stunned = True
                 self.stuns.append(1)
             else:
-                dmg = roll_dice(1, self.weapon_die) + self.character.mod("wis")
-                args.add_damage("StunningStrike", dmg)
+                args.attack.target.semistunned = True
 
-    def end_turn(self, target):
+    def end_turn(self, target: Target):
         self.stuns = [stun - 1 for stun in self.stuns if stun > 0]
         if len(self.stuns) == 0:
             target.stunned = False
@@ -101,27 +105,20 @@ class Monk(Character):
     def __init__(self, level):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
-        if level >= 17:
-            weapon_die = 12
-        elif level >= 11:
-            weapon_die = 10
-        elif level >= 5:
-            weapon_die = 8
-        else:
-            weapon_die = 6
+        weapon_die = martial_arts_die(level)
         fists = Fists(weapon_die, bonus=magic_weapon)
-        base_feats.append(EquipWeapon(weapon=fists, max_reroll=1))
-        if level >= 5:
-            attacks = 2 * [fists]
-        else:
-            attacks = [fists]
-        base_feats.append(AttackAction(attacks=attacks))
-        if level >= 10:
-            base_feats.append(FlurryOfBlows(num_attacks=3, weapon=fists))
-        elif level >= 2:
-            base_feats.append(FlurryOfBlows(num_attacks=2, weapon=fists))
-        base_feats.append(BonusAttack(weapon=fists))
+        weapon = fists
+        base_feats.append(EquipWeapon(weapon=weapon, max_reroll=1))
+        num_attacks = 2 if level >= 5 else 1
+        base_feats.append(AttackAction(attacks=(num_attacks * [weapon])))
         base_feats.append(Ki(level if level >= 2 else 0))
+        if level >= 10:
+            bonus_attacks = 3
+        elif level >= 2:
+            bonus_attacks = 2
+        else:
+            bonus_attacks = 0
+        base_feats.append(FlurryOfBlows(num_attacks=bonus_attacks, weapon=fists))
         if level >= 5:
             base_feats.append(StunningStrike(weapon_die))
         if level >= 20:

@@ -25,6 +25,7 @@ class Weapon:
         self.topple = topple
         self.base = base
 
+
 class Glaive(Weapon):
     def __init__(self, **kwargs):
         super().__init__(
@@ -48,15 +49,13 @@ class Greatsword(Weapon):
 
 class Shortsword(Weapon):
     def __init__(self, mod="dex", name="Shortsword", **kwargs):
-        super().__init__(
-            name=name, num_dice=1, die=6, mod=mod, vex=True, **kwargs
-        )
+        super().__init__(name=name, num_dice=1, die=6, mod=mod, vex=True, **kwargs)
+
 
 class Rapier(Weapon):
     def __init__(self, mod="dex", name="Rapier", **kwargs):
-        super().__init__(
-            name=name, num_dice=1, die=8, mod=mod, vex=True, **kwargs
-        )
+        super().__init__(name=name, num_dice=1, die=8, mod=mod, vex=True, **kwargs)
+
 
 class Scimitar(Weapon):
     def __init__(self, mod="dex", **kwargs):
@@ -68,6 +67,11 @@ class Maul(Weapon):
         super().__init__(
             name="Maul", num_dice=2, die=6, mod="str", topple=True, **kwargs
         )
+
+
+class Quarterstaff(Weapon):
+    def __init__(self, mod="str", **kwargs):
+        super().__init__(name="Quarterstaff", num_dice=1, die=8, mod=mod, **kwargs)
 
 
 class HandCrossbow(Weapon):
