@@ -157,7 +157,7 @@ class BoomingBlade(Feat):
         self.character.attack(target, self.weapon, tags=["main_action", "booming_blade"])
 
     def hit(self, args: HitArgs):
-        if "booming_blade" not in args.attack.tags:
+        if not args.attack.has_tag("booming_blade"):
             return
         if self.character.level >= 17:
             extra_dice = 3
