@@ -8,7 +8,7 @@ from fighter import (
     ChampionFighter,
     PrecisionTrippingFighter,
 )
-from rogue import Rogue
+from rogue import AssassinRogue
 from wizard import Wizard
 from paladin import Paladin
 from ranger import GloomstalkerRanger, BeastMasterRanger
@@ -66,7 +66,7 @@ CHARACTER_MAPPING = {
     "paladin": ["Paladin", Paladin],
     "gloomstalker": ["Gloomstalker Ranger", GloomstalkerRanger],
     "beastmaster": ["Beastmaster Ranger", BeastMasterRanger],
-    "rogue": ["Rogue", Rogue],
+    "rogue": ["Rogue", AssassinRogue],
     "wizard": ["Wizard", Wizard],
     "cleric": ["Cleric", Cleric],
     "au": ["Assault Unit 2 1", AssaultUnit],
