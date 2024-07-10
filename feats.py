@@ -64,8 +64,8 @@ class GreatWeaponMaster(Feat):
         self.used_dmg = False
         self.bonus_attack_enabled = False
 
-    def hit(self, args):
-        if not self.used_dmg:
+    def hit(self, args: HitArgs):
+        if not self.used_dmg and args.attack.weapon.heavy:
             self.used_dmg = True
             args.add_damage("GreatWeaponMaster", self.character.prof)
         if args.crit:
@@ -74,6 +74,24 @@ class GreatWeaponMaster(Feat):
     def after_action(self, target: Target):
         if self.bonus_attack_enabled and self.character.use_bonus("GreatWeaponMaster"):
             self.character.attack(target, self.weapon)
+
+
+class ElvenAccuracy(Feat):
+    def __init__(self, mod: str):
+        self.name = "ElvenAccuracy"
+        self.mod = mod
+
+    def apply(self, character):
+        super().apply(character)
+        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+
+    def roll_attack(self, args: AttackRollArgs):
+        if args.adv:
+            roll = roll_dice(1, 20)
+            if args.roll1 < args.roll2 and args.roll1 < roll:
+                args.roll1 = roll
+            elif args.roll2 < roll:
+                args.roll2 = roll
 
 
 class Archery(Feat):
@@ -249,6 +267,8 @@ class EquipWeapon(Feat):
         if weapon.name != self.weapon.name:
             return
         log.record(f"Hit:{weapon.name}", 1)
+        if args.crit:
+            log.record(f"Crit:{weapon.name}", 1)
         dmg = self.damage(crit=args.crit)
         if self.savage_attacker and not self.used_savage_attacker:
             self.used_savage_attacker = True
@@ -375,3 +395,27 @@ class WeaponMaster(Feat):
     def apply(self, character):
         super().apply(character)
         character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+
+
+class DualWielder(Feat):
+    def __init__(self, mod: str) -> None:
+        self.name = "DualWielder"
+        self.mod = mod
+
+    def apply(self, character):
+        super().apply(character)
+        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+
+
+class Piercer(Feat):
+    def __init__(self, mod: str) -> None:
+        self.name = "Piercer"
+        self.mod = mod
+
+    def apply(self, character):
+        super().apply(character)
+        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+
+    def hit(self, args: HitArgs):
+        if args.crit and args.attack.weapon.damage_type == "piercing":
+            args.add_damage("PiercerCrit", roll_dice(1, args.attack.weapon.die))

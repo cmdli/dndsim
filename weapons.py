@@ -12,6 +12,8 @@ class Weapon:
         ranged=False,
         topple=False,
         base=None,
+        heavy=False,
+        damage_type="unknown",
     ) -> None:
         self.name = name
         self.num_dice = num_dice
@@ -24,54 +26,114 @@ class Weapon:
         self.ranged = ranged
         self.topple = topple
         self.base = base
+        self.heavy = heavy
+        self.damage_type = damage_type
 
 
 class Glaive(Weapon):
     def __init__(self, **kwargs):
         super().__init__(
-            name="Glaive", num_dice=1, die=10, mod="str", graze=True, **kwargs
+            name="Glaive",
+            num_dice=1,
+            die=10,
+            mod="str",
+            graze=True,
+            heavy=True,
+            damage="slashing",
+            **kwargs,
         )
 
 
 class GlaiveButt(Weapon):
     def __init__(self, **kwargs):
         super().__init__(
-            name="GlaiveButt", num_dice=1, die=4, mod="str", graze=True, **kwargs
+            name="GlaiveButt",
+            num_dice=1,
+            die=4,
+            mod="str",
+            graze=True,
+            heavy=True,
+            damage_type="bludgeoning",
+            **kwargs,
         )
 
 
 class Greatsword(Weapon):
     def __init__(self, **kwargs):
         super().__init__(
-            name="Greatsword", num_dice=2, die=6, mod="str", graze=True, **kwargs
+            name="Greatsword",
+            num_dice=2,
+            die=6,
+            mod="str",
+            graze=True,
+            heavy=True,
+            damage_type="slashing",
+            **kwargs,
         )
 
 
 class Shortsword(Weapon):
     def __init__(self, mod="dex", name="Shortsword", **kwargs):
-        super().__init__(name=name, num_dice=1, die=6, mod=mod, vex=True, **kwargs)
+        super().__init__(
+            name=name,
+            num_dice=1,
+            die=6,
+            mod=mod,
+            vex=True,
+            damage_type="piercing",
+            **kwargs,
+        )
 
 
 class Rapier(Weapon):
     def __init__(self, mod="dex", name="Rapier", **kwargs):
-        super().__init__(name=name, num_dice=1, die=8, mod=mod, vex=True, **kwargs)
+        super().__init__(
+            name=name,
+            num_dice=1,
+            die=8,
+            mod=mod,
+            vex=True,
+            damage_type="piercing",
+            **kwargs,
+        )
 
 
 class Scimitar(Weapon):
     def __init__(self, mod="dex", **kwargs):
-        super().__init__(name="Scimitar", num_dice=1, die=6, mod=mod, **kwargs)
+        super().__init__(
+            name="Scimitar",
+            num_dice=1,
+            die=6,
+            mod=mod,
+            damage_type="slashing",
+            **kwargs,
+        )
 
 
 class Maul(Weapon):
     def __init__(self, **kwargs):
         super().__init__(
-            name="Maul", num_dice=2, die=6, mod="str", topple=True, **kwargs
+            name="Maul",
+            num_dice=2,
+            die=6,
+            mod="str",
+            topple=True,
+            heavy=True,
+            damage_type="bludgeoning",
+            **kwargs,
         )
 
 
 class Quarterstaff(Weapon):
     def __init__(self, mod="str", **kwargs):
-        super().__init__(name="Quarterstaff", num_dice=1, die=8, mod=mod, **kwargs)
+        super().__init__(
+            name="Quarterstaff",
+            num_dice=1,
+            die=8,
+            mod=mod,
+            damage_type="bludgeoning",
+            **kwargs,
+        )
 
 
 class HandCrossbow(Weapon):
@@ -83,5 +145,13 @@ class HandCrossbow(Weapon):
             mod="dex",
             vex=True,
             ranged=True,
-            **kwargs
+            damage_type="piercing",
+            **kwargs,
+        )
+
+
+class Dagger(Weapon):
+    def __init__(self, mod="dex", **kwargs):
+        super().__init__(
+            name="Dagger", num_dice=1, die=4, mod=mod, damage_type="piercing", **kwargs
         )

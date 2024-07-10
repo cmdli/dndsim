@@ -7,6 +7,7 @@ from barbarian import Barbarian
 from fighter import (
     ChampionFighter,
     PrecisionTrippingFighter,
+    TWFFighter,
 )
 from rogue import AssassinRogue
 from wizard import Wizard
@@ -72,15 +73,25 @@ CHARACTER_MAPPING = {
     "au": ["Assault Unit 2 1", AssaultUnit],
 }
 
+ALL_CHARACTERS = [
+    "monk",
+    "champion",
+    "barbarian",
+    "paladin",
+    "beastmaster",
+    "rogue",
+    "wizard",
+    "cleric",
+]
+
 
 def get_characters(names: Set[str]):
     if "all" in names:
-        return list(CHARACTER_MAPPING.values())
-    else:
-        characters = []
-        for name in names:
-            characters.append(CHARACTER_MAPPING[name.lower()])
-        return characters
+        names = set(ALL_CHARACTERS)
+    characters = []
+    for name in names:
+        characters.append(CHARACTER_MAPPING[name.lower()])
+    return characters
 
 
 @click.command()

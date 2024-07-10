@@ -294,7 +294,7 @@ class BeastMasterRanger(Character):
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
             feats=[
-                DualWielder(),
+                DualWielder("dex"),
                 ASI([["dex", 2]]),
                 ASI([["wis", 2]]),
                 ASI([["wis", 2]]),

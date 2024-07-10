@@ -9,12 +9,26 @@ from feats import (
     PolearmMaster,
     Feat,
     EquipWeapon,
-    CombatProwess,
     IrresistibleOffense,
+    TwoWeaponFighting,
+    ElvenAccuracy,
+    DualWielder,
+    Piercer,
 )
 from character import Character
-from weapons import Glaive, Greatsword, GlaiveButt, Maul
+from weapons import Glaive, Greatsword, GlaiveButt, Maul, Shortsword, Scimitar, Rapier
 from log import log
+
+
+def get_num_attacks(level: int):
+    if level >= 20:
+        return 4
+    elif level >= 11:
+        return 3
+    elif level >= 5:
+        return 2
+    else:
+        return 1
 
 
 class StudiedAttacks(Feat):
@@ -266,3 +280,49 @@ class PrecisionTrippingFighter(Fighter):
             feats.append(TrippingAttack())
             feats.append(PrecisionAttack(low=low))
         super().__init__(level, subclass_feats=feats, **kwargs)
+
+
+class TWFFighter(Character):
+    def __init__(self, level: int) -> None:
+        if level >= 15:
+            min_crit = 18
+        elif level >= 3:
+            min_crit = 19
+        else:
+            min_crit = 20
+        magic_weapon = get_magic_weapon(level)
+        base_feats = []
+        base_feats.append(TwoWeaponFighting())
+        if level >= 6:
+            weapon = Rapier(mod="str", bonus=magic_weapon, min_crit=min_crit)
+        else:
+            weapon = Shortsword(mod="str", bonus=magic_weapon, min_crit=min_crit)
+        scimitar = Scimitar(mod="str", bonus=magic_weapon, min_crit=min_crit)
+        base_feats.append(EquipWeapon(weapon, savage_attacker=True))
+        base_feats.append(EquipWeapon(scimitar, savage_attacker=True))
+        num_attacks = get_num_attacks(level)
+        base_feats.append(
+            AttackAction(attacks=(num_attacks * [weapon]), nick_attacks=[scimitar])
+        )
+        if level >= 2:
+            base_feats.append(ActionSurge(2 if level >= 17 else 1))
+        if level >= 10:
+            base_feats.append(HeroicAdvantage())
+        if level >= 13:
+            base_feats.append(StudiedAttacks())
+        feats = [
+            GreatWeaponMaster(weapon),
+            DualWielder("str"),
+            ASI([["str", 2]]),
+            ASI(),
+            ASI(),
+            ASI(),
+            IrresistibleOffense("str"),
+        ]
+        super().init(
+            level=level,
+            stats=[17, 10, 10, 10, 10, 10],
+            feats=feats,
+            base_feats=base_feats,
+            feat_schedule=[4, 6, 8, 12, 14, 16, 19],
+        )
