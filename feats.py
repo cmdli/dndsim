@@ -147,6 +147,7 @@ class AttackAction(Feat):
         for weapon in self.nick_attacks:
             self.character.attack(target, weapon, tags=["main_action", "light"])
 
+
 class BoomingBlade(Feat):
     def __init__(self, character, weapon: Weapon):
         self.name = "BoomingBladeAction"
@@ -154,7 +155,9 @@ class BoomingBlade(Feat):
         self.character = character
 
     def action(self, target):
-        self.character.attack(target, self.weapon, tags=["main_action", "booming_blade"])
+        self.character.attack(
+            target, self.weapon, tags=["main_action", "booming_blade"]
+        )
 
     def hit(self, args: HitArgs):
         if not args.attack.has_tag("booming_blade"):
@@ -240,7 +243,7 @@ class EquipWeapon(Feat):
             dmg += self.weapon_dmg()
         return dmg
 
-    def hit(self, args):
+    def hit(self, args: HitArgs):
         target = args.attack.target
         weapon = args.attack.weapon
         if weapon.name != self.weapon.name:
@@ -262,7 +265,7 @@ class EquipWeapon(Feat):
                 log.output(lambda: "Knocked prone")
                 target.prone = True
 
-    def miss(self, args):
+    def miss(self, args: MissArgs):
         if args.attack.weapon.name != self.weapon.name:
             return
         if self.weapon.graze:
@@ -362,3 +365,13 @@ class CombatProwess(Feat):
         if not self.used:
             self.used = True
             self.character.hit(args.attack)
+
+
+class WeaponMaster(Feat):
+    def __init__(self, mod: str) -> None:
+        self.name = "WeaponMaster"
+        self.mod = mod
+
+    def apply(self, character):
+        super().apply(character)
+        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
