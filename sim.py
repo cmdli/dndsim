@@ -73,19 +73,17 @@ def sim(name: str, constructor, **kwargs):
 
 
 CHARACTER_MAPPING = {
-    # "monk": sim("Monk", Monk),
-    # "champion": sim("Champion Fighter", ChampionFighter),
-    # "battlemaster": sim("Battlemaster Fighter", ChampionFighter),
-    # "barbarian": sim("Barbarian", Barbarian),
-    # "paladin": sim("Paladin", Paladin),
-    # "gloomstalker": sim("Gloomstalker Ranger", GloomstalkerRanger),
-    # "beastmaster": sim("Beastmaster Ranger", BeastMasterRanger),
-    "assassin1": sim("Assassin (BB)", AssassinRogue, booming_blade=True),
-    "assassin2": sim("Assassin", AssassinRogue, booming_blade=False),
-    "arcanetrickster": sim("Arcane Trickster", ArcaneTricksterRogue)
-    # "wizard": sim("Wizard", Wizard),
-    # "cleric": sim("Cleric", Cleric),
-    # "au": sim("Assault Unit 2 1", AssaultUnit),
+    "monk": sim("Monk", Monk),
+    "champion": sim("Champion Fighter", ChampionFighter),
+    "battlemaster": sim("Battlemaster Fighter", ChampionFighter),
+    "barbarian": sim("Barbarian", Barbarian),
+    "paladin": sim("Paladin", Paladin),
+    "gloomstalker": sim("Gloomstalker Ranger", GloomstalkerRanger),
+    "beastmaster": sim("Beastmaster Ranger", BeastMasterRanger),
+    "assassin": sim("Assassin (BB)", AssassinRogue),
+    "wizard": sim("Wizard", Wizard),
+    "cleric": sim("Cleric", Cleric),
+    "au": sim("Assault Unit 2 1", AssaultUnit),
 }
 
 ALL_CHARACTERS = [
@@ -102,8 +100,7 @@ ALL_CHARACTERS = [
 
 def get_characters(names: Set[str]):
     if "all" in names:
-        return CHARACTER_MAPPING.values()
-        # names = set(ALL_CHARACTERS)
+        names = set(ALL_CHARACTERS)
     characters = []
     for name in names:
         characters.append(CHARACTER_MAPPING[name.lower()])
