@@ -9,7 +9,7 @@ from fighter import (
     PrecisionTrippingFighter,
     TWFFighter,
 )
-from rogue import AssassinRogue
+from rogue import AssassinRogue, ArcaneTricksterRogue
 from wizard import Wizard
 from paladin import Paladin
 from ranger import GloomstalkerRanger, BeastMasterRanger
@@ -51,26 +51,36 @@ def write_data(file, data):
         writer.writerows(data)
 
 
-def test_characters(characters, start: int, end: int, extra_args: Dict[str, bool]):
+class CharacterConfig:
+    def __init__(self, name: str, constructor, **kwargs):
+        self.name = name
+        self.constructor = constructor
+        self.args = kwargs
+
+
+def test_characters(characters: List[CharacterConfig], start: int, end: int, extra_args: Dict[str, bool]):
     data = [["Level", "Character", "DPR"]]
     for level in range(start, end + 1):
-        for [name, Creator] in characters:
-            data.append([level, name, test_dpr(Creator(level, **extra_args), level)])
+        for character in characters:
+            args = dict(extra_args)
+            args.update(character.args)
+            data.append([level, character.name, test_dpr(character.constructor(level, **args), level)])
     return data
 
 
 CHARACTER_MAPPING = {
-    "monk": ["Monk", Monk],
-    "champion": ["Champion Fighter", ChampionFighter],
-    "battlemaster": ["Battlemaster Fighter", ChampionFighter],
-    "barbarian": ["Barbarian", Barbarian],
-    "paladin": ["Paladin", Paladin],
-    "gloomstalker": ["Gloomstalker Ranger", GloomstalkerRanger],
-    "beastmaster": ["Beastmaster Ranger", BeastMasterRanger],
-    "rogue": ["Rogue", AssassinRogue],
-    "wizard": ["Wizard", Wizard],
-    "cleric": ["Cleric", Cleric],
-    "au": ["Assault Unit 2 1", AssaultUnit],
+    "monk": CharacterConfig("Monk", Monk),
+    "champion": CharacterConfig("Champion Fighter", ChampionFighter),
+    "battlemaster": CharacterConfig("Battlemaster Fighter", ChampionFighter),
+    "barbarian": CharacterConfig("Barbarian", Barbarian),
+    "paladin": CharacterConfig("Paladin", Paladin),
+    "gloomstalker": CharacterConfig("Gloomstalker Ranger", GloomstalkerRanger),
+    "beastmaster": CharacterConfig("Beastmaster Ranger", BeastMasterRanger),
+    "rogue": CharacterConfig("Assassin", AssassinRogue),
+    "arcane_trickster": CharacterConfig("Arcane Trickster", ArcaneTricksterRogue),
+    "wizard": CharacterConfig("Wizard", Wizard),
+    "cleric": CharacterConfig("Cleric", Cleric),
+    "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
 }
 
 ALL_CHARACTERS = [
