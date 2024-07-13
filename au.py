@@ -94,7 +94,7 @@ class Blessed(Feat):
 
 
 class AssaultUnit(Character):
-    def __init__(self, level: int, blessed: bool = False) -> None:
+    def __init__(self, level: int, blessed: bool = False, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
         weapon = OldHandCrossbow(bonus=magic_weapon)
         base_feats = []

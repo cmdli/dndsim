@@ -15,10 +15,11 @@ from weapons import Glaive, Greatsword, GlaiveButt
 
 
 class Beserker(Feat):
-    def __init__(self, num_dice: int):
+    def __init__(self, num_dice: int, max_reroll: int = 0):
         self.name = "Berserker"
         self.used = False
         self.num_dice = num_dice
+        self.max_reroll = max_reroll
 
     def begin_turn(self, target):
         self.used = False
@@ -27,13 +28,14 @@ class Beserker(Feat):
         if not self.used:
             self.used = True
             num = 2 * self.num_dice if args.crit else self.num_dice
-            args.add_damage("Berserker", roll_dice(num, 6))
+            args.add_damage("Berserker", roll_dice(num, 6, max_reroll=self.max_reroll))
 
 
 class BrutalStrike(Feat):
-    def __init__(self, num_dice):
+    def __init__(self, num_dice: int, max_reroll: int = 0):
         self.name = "BrutalStrike"
         self.num_dice = num_dice
+        self.max_reroll = max_reroll
 
     def begin_turn(self, target):
         self.used = False
@@ -47,7 +49,9 @@ class BrutalStrike(Feat):
     def hit(self, args):
         if args.attack.has_tag("brutal_strike"):
             num = 2 * self.num_dice if args.crit else self.num_dice
-            args.add_damage("BrutalStrike", roll_dice(num, 10))
+            args.add_damage(
+                "BrutalStrike", roll_dice(num, 10, max_reroll=self.max_reroll)
+            )
 
 
 class Retaliation(Feat):
@@ -111,7 +115,7 @@ def rage_damage(level: int):
 
 
 class Barbarian(Character):
-    def __init__(self, level, use_pam=False):
+    def __init__(self, level, use_pam=False, **kwargs):
         rage_dmg = rage_damage(level)
         magic_weapon = get_magic_weapon(level)
         base_feats = []

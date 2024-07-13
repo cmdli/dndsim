@@ -149,6 +149,7 @@ class Monk(Character):
         use_hunters_mark: bool = False,
         use_nick: bool = False,
         use_grappler: bool = True,
+        **kwargs
     ):
         magic_weapon = get_magic_weapon(level)
         base_feats = []

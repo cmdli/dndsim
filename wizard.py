@@ -10,7 +10,7 @@ from util import (
 
 
 class Wizard:
-    def __init__(self, level):
+    def __init__(self, level: int, **kwargs):
         self.level = level
         self.prof = prof_bonus(level)
         if level >= 8:

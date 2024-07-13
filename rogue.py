@@ -107,7 +107,7 @@ class DeathStrike(Feat):
 
 
 class AssassinRogue(Character):
-    def __init__(self, level):
+    def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
@@ -131,8 +131,9 @@ class AssassinRogue(Character):
             base_feats=base_feats,
         )
 
+
 class ArcaneTricksterRogue(Character):
-    def __init__(self, level):
+    def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
@@ -148,7 +149,9 @@ class ArcaneTricksterRogue(Character):
             scimitar = Scimitar(bonus=magic_weapon)
             base_feats.append(EquipWeapon(shortsword))
             base_feats.append(EquipWeapon(scimitar))
-            base_feats.append(AttackAction(attacks=[shortsword], nick_attacks=[scimitar]))
+            base_feats.append(
+                AttackAction(attacks=[shortsword], nick_attacks=[scimitar])
+            )
         if level >= 20:
             base_feats.append(StrokeOfLuck())
         super().init(

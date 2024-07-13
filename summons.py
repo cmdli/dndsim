@@ -44,6 +44,7 @@ class Summon(Character):
         weapon: Weapon,
         bonus_dmg: int,
         feats=[],
+        **kwargs
     ):
         base_feats = []
         base_feats.append(SummonAction(slot, weapon))

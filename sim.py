@@ -1,6 +1,6 @@
 import csv
 import click
-from typing import Set
+from typing import Set, List, Dict
 
 from monk import Monk
 from barbarian import Barbarian
@@ -51,11 +51,11 @@ def write_data(file, data):
         writer.writerows(data)
 
 
-def test_characters(characters, start: int, end: int):
+def test_characters(characters, start: int, end: int, extra_args: Dict[str, bool]):
     data = [["Level", "Character", "DPR"]]
     for level in range(start, end + 1):
         for [name, Creator] in characters:
-            data.append([level, name, test_dpr(Creator(level), level)])
+            data.append([level, name, test_dpr(Creator(level, **extra_args), level)])
     return data
 
 
@@ -94,16 +94,32 @@ def get_characters(names: Set[str]):
     return characters
 
 
-@click.command()
+def parse_unknown_args(args: List[str]) -> Dict[str, bool]:
+    parsed_args = []
+    for arg in args:
+        if not arg.startswith("--"):
+            raise Exception(f"Invalid argument: {arg}")
+        parsed_args.append(arg.strip("-"))
+    return {arg: True for arg in parsed_args}
+
+
+@click.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+    )
+)
 @click.option("-s", "--start", default=1, help="Start of the level range")
 @click.option("-e", "--end", default=20, help="End of the level range")
 @click.option("--characters", default="all", help="Characters to test")
-def run(start, end, characters):
+@click.argument("extra_args", nargs=-1, type=click.UNPROCESSED)
+def run(start, end, characters, extra_args):
+    parsed_extra_args = parse_unknown_args(extra_args)
     characters = get_characters(characters.split(","))
     data = test_characters(
         characters,
         start=start,
         end=end,
+        extra_args=parsed_extra_args,
     )
     write_data("data.csv", data)
     log.printReport()

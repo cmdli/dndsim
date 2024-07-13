@@ -166,7 +166,13 @@ class ToppleIfNecessaryAttackAction(Feat):
 
 class Fighter(Character):
     def __init__(
-        self, level, use_pam=False, subclass_feats=[], min_crit=20, use_topple=True
+        self,
+        level: int,
+        use_pam=False,
+        subclass_feats=[],
+        min_crit=20,
+        use_topple=True,
+        **kwargs
     ):
         base_feats = []
         magic_weapon = get_magic_weapon(level)
@@ -228,7 +234,7 @@ class Fighter(Character):
 
 
 class ChampionFighter(Fighter):
-    def __init__(self, level, **kwargs):
+    def __init__(self, level: int, **kwargs):
         feats = []
         if level >= 10:
             feats.append(HeroicAdvantage())
@@ -247,7 +253,7 @@ class ChampionFighter(Fighter):
 
 
 class TrippingFighter(Fighter):
-    def __init__(self, level, **kwargs):
+    def __init__(self, level: int, **kwargs):
         feats = []
         if level >= 3:
             feats.append(Maneuvers(level))
@@ -256,7 +262,7 @@ class TrippingFighter(Fighter):
 
 
 class BattlemasterFighter(Fighter):
-    def __init__(self, level, **kwargs):
+    def __init__(self, level: int, **kwargs):
         feats = []
         if level >= 3:
             feats.append(Maneuvers(level))
@@ -264,7 +270,7 @@ class BattlemasterFighter(Fighter):
 
 
 class PrecisionFighter(Fighter):
-    def __init__(self, level, low=8, **kwargs):
+    def __init__(self, level: int, low: int = 8, **kwargs):
         feats = []
         if level >= 3:
             feats.append(Maneuvers(level))
@@ -273,7 +279,7 @@ class PrecisionFighter(Fighter):
 
 
 class PrecisionTrippingFighter(Fighter):
-    def __init__(self, level, low=1, **kwargs):
+    def __init__(self, level: int, low: int = 1, **kwargs):
         feats = []
         if level >= 3:
             feats.append(Maneuvers(level))
@@ -283,7 +289,7 @@ class PrecisionTrippingFighter(Fighter):
 
 
 class TWFFighter(Character):
-    def __init__(self, level: int) -> None:
+    def __init__(self, level: int, **kwargs) -> None:
         if level >= 15:
             min_crit = 18
         elif level >= 3:

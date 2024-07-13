@@ -91,7 +91,7 @@ class DivineFavorFeat(Feat):
 
 
 class Paladin(Character):
-    def __init__(self, level, use_twf=False):
+    def __init__(self, level: int, use_twf=False, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         if use_twf:

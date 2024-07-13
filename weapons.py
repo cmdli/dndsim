@@ -39,7 +39,7 @@ class Glaive(Weapon):
             mod="str",
             graze=True,
             heavy=True,
-            damage="slashing",
+            damage_type="slashing",
             **kwargs,
         )
 

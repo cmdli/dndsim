@@ -193,7 +193,7 @@ class GloomstalkerRanger(Character):
 
 
 class PrimalCompanion(Character):
-    def __init__(self, level: int, ranger: Character):
+    def __init__(self, level: int, ranger: Character, **kwargs):
         self.ranger = ranger
         self.num_attacks = 2 if level >= 11 else 1
         self.weapon = BeastMaul(base=2 + prof_bonus(level))
@@ -258,7 +258,7 @@ class BeastMasterAction(Feat):
 
 
 class BeastMasterRanger(Character):
-    def __init__(self, level):
+    def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         beast = PrimalCompanion(level, ranger=self)

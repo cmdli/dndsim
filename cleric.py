@@ -11,7 +11,7 @@ from util import (
 
 
 class Cleric:
-    def __init__(self, level):
+    def __init__(self, level: int, *args, **kwargs):
         self.level = level
         self.prof = prof_bonus(level)
         if level >= 8:
