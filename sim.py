@@ -51,14 +51,14 @@ def write_data(file, data):
         writer.writerows(data)
 
 
-class Sim:
+class CharacterConfig:
     def __init__(self, name: str, constructor, **kwargs):
         self.name = name
         self.constructor = constructor
         self.args = kwargs
 
 
-def test_characters(characters: List[Sim], start: int, end: int, extra_args: Dict[str, bool]):
+def test_characters(characters: List[CharacterConfig], start: int, end: int, extra_args: Dict[str, bool]):
     data = [["Level", "Character", "DPR"]]
     for level in range(start, end + 1):
         for character in characters:
@@ -68,22 +68,19 @@ def test_characters(characters: List[Sim], start: int, end: int, extra_args: Dic
     return data
 
 
-def sim(name: str, constructor, **kwargs):
-    return Sim(name, constructor, **kwargs)
-
-
 CHARACTER_MAPPING = {
-    "monk": sim("Monk", Monk),
-    "champion": sim("Champion Fighter", ChampionFighter),
-    "battlemaster": sim("Battlemaster Fighter", ChampionFighter),
-    "barbarian": sim("Barbarian", Barbarian),
-    "paladin": sim("Paladin", Paladin),
-    "gloomstalker": sim("Gloomstalker Ranger", GloomstalkerRanger),
-    "beastmaster": sim("Beastmaster Ranger", BeastMasterRanger),
-    "assassin": sim("Assassin (BB)", AssassinRogue),
-    "wizard": sim("Wizard", Wizard),
-    "cleric": sim("Cleric", Cleric),
-    "au": sim("Assault Unit 2 1", AssaultUnit),
+    "monk": CharacterConfig("Monk", Monk),
+    "champion": CharacterConfig("Champion Fighter", ChampionFighter),
+    "battlemaster": CharacterConfig("Battlemaster Fighter", ChampionFighter),
+    "barbarian": CharacterConfig("Barbarian", Barbarian),
+    "paladin": CharacterConfig("Paladin", Paladin),
+    "gloomstalker": CharacterConfig("Gloomstalker Ranger", GloomstalkerRanger),
+    "beastmaster": CharacterConfig("Beastmaster Ranger", BeastMasterRanger),
+    "rogue": CharacterConfig("Assassin", AssassinRogue),
+    "arcane_trickster": CharacterConfig("Arcane Trickster", ArcaneTricksterRogue),
+    "wizard": CharacterConfig("Wizard", Wizard),
+    "cleric": CharacterConfig("Cleric", Cleric),
+    "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
 }
 
 ALL_CHARACTERS = [
