@@ -107,11 +107,11 @@ class DeathStrike(Feat):
 
 
 class AssassinRogue(Character):
-    def __init__(self, level, **kwargs):
+    def __init__(self, level, booming_blade=False):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
-        if level >= 5 and kwargs["booming_blade"]:
+        if level >= 5 and booming_blade:
             rapier = Rapier(bonus=magic_weapon)
             base_feats.append(EquipWeapon(rapier))
             base_feats.append(BoomingBlade(self, rapier))
