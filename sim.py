@@ -9,7 +9,7 @@ from fighter import (
     PrecisionTrippingFighter,
     TWFFighter,
 )
-from rogue import AssassinRogue
+from rogue import AssassinRogue, ArcaneTricksterRogue
 from wizard import Wizard
 from paladin import Paladin
 from ranger import GloomstalkerRanger, BeastMasterRanger
@@ -51,26 +51,41 @@ def write_data(file, data):
         writer.writerows(data)
 
 
-def test_characters(characters, start: int, end: int, extra_args: Dict[str, bool]):
+class Sim:
+    def __init__(self, name: str, constructor, **kwargs):
+        self.name = name
+        self.constructor = constructor
+        self.args = kwargs
+
+
+def test_characters(characters: List[Sim], start: int, end: int, extra_args: Dict[str, bool]):
     data = [["Level", "Character", "DPR"]]
     for level in range(start, end + 1):
-        for [name, Creator] in characters:
-            data.append([level, name, test_dpr(Creator(level, **extra_args), level)])
+        for character in characters:
+            args = dict(extra_args)
+            args.update(character.args)
+            data.append([level, character.name, test_dpr(character.constructor(level, **args), level)])
     return data
 
 
+def sim(name: str, constructor, **kwargs):
+    return Sim(name, constructor, **kwargs)
+
+
 CHARACTER_MAPPING = {
-    "monk": ["Monk", Monk],
-    "champion": ["Champion Fighter", ChampionFighter],
-    "battlemaster": ["Battlemaster Fighter", ChampionFighter],
-    "barbarian": ["Barbarian", Barbarian],
-    "paladin": ["Paladin", Paladin],
-    "gloomstalker": ["Gloomstalker Ranger", GloomstalkerRanger],
-    "beastmaster": ["Beastmaster Ranger", BeastMasterRanger],
-    "rogue": ["Rogue", AssassinRogue],
-    "wizard": ["Wizard", Wizard],
-    "cleric": ["Cleric", Cleric],
-    "au": ["Assault Unit 2 1", AssaultUnit],
+    # "monk": sim("Monk", Monk),
+    # "champion": sim("Champion Fighter", ChampionFighter),
+    # "battlemaster": sim("Battlemaster Fighter", ChampionFighter),
+    # "barbarian": sim("Barbarian", Barbarian),
+    # "paladin": sim("Paladin", Paladin),
+    # "gloomstalker": sim("Gloomstalker Ranger", GloomstalkerRanger),
+    # "beastmaster": sim("Beastmaster Ranger", BeastMasterRanger),
+    "assassin1": sim("Assassin (BB)", AssassinRogue, booming_blade=True),
+    "assassin2": sim("Assassin", AssassinRogue, booming_blade=False),
+    "arcanetrickster": sim("Arcane Trickster", ArcaneTricksterRogue)
+    # "wizard": sim("Wizard", Wizard),
+    # "cleric": sim("Cleric", Cleric),
+    # "au": sim("Assault Unit 2 1", AssaultUnit),
 }
 
 ALL_CHARACTERS = [
@@ -87,7 +102,8 @@ ALL_CHARACTERS = [
 
 def get_characters(names: Set[str]):
     if "all" in names:
-        names = set(ALL_CHARACTERS)
+        return CHARACTER_MAPPING.values()
+        # names = set(ALL_CHARACTERS)
     characters = []
     for name in names:
         characters.append(CHARACTER_MAPPING[name.lower()])

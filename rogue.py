@@ -111,11 +111,16 @@ class AssassinRogue(Character):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
-        shortsword = Shortsword(bonus=magic_weapon)
-        scimitar = Scimitar(bonus=magic_weapon)
-        base_feats.append(EquipWeapon(shortsword))
-        base_feats.append(EquipWeapon(scimitar))
-        base_feats.append(AttackAction(attacks=[shortsword], nick_attacks=[scimitar]))
+        if level >= 5 and kwargs["booming_blade"]:
+            rapier = Rapier(bonus=magic_weapon)
+            base_feats.append(EquipWeapon(rapier))
+            base_feats.append(BoomingBlade(self, rapier))
+        else:
+            shortsword = Shortsword(bonus=magic_weapon)
+            scimitar = Scimitar(bonus=magic_weapon)
+            base_feats.append(EquipWeapon(shortsword))
+            base_feats.append(EquipWeapon(scimitar))
+            base_feats.append(AttackAction(attacks=[shortsword], nick_attacks=[scimitar]))
         base_feats.append(SneakAttack(sneak_attack))
         if level >= 3:
             base_feats.append(SteadyAim())
