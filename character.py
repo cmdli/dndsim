@@ -6,6 +6,9 @@ from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
 from log import log
 from typing import List
 from collections import defaultdict
+from util import spell_slots, highest_spell_slot, lowest_spell_slot
+from spells import Spell, Spellcaster
+from typing import Callable, Any
 
 
 class Character:
@@ -17,6 +20,7 @@ class Character:
         base_feats: List[Feat] = None,
         feat_schedule=[4, 8, 12, 16, 19],
         default_feats=None,
+        spellcaster: Spellcaster = Spellcaster.NONE,
     ):
         if default_feats is None:
             default_feats = [Attack(), Vex()]
@@ -29,6 +33,9 @@ class Character:
         self.wis = stats[4]
         self.cha = stats[5]
         self.minions = []
+        self.effects = set()
+        self.spellcaster = spellcaster
+        self.concentration = None
         self.feats = dict()
         self.feats_by_event = dict()
         for feat in default_feats:
@@ -163,10 +170,12 @@ class Character:
             feat.miss(args)
 
     def short_rest(self):
+        self.effects = set()
         for feat in self.feats_for_event("short_rest"):
             feat.short_rest()
 
     def long_rest(self):
+        self.reset_spell_slots()
         self.short_rest()
         for feat in self.feats_for_event("long_rest"):
             feat.long_rest()
@@ -174,3 +183,39 @@ class Character:
     def enemy_turn(self, target: Target):
         for feat in self.feats_for_event("enemy_turn"):
             feat.enemy_turn(target)
+
+    def reset_spell_slots(self):
+        self.slots = spell_slots(self.level, half=self.spellcaster is Spellcaster.HALF)
+
+    def spell_dc(self):
+        return 8 + self.mod(self.spell_mod) + self.prof
+
+    def highest_slot(self, max: int = 9) -> int:
+        return highest_spell_slot(self.slots, max=max)
+
+    def lowest_slot(self, min: int = 1) -> int:
+        return lowest_spell_slot(self.slots, min=min)
+
+    def cast(self, spell: Spell, target: Target = None):
+        self.slots[spell.slot] -= 1
+        if spell.concentration:
+            self.set_concentration(spell)
+        spell.cast(self, target)
+
+    def set_concentration(self, spell: Spell):
+        if self.concentration:
+            self.concentration.end(self)
+        self.concentration = spell
+
+    def concentrating_on(self, name: str) -> bool:
+        return self.concentration is not None and self.concentration.name is name
+
+    def is_concentrating(self) -> bool:
+        return self.concentration is not None
+
+    def add_effect(self, effect: str):
+        self.effects.add(effect)
+
+    def remove_effect(self, effect: str):
+        if effect in self.effects:
+            self.effects.remove(effect)

@@ -11,34 +11,25 @@ from feats import (
     EquipWeapon,
     GreatWeaponMaster,
     Feat,
-    Spellcasting,
     TwoWeaponFighting,
 )
 from weapons import Greatsword, Shortsword, Scimitar
 from log import log
-from spells import DivineSmite, DivineFavor
+from spells import DivineSmite, DivineFavor, Spellcaster
 
 
 class DivineSmiteFeat(Feat):
-    def __init__(self, max_reroll: int = 0) -> None:
+    def __init__(self) -> None:
         self.name = "DivineSmite"
-        self.max_reroll = max_reroll
 
     def begin_turn(self, target: Target):
         self.used = False
 
     def hit(self, args: HitArgs):
-        spellcasting = self.character.feat("Spellcasting")
-        slot = spellcasting.highest_slot()
+        slot = self.character.highest_slot()
         if not self.used and slot >= 1 and self.character.use_bonus("DivineSmite"):
             self.used = True
-            spellcasting.cast(DivineSmite(slot))
-            num = 1 + slot
-            if args.crit:
-                num *= 2
-            args.add_damage(
-                "DivineSmite", roll_dice(num, 8, max_reroll=self.max_reroll)
-            )
+            self.character.cast(DivineSmite(slot, args.crit), target=args.attack.target)
 
 
 class ImprovedDivineSmite(Feat):
@@ -74,20 +65,17 @@ class DivineFavorFeat(Feat):
         self.name = "DivineFavor"
 
     def begin_turn(self, target: Target):
-        spellcasting = self.character.feat("Spellcasting")
-        slot = spellcasting.lowest_slot()
+        slot = self.character.lowest_slot()
         if (
-            not spellcasting.is_concentrating()
+            not self.character.is_concentrating()
             and slot >= 1
             and self.character.use_bonus("DivineFavor")
         ):
-            spellcasting.cast(DivineFavor(slot))
+            self.character.cast(DivineFavor(slot))
 
     def hit(self, args: HitArgs):
-        spellcasting = self.character.feat("Spellcasting")
-        if not spellcasting.concentrating_on("DivineFavor"):
-            return
-        args.add_damage("DivineFavor", roll_dice(1, 4))
+        if self.character.concentrating_on("DivineFavor"):
+            args.add_damage("DivineFavor", roll_dice(1, 4))
 
 
 class Paladin(Character):
@@ -111,7 +99,6 @@ class Paladin(Character):
         else:
             attacks = [weapon]
         base_feats.append(AttackAction(attacks=attacks, nick_attacks=nick_attacks))
-        base_feats.append(Spellcasting(level, half=True))
         if level >= 2:
             base_feats.append(DivineSmiteFeat())
         if level >= 11:
@@ -140,4 +127,5 @@ class Paladin(Character):
             stats=[17, 10, 10, 10, 10, 16],
             feats=feats,
             base_feats=base_feats,
+            spellcaster=Spellcaster.HALF,
         )

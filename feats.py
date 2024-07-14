@@ -294,40 +294,6 @@ class EquipWeapon(Feat):
             )
 
 
-class Spellcasting(Feat):
-    def __init__(self, level, half=False) -> None:
-        self.name = "Spellcasting"
-        self.level = level
-        self.half = half
-        self.concentration: Spell = None
-
-    def long_rest(self):
-        self.slots = spell_slots(self.level, half=self.half)
-
-    def short_rest(self):
-        if self.concentration is not None:
-            self.concentration.end()
-            self.concentration = None
-
-    def highest_slot(self):
-        return highest_spell_slot(self.slots)
-
-    def lowest_slot(self):
-        return lowest_spell_slot(self.slots)
-
-    def cast(self, spell: Spell):
-        self.slots[spell.slot] -= 1
-        if spell.concentration:
-            self.concentration = spell
-        spell.begin(self.character)
-
-    def concentrating_on(self, name: str):
-        return self.concentration is not None and self.concentration.name is name
-
-    def is_concentrating(self):
-        return self.concentration is not None
-
-
 class LightWeaponBonusAttack(Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.name = "LightWeaponBonusAttack"

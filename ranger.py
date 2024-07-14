@@ -13,37 +13,35 @@ from feats import (
     Archery,
     CrossbowExpert,
     Feat,
-    Spellcasting,
     EquipWeapon,
     DualWielder,
     Attack,
     TwoWeaponFighting,
 )
 from weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
-from spells import HuntersMark
+from spells import HuntersMark, Spellcaster
 from summons import FeySummon, SummonFey
 from log import log
 
 
 # ranger casts either summon fey or hunter's mark, returns true if ranger still has action
 def cast_spell(character: Character, summon_fey_threshold: int) -> bool:
-    spellcasting = character.feat("Spellcasting")
-    slot = spellcasting.highest_slot()
+    slot = character.highest_slot()
     if (
         summon_fey_threshold
         and slot >= summon_fey_threshold
-        and not spellcasting.is_concentrating()
+        and not character.is_concentrating()
     ):
         spell = SummonFey(
             slot,
             caster_level=character.level,
             to_hit=character.prof + character.mod("wis"),
         )
-        spellcasting.cast(spell)
+        character.cast(spell)
         return False
     else:
-        if not spellcasting.is_concentrating() and character.use_bonus("HuntersMark"):
-            spellcasting.cast(HuntersMark(slot))
+        if not character.is_concentrating() and character.use_bonus("HuntersMark"):
+            character.cast(HuntersMark(slot))
         return True
 
 
@@ -75,18 +73,13 @@ class HuntersMarkFeat(Feat):
             self.caster = character
 
     def roll_attack(self, args: AttackRollArgs):
-        spellcasting = self.caster.feat("Spellcasting")
-        if not spellcasting.concentrating_on("HuntersMark"):
-            return
-        if self.adv:
+        if self.caster.concentrating_on("HuntersMark") and self.adv:
             args.adv = True
 
     def hit(self, args: HitArgs):
-        spellcasting = self.caster.feat("Spellcasting")
-        if not spellcasting.concentrating_on("HuntersMark"):
-            return
-        num = 2 if args.crit else 1
-        args.add_damage("HuntersMark", roll_dice(num, self.die))
+        if self.caster.concentrating_on("HuntersMark"):
+            num = 2 if args.crit else 1
+            args.add_damage("HuntersMark", roll_dice(num, self.die))
 
 
 class Gloomstalker(Feat):
@@ -155,7 +148,7 @@ class StalkersFlurry(Feat):
 
 
 class GloomstalkerRanger(Character):
-    def __init__(self, level):
+    def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         if level >= 2:
@@ -167,7 +160,6 @@ class GloomstalkerRanger(Character):
             attacks = [weapon]
         base_feats.append(EquipWeapon(weapon))
         base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
-        base_feats.append(Spellcasting(level, half=True))
         if level >= 20:
             base_feats.append(HuntersMarkFeat(10, True))
         elif level >= 17:
@@ -273,7 +265,6 @@ class BeastMasterRanger(Character):
         base_feats.append(EquipWeapon(rapier))
         base_feats.append(EquipWeapon(scimitar))
         base_feats.append(EquipWeapon(other_shortsword))
-        base_feats.append(Spellcasting(level, half=True))
         if level >= 2:
             base_feats.append(TwoWeaponFighting())
         if level >= 20:
@@ -301,5 +292,6 @@ class BeastMasterRanger(Character):
                 ASI(),
             ],
             base_feats=base_feats,
+            spellcaster=Spellcaster.HALF,
         )
         self.add_minion(beast)
