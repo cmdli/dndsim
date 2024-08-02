@@ -188,7 +188,9 @@ class PrimalCompanion(Character):
     def __init__(self, level: int, ranger: Character, **kwargs):
         self.ranger = ranger
         self.num_attacks = 2 if level >= 11 else 1
-        self.weapon = BeastMaul(base=2 + prof_bonus(level))
+        self.weapon = BeastMaul(
+            to_hit=lambda: self.get_to_hit(), base=2 + prof_bonus(level)
+        )
         base_feats: List[Feat] = [BeastChargeFeat(), EquipWeapon(self.weapon)]
         if level >= 11:
             base_feats += [HuntersMarkFeat(die=10 if level >= 20 else 6, caster=ranger)]
@@ -197,7 +199,6 @@ class PrimalCompanion(Character):
             stats=[10, 10, 10, 10, 10, 10],
             feats=[],
             base_feats=base_feats,
-            default_feats=[Attack(lambda: self.get_to_hit())],
         )
 
     def do_attack(self, target: Target):
@@ -209,9 +210,15 @@ class PrimalCompanion(Character):
 
 
 class BeastMaul(Weapon):
-    def __init__(self, base, **kwargs):
+    def __init__(self, to_hit, base, **kwargs):
         super().__init__(
-            name="Beast Maul", num_dice=1, die=8, mod="wis", base=base, **kwargs
+            name="Beast Maul",
+            num_dice=1,
+            die=8,
+            mod="wis",
+            base=base,
+            to_hit=to_hit,
+            **kwargs
         )
 
 

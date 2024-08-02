@@ -61,12 +61,10 @@ class GreatWeaponMaster(Feat):
         character.str += 1
 
     def begin_turn(self, target):
-        self.used_dmg = False
         self.bonus_attack_enabled = False
 
     def hit(self, args: HitArgs):
-        if not self.used_dmg and args.attack.weapon.heavy:
-            self.used_dmg = True
+        if args.attack.weapon.heavy:
             args.add_damage("GreatWeaponMaster", self.character.prof)
         if args.crit:
             self.bonus_attack_enabled = True
@@ -194,9 +192,8 @@ class BoomingBlade(Feat):
 
 
 class Attack(Feat):
-    def __init__(self, custom_to_hit=None):
+    def __init__(self):
         self.name = "Attack"
-        self.custom_to_hit = custom_to_hit
 
     def roll_attack(self, args: AttackRollArgs):
         if args.attack.target.stunned:

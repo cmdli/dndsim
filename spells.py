@@ -36,7 +36,7 @@ class ConcentrationSpell(Spell):
         character.add_effect(self.name)
 
     def end(self, character):
-        self.character.add_effect(self.name)
+        character.remove_effect(self.name)
 
 
 class HuntersMark(ConcentrationSpell):
@@ -73,9 +73,14 @@ class Fireball(Spell):
 
 
 class TrueStrike(Spell):
-    def __init__(self, slot: int, weapon: Weapon, **kwargs):
-        super().__init__("TrueStrike", slot)
+    def __init__(self, weapon: Weapon, **kwargs):
+        super().__init__("TrueStrike", 0)
         self.weapon = weapon
 
     def cast(self, character, target: Target):
-        self.character.attack(target, self.weapon, tags=["truestrike"])
+        character.attack(target, self.weapon, tags=["truestrike"])
+
+
+class HolyWeapon(ConcentrationSpell):
+    def __init__(self, slot: int, **kwargs):
+        super().__init__("HolyWeapon", slot=slot, **kwargs)

@@ -14,6 +14,7 @@ class Weapon:
         base=None,
         heavy=False,
         damage_type="unknown",
+        to_hit=None,
     ) -> None:
         self.name = name
         self.num_dice = num_dice
@@ -28,6 +29,7 @@ class Weapon:
         self.base = base
         self.heavy = heavy
         self.damage_type = damage_type
+        self.to_hit = to_hit
 
 
 class Glaive(Weapon):

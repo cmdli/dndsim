@@ -6,8 +6,6 @@ from monk import Monk
 from barbarian import Barbarian
 from fighter import (
     ChampionFighter,
-    PrecisionTrippingFighter,
-    TWFFighter,
 )
 from rogue import AssassinRogue, ArcaneTricksterRogue
 from wizard import Wizard
@@ -17,6 +15,7 @@ from cleric import Cleric
 from target import Target
 from log import log
 from au import AssaultUnit
+from bard import ValorBard
 
 NUM_FIGHTS = 3
 NUM_TURNS = 5
@@ -58,13 +57,21 @@ class CharacterConfig:
         self.args = kwargs
 
 
-def test_characters(characters: List[CharacterConfig], start: int, end: int, extra_args: Dict[str, bool]):
+def test_characters(
+    characters: List[CharacterConfig], start: int, end: int, extra_args: Dict[str, bool]
+):
     data = [["Level", "Character", "DPR"]]
     for level in range(start, end + 1):
         for character in characters:
             args = dict(extra_args)
             args.update(character.args)
-            data.append([level, character.name, test_dpr(character.constructor(level, **args), level)])
+            data.append(
+                [
+                    level,
+                    character.name,
+                    test_dpr(character.constructor(level, **args), level),
+                ]
+            )
     return data
 
 
@@ -81,6 +88,7 @@ CHARACTER_MAPPING = {
     "wizard": CharacterConfig("Wizard", Wizard),
     "cleric": CharacterConfig("Cleric", Cleric),
     "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
+    "bard": CharacterConfig("Bard", ValorBard),
 }
 
 ALL_CHARACTERS = [

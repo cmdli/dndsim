@@ -21,6 +21,7 @@ class Character:
         feat_schedule=[4, 8, 12, 16, 19],
         default_feats=None,
         spellcaster: Spellcaster = Spellcaster.NONE,
+        spell_mod: str = None,
     ):
         if default_feats is None:
             default_feats = [Attack(), Vex()]
@@ -35,6 +36,7 @@ class Character:
         self.minions = []
         self.effects = set()
         self.spellcaster = spellcaster
+        self.spell_mod = spell_mod
         self.concentration = None
         self.feats = dict()
         self.feats_by_event = dict()
@@ -82,12 +84,26 @@ class Character:
     def remove_minion(self, minion):
         self.minions.remove(minion)
 
+    def add_effect(self, effect: str):
+        self.effects.add(effect)
+
+    def remove_effect(self, effect: str):
+        if effect in self.effects:
+            self.effects.remove(effect)
+
+    def has_effect(self, effect: str):
+        return effect in self.effects
+
     def use_bonus(self, source: str):
         if not self.used_bonus:
             log.record(f"Bonus ({source})", 1)
             self.used_bonus = True
             return True
         return False
+
+    # =============================
+    #       LIFECYCLE EVENTS
+    # =============================
 
     def begin_turn(self, target: Target):
         log.record("Turn", 1)
@@ -126,6 +142,25 @@ class Character:
         for feat in self.feats_for_event("after_action"):
             feat.after_action(target)
 
+    def short_rest(self):
+        self.effects = set()
+        for feat in self.feats_for_event("short_rest"):
+            feat.short_rest()
+
+    def long_rest(self):
+        self.reset_spell_slots()
+        self.short_rest()
+        for feat in self.feats_for_event("long_rest"):
+            feat.long_rest()
+
+    def enemy_turn(self, target: Target):
+        for feat in self.feats_for_event("enemy_turn"):
+            feat.enemy_turn(target)
+
+    # ============================
+    #      WEAPON ATTACKS
+    # ============================
+
     def attack(
         self,
         target: Target,
@@ -138,8 +173,23 @@ class Character:
             weapon=weapon,
             tags=tags,
         )
-        for feat in self.feats_for_event("attack"):
-            feat.attack(args)
+        log.record(f"Attack:{args.weapon.name}", 1)
+        self.before_attack()
+        if weapon.to_hit:
+            to_hit = weapon.to_hit()
+        else:
+            to_hit = self.prof + self.mod(args.weapon.mod) + args.weapon.bonus
+        result = self.roll_attack(attack=args, to_hit=to_hit)
+        roll = result.roll()
+        crit = False
+        if roll >= args.weapon.min_crit:
+            crit = True
+        roll_total = roll + to_hit + result.situational_bonus
+        log.output(lambda: f"{args.weapon.name} total {roll_total} vs {args.target.ac}")
+        if roll_total >= args.target.ac:
+            self.hit(attack=args, crit=crit, roll=roll)
+        else:
+            self.miss(attack=args)
 
     def before_attack(self):
         for feat in self.feats_for_event("before_attack"):
@@ -147,6 +197,16 @@ class Character:
 
     def roll_attack(self, attack: AttackArgs, to_hit: int):
         args = AttackRollArgs(attack=attack, to_hit=to_hit)
+        if attack.target.stunned:
+            args.adv = True
+        if attack.target.prone:
+            if args.attack.weapon.ranged:
+                args.disadv = True
+            else:
+                args.adv = True
+        if attack.target.semistunned:
+            args.adv = True
+            args.attack.target.semistunned = False
         for feat in self.feats_for_event("roll_attack"):
             feat.roll_attack(args)
         return args
@@ -169,20 +229,9 @@ class Character:
         for feat in self.feats_for_event("miss"):
             feat.miss(args)
 
-    def short_rest(self):
-        self.effects = set()
-        for feat in self.feats_for_event("short_rest"):
-            feat.short_rest()
-
-    def long_rest(self):
-        self.reset_spell_slots()
-        self.short_rest()
-        for feat in self.feats_for_event("long_rest"):
-            feat.long_rest()
-
-    def enemy_turn(self, target: Target):
-        for feat in self.feats_for_event("enemy_turn"):
-            feat.enemy_turn(target)
+    # ==================================
+    #         SPELLCASTING
+    # ==================================
 
     def reset_spell_slots(self):
         self.slots = spell_slots(self.level, half=self.spellcaster is Spellcaster.HALF)
@@ -197,7 +246,8 @@ class Character:
         return lowest_spell_slot(self.slots, min=min)
 
     def cast(self, spell: Spell, target: Target = None):
-        self.slots[spell.slot] -= 1
+        if spell.slot > 0:
+            self.slots[spell.slot] -= 1
         if spell.concentration:
             self.set_concentration(spell)
         spell.cast(self, target)
@@ -212,10 +262,3 @@ class Character:
 
     def is_concentrating(self) -> bool:
         return self.concentration is not None
-
-    def add_effect(self, effect: str):
-        self.effects.add(effect)
-
-    def remove_effect(self, effect: str):
-        if effect in self.effects:
-            self.effects.remove(effect)

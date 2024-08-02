@@ -40,7 +40,6 @@ class Summon(Character):
         self,
         slot: int,
         caster_level: int,
-        to_hit: int,
         weapon: Weapon,
         bonus_dmg: int,
         feats=[],
@@ -56,7 +55,6 @@ class Summon(Character):
             base_feats=base_feats,
             feats=[],
             feat_schedule=[],
-            default_feats=[Attack(lambda: to_hit)],
         )
 
 
