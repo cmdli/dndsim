@@ -90,3 +90,10 @@ class HitArgs:
 class MissArgs:
     def __init__(self, attack: AttackArgs):
         self.attack = attack
+
+
+class WeaponRollArgs:
+    def __init__(self, weapon: Weapon, rolls: List[int], crit: bool = False) -> None:
+        self.weapon = weapon
+        self.rolls = rolls
+        self.crit = crit

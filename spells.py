@@ -1,5 +1,5 @@
 from target import Target
-from util import roll_dice
+from util import roll_dice, cantrip_dice
 from weapons import Weapon
 from enum import Enum
 
@@ -84,3 +84,20 @@ class TrueStrike(Spell):
 class HolyWeapon(ConcentrationSpell):
     def __init__(self, slot: int, **kwargs):
         super().__init__("HolyWeapon", slot=slot, **kwargs)
+
+
+class EldritchBlastBolt(Weapon):
+    def __init__(self, **kwargs):
+        super().__init__("EldritchBlastBolt", num_dice=1, die=10, mod="none")
+
+
+class EldritchBlast(Spell):
+    def __init__(self, character_level: int, **kwargs):
+        super().__init__("EldritchBlast", 0, **kwargs)
+        self.character_level = character_level
+        self.weapon = EldritchBlastBolt()
+        self.num_bolts = cantrip_dice(character_level)
+
+    def cast(self, character, target: Target):
+        for _ in range(self.num_bolts):
+            character.attack(target, self.weapon)

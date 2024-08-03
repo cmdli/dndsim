@@ -7,19 +7,18 @@ from feats import (
     PolearmMaster,
     AttackAction,
     Feat,
-    EquipWeapon,
     IrresistibleOffense,
+    SavageAttacker,
     CombatProwess,
 )
 from weapons import Glaive, Greatsword, GlaiveButt
 
 
 class Beserker(Feat):
-    def __init__(self, num_dice: int, max_reroll: int = 0):
+    def __init__(self, num_dice: int):
         self.name = "Berserker"
         self.used = False
         self.num_dice = num_dice
-        self.max_reroll = max_reroll
 
     def begin_turn(self, target):
         self.used = False
@@ -28,14 +27,13 @@ class Beserker(Feat):
         if not self.used:
             self.used = True
             num = 2 * self.num_dice if args.crit else self.num_dice
-            args.add_damage("Berserker", roll_dice(num, 6, max_reroll=self.max_reroll))
+            args.add_damage("Berserker", roll_dice(num, 6))
 
 
 class BrutalStrike(Feat):
-    def __init__(self, num_dice: int, max_reroll: int = 0):
+    def __init__(self, num_dice: int):
         self.name = "BrutalStrike"
         self.num_dice = num_dice
-        self.max_reroll = max_reroll
 
     def begin_turn(self, target):
         self.used = False
@@ -49,9 +47,7 @@ class BrutalStrike(Feat):
     def hit(self, args):
         if args.attack.has_tag("brutal_strike"):
             num = 2 * self.num_dice if args.crit else self.num_dice
-            args.add_damage(
-                "BrutalStrike", roll_dice(num, 10, max_reroll=self.max_reroll)
-            )
+            args.add_damage("BrutalStrike", roll_dice(num, 10))
 
 
 class Retaliation(Feat):
@@ -119,13 +115,13 @@ class Barbarian(Character):
         rage_dmg = rage_damage(level)
         magic_weapon = get_magic_weapon(level)
         base_feats = []
+        base_feats.append(SavageAttacker())
         base_feats.append(Rage(dmg=rage_dmg))
         base_feats.append(RecklessAttack())
         if use_pam:
             weapon = Glaive(bonus=magic_weapon)
         else:
             weapon = Greatsword(bonus=magic_weapon)
-        base_feats.append(EquipWeapon(weapon, savage_attacker=True))
         if level >= 5:
             attacks = 2 * [weapon]
         else:

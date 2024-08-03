@@ -8,12 +8,13 @@ from feats import (
     ASI,
     PolearmMaster,
     Feat,
-    EquipWeapon,
     IrresistibleOffense,
     TwoWeaponFighting,
     ElvenAccuracy,
     DualWielder,
     Piercer,
+    SavageAttacker,
+    GreatWeaponFighting,
 )
 from character import Character
 from weapons import Glaive, Greatsword, GlaiveButt, Maul, Shortsword, Scimitar, Rapier
@@ -175,12 +176,13 @@ class Fighter(Character):
         **kwargs
     ):
         base_feats = []
+        base_feats.append(SavageAttacker())
+        base_feats.append(GreatWeaponFighting())
         magic_weapon = get_magic_weapon(level)
         if use_pam:
             weapon = Glaive(bonus=magic_weapon, min_crit=min_crit)
         else:
             weapon = Greatsword(bonus=magic_weapon, min_crit=min_crit)
-        base_feats.append(EquipWeapon(weapon, savage_attacker=True, max_reroll=2))
         if level >= 20:
             num_attacks = 4
         elif level >= 11:
@@ -191,7 +193,6 @@ class Fighter(Character):
             num_attacks = 1
         if use_topple and level >= 5:
             maul = Maul(bonus=magic_weapon, min_crit=min_crit)
-            base_feats.append(EquipWeapon(maul, savage_attacker=True, max_reroll=2))
             base_feats.append(ToppleIfNecessaryAttackAction(num_attacks, maul, weapon))
         else:
             base_feats.append(AttackAction(attacks=(num_attacks * [weapon])))
@@ -204,7 +205,6 @@ class Fighter(Character):
         base_feats.extend(subclass_feats)
         if use_pam:
             butt = GlaiveButt(bonus=magic_weapon, min_crit=min_crit)
-            base_feats.append(EquipWeapon(butt, savage_attacker=True, max_reroll=2))
             feats = [
                 GreatWeaponMaster(weapon),
                 PolearmMaster(butt),
@@ -299,13 +299,12 @@ class TWFFighter(Character):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         base_feats.append(TwoWeaponFighting())
+        base_feats.append(SavageAttacker())
         if level >= 6:
             weapon = Rapier(mod="str", bonus=magic_weapon, min_crit=min_crit)
         else:
             weapon = Shortsword(mod="str", bonus=magic_weapon, min_crit=min_crit)
         scimitar = Scimitar(mod="str", bonus=magic_weapon, min_crit=min_crit)
-        base_feats.append(EquipWeapon(weapon, savage_attacker=True))
-        base_feats.append(EquipWeapon(scimitar, savage_attacker=True))
         num_attacks = get_num_attacks(level)
         base_feats.append(
             AttackAction(attacks=(num_attacks * [weapon]), nick_attacks=[scimitar])

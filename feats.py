@@ -1,9 +1,8 @@
-from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
-from util import roll_dice, spell_slots, highest_spell_slot, lowest_spell_slot
+from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
+from util import roll_dice
 from target import Target
 from weapons import Weapon
 from log import log
-from spells import Spell
 
 EVENT_NAMES = set(
     [
@@ -20,6 +19,7 @@ EVENT_NAMES = set(
         "enemy_turn",
         "short_rest",
         "long_rest",
+        "weapon_roll",
     ]
 )
 
@@ -119,6 +119,16 @@ class TwoWeaponFighting(Feat):
             args.attack.remove_tag("light")
 
 
+class GreatWeaponFighting(Feat):
+    def __init__(self) -> None:
+        self.name = "GreatWeaponFighting"
+
+    def weapon_roll(self, args: WeaponRollArgs):
+        for i in range(len(args.rolls)):
+            if args.rolls[i] == 1 or args.rolls[i] == 2:
+                args.rolls[i] = roll_dice(1, args.weapon.die)
+
+
 class CrossbowExpert(Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.name = "CrossbowExpert"
@@ -191,106 +201,6 @@ class BoomingBlade(Feat):
         args.add_damage("BoomingBlade", roll_dice(extra_dice, 8))
 
 
-class Attack(Feat):
-    def __init__(self):
-        self.name = "Attack"
-
-    def roll_attack(self, args: AttackRollArgs):
-        if args.attack.target.stunned:
-            args.adv = True
-        if args.attack.target.prone:
-            if args.attack.weapon.ranged:
-                args.disadv = True
-            else:
-                args.adv = True
-        if args.attack.target.semistunned:
-            args.adv = True
-            args.attack.target.semistunned = False
-
-    def attack(self, args: AttackArgs):
-        log.record(f"Attack:{args.weapon.name}", 1)
-        self.character.before_attack()
-        if self.custom_to_hit:
-            to_hit = self.custom_to_hit()
-        else:
-            to_hit = (
-                self.character.prof
-                + self.character.mod(args.weapon.mod)
-                + args.weapon.bonus
-            )
-        result = self.character.roll_attack(attack=args, to_hit=to_hit)
-        roll = result.roll()
-        crit = False
-        if roll >= args.weapon.min_crit:
-            crit = True
-        roll_total = roll + to_hit + result.situational_bonus
-        log.output(lambda: f"{args.weapon.name} total {roll_total} vs {args.target.ac}")
-        if roll_total >= args.target.ac:
-            self.character.hit(attack=args, crit=crit, roll=roll)
-        else:
-            self.character.miss(attack=args)
-
-
-class EquipWeapon(Feat):
-    def __init__(
-        self,
-        weapon: Weapon = None,
-        savage_attacker: bool = False,
-        max_reroll: int = 0,
-    ):
-        self.name = weapon.name
-        self.weapon = weapon
-        self.savage_attacker = savage_attacker
-        self.max_reroll = max_reroll
-        self.used_savage_attacker = False
-
-    def begin_turn(self, target):
-        self.used_savage_attacker = False
-
-    def weapon_dmg(self):
-        return roll_dice(
-            self.weapon.num_dice, self.weapon.die, max_reroll=self.max_reroll
-        )
-
-    def damage(self, crit=False):
-        dmg = self.weapon_dmg()
-        if crit:
-            dmg += self.weapon_dmg()
-        return dmg
-
-    def hit(self, args: HitArgs):
-        target = args.attack.target
-        weapon = args.attack.weapon
-        if weapon.name != self.weapon.name:
-            return
-        log.record(f"Hit:{weapon.name}", 1)
-        if args.crit:
-            log.record(f"Crit:{weapon.name}", 1)
-        dmg = self.damage(crit=args.crit)
-        if self.savage_attacker and not self.used_savage_attacker:
-            self.used_savage_attacker = True
-            dmg2 = self.damage(crit=args.crit)
-            dmg = max(dmg, dmg2)
-        total_dmg = dmg + weapon.bonus
-        if args.attack.weapon.base is not None:
-            total_dmg += args.attack.weapon.base
-        elif not args.attack.has_tag("light"):
-            total_dmg += args.attack.character.mod(weapon.mod)
-        args.add_damage(f"Weapon:{weapon.name}", total_dmg)
-        if weapon.topple:
-            if not target.save(args.attack.character.dc(weapon.mod)):
-                log.output(lambda: "Knocked prone")
-                target.prone = True
-
-    def miss(self, args: MissArgs):
-        if args.attack.weapon.name != self.weapon.name:
-            return
-        if self.weapon.graze:
-            args.attack.target.damage_source(
-                "Graze", args.attack.character.mod(self.weapon.mod)
-            )
-
-
 class LightWeaponBonusAttack(Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.name = "LightWeaponBonusAttack"
@@ -317,6 +227,30 @@ class Vex(Feat):
     def hit(self, args: HitArgs):
         if args.attack.weapon.vex:
             self.vexing = True
+
+
+class Topple(Feat):
+    def __init__(self) -> None:
+        self.name = "Topple"
+
+    def hit(self, args: HitArgs):
+        weapon = args.attack.weapon
+        target = args.attack.target
+        if weapon.topple:
+            if not target.save(self.character.dc(weapon.mod)):
+                log.output(lambda: "Knocked prone")
+                target.prone = True
+
+
+class Graze(Feat):
+    def __init__(self) -> None:
+        self.name = "Graze"
+
+    def miss(self, args: MissArgs):
+        if args.attack.weapon.graze:
+            args.attack.target.damage_source(
+                "Graze", self.character.mod(args.attack.weapon.mod)
+            )
 
 
 class IrresistibleOffense(Feat):
@@ -368,6 +302,23 @@ class DualWielder(Feat):
     def apply(self, character):
         super().apply(character)
         character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+
+
+class SavageAttacker(Feat):
+    def __init__(self) -> None:
+        self.name = "SavageAttacker"
+        self.used = False
+
+    def begin_turn(self, target: Target):
+        self.used = False
+
+    def weapon_roll(self, args: WeaponRollArgs):
+        if self.used:
+            return
+        self.used = True
+        new_rolls = args.weapon.rolls(crit=args.crit)
+        if sum(new_rolls) > sum(args.rolls):
+            args.rolls = new_rolls
 
 
 class Piercer(Feat):

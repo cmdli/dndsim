@@ -1,5 +1,5 @@
-from events import AttackArgs, AttackRollArgs, HitArgs
-from feats import Feat, Attack
+from events import AttackRollArgs, HitArgs
+from feats import Feat
 from util import do_roll, roll_dice
 from target import Target
 from log import log

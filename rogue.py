@@ -5,7 +5,7 @@ from util import (
     do_roll,
 )
 from character import Character
-from feats import ASI, AttackAction, Feat, EquipWeapon, BoomingBlade
+from feats import ASI, AttackAction, Feat, BoomingBlade
 from weapons import Shortsword, Scimitar, Rapier
 from events import HitArgs
 from log import log
@@ -113,14 +113,13 @@ class AssassinRogue(Character):
         base_feats = []
         if level >= 5 and booming_blade:
             rapier = Rapier(bonus=magic_weapon)
-            base_feats.append(EquipWeapon(rapier))
             base_feats.append(BoomingBlade(self, rapier))
         else:
             shortsword = Shortsword(bonus=magic_weapon)
             scimitar = Scimitar(bonus=magic_weapon)
-            base_feats.append(EquipWeapon(shortsword))
-            base_feats.append(EquipWeapon(scimitar))
-            base_feats.append(AttackAction(attacks=[shortsword], nick_attacks=[scimitar]))
+            base_feats.append(
+                AttackAction(attacks=[shortsword], nick_attacks=[scimitar])
+            )
         base_feats.append(SneakAttack(sneak_attack))
         if level >= 3:
             base_feats.append(SteadyAim())
@@ -147,13 +146,10 @@ class ArcaneTricksterRogue(Character):
             base_feats.append(SteadyAim())
         if level >= 5:
             rapier = Rapier(bonus=magic_weapon)
-            base_feats.append(EquipWeapon(rapier))
             base_feats.append(BoomingBlade(self, rapier))
         else:
             shortsword = Shortsword(bonus=magic_weapon)
             scimitar = Scimitar(bonus=magic_weapon)
-            base_feats.append(EquipWeapon(shortsword))
-            base_feats.append(EquipWeapon(scimitar))
             base_feats.append(
                 AttackAction(attacks=[shortsword], nick_attacks=[scimitar])
             )

@@ -1,3 +1,6 @@
+from util import roll_dice
+
+
 class Weapon:
     def __init__(
         self,
@@ -11,7 +14,7 @@ class Weapon:
         min_crit=20,
         ranged=False,
         topple=False,
-        base=None,
+        base=0,
         heavy=False,
         damage_type="unknown",
         to_hit=None,
@@ -30,6 +33,18 @@ class Weapon:
         self.heavy = heavy
         self.damage_type = damage_type
         self.to_hit = to_hit
+
+    def damage(self, crit: bool = False, max_reroll: int = None):
+        dmg = roll_dice(self.num_dice, self.die, max_reroll=max_reroll)
+        if crit:
+            dmg += roll_dice(self.num_dice, self.die, max_reroll=max_reroll)
+        return dmg
+
+    def rolls(self, crit: bool = False):
+        num_dice = self.num_dice
+        if crit:
+            num_dice *= 2
+        return [roll_dice(1, self.die) for _ in range(num_dice)]
 
 
 class Glaive(Weapon):

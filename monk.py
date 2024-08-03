@@ -4,12 +4,11 @@ from feats import (
     ASI,
     AttackAction,
     Feat,
-    EquipWeapon,
     IrresistibleOffense,
     WeaponMaster,
 )
 from weapons import Weapon
-from events import HitArgs
+from events import HitArgs, WeaponRollArgs
 from target import Target
 from log import log
 
@@ -142,23 +141,27 @@ class MagicInitiateHuntersMark(Feat):
             args.add_damage("HuntersMark", roll_dice(1, 6))
 
 
+class TavernBrawler(Feat):
+    def __init__(self, die: int) -> None:
+        self.name = "TavernBrawler"
+        self.die = die
+
+    def weapon_roll(self, args: WeaponRollArgs):
+        for i in range(len(args.rolls)):
+            if args.rolls[i] == 1:
+                args.rolls[i] = roll_dice(1, self.die)
+
+
 class Monk(Character):
     def __init__(
-        self,
-        level,
-        use_hunters_mark: bool = False,
-        use_nick: bool = False,
-        use_grappler: bool = True,
-        **kwargs
+        self, level, use_nick: bool = False, use_grappler: bool = True, **kwargs
     ):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         weapon_die = martial_arts_die(level)
+        base_feats.append(TavernBrawler(weapon_die))
         fists = Fists(weapon_die, bonus=magic_weapon)
         weapon = fists
-        base_feats.append(
-            EquipWeapon(weapon=weapon, max_reroll=1 if not use_hunters_mark else 0)
-        )
         nick_attacks = []
         if use_nick and level >= 8:
             # Using fists here to simulate a monk weapon
@@ -168,8 +171,6 @@ class Monk(Character):
             AttackAction(attacks=(num_attacks * [weapon]), nick_attacks=nick_attacks)
         )
         base_feats.append(Ki(level if level >= 2 else 0))
-        if use_hunters_mark:
-            base_feats.append(MagicInitiateHuntersMark())
         if level >= 10:
             bonus_attacks = 3
         elif level >= 2:

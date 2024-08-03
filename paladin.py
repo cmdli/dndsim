@@ -8,10 +8,10 @@ from character import Character
 from feats import (
     ASI,
     AttackAction,
-    EquipWeapon,
     GreatWeaponMaster,
     Feat,
     TwoWeaponFighting,
+    GreatWeaponFighting,
 )
 from weapons import Greatsword, Shortsword, Scimitar
 from log import log
@@ -33,15 +33,12 @@ class DivineSmiteFeat(Feat):
 
 
 class ImprovedDivineSmite(Feat):
-    def __init__(self, max_reroll: int = 0) -> None:
+    def __init__(self) -> None:
         self.name = "ImprovedDivineSmite"
-        self.max_reroll = max_reroll
 
     def hit(self, args: HitArgs):
         num = 2 if args.crit else 1
-        args.add_damage(
-            "ImprovedDivineSmite", roll_dice(num, 8, max_reroll=self.max_reroll)
-        )
+        args.add_damage("ImprovedDivineSmite", roll_dice(num, 8))
 
 
 class SacredWeapon(Feat):
@@ -85,15 +82,12 @@ class Paladin(Character):
         if use_twf:
             scimitar = Scimitar("str", bonus=magic_weapon)
             base_feats.append(TwoWeaponFighting())
-            base_feats.append(EquipWeapon(scimitar))
             weapon = Shortsword("str", bonus=magic_weapon)
             nick_attacks = [scimitar]
-            max_reroll = 0
         else:
+            base_feats.append(GreatWeaponFighting())
             weapon = Greatsword(bonus=magic_weapon)
             nick_attacks = []
-            max_reroll = 2
-        base_feats.append(EquipWeapon(weapon=weapon, max_reroll=max_reroll))
         if level >= 5:
             attacks = 2 * [weapon]
         else:

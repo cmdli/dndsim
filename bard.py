@@ -1,11 +1,11 @@
 from character import Character
-from feats import Feat, ASI, AttackAction, EquipWeapon, DualWielder
+from feats import Feat, ASI, AttackAction, DualWielder
 from weapons import Weapon, Shortsword, Scimitar
 from events import HitArgs, AttackRollArgs
 from util import roll_dice, get_magic_weapon
 from target import Target
 from typing import List
-from spells import TrueStrike, HolyWeapon, Spellcaster
+from spells import TrueStrike, HolyWeapon, Spellcaster, EldritchBlast
 
 
 class TrueStrikeFeat(Feat):
@@ -82,9 +82,7 @@ class ValorBard(Character):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         weapon = Shortsword("dex", bonus=magic_weapon)
-        base_feats.append(EquipWeapon(weapon))
         scimitar = Scimitar("dex", bonus=magic_weapon)
-        base_feats.append(EquipWeapon(scimitar))
         base_feats.append(TrueStrikeFeat(level))
         attacks = []
         if level >= 6:
@@ -106,6 +104,45 @@ class ValorBard(Character):
         super().init(
             level=level,
             stats=[10, 16, 10, 10, 10, 17],
+            base_feats=base_feats,
+            feats=feats,
+            spellcaster=Spellcaster.FULL,
+            spell_mod="cha",
+        )
+
+
+class CMEMulticlassAction(Feat):
+    def __init__(self, level: int, weapon: Weapon) -> None:
+        super().__init__()
+        self.name = "CMEMulticlassAction"
+        self.level = level
+        self.weapon = weapon
+
+    def action(self, target):
+        if self.level >= 7:
+            self.character.cast(EldritchBlast(self.level))
+        self.character.attack(target, self.weapon)
+        self.character.attack(target, self.weapon)
+
+
+class CMEMulticlass(Character):
+    def __init__(self, level: int) -> None:
+        # Valor Bard 5
+        # Warlock 1
+        # Valor Bard 19
+        base_feats = []
+        weapon = Scimitar()
+        base_feats.append(CMEMulticlassAction(level, weapon))
+        feats = [
+            DualWielder(),
+            ASI([["dex", 2]]),
+            ASI([["cha", 2]]),
+            ASI([["cha", 1]]),
+            ASI(),
+        ]
+        super().init(
+            level=level,
+            stats=[10, 17, 10, 10, 10, 16],
             base_feats=base_feats,
             feats=feats,
             spellcaster=Spellcaster.FULL,

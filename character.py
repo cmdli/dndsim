@@ -1,8 +1,8 @@
 from util import prof_bonus
-from feats import Attack, Vex, Feat
+from feats import Vex, Feat, Topple
 from target import Target
 from weapons import Weapon
-from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs
+from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
 from log import log
 from typing import List
 from collections import defaultdict
@@ -24,7 +24,7 @@ class Character:
         spell_mod: str = None,
     ):
         if default_feats is None:
-            default_feats = [Attack(), Vex()]
+            default_feats = [Vex(), Topple()]
         self.level = level
         self.prof = prof_bonus(level)
         self.str = stats[0]
@@ -211,6 +211,13 @@ class Character:
             feat.roll_attack(args)
         return args
 
+    def weapon_roll(self, weapon: Weapon, crit: bool = False):
+        rolls = weapon.rolls(crit=crit)
+        args = WeaponRollArgs(weapon=weapon, rolls=rolls, crit=crit)
+        for feat in self.feats_for_event("weapon_roll"):
+            feat.weapon_roll(args)
+        return sum(args.rolls)
+
     def hit(
         self,
         attack: AttackArgs,
@@ -218,11 +225,20 @@ class Character:
         roll: int = 0,
     ):
         args = HitArgs(attack=attack, crit=crit, roll=roll)
+        target = attack.target
+        weapon = attack.weapon
+        log.record(f"Hit:{weapon.name}", 1)
+        if crit:
+            log.record(f"Crit:{weapon.name}", 1)
+        dmg = self.weapon_roll(weapon, crit=crit) + weapon.bonus + weapon.base
+        if not attack.has_tag("light"):
+            dmg += self.mod(weapon.mod)
+        args.add_damage(f"Weapon:{weapon.name}", dmg)
         for feat in self.feats_for_event("hit"):
             feat.hit(args)
         log.output(lambda: str(args._dmg))
         for key in args._dmg:
-            attack.target.damage_source(key, args.dmg_multiplier * args._dmg[key])
+            target.damage_source(key, args.dmg_multiplier * args._dmg[key])
 
     def miss(self, attack: AttackArgs):
         args = MissArgs(attack)

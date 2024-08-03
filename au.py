@@ -1,6 +1,6 @@
 from character import Character
 from events import AttackRollArgs, HitArgs
-from feats import Feat, ASI, EquipWeapon, AttackAction
+from feats import Feat, ASI, AttackAction
 from target import Target
 from weapons import Weapon
 from util import get_magic_weapon
@@ -98,7 +98,6 @@ class AssaultUnit(Character):
         magic_weapon = get_magic_weapon(level)
         weapon = OldHandCrossbow(bonus=magic_weapon)
         base_feats = []
-        base_feats.append(EquipWeapon(weapon))
         if level >= 20:
             attacks = 4 * [weapon]
         elif level >= 11:

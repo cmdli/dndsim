@@ -13,9 +13,7 @@ from feats import (
     Archery,
     CrossbowExpert,
     Feat,
-    EquipWeapon,
     DualWielder,
-    Attack,
     TwoWeaponFighting,
 )
 from weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
@@ -158,7 +156,6 @@ class GloomstalkerRanger(Character):
             attacks = 2 * [weapon]
         else:
             attacks = [weapon]
-        base_feats.append(EquipWeapon(weapon))
         base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
         if level >= 20:
             base_feats.append(HuntersMarkFeat(10, True))
@@ -191,7 +188,7 @@ class PrimalCompanion(Character):
         self.weapon = BeastMaul(
             to_hit=lambda: self.get_to_hit(), base=2 + prof_bonus(level)
         )
-        base_feats: List[Feat] = [BeastChargeFeat(), EquipWeapon(self.weapon)]
+        base_feats: List[Feat] = [BeastChargeFeat()]
         if level >= 11:
             base_feats += [HuntersMarkFeat(die=10 if level >= 20 else 6, caster=ranger)]
         super().init(
@@ -268,10 +265,6 @@ class BeastMasterRanger(Character):
             name="OffhandShortsword",
         )
         scimitar = Scimitar(bonus=magic_weapon)
-        base_feats.append(EquipWeapon(shortsword))
-        base_feats.append(EquipWeapon(rapier))
-        base_feats.append(EquipWeapon(scimitar))
-        base_feats.append(EquipWeapon(other_shortsword))
         if level >= 2:
             base_feats.append(TwoWeaponFighting())
         if level >= 20:
