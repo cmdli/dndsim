@@ -1,4 +1,29 @@
 from util import roll_dice
+from typing import List
+
+"""
+Overlooked things for weapons:
+- Versatile (higher die only)
+- TwoHanded integration (we dont track hands yet)
+- Loading
+- Range (Ranged vs Melee is supported)
+- Thrown
+- Reach
+- Ammunition
+
+A few implementation notes:
+- Finesse weapons choose the higher of strength or dexterity
+"""
+
+WEAPON_MASTERIES = [
+    "vex",
+    "topple",
+    "slow",
+    "nick",
+    "cleave",
+    "graze",
+    "sap",
+]
 
 
 class Weapon:
@@ -7,32 +32,29 @@ class Weapon:
         name=None,
         num_dice=0,
         die=6,
-        mod=None,
-        bonus=0,
-        graze=False,
-        vex=False,
-        min_crit=20,
-        ranged=False,
-        topple=False,
-        base=0,
-        heavy=False,
         damage_type="unknown",
-        to_hit=None,
+        min_crit=20,
+        mastery: str = None,
+        magic_bonus=0,
+        attack_bonus=0,
+        dmg_bonus=0,
+        tags: List[str] = None,
+        flat_dmg_bonus: int = None,
+        override_to_hit=None,
+        override_mod=None,
     ) -> None:
         self.name = name
         self.num_dice = num_dice
         self.die = die
-        self.mod = mod
-        self.bonus = bonus
-        self.graze = graze
-        self.vex = vex
-        self.min_crit = min_crit
-        self.ranged = ranged
-        self.topple = topple
-        self.base = base
-        self.heavy = heavy
         self.damage_type = damage_type
-        self.to_hit = to_hit
+        self.min_crit = min_crit
+        self.attack_bonus = magic_bonus + attack_bonus
+        self.dmg_bonus = magic_bonus + dmg_bonus
+        self.override_mod = override_mod
+        self.override_to_hit = override_to_hit
+        self.flat_dmg_bonus = flat_dmg_bonus
+        self.mastery = mastery
+        self.tags = tags or []
 
     def damage(self, crit: bool = False, max_reroll: int = None):
         dmg = roll_dice(self.num_dice, self.die, max_reroll=max_reroll)
@@ -46,6 +68,9 @@ class Weapon:
             num_dice *= 2
         return [roll_dice(1, self.die) for _ in range(num_dice)]
 
+    def has_tag(self, tag: str):
+        return tag in self.tags
+
 
 class Glaive(Weapon):
     def __init__(self, **kwargs):
@@ -53,10 +78,9 @@ class Glaive(Weapon):
             name="Glaive",
             num_dice=1,
             die=10,
-            mod="str",
-            graze=True,
-            heavy=True,
             damage_type="slashing",
+            mastery="graze",
+            tags=["heavy"],
             **kwargs,
         )
 
@@ -67,10 +91,9 @@ class GlaiveButt(Weapon):
             name="GlaiveButt",
             num_dice=1,
             die=4,
-            mod="str",
-            graze=True,
-            heavy=True,
             damage_type="bludgeoning",
+            mastery="graze",
+            tags=["heavy"],
             **kwargs,
         )
 
@@ -81,48 +104,48 @@ class Greatsword(Weapon):
             name="Greatsword",
             num_dice=2,
             die=6,
-            mod="str",
-            graze=True,
-            heavy=True,
             damage_type="slashing",
+            mastery="graze",
+            tags=["heavy"],
             **kwargs,
         )
 
 
 class Shortsword(Weapon):
-    def __init__(self, mod="dex", name="Shortsword", **kwargs):
+    def __init__(self, name="Shortsword", **kwargs):
         super().__init__(
             name=name,
             num_dice=1,
             die=6,
-            mod=mod,
-            vex=True,
             damage_type="piercing",
+            mastery="vex",
+            tags=["finesse", "light"],
             **kwargs,
         )
 
 
 class Rapier(Weapon):
-    def __init__(self, mod="dex", name="Rapier", **kwargs):
+    def __init__(self, name="Rapier", **kwargs):
         super().__init__(
             name=name,
             num_dice=1,
             die=8,
-            mod=mod,
-            vex=True,
             damage_type="piercing",
+            mastery="vex",
+            tags=["finesse"],
             **kwargs,
         )
 
 
 class Scimitar(Weapon):
-    def __init__(self, mod="dex", **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(
             name="Scimitar",
             num_dice=1,
             die=6,
-            mod=mod,
             damage_type="slashing",
+            mastery="nick",
+            tags=["finesse", "light"],
             **kwargs,
         )
 
@@ -133,22 +156,21 @@ class Maul(Weapon):
             name="Maul",
             num_dice=2,
             die=6,
-            mod="str",
-            topple=True,
-            heavy=True,
             damage_type="bludgeoning",
+            mastery="topple",
+            tags=["heavy"],
             **kwargs,
         )
 
 
 class Quarterstaff(Weapon):
-    def __init__(self, mod="str", **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(
             name="Quarterstaff",
             num_dice=1,
             die=8,
-            mod=mod,
             damage_type="bludgeoning",
+            mastery="topple",
             **kwargs,
         )
 
@@ -159,16 +181,21 @@ class HandCrossbow(Weapon):
             name="HandCrossbow",
             num_dice=1,
             die=6,
-            mod="dex",
-            vex=True,
-            ranged=True,
             damage_type="piercing",
+            mastery="vex",
+            tags=["ranged", "light"],
             **kwargs,
         )
 
 
 class Dagger(Weapon):
-    def __init__(self, mod="dex", **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(
-            name="Dagger", num_dice=1, die=4, mod=mod, damage_type="piercing", **kwargs
+            name="Dagger",
+            num_dice=1,
+            die=4,
+            damage_type="piercing",
+            mastery="nick",
+            tags=["finesse", "light"],
+            **kwargs,
         )

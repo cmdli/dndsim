@@ -5,7 +5,7 @@ from util import (
     do_roll,
 )
 from character import Character
-from feats import ASI, AttackAction, Feat, BoomingBlade
+from feats import ASI, AttackAction, Feat, BoomingBlade, WeaponMasteries
 from weapons import Shortsword, Scimitar, Rapier
 from events import HitArgs
 from log import log
@@ -107,16 +107,17 @@ class DeathStrike(Feat):
 
 
 class AssassinRogue(Character):
-    def __init__(self, level, booming_blade=False):
+    def __init__(self, level: int, booming_blade: bool = False):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
+        base_feats.append(WeaponMasteries(["vex", "nick"]))
         if level >= 5 and booming_blade:
-            rapier = Rapier(bonus=magic_weapon)
+            rapier = Rapier(magic_bonus=magic_weapon)
             base_feats.append(BoomingBlade(self, rapier))
         else:
-            shortsword = Shortsword(bonus=magic_weapon)
-            scimitar = Scimitar(bonus=magic_weapon)
+            shortsword = Shortsword(magic_bonus=magic_weapon)
+            scimitar = Scimitar(magic_bonus=magic_weapon)
             base_feats.append(
                 AttackAction(attacks=[shortsword], nick_attacks=[scimitar])
             )
@@ -141,15 +142,16 @@ class ArcaneTricksterRogue(Character):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
+        base_feats.append(WeaponMasteries(["vex", "nick"]))
         base_feats.append(SneakAttack(sneak_attack))
         if level >= 3:
             base_feats.append(SteadyAim())
         if level >= 5:
-            rapier = Rapier(bonus=magic_weapon)
+            rapier = Rapier(magic_bonus=magic_weapon)
             base_feats.append(BoomingBlade(self, rapier))
         else:
-            shortsword = Shortsword(bonus=magic_weapon)
-            scimitar = Scimitar(bonus=magic_weapon)
+            shortsword = Shortsword(magic_bonus=magic_weapon)
+            scimitar = Scimitar(magic_bonus=magic_weapon)
             base_feats.append(
                 AttackAction(attacks=[shortsword], nick_attacks=[scimitar])
             )

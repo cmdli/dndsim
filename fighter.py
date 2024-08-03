@@ -10,9 +10,8 @@ from feats import (
     Feat,
     IrresistibleOffense,
     TwoWeaponFighting,
-    ElvenAccuracy,
+    WeaponMasteries,
     DualWielder,
-    Piercer,
     SavageAttacker,
     GreatWeaponFighting,
 )
@@ -176,13 +175,14 @@ class Fighter(Character):
         **kwargs
     ):
         base_feats = []
+        base_feats.append(WeaponMasteries(["topple", "graze"]))
         base_feats.append(SavageAttacker())
         base_feats.append(GreatWeaponFighting())
         magic_weapon = get_magic_weapon(level)
         if use_pam:
-            weapon = Glaive(bonus=magic_weapon, min_crit=min_crit)
+            weapon = Glaive(magic_bonus=magic_weapon, min_crit=min_crit)
         else:
-            weapon = Greatsword(bonus=magic_weapon, min_crit=min_crit)
+            weapon = Greatsword(magic_bonus=magic_weapon, min_crit=min_crit)
         if level >= 20:
             num_attacks = 4
         elif level >= 11:
@@ -192,7 +192,7 @@ class Fighter(Character):
         else:
             num_attacks = 1
         if use_topple and level >= 5:
-            maul = Maul(bonus=magic_weapon, min_crit=min_crit)
+            maul = Maul(magic_bonus=magic_weapon, min_crit=min_crit)
             base_feats.append(ToppleIfNecessaryAttackAction(num_attacks, maul, weapon))
         else:
             base_feats.append(AttackAction(attacks=(num_attacks * [weapon])))
@@ -298,13 +298,14 @@ class TWFFighter(Character):
             min_crit = 20
         magic_weapon = get_magic_weapon(level)
         base_feats = []
+        base_feats.append(WeaponMasteries(["vex", "nick"]))
         base_feats.append(TwoWeaponFighting())
         base_feats.append(SavageAttacker())
         if level >= 6:
-            weapon = Rapier(mod="str", bonus=magic_weapon, min_crit=min_crit)
+            weapon = Rapier(magic_bonus=magic_weapon, min_crit=min_crit)
         else:
-            weapon = Shortsword(mod="str", bonus=magic_weapon, min_crit=min_crit)
-        scimitar = Scimitar(mod="str", bonus=magic_weapon, min_crit=min_crit)
+            weapon = Shortsword(magic_bonus=magic_weapon, min_crit=min_crit)
+        scimitar = Scimitar(magic_bonus=magic_weapon, min_crit=min_crit)
         num_attacks = get_num_attacks(level)
         base_feats.append(
             AttackAction(attacks=(num_attacks * [weapon]), nick_attacks=[scimitar])
@@ -317,7 +318,7 @@ class TWFFighter(Character):
             base_feats.append(StudiedAttacks())
         feats = [
             GreatWeaponMaster(weapon),
-            DualWielder("str"),
+            DualWielder("str", weapon),
             ASI([["str", 2]]),
             ASI(),
             ASI(),

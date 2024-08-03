@@ -3,6 +3,7 @@ from util import roll_dice
 from target import Target
 from weapons import Weapon
 from log import log
+from typing import List
 
 EVENT_NAMES = set(
     [
@@ -64,7 +65,7 @@ class GreatWeaponMaster(Feat):
         self.bonus_attack_enabled = False
 
     def hit(self, args: HitArgs):
-        if args.attack.weapon.heavy:
+        if args.attack.weapon.has_tag("heavy"):
             args.add_damage("GreatWeaponMaster", self.character.prof)
         if args.crit:
             self.bonus_attack_enabled = True
@@ -97,17 +98,22 @@ class Archery(Feat):
         self.name = "Archery"
 
     def roll_attack(self, args: AttackRollArgs):
-        if args.attack.weapon.ranged:
+        if args.attack.weapon.has_tag("ranged"):
             args.situational_bonus += 2
 
 
 class DualWielder(Feat):
-    def __init__(self):
+    def __init__(self, weapon: Weapon):
         self.name = "DualWielder"
+        self.weapon = weapon
 
     def apply(self, character):
         super().apply(character)
         character.dex += 1
+
+    def after_actions(self, target: Target):
+        if self.character.use_bonus("DualWielder"):
+            self.character.attack(target, self.weapon)
 
 
 class TwoWeaponFighting(Feat):
@@ -126,7 +132,7 @@ class GreatWeaponFighting(Feat):
     def weapon_roll(self, args: WeaponRollArgs):
         for i in range(len(args.rolls)):
             if args.rolls[i] == 1 or args.rolls[i] == 2:
-                args.rolls[i] = roll_dice(1, args.weapon.die)
+                args.rolls[i] = 3
 
 
 class CrossbowExpert(Feat):
@@ -225,7 +231,7 @@ class Vex(Feat):
             self.vexing = False
 
     def hit(self, args: HitArgs):
-        if args.attack.weapon.vex:
+        if args.attack.weapon.mastery == "vex" and self.character.has_mastery("vex"):
             self.vexing = True
 
 
@@ -236,8 +242,8 @@ class Topple(Feat):
     def hit(self, args: HitArgs):
         weapon = args.attack.weapon
         target = args.attack.target
-        if weapon.topple:
-            if not target.save(self.character.dc(weapon.mod)):
+        if weapon.mastery == "topple" and self.character.has_mastery("topple"):
+            if not target.save(self.character.dc(args.attack.mod)):
                 log.output(lambda: "Knocked prone")
                 target.prone = True
 
@@ -247,10 +253,22 @@ class Graze(Feat):
         self.name = "Graze"
 
     def miss(self, args: MissArgs):
-        if args.attack.weapon.graze:
+        if args.attack.weapon.mastery == "graze" and self.character.has_mastery(
+            "graze"
+        ):
             args.attack.target.damage_source(
-                "Graze", self.character.mod(args.attack.weapon.mod)
+                "Graze", self.character.mod(args.attack.mod)
             )
+
+
+class WeaponMasteries(Feat):
+    def __init__(self, masteries: List[str]) -> None:
+        self.name = "WeaponMasteries"
+        self.masteries = masteries
+
+    def apply(self, character):
+        super().apply(character)
+        character.add_masteries(self.masteries)
 
 
 class IrresistibleOffense(Feat):

@@ -9,8 +9,9 @@ from spells import TrueStrike, HolyWeapon, Spellcaster, EldritchBlast
 
 
 class TrueStrikeFeat(Feat):
-    def __init__(self, level: int) -> None:
+    def __init__(self, level: int, spell_mod: str) -> None:
         self.name = "TrueStrike"
+        self.spell_mod = spell_mod
         if level >= 17:
             self.num_dice = 3
         elif level >= 11:
@@ -23,8 +24,8 @@ class TrueStrikeFeat(Feat):
     def roll_attack(self, args: AttackRollArgs):
         if args.attack.has_tag("truestrike"):
             args.situational_bonus += self.character.mod(
-                self.character.spell_mod
-            ) - self.character.mod(args.attack.weapon.mod)
+                self.spell_mod
+            ) - self.character.mod(args.mod)
 
     def hit(self, args: HitArgs):
         if args.attack.has_tag("truestrike"):
@@ -81,9 +82,9 @@ class ValorBard(Character):
     def __init__(self, level: int, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
         base_feats = []
-        weapon = Shortsword("dex", bonus=magic_weapon)
-        scimitar = Scimitar("dex", bonus=magic_weapon)
-        base_feats.append(TrueStrikeFeat(level))
+        weapon = Shortsword(magic_bonus=magic_weapon)
+        scimitar = Scimitar(magic_bonus=magic_weapon)
+        base_feats.append(TrueStrikeFeat(level, "cha"))
         attacks = []
         if level >= 6:
             attacks = [weapon]

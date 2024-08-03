@@ -38,6 +38,7 @@ class Character:
         self.spellcaster = spellcaster
         self.spell_mod = spell_mod
         self.concentration = None
+        self.masteries = []
         self.feats = dict()
         self.feats_by_event = dict()
         for feat in default_feats:
@@ -161,6 +162,24 @@ class Character:
     #      WEAPON ATTACKS
     # ============================
 
+    def add_masteries(self, masteries: List[str]):
+        self.masteries.extend(masteries)
+
+    def has_mastery(self, mastery: str) -> bool:
+        return mastery in self.masteries
+
+    def get_weapon_mod(self, weapon: Weapon):
+        if weapon.override_mod is not None:
+            return weapon.override_mod
+        elif weapon.has_tag("ranged"):
+            return "dex"
+        elif (weapon.has_tag("finesse") or weapon.has_tag("thrown")) and (
+            self.mod("dex") > self.mod("str")
+        ):
+            return "dex"
+        else:
+            return "str"
+
     def attack(
         self,
         target: Target,
@@ -172,13 +191,14 @@ class Character:
             target=target,
             weapon=weapon,
             tags=tags,
+            mod=self.get_weapon_mod(weapon),
         )
         log.record(f"Attack:{args.weapon.name}", 1)
         self.before_attack()
-        if weapon.to_hit:
-            to_hit = weapon.to_hit()
+        if weapon.override_to_hit:
+            to_hit = weapon.override_to_hit()
         else:
-            to_hit = self.prof + self.mod(args.weapon.mod) + args.weapon.bonus
+            to_hit = self.prof + self.mod(args.mod) + weapon.attack_bonus
         result = self.roll_attack(attack=args, to_hit=to_hit)
         roll = result.roll()
         crit = False
@@ -195,12 +215,12 @@ class Character:
         for feat in self.feats_for_event("before_attack"):
             feat.before_attack()
 
-    def roll_attack(self, attack: AttackArgs, to_hit: int):
+    def roll_attack(self, attack: AttackArgs, to_hit: int) -> AttackRollArgs:
         args = AttackRollArgs(attack=attack, to_hit=to_hit)
         if attack.target.stunned:
             args.adv = True
         if attack.target.prone:
-            if args.attack.weapon.ranged:
+            if args.attack.weapon.has_tag("ranged"):
                 args.disadv = True
             else:
                 args.adv = True
@@ -230,9 +250,14 @@ class Character:
         log.record(f"Hit:{weapon.name}", 1)
         if crit:
             log.record(f"Crit:{weapon.name}", 1)
-        dmg = self.weapon_roll(weapon, crit=crit) + weapon.bonus + weapon.base
-        if not attack.has_tag("light"):
-            dmg += self.mod(weapon.mod)
+        dmg = self.weapon_roll(weapon, crit=crit)
+        if weapon.flat_dmg_bonus:
+            dmg += weapon.flat_dmg_bonus
+        else:
+            dmg += weapon.dmg_bonus
+            if not attack.has_tag("light"):
+                mod = self.get_weapon_mod(weapon)
+                dmg += self.mod(mod)
         args.add_damage(f"Weapon:{weapon.name}", dmg)
         for feat in self.feats_for_event("hit"):
             feat.hit(args)

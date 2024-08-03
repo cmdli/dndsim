@@ -82,7 +82,7 @@ class RapidStrike(Feat):
 
 class OldHandCrossbow(Weapon):
     def __init__(self, **kwargs):
-        super().__init__(name="OldHandCrossbow", num_dice=1, die=6, mod="dex", **kwargs)
+        super().__init__(name="OldHandCrossbow", num_dice=1, die=6, **kwargs)
 
 
 class Blessed(Feat):

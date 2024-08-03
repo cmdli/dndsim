@@ -115,7 +115,11 @@ class Ki(Feat):
 class Fists(Weapon):
     def __init__(self, weapon_die, bonus=0):
         super().__init__(
-            name="Fists", num_dice=1, die=weapon_die, mod="dex", bonus=bonus
+            name="Fists",
+            num_dice=1,
+            die=weapon_die,
+            magic_bonus=bonus,
+            tags=["finesse"],
         )
 
 

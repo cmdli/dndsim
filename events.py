@@ -14,10 +14,12 @@ class AttackArgs:
         target: Target,
         weapon: Weapon,
         tags: List[str] = None,
+        mod: str = "none",
     ):
         self.character = character
         self.target = target
         self.weapon = weapon
+        self.mod = mod
         self.tags = set(tags) if tags is not None else None
 
     def has_tag(self, tag: str):

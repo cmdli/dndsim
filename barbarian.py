@@ -10,6 +10,7 @@ from feats import (
     IrresistibleOffense,
     SavageAttacker,
     CombatProwess,
+    WeaponMasteries,
 )
 from weapons import Glaive, Greatsword, GlaiveButt
 
@@ -115,13 +116,14 @@ class Barbarian(Character):
         rage_dmg = rage_damage(level)
         magic_weapon = get_magic_weapon(level)
         base_feats = []
+        base_feats.append(WeaponMasteries(["graze"]))
         base_feats.append(SavageAttacker())
         base_feats.append(Rage(dmg=rage_dmg))
         base_feats.append(RecklessAttack())
         if use_pam:
-            weapon = Glaive(bonus=magic_weapon)
+            weapon = Glaive(magic_bonus=magic_weapon)
         else:
-            weapon = Greatsword(bonus=magic_weapon)
+            weapon = Greatsword(magic_bonus=magic_weapon)
         if level >= 5:
             attacks = 2 * [weapon]
         else:
@@ -140,10 +142,10 @@ class Barbarian(Character):
         if use_pam:
             feats = [
                 GreatWeaponMaster(weapon),
-                PolearmMaster(GlaiveButt(bonus=magic_weapon)),
+                PolearmMaster(GlaiveButt(magic_bonus=magic_weapon)),
                 ASI([["str", 1], ["con", 1]]),
                 ASI(),
-                CombatProwess(),
+                IrresistibleOffense("str"),
             ]
         else:
             feats = [
@@ -151,7 +153,7 @@ class Barbarian(Character):
                 ASI([["str", 2]]),
                 ASI(),
                 ASI(),
-                CombatProwess(),
+                IrresistibleOffense("str"),
             ]
         super().init(
             level=level,

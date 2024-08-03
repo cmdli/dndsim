@@ -15,6 +15,7 @@ from feats import (
     Feat,
     DualWielder,
     TwoWeaponFighting,
+    WeaponMasteries,
 )
 from weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells import HuntersMark, Spellcaster
@@ -149,9 +150,10 @@ class GloomstalkerRanger(Character):
     def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
+        base_feats.append(WeaponMasteries(["vex", "nick"]))
         if level >= 2:
             base_feats.append(Archery())
-        weapon = HandCrossbow(bonus=magic_weapon)
+        weapon = HandCrossbow(magic_bonus=magic_weapon)
         if level >= 5:
             attacks = 2 * [weapon]
         else:
@@ -186,7 +188,8 @@ class PrimalCompanion(Character):
         self.ranger = ranger
         self.num_attacks = 2 if level >= 11 else 1
         self.weapon = BeastMaul(
-            to_hit=lambda: self.get_to_hit(), base=2 + prof_bonus(level)
+            override_to_hit=lambda: self.get_to_hit(),
+            flat_dmg_bonus=2 + prof_bonus(level),
         )
         base_feats: List[Feat] = [BeastChargeFeat()]
         if level >= 11:
@@ -207,16 +210,8 @@ class PrimalCompanion(Character):
 
 
 class BeastMaul(Weapon):
-    def __init__(self, to_hit, base, **kwargs):
-        super().__init__(
-            name="Beast Maul",
-            num_dice=1,
-            die=8,
-            mod="wis",
-            base=base,
-            to_hit=to_hit,
-            **kwargs
-        )
+    def __init__(self, **kwargs):
+        super().__init__(name="Beast Maul", num_dice=1, die=8, **kwargs)
 
 
 class BeastMasterAction(Feat):
@@ -257,14 +252,15 @@ class BeastMasterRanger(Character):
     def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
+        base_feats.append(WeaponMasteries(["vex", "nick"]))
         beast = PrimalCompanion(level, ranger=self)
-        shortsword = Shortsword(bonus=magic_weapon)
-        rapier = Rapier(bonus=magic_weapon)
+        shortsword = Shortsword(magic_bonus=magic_weapon)
+        rapier = Rapier(magic_bonus=magic_weapon)
         other_shortsword = Shortsword(
-            bonus=magic_weapon,
+            magic_bonus=magic_weapon,
             name="OffhandShortsword",
         )
-        scimitar = Scimitar(bonus=magic_weapon)
+        scimitar = Scimitar(magic_bonus=magic_weapon)
         if level >= 2:
             base_feats.append(TwoWeaponFighting())
         if level >= 20:

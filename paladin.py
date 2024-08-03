@@ -12,6 +12,7 @@ from feats import (
     Feat,
     TwoWeaponFighting,
     GreatWeaponFighting,
+    WeaponMasteries,
 )
 from weapons import Greatsword, Shortsword, Scimitar
 from log import log
@@ -80,13 +81,15 @@ class Paladin(Character):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         if use_twf:
-            scimitar = Scimitar("str", bonus=magic_weapon)
+            base_feats.append(WeaponMasteries(["vex", "nick"]))
+            scimitar = Scimitar(magic_bonus=magic_weapon)
             base_feats.append(TwoWeaponFighting())
-            weapon = Shortsword("str", bonus=magic_weapon)
+            weapon = Shortsword(magic_bonus=magic_weapon)
             nick_attacks = [scimitar]
         else:
+            base_feats.append(WeaponMasteries(["graze", "topple"]))
             base_feats.append(GreatWeaponFighting())
-            weapon = Greatsword(bonus=magic_weapon)
+            weapon = Greatsword(magic_bonus=magic_weapon)
             nick_attacks = []
         if level >= 5:
             attacks = 2 * [weapon]
