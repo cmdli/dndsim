@@ -1,11 +1,11 @@
-from events import AttackRollArgs, HitArgs
-from feats import Feat
-from util import do_roll, roll_dice
-from target import Target
-from log import log
-from character import Character
-from weapons import Weapon
-from spells import Spell
+from sim.events import AttackRollArgs, HitArgs
+from sim.feats import Feat
+from util.util import do_roll, roll_dice
+from sim.target import Target
+from util.log import log
+from sim.character import Character
+from sim.weapons import Weapon
+from sim.spells import Spell
 
 
 class SummonHit(Feat):

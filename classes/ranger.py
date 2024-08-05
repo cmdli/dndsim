@@ -1,14 +1,14 @@
 from typing import List
 
-from events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
-from target import Target
-from util import (
+from sim.events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
+from sim.target import Target
+from util.util import (
     roll_dice,
     prof_bonus,
     get_magic_weapon,
 )
-from character import Character
-from feats import (
+from sim.character import Character
+from sim.feats import (
     ASI,
     Archery,
     CrossbowExpert,
@@ -17,10 +17,10 @@ from feats import (
     TwoWeaponFighting,
     WeaponMasteries,
 )
-from weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
-from spells import HuntersMark, Spellcaster
-from summons import FeySummon, SummonFey
-from log import log
+from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
+from sim.spells import HuntersMark, Spellcaster
+from sim.summons import FeySummon, SummonFey
+from util.log import log
 
 
 # ranger casts either summon fey or hunter's mark, returns true if ranger still has action
@@ -187,10 +187,7 @@ class PrimalCompanion(Character):
     def __init__(self, level: int, ranger: Character, **kwargs):
         self.ranger = ranger
         self.num_attacks = 2 if level >= 11 else 1
-        self.weapon = BeastMaul(
-            override_to_hit=lambda: self.get_to_hit(),
-            flat_dmg_bonus=2 + prof_bonus(level),
-        )
+        self.weapon = BeastMaul(self)
         base_feats: List[Feat] = [BeastChargeFeat()]
         if level >= 11:
             base_feats += [HuntersMarkFeat(die=10 if level >= 20 else 6, caster=ranger)]
@@ -210,8 +207,15 @@ class PrimalCompanion(Character):
 
 
 class BeastMaul(Weapon):
-    def __init__(self, **kwargs):
+    def __init__(self, ranger, **kwargs):
         super().__init__(name="Beast Maul", num_dice=1, die=8, **kwargs)
+        self.ranger = ranger
+
+    def to_hit(self, character):
+        return self.ranger.prof + self.ranger.mod("wis")
+
+    def damage(self, character, args: HitArgs):
+        return character.weapon_roll(self, crit=args.crit) + 2 + self.ranger.prof
 
 
 class BeastMasterAction(Feat):

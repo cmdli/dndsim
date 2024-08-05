@@ -2,7 +2,7 @@ import random
 import math
 from collections import defaultdict
 
-from log import log
+from util.log import log
 
 SPELL_SLOTS_ARR = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 0

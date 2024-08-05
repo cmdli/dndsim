@@ -1,8 +1,8 @@
 import random
-from events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
-from target import Target
-from util import get_magic_weapon, roll_dice
-from feats import (
+from sim.events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
+from sim.target import Target
+from util.util import get_magic_weapon, roll_dice
+from sim.feats import (
     GreatWeaponMaster,
     AttackAction,
     ASI,
@@ -15,9 +15,17 @@ from feats import (
     SavageAttacker,
     GreatWeaponFighting,
 )
-from character import Character
-from weapons import Glaive, Greatsword, GlaiveButt, Maul, Shortsword, Scimitar, Rapier
-from log import log
+from sim.character import Character
+from sim.weapons import (
+    Glaive,
+    Greatsword,
+    GlaiveButt,
+    Maul,
+    Shortsword,
+    Scimitar,
+    Rapier,
+)
+from util.log import log
 
 
 def get_num_attacks(level: int):

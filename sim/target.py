@@ -1,7 +1,7 @@
 import random
-from util import prof_bonus
+from util.util import prof_bonus
 from collections import defaultdict
-from log import log
+from util.log import log
 
 TARGET_AC = [
     13,  # 1

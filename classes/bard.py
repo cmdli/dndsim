@@ -1,11 +1,11 @@
-from character import Character
-from feats import Feat, ASI, AttackAction, DualWielder
-from weapons import Weapon, Shortsword, Scimitar
-from events import HitArgs, AttackRollArgs
-from util import roll_dice, get_magic_weapon
-from target import Target
+from sim.character import Character
+from sim.feats import Feat, ASI, AttackAction, DualWielder
+from sim.weapons import Weapon, Shortsword, Scimitar
+from sim.events import HitArgs, AttackRollArgs
+from util.util import roll_dice, get_magic_weapon
+from sim.target import Target
 from typing import List
-from spells import TrueStrike, HolyWeapon, Spellcaster, EldritchBlast
+from sim.spells import TrueStrike, HolyWeapon, Spellcaster, EldritchBlast
 
 
 class TrueStrikeFeat(Feat):

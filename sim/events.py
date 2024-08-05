@@ -1,8 +1,8 @@
 import random
 
-from log import log
-from target import Target
-from weapons import Weapon
+from util.log import log
+from sim.target import Target
+import sim.weapons
 from collections import defaultdict
 from typing import Set, List
 
@@ -12,7 +12,7 @@ class AttackArgs:
         self,
         character,
         target: Target,
-        weapon: Weapon,
+        weapon: sim.weapons.Weapon,
         tags: List[str] = None,
         mod: str = "none",
     ):
@@ -95,7 +95,9 @@ class MissArgs:
 
 
 class WeaponRollArgs:
-    def __init__(self, weapon: Weapon, rolls: List[int], crit: bool = False) -> None:
+    def __init__(
+        self, weapon: sim.weapons.Weapon, rolls: List[int], crit: bool = False
+    ) -> None:
         self.weapon = weapon
         self.rolls = rolls
         self.crit = crit

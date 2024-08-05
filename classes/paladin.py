@@ -1,11 +1,11 @@
-from events import AttackRollArgs, HitArgs
-from target import Target
-from util import (
+from sim.events import AttackRollArgs, HitArgs
+from sim.target import Target
+from util.util import (
     get_magic_weapon,
     roll_dice,
 )
-from character import Character
-from feats import (
+from sim.character import Character
+from sim.feats import (
     ASI,
     AttackAction,
     GreatWeaponMaster,
@@ -14,9 +14,9 @@ from feats import (
     GreatWeaponFighting,
     WeaponMasteries,
 )
-from weapons import Greatsword, Shortsword, Scimitar
-from log import log
-from spells import DivineSmite, DivineFavor, Spellcaster
+from sim.weapons import Greatsword, Shortsword, Scimitar
+from util.log import log
+from sim.spells import DivineSmite, DivineFavor, Spellcaster
 
 
 class DivineSmiteFeat(Feat):

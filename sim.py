@@ -2,20 +2,20 @@ import csv
 import click
 from typing import Set, List, Dict
 
-from monk import Monk
-from barbarian import Barbarian
-from fighter import (
+from classes.monk import Monk
+from classes.barbarian import Barbarian
+from classes.fighter import (
     ChampionFighter,
 )
-from rogue import AssassinRogue, ArcaneTricksterRogue
-from wizard import Wizard
-from paladin import Paladin
-from ranger import GloomstalkerRanger, BeastMasterRanger
-from cleric import Cleric
-from target import Target
-from log import log
-from au import AssaultUnit
-from bard import ValorBard
+from classes.rogue import AssassinRogue, ArcaneTricksterRogue
+from classes.wizard import Wizard
+from classes.paladin import Paladin
+from classes.ranger import GloomstalkerRanger, BeastMasterRanger
+from classes.cleric import Cleric
+from classes.au import AssaultUnit
+from classes.bard import ValorBard
+from sim.target import Target
+from util.log import log
 
 NUM_FIGHTS = 3
 NUM_TURNS = 5

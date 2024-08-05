@@ -1,6 +1,6 @@
-from target import Target
-from util import roll_dice, cantrip_dice
-from weapons import Weapon
+from sim.target import Target
+from util.util import roll_dice, cantrip_dice
+from sim.weapons import Weapon
 from enum import Enum
 
 

@@ -1,7 +1,7 @@
 import random
-from util import get_magic_weapon, do_roll, roll_dice
-from character import Character
-from feats import (
+from util.util import get_magic_weapon, do_roll, roll_dice
+from sim.character import Character
+from sim.feats import (
     ASI,
     GreatWeaponMaster,
     PolearmMaster,
@@ -12,7 +12,7 @@ from feats import (
     CombatProwess,
     WeaponMasteries,
 )
-from weapons import Glaive, Greatsword, GlaiveButt
+from sim.weapons import Glaive, Greatsword, GlaiveButt
 
 
 class Beserker(Feat):

@@ -1,8 +1,8 @@
-from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
-from util import roll_dice
-from target import Target
-from weapons import Weapon
-from log import log
+from sim.events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
+from util.util import roll_dice
+from sim.target import Target
+from sim.weapons import Weapon
+from util.log import log
 from typing import List
 
 EVENT_NAMES = set(

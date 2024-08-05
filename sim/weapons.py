@@ -1,5 +1,6 @@
-from util import roll_dice
+from util.util import roll_dice
 from typing import List
+import sim.events
 
 """
 Overlooked things for weapons:
@@ -39,8 +40,6 @@ class Weapon:
         attack_bonus=0,
         dmg_bonus=0,
         tags: List[str] = None,
-        flat_dmg_bonus: int = None,
-        override_to_hit=None,
         override_mod=None,
     ) -> None:
         self.name = name
@@ -51,15 +50,27 @@ class Weapon:
         self.attack_bonus = magic_bonus + attack_bonus
         self.dmg_bonus = magic_bonus + dmg_bonus
         self.override_mod = override_mod
-        self.override_to_hit = override_to_hit
-        self.flat_dmg_bonus = flat_dmg_bonus
         self.mastery = mastery
         self.tags = tags or []
 
-    def damage(self, crit: bool = False, max_reroll: int = None):
-        dmg = roll_dice(self.num_dice, self.die, max_reroll=max_reroll)
-        if crit:
-            dmg += roll_dice(self.num_dice, self.die, max_reroll=max_reroll)
+    def mod(self, character):
+        if self.override_mod is not None:
+            return self.override_mod
+        elif self.has_tag("ranged"):
+            return "dex"
+        elif self.has_tag("finesse") and (character.dex > character.str):
+            return "dex"
+        else:
+            return "str"
+
+    def to_hit(self, character):
+        mod = self.mod(character)
+        return character.prof + character.mod(mod) + self.attack_bonus
+
+    def damage(self, character, args: "sim.events.HitArgs"):
+        dmg = character.weapon_roll(self, crit=args.crit) + self.dmg_bonus
+        if not args.attack.has_tag("light"):
+            dmg += character.mod(args.attack.mod)
         return dmg
 
     def rolls(self, crit: bool = False):

@@ -1,13 +1,13 @@
-from util import prof_bonus
-from feats import Vex, Feat, Topple
-from target import Target
-from weapons import Weapon
-from events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
-from log import log
+from util.util import prof_bonus
+from sim.feats import Vex, Feat, Topple
+from sim.target import Target
+from sim.weapons import Weapon
+from sim.events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
+from util.log import log
 from typing import List
 from collections import defaultdict
-from util import spell_slots, highest_spell_slot, lowest_spell_slot
-from spells import Spell, Spellcaster
+from util.util import spell_slots, highest_spell_slot, lowest_spell_slot
+from sim.spells import Spell, Spellcaster
 from typing import Callable, Any
 
 
@@ -168,18 +168,6 @@ class Character:
     def has_mastery(self, mastery: str) -> bool:
         return mastery in self.masteries
 
-    def get_weapon_mod(self, weapon: Weapon):
-        if weapon.override_mod is not None:
-            return weapon.override_mod
-        elif weapon.has_tag("ranged"):
-            return "dex"
-        elif (weapon.has_tag("finesse") or weapon.has_tag("thrown")) and (
-            self.mod("dex") > self.mod("str")
-        ):
-            return "dex"
-        else:
-            return "str"
-
     def attack(
         self,
         target: Target,
@@ -191,19 +179,14 @@ class Character:
             target=target,
             weapon=weapon,
             tags=tags,
-            mod=self.get_weapon_mod(weapon),
+            mod=weapon.mod(self),
         )
         log.record(f"Attack:{args.weapon.name}", 1)
         self.before_attack()
-        if weapon.override_to_hit:
-            to_hit = weapon.override_to_hit()
-        else:
-            to_hit = self.prof + self.mod(args.mod) + weapon.attack_bonus
+        to_hit = weapon.to_hit(self)
         result = self.roll_attack(attack=args, to_hit=to_hit)
         roll = result.roll()
-        crit = False
-        if roll >= args.weapon.min_crit:
-            crit = True
+        crit = roll >= args.weapon.min_crit
         roll_total = roll + to_hit + result.situational_bonus
         log.output(lambda: f"{args.weapon.name} total {roll_total} vs {args.target.ac}")
         if roll_total >= args.target.ac:
@@ -250,14 +233,7 @@ class Character:
         log.record(f"Hit:{weapon.name}", 1)
         if crit:
             log.record(f"Crit:{weapon.name}", 1)
-        dmg = self.weapon_roll(weapon, crit=crit)
-        if weapon.flat_dmg_bonus:
-            dmg += weapon.flat_dmg_bonus
-        else:
-            dmg += weapon.dmg_bonus
-            if not attack.has_tag("light"):
-                mod = self.get_weapon_mod(weapon)
-                dmg += self.mod(mod)
+        dmg = weapon.damage(self, args)
         args.add_damage(f"Weapon:{weapon.name}", dmg)
         for feat in self.feats_for_event("hit"):
             feat.hit(args)

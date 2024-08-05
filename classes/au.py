@@ -1,10 +1,10 @@
-from character import Character
-from events import AttackRollArgs, HitArgs
-from feats import Feat, ASI, AttackAction
-from target import Target
-from weapons import Weapon
-from util import get_magic_weapon
-from fighter import ActionSurge
+from sim.character import Character
+from sim.events import AttackRollArgs, HitArgs
+from sim.feats import Feat, ASI, AttackAction
+from sim.target import Target
+from sim.weapons import Weapon
+from util.util import get_magic_weapon
+from classes.fighter import ActionSurge
 import random
 
 

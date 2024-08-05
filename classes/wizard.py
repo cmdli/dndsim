@@ -1,4 +1,4 @@
-from util import (
+from util.util import (
     prof_bonus,
     get_magic_weapon,
     cantrip_dice,

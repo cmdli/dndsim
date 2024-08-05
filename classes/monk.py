@@ -1,16 +1,16 @@
-from util import get_magic_weapon, roll_dice
-from character import Character
-from feats import (
+from util.util import get_magic_weapon, roll_dice
+from sim.character import Character
+from sim.feats import (
     ASI,
     AttackAction,
     Feat,
     IrresistibleOffense,
     WeaponMaster,
 )
-from weapons import Weapon
-from events import HitArgs, WeaponRollArgs
-from target import Target
-from log import log
+from sim.weapons import Weapon
+from sim.events import HitArgs, WeaponRollArgs
+from sim.target import Target
+from util.log import log
 
 
 def martial_arts_die(level: int):
