@@ -1,4 +1,5 @@
 from util.util import prof_bonus
+from sim.feat import Feat
 from sim.feats import Vex, Feat, Topple
 from sim.target import Target
 from sim.weapons import Weapon
@@ -8,7 +9,7 @@ from typing import List
 from collections import defaultdict
 from util.util import spell_slots, highest_spell_slot, lowest_spell_slot
 from sim.spells import Spell, Spellcaster
-from typing import Callable, Any
+from typing import Callable, Any, Dict
 
 
 class Character:
@@ -39,8 +40,8 @@ class Character:
         self.spell_mod = spell_mod
         self.concentration = None
         self.masteries = []
-        self.feats = dict()
-        self.feats_by_event = dict()
+        self.feats: Dict[str, Feat] = dict()
+        self.feats_by_event: Dict[str, List[Feat]] = dict()
         for feat in default_feats:
             self.add_feat(feat)
         for feat in base_feats:
@@ -49,7 +50,7 @@ class Character:
             if level >= target:
                 self.add_feat(feat)
 
-    def add_feat(self, feat):
+    def add_feat(self, feat: Feat):
         feat.apply(self)
         self.feats[feat.name] = feat
         for event in feat.events():

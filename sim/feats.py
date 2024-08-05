@@ -4,34 +4,7 @@ from sim.target import Target
 from sim.weapons import Weapon
 from util.log import log
 from typing import List
-
-EVENT_NAMES = set(
-    [
-        "begin_turn",
-        "before_action",
-        "action",
-        "after_action",
-        "before_attack",
-        "attack",
-        "roll_attack",
-        "hit",
-        "miss",
-        "end_turn",
-        "enemy_turn",
-        "short_rest",
-        "long_rest",
-        "weapon_roll",
-    ]
-)
-
-
-class Feat:
-    def apply(self, character):
-        self.character = character
-
-    def events(self):
-        global EVENT_NAMES
-        return [name for name in self.__dir__() if name in EVENT_NAMES]
+from sim.feat import Feat
 
 
 class PolearmMaster(Feat):
@@ -46,7 +19,7 @@ class PolearmMaster(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def end_turn(self, target):
+    def end_turn(self, target: Target):
         if not self.used and self.character.use_bonus("PAM"):
             self.used = True
             self.character.attack(target, self.weapon)
@@ -61,7 +34,7 @@ class GreatWeaponMaster(Feat):
         super().apply(character)
         character.str += 1
 
-    def begin_turn(self, target):
+    def begin_turn(self, target: Target):
         self.bonus_attack_enabled = False
 
     def hit(self, args: HitArgs):
