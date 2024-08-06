@@ -4,7 +4,6 @@ from sim.events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
 from sim.target import Target
 from util.util import (
     roll_dice,
-    prof_bonus,
     get_magic_weapon,
 )
 from sim.character import Character
@@ -18,29 +17,32 @@ from sim.feats import (
     WeaponMasteries,
 )
 from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
-from sim.spells import HuntersMark, Spellcaster
-from sim.summons import FeySummon, SummonFey
+from sim.spells import HuntersMark
+from sim.spellcasting import Spellcaster
+from sim.summons import SummonFey
 from util.log import log
 
 
 # ranger casts either summon fey or hunter's mark, returns true if ranger still has action
 def cast_spell(character: Character, summon_fey_threshold: int) -> bool:
-    slot = character.highest_slot()
+    slot = character.spells.highest_slot()
     if (
         summon_fey_threshold
         and slot >= summon_fey_threshold
-        and not character.is_concentrating()
+        and not character.spells.is_concentrating()
     ):
         spell = SummonFey(
             slot,
             caster_level=character.level,
             to_hit=character.prof + character.mod("wis"),
         )
-        character.cast(spell)
+        character.spells.cast(spell)
         return False
     else:
-        if not character.is_concentrating() and character.use_bonus("HuntersMark"):
-            character.cast(HuntersMark(slot))
+        if not character.spells.is_concentrating() and character.use_bonus(
+            "HuntersMark"
+        ):
+            character.spells.cast(HuntersMark(slot))
         return True
 
 
@@ -72,11 +74,11 @@ class HuntersMarkFeat(Feat):
             self.caster = character
 
     def roll_attack(self, args: AttackRollArgs):
-        if self.caster.concentrating_on("HuntersMark") and self.adv:
+        if self.caster.spells.concentrating_on("HuntersMark") and self.adv:
             args.adv = True
 
     def hit(self, args: HitArgs):
-        if self.caster.concentrating_on("HuntersMark"):
+        if self.caster.spells.concentrating_on("HuntersMark"):
             num = 2 if args.crit else 1
             args.add_damage("HuntersMark", roll_dice(num, self.die))
 

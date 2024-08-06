@@ -16,7 +16,8 @@ from sim.feats import (
 )
 from sim.weapons import Greatsword, Shortsword, Scimitar
 from util.log import log
-from sim.spells import DivineSmite, DivineFavor, Spellcaster
+from sim.spells import DivineSmite, DivineFavor
+from sim.spellcasting import Spellcaster
 
 
 class DivineSmiteFeat(Feat):
@@ -27,10 +28,12 @@ class DivineSmiteFeat(Feat):
         self.used = False
 
     def hit(self, args: HitArgs):
-        slot = self.character.highest_slot()
+        slot = self.character.spells.highest_slot()
         if not self.used and slot >= 1 and self.character.use_bonus("DivineSmite"):
             self.used = True
-            self.character.cast(DivineSmite(slot, args.crit), target=args.attack.target)
+            self.character.spells.cast(
+                DivineSmite(slot, args.crit), target=args.attack.target
+            )
 
 
 class ImprovedDivineSmite(Feat):
@@ -63,16 +66,16 @@ class DivineFavorFeat(Feat):
         self.name = "DivineFavor"
 
     def begin_turn(self, target: Target):
-        slot = self.character.lowest_slot()
+        slot = self.character.spells.lowest_slot()
         if (
-            not self.character.is_concentrating()
+            not self.character.spells.is_concentrating()
             and slot >= 1
             and self.character.use_bonus("DivineFavor")
         ):
-            self.character.cast(DivineFavor(slot))
+            self.character.spells.cast(DivineFavor(slot))
 
     def hit(self, args: HitArgs):
-        if self.character.concentrating_on("DivineFavor"):
+        if self.character.spells.concentrating_on("DivineFavor"):
             args.add_damage("DivineFavor", roll_dice(1, 4))
 
 

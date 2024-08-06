@@ -6,10 +6,8 @@ from sim.weapons import Weapon
 from sim.events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
 from util.log import log
 from typing import List
-from collections import defaultdict
-from util.util import spell_slots, highest_spell_slot, lowest_spell_slot
-from sim.spells import Spell, Spellcaster
 from typing import Callable, Any, Dict
+from sim.spellcasting import Spellcasting, Spellcaster
 
 
 class Character:
@@ -36,6 +34,7 @@ class Character:
         self.cha = stats[5]
         self.minions = []
         self.effects = set()
+        self.spells = Spellcasting(self, spell_mod, [(spellcaster, level)])
         self.spellcaster = spellcaster
         self.spell_mod = spell_mod
         self.concentration = None
@@ -150,7 +149,7 @@ class Character:
             feat.short_rest()
 
     def long_rest(self):
-        self.reset_spell_slots()
+        self.spells.reset_spell_slots()
         self.short_rest()
         for feat in self.feats_for_event("long_rest"):
             feat.long_rest()
@@ -246,37 +245,3 @@ class Character:
         args = MissArgs(attack)
         for feat in self.feats_for_event("miss"):
             feat.miss(args)
-
-    # ==================================
-    #         SPELLCASTING
-    # ==================================
-
-    def reset_spell_slots(self):
-        self.slots = spell_slots(self.level, half=self.spellcaster is Spellcaster.HALF)
-
-    def spell_dc(self):
-        return 8 + self.mod(self.spell_mod) + self.prof
-
-    def highest_slot(self, max: int = 9) -> int:
-        return highest_spell_slot(self.slots, max=max)
-
-    def lowest_slot(self, min: int = 1) -> int:
-        return lowest_spell_slot(self.slots, min=min)
-
-    def cast(self, spell: Spell, target: Target = None):
-        if spell.slot > 0:
-            self.slots[spell.slot] -= 1
-        if spell.concentration:
-            self.set_concentration(spell)
-        spell.cast(self, target)
-
-    def set_concentration(self, spell: Spell):
-        if self.concentration:
-            self.concentration.end(self)
-        self.concentration = spell
-
-    def concentrating_on(self, name: str) -> bool:
-        return self.concentration is not None and self.concentration.name is name
-
-    def is_concentrating(self) -> bool:
-        return self.concentration is not None

@@ -5,7 +5,8 @@ from sim.events import HitArgs, AttackRollArgs
 from util.util import roll_dice, get_magic_weapon
 from sim.target import Target
 from typing import List
-from sim.spells import TrueStrike, HolyWeapon, Spellcaster, EldritchBlast
+from sim.spells import TrueStrike, HolyWeapon, EldritchBlast
+from sim.spellcasting import Spellcaster
 
 
 class TrueStrikeFeat(Feat):
@@ -45,7 +46,7 @@ class TrueStrikeAction(Feat):
         self.nick_attacks = nick_attacks
 
     def action(self, target: Target):
-        self.character.cast(TrueStrike(self.truestrike_weapon), target)
+        self.character.spells.cast(TrueStrike(self.truestrike_weapon), target)
         for attack in self.attacks:
             self.character.attack(target, attack)
         for attack in self.nick_attacks:
@@ -61,7 +62,7 @@ class HolyWeaponFeat(Feat):
         if not self.character.has_effect("HolyWeapon") and self.character.use_bonus(
             "HolyWeapon"
         ):
-            self.character.cast(HolyWeapon(self.character.highest_slot()))
+            self.character.spells.cast(HolyWeapon(self.character.spells.highest_slot()))
 
     def hit(self, args: HitArgs):
         if args.attack.weapon.name == self.weapon.name:

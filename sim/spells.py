@@ -1,13 +1,7 @@
-from sim.target import Target
+import sim.target
 from util.util import roll_dice, cantrip_dice
 from sim.weapons import Weapon
-from enum import Enum
-
-
-class Spellcaster(Enum):
-    FULL = 0
-    HALF = 1
-    NONE = 2
+import sim.character
 
 
 class Spell:
@@ -21,7 +15,7 @@ class Spell:
         self.slot = slot
         self.concentration = concentration
 
-    def cast(self, character, target: Target):
+    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
         pass
 
     def end(self):
@@ -32,10 +26,10 @@ class ConcentrationSpell(Spell):
     def __init__(self, name: str, slot: int, **kwargs):
         super().__init__(name, slot, concentration=True, **kwargs)
 
-    def cast(self, character, target: Target):
+    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
         character.add_effect(self.name)
 
-    def end(self, character):
+    def end(self, character: "sim.character.Character"):
         character.remove_effect(self.name)
 
 
@@ -49,7 +43,7 @@ class DivineSmite(Spell):
         super().__init__("DivineSmite", slot=slot)
         self.crit = crit
 
-    def cast(self, character, target: Target):
+    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
         num_dice = 1 + self.slot
         if self.crit:
             num_dice *= 2
@@ -65,9 +59,9 @@ class Fireball(Spell):
     def __init__(self, slot: int):
         super().__init__("Fireball", slot)
 
-    def cast(self, character, target: Target):
+    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
         dmg = roll_dice(5 + self.slot, 6)
-        if target.save(character.spell_dc()):
+        if target.save(character.spells.dc()):
             dmg = dmg // 2
         target.damage_source("Fireball", dmg)
 
@@ -77,7 +71,7 @@ class TrueStrike(Spell):
         super().__init__("TrueStrike", 0)
         self.weapon = weapon
 
-    def cast(self, character, target: Target):
+    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
         character.attack(target, self.weapon, tags=["truestrike"])
 
 
@@ -98,6 +92,6 @@ class EldritchBlast(Spell):
         self.weapon = EldritchBlastBolt()
         self.num_bolts = cantrip_dice(character_level)
 
-    def cast(self, character, target: Target):
+    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
         for _ in range(self.num_bolts):
             character.attack(target, self.weapon)
