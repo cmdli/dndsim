@@ -15,6 +15,7 @@ from classes.cleric import Cleric
 from classes.au import AssaultUnit
 from classes.bard import ValorBard
 from sim.target import Target
+import sim.character
 from util.log import log
 
 NUM_FIGHTS = 3
@@ -22,7 +23,9 @@ NUM_TURNS = 5
 NUM_SIMS = 500
 
 
-def simulate(character, level, fights, rounds):
+def simulate(
+    character: "sim.character.Character", level: int, fights: int, rounds: int
+):
     dmg = 0
     character.long_rest()
     for _ in range(fights):

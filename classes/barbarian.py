@@ -17,7 +17,6 @@ from sim.weapons import Glaive, Greatsword, GlaiveButt
 
 class Beserker(Feat):
     def __init__(self, num_dice: int):
-        self.name = "Berserker"
         self.used = False
         self.num_dice = num_dice
 
@@ -33,7 +32,6 @@ class Beserker(Feat):
 
 class BrutalStrike(Feat):
     def __init__(self, num_dice: int):
-        self.name = "BrutalStrike"
         self.num_dice = num_dice
 
     def begin_turn(self, target):
@@ -53,7 +51,6 @@ class BrutalStrike(Feat):
 
 class Retaliation(Feat):
     def __init__(self, weapon):
-        self.name = "Retaliation"
         self.weapon = weapon
 
     def enemy_turn(self, target):
@@ -61,8 +58,6 @@ class Retaliation(Feat):
 
 
 class PrimalChampion(Feat):
-    def __init__(self):
-        self.name = "PrimalChampion"
 
     def apply(self, character):
         super().apply(character)
@@ -72,7 +67,6 @@ class PrimalChampion(Feat):
 
 class Rage(Feat):
     def __init__(self, dmg):
-        self.name = "Rage"
         self.raging = False
         self.dmg = dmg
 
@@ -89,9 +83,6 @@ class Rage(Feat):
 
 
 class RecklessAttack(Feat):
-    def __init__(self):
-        self.name = "RecklessAttack"
-
     def begin_turn(self, target):
         self.enabled = True
 

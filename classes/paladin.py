@@ -21,9 +21,6 @@ from sim.spellcasting import Spellcaster
 
 
 class DivineSmiteFeat(Feat):
-    def __init__(self) -> None:
-        self.name = "DivineSmite"
-
     def begin_turn(self, target: Target):
         self.used = False
 
@@ -37,18 +34,12 @@ class DivineSmiteFeat(Feat):
 
 
 class ImprovedDivineSmite(Feat):
-    def __init__(self) -> None:
-        self.name = "ImprovedDivineSmite"
-
     def hit(self, args: HitArgs):
         num = 2 if args.crit else 1
         args.add_damage("ImprovedDivineSmite", roll_dice(num, 8))
 
 
 class SacredWeapon(Feat):
-    def __init__(self) -> None:
-        self.name = "SacredWeapon"
-
     def short_rest(self):
         self.enabled = False
 
@@ -62,9 +53,6 @@ class SacredWeapon(Feat):
 
 
 class DivineFavorFeat(Feat):
-    def __init__(self) -> None:
-        self.name = "DivineFavor"
-
     def begin_turn(self, target: Target):
         slot = self.character.spells.lowest_slot()
         if (

@@ -52,7 +52,7 @@ class Character:
 
     def add_feat(self, feat: Feat):
         feat.apply(self)
-        self.feats[feat.name] = feat
+        self.feats[feat.name()] = feat
         self.events.add(feat)
 
     def has_feat(self, name: str):

@@ -48,7 +48,6 @@ def cast_spell(character: Character, summon_fey_threshold: int) -> bool:
 
 class RangerAction(Feat):
     def __init__(self, attacks, summon_fey_threshold: int = None) -> None:
-        self.name = "RangerAction"
         self.attacks = attacks
         self.summon_fey_threshold = summon_fey_threshold
 
@@ -62,7 +61,6 @@ class RangerAction(Feat):
 
 class HuntersMarkFeat(Feat):
     def __init__(self, die: int, adv: bool = False, caster: Character = None) -> None:
-        self.name = "HuntersMarkFeat"
         self.die = die
         self.adv = adv
         self.filter = filter
@@ -85,7 +83,6 @@ class HuntersMarkFeat(Feat):
 
 class Gloomstalker(Feat):
     def __init__(self, weapon: Weapon) -> None:
-        self.name = "Gloomstalker"
         self.weapon = weapon
         self.using = False
         self.first_turn = False
@@ -117,9 +114,8 @@ class Gloomstalker(Feat):
 
 
 class BeastChargeFeat(Feat):
-    def __init__(self):
-        self.name = "BeastChargeFeat"
-        self.character = Character
+    def __init__(self, character: "Character"):
+        self.character = character
 
     def hit(self, args: HitArgs):
         if isinstance(args.attack.weapon, BeastMaul):
@@ -134,7 +130,6 @@ class BeastChargeFeat(Feat):
 
 class StalkersFlurry(Feat):
     def __init__(self, weapon: Weapon) -> None:
-        self.name = "StalkersFlurry"
         self.weapon = weapon
 
     def begin_turn(self, target: Target):
@@ -190,7 +185,7 @@ class PrimalCompanion(Character):
         self.ranger = ranger
         self.num_attacks = 2 if level >= 11 else 1
         self.weapon = BeastMaul(self)
-        base_feats: List[Feat] = [BeastChargeFeat()]
+        base_feats: List[Feat] = [BeastChargeFeat(ranger)]
         if level >= 11:
             base_feats += [HuntersMarkFeat(die=10 if level >= 20 else 6, caster=ranger)]
         super().init(
@@ -228,7 +223,6 @@ class BeastMasterAction(Feat):
         off_hand_nick: Weapon,
         off_hand_other: Weapon,
     ) -> None:
-        self.name = "BeastMasterAction"
         self.beast = beast
         self.off_hand_other = off_hand_other
         self.off_hand_nick = off_hand_nick

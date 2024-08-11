@@ -25,9 +25,6 @@ def martial_arts_die(level: int):
 
 
 class BodyAndMind(Feat):
-    def __init__(self):
-        self.name = "BodyAndMind"
-
     def apply(self, character):
         super().apply(character)
         character.dex += 4
@@ -36,7 +33,6 @@ class BodyAndMind(Feat):
 
 class FlurryOfBlows(Feat):
     def __init__(self, num_attacks, weapon):
-        self.name = "FlurryOfBlows"
         self.num_attacks = num_attacks
         self.weapon = weapon
 
@@ -50,9 +46,6 @@ class FlurryOfBlows(Feat):
 
 
 class OpenHandTechnique(Feat):
-    def __init__(self) -> None:
-        self.name = "OpenHandTechnique"
-
     def hit(self, args: HitArgs):
         if args.attack.has_tag("flurry"):
             if not args.attack.target.save(self.character.dc("wis")):
@@ -61,9 +54,6 @@ class OpenHandTechnique(Feat):
 
 
 class Grappler(Feat):
-    def __init__(self):
-        self.name = "Grappler"
-
     def apply(self, character):
         super().apply(character)
         character.dex += 1
@@ -79,7 +69,6 @@ class Grappler(Feat):
 
 class StunningStrike(Feat):
     def __init__(self, weapon_die, avoid_on_grapple: bool = False):
-        self.name = "StunningStrike"
         self.weapon_die = weapon_die
         self.stuns = []
         self.avoid_on_grapple = avoid_on_grapple
@@ -105,7 +94,6 @@ class StunningStrike(Feat):
 
 class Ki(Feat):
     def __init__(self, max_ki):
-        self.name = "Ki"
         self.max_ki = max_ki
 
     def short_rest(self):
@@ -125,7 +113,6 @@ class Fists(Weapon):
 
 class MagicInitiateHuntersMark(Feat):
     def __init__(self) -> None:
-        self.name = "MagicInitiateHuntersMark"
         self.enabled = False
         self.used = False
 
@@ -147,7 +134,6 @@ class MagicInitiateHuntersMark(Feat):
 
 class TavernBrawler(Feat):
     def __init__(self, die: int) -> None:
-        self.name = "TavernBrawler"
         self.die = die
 
     def weapon_roll(self, args: WeaponRollArgs):

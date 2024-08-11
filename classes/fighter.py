@@ -41,7 +41,6 @@ def get_num_attacks(level: int):
 
 class StudiedAttacks(Feat):
     def __init__(self) -> None:
-        self.name = "StudiedAttacks"
         self.enabled = False
 
     def roll_attack(self, args):
@@ -54,9 +53,6 @@ class StudiedAttacks(Feat):
 
 
 class HeroicAdvantage(Feat):
-    def __init__(self):
-        self.name = "HeroicAdvantage"
-
     def begin_turn(self, target):
         self.used = False
 
@@ -78,7 +74,6 @@ class HeroicAdvantage(Feat):
 
 class ActionSurge(Feat):
     def __init__(self, max_surges) -> None:
-        self.name = "ActionSurge"
         self.max_surges = max_surges
 
     def before_action(self, target):
@@ -92,7 +87,6 @@ class ActionSurge(Feat):
 
 class PrecisionAttack(Feat):
     def __init__(self, low=5) -> None:
-        self.name = "PrecisionAttack"
         self.low = low
 
     def roll_attack(self, args: AttackRollArgs):
@@ -106,9 +100,6 @@ class PrecisionAttack(Feat):
 
 
 class TrippingAttack(Feat):
-    def __init__(self) -> None:
-        self.name = "TrippingAttack"
-
     def hit(self, args: HitArgs):
         if args.attack.has_tag("used_maneuver"):
             return
@@ -125,7 +116,6 @@ class TrippingAttack(Feat):
 
 class Maneuvers(Feat):
     def __init__(self, level) -> None:
-        self.name = "Maneuvers"
         if level >= 15:
             self.max_dice = 6
         elif level >= 7:
@@ -159,7 +149,6 @@ class Maneuvers(Feat):
 
 class ToppleIfNecessaryAttackAction(Feat):
     def __init__(self, num_attacks, topple_weapon, default_weapon) -> None:
-        self.name = "ToppleIfNecessaryAttackAction"
         self.topple_weapon = topple_weapon
         self.default_weapon = default_weapon
         self.num_attacks = num_attacks

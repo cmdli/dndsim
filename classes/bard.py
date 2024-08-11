@@ -11,7 +11,6 @@ from sim.spellcasting import Spellcaster
 
 class TrueStrikeFeat(Feat):
     def __init__(self, level: int, spell_mod: str) -> None:
-        self.name = "TrueStrike"
         self.spell_mod = spell_mod
         if level >= 17:
             self.num_dice = 3
@@ -40,7 +39,6 @@ class TrueStrikeAction(Feat):
         attacks: List[Weapon],
         nick_attacks: List[Weapon],
     ) -> None:
-        self.name = "ValorBardAction"
         self.truestrike_weapon = truestrike_weapon
         self.attacks = attacks
         self.nick_attacks = nick_attacks
@@ -55,7 +53,6 @@ class TrueStrikeAction(Feat):
 
 class HolyWeaponFeat(Feat):
     def __init__(self, weapon: Weapon) -> None:
-        self.name = "HolyWeaponFeat"
         self.weapon = weapon
 
     def before_action(self, target: Target):
@@ -71,7 +68,6 @@ class HolyWeaponFeat(Feat):
 
 class ValorBardBonusAttack(Feat):
     def __init__(self, weapon: Weapon) -> None:
-        self.name = "ValorBardBonusAttack"
         self.weapon = weapon
 
     def after_action(self, target: Target):
@@ -115,8 +111,6 @@ class ValorBard(Character):
 
 class CMEMulticlassAction(Feat):
     def __init__(self, level: int, weapon: Weapon) -> None:
-        super().__init__()
-        self.name = "CMEMulticlassAction"
         self.level = level
         self.weapon = weapon
 

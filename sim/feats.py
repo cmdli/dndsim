@@ -9,7 +9,6 @@ from sim.feat import Feat
 
 class PolearmMaster(Feat):
     def __init__(self, weapon):
-        self.name = "PolearmMaster"
         self.weapon = weapon
 
     def apply(self, character):
@@ -27,7 +26,6 @@ class PolearmMaster(Feat):
 
 class GreatWeaponMaster(Feat):
     def __init__(self, weapon: Weapon):
-        self.name = "GreatWeaponMaster"
         self.weapon = weapon
 
     def apply(self, character):
@@ -50,7 +48,6 @@ class GreatWeaponMaster(Feat):
 
 class ElvenAccuracy(Feat):
     def __init__(self, mod: str):
-        self.name = "ElvenAccuracy"
         self.mod = mod
 
     def apply(self, character):
@@ -67,9 +64,6 @@ class ElvenAccuracy(Feat):
 
 
 class Archery(Feat):
-    def __init__(self) -> None:
-        self.name = "Archery"
-
     def roll_attack(self, args: AttackRollArgs):
         if args.attack.weapon.has_tag("ranged"):
             args.situational_bonus += 2
@@ -77,7 +71,6 @@ class Archery(Feat):
 
 class DualWielder(Feat):
     def __init__(self, weapon: Weapon):
-        self.name = "DualWielder"
         self.weapon = weapon
 
     def apply(self, character):
@@ -90,18 +83,12 @@ class DualWielder(Feat):
 
 
 class TwoWeaponFighting(Feat):
-    def __init__(self) -> None:
-        self.name = "TwoWeaponFighting"
-
     def roll_attack(self, args: AttackRollArgs):
         if args.attack.has_tag("light"):
             args.attack.remove_tag("light")
 
 
 class GreatWeaponFighting(Feat):
-    def __init__(self) -> None:
-        self.name = "GreatWeaponFighting"
-
     def weapon_roll(self, args: WeaponRollArgs):
         for i in range(len(args.rolls)):
             if args.rolls[i] == 1 or args.rolls[i] == 2:
@@ -110,7 +97,6 @@ class GreatWeaponFighting(Feat):
 
 class CrossbowExpert(Feat):
     def __init__(self, weapon: Weapon) -> None:
-        self.name = "CrossbowExpert"
         self.weapon = weapon
 
     def apply(self, character):
@@ -131,7 +117,6 @@ class CrossbowExpert(Feat):
 
 class ASI(Feat):
     def __init__(self, stat_increases=[]):
-        self.name = "ASI"
         self.stat_increases = stat_increases
 
     def apply(self, character):
@@ -142,7 +127,6 @@ class ASI(Feat):
 
 class AttackAction(Feat):
     def __init__(self, attacks, nick_attacks=[]):
-        self.name = "AttackAction"
         self.base_attacks = attacks
         self.nick_attacks = nick_attacks
 
@@ -155,7 +139,6 @@ class AttackAction(Feat):
 
 class BoomingBlade(Feat):
     def __init__(self, character, weapon: Weapon):
-        self.name = "BoomingBladeAction"
         self.weapon = weapon
         self.character = character
 
@@ -182,7 +165,6 @@ class BoomingBlade(Feat):
 
 class LightWeaponBonusAttack(Feat):
     def __init__(self, weapon: Weapon) -> None:
-        self.name = "LightWeaponBonusAttack"
         self.weapon = weapon
 
     def end_turn(self, target):
@@ -192,7 +174,6 @@ class LightWeaponBonusAttack(Feat):
 
 class Vex(Feat):
     def __init__(self) -> None:
-        self.name = "Vex"
         self.vexing = False
 
     def short_rest(self):
@@ -209,9 +190,6 @@ class Vex(Feat):
 
 
 class Topple(Feat):
-    def __init__(self) -> None:
-        self.name = "Topple"
-
     def hit(self, args: HitArgs):
         weapon = args.attack.weapon
         target = args.attack.target
@@ -222,9 +200,6 @@ class Topple(Feat):
 
 
 class Graze(Feat):
-    def __init__(self) -> None:
-        self.name = "Graze"
-
     def miss(self, args: MissArgs):
         if args.attack.weapon.mastery == "graze" and self.character.has_mastery(
             "graze"
@@ -236,7 +211,6 @@ class Graze(Feat):
 
 class WeaponMasteries(Feat):
     def __init__(self, masteries: List[str]) -> None:
-        self.name = "WeaponMasteries"
         self.masteries = masteries
 
     def apply(self, character):
@@ -246,7 +220,6 @@ class WeaponMasteries(Feat):
 
 class IrresistibleOffense(Feat):
     def __init__(self, mod: str) -> None:
-        self.name = "IrresistibleOffense"
         self.mod = mod
 
     def apply(self, character):
@@ -259,9 +232,6 @@ class IrresistibleOffense(Feat):
 
 
 class CombatProwess(Feat):
-    def __init__(self) -> None:
-        self.name = "CombatProwess"
-
     def apply(self, character):
         super().apply(character)
         character.str += 1
@@ -277,7 +247,6 @@ class CombatProwess(Feat):
 
 class WeaponMaster(Feat):
     def __init__(self, mod: str) -> None:
-        self.name = "WeaponMaster"
         self.mod = mod
 
     def apply(self, character):
@@ -287,7 +256,6 @@ class WeaponMaster(Feat):
 
 class DualWielder(Feat):
     def __init__(self, mod: str) -> None:
-        self.name = "DualWielder"
         self.mod = mod
 
     def apply(self, character):
@@ -297,7 +265,6 @@ class DualWielder(Feat):
 
 class SavageAttacker(Feat):
     def __init__(self) -> None:
-        self.name = "SavageAttacker"
         self.used = False
 
     def begin_turn(self, target: Target):
@@ -314,7 +281,6 @@ class SavageAttacker(Feat):
 
 class Piercer(Feat):
     def __init__(self, mod: str) -> None:
-        self.name = "Piercer"
         self.mod = mod
 
     def apply(self, character):

@@ -23,8 +23,8 @@ EVENT_NAMES = set(
 
 
 class Feat:
-    def __init__(self) -> None:
-        self.name: str = None
+    def name(self) -> str:
+        return type(self).__name__
 
     def apply(self, character: "sim.character.Character"):
         self.character = character

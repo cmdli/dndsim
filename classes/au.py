@@ -10,7 +10,6 @@ import random
 
 class OldCrossbowExpert(Feat):
     def __init__(self, weapon: Weapon) -> None:
-        self.name = "OldCrossbowExpert"
         self.weapon = weapon
 
     def apply(self, character):
@@ -23,9 +22,6 @@ class OldCrossbowExpert(Feat):
 
 
 class OldSharpshooter(Feat):
-    def __init__(self) -> None:
-        self.name = "OldSharpshooter"
-
     def apply(self, character):
         super().apply(character)
         character.dex += 1
@@ -41,7 +37,6 @@ class OldSharpshooter(Feat):
 
 class FightingSpirit(Feat):
     def __init__(self, regain_on_initiative: bool = False) -> None:
-        self.name = "FightingSpirit"
         self.enabled = False
         self.fighting_spirit = 3
         self.regain_on_initiative = regain_on_initiative
@@ -68,7 +63,6 @@ class FightingSpirit(Feat):
 
 class RapidStrike(Feat):
     def __init__(self) -> None:
-        self.name = "RapidStrike"
         self.used = False
 
     def begin_turn(self, target: Target):
@@ -86,9 +80,6 @@ class OldHandCrossbow(Weapon):
 
 
 class Blessed(Feat):
-    def __init__(self) -> None:
-        self.name = "Blessed"
-
     def roll_attack(self, args: AttackRollArgs):
         args.situational_bonus += random.randint(1, 4)
 

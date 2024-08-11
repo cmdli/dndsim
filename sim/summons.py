@@ -10,7 +10,6 @@ from sim.spells import Spell
 
 class SummonHit(Feat):
     def __init__(self, slot: int, bonus_dmg: int) -> None:
-        self.name = "SummonHit"
         self.bonus_dmg = bonus_dmg
         self.slot = slot
 
@@ -26,7 +25,6 @@ class SummonHit(Feat):
 
 class SummonAction(Feat):
     def __init__(self, slot: int, weapon: Weapon) -> None:
-        self.name = "SummonAction"
         self.slot = slot
         self.weapon = weapon
 
@@ -64,9 +62,6 @@ class FeyWeapon(Weapon):
 
 
 class Mirthful(Feat):
-    def __init__(self) -> None:
-        self.name = "Mirthful"
-
     def begin_turn(self, target: Target):
         self.used = False
 

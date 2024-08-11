@@ -13,7 +13,6 @@ from util.log import log
 
 class SneakAttack(Feat):
     def __init__(self, num):
-        self.name = "SneakAttack"
         self.num = num
 
     def begin_turn(self, target):
@@ -27,9 +26,6 @@ class SneakAttack(Feat):
 
 
 class SteadyAim(Feat):
-    def __init__(self) -> None:
-        self.name = "SteadyAim"
-
     def before_action(self, target):
         if self.character.use_bonus("SteadyAim"):
             self.enabled = True
@@ -44,9 +40,6 @@ class SteadyAim(Feat):
 
 
 class StrokeOfLuck(Feat):
-    def __init__(self) -> None:
-        self.name = "StrokeOfLuck"
-
     def begin_turn(self, target):
         self.used = False
 
@@ -59,7 +52,6 @@ class StrokeOfLuck(Feat):
 
 class Assassinate(Feat):
     def __init__(self, dmg):
-        self.name = "Assassinate"
         self.dmg = dmg
         self.first_turn = False
         self.used_dmg = False
@@ -90,9 +82,6 @@ class Assassinate(Feat):
 
 
 class DeathStrike(Feat):
-    def __init__(self) -> None:
-        self.name = "DeathStrike"
-
     def short_rest(self):
         self.enabled = True
 
