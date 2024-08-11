@@ -4,6 +4,7 @@ from sim.feats import Vex, Feat, Topple
 from sim.target import Target
 from sim.weapons import Weapon
 from sim.events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
+from sim.event_loop import EventLoop
 from util.log import log
 from typing import List
 from typing import Callable, Any, Dict
@@ -32,7 +33,8 @@ class Character:
         self.int = stats[3]
         self.wis = stats[4]
         self.cha = stats[5]
-        self.minions = []
+        self.minions: List[Character] = []
+        self.events = EventLoop()
         self.effects = set()
         self.spells = Spellcasting(self, spell_mod, [(spellcaster, level)])
         self.spellcaster = spellcaster
@@ -40,7 +42,6 @@ class Character:
         self.concentration = None
         self.masteries = []
         self.feats: Dict[str, Feat] = dict()
-        self.feats_by_event: Dict[str, List[Feat]] = dict()
         for feat in default_feats:
             self.add_feat(feat)
         for feat in base_feats:
@@ -52,24 +53,13 @@ class Character:
     def add_feat(self, feat: Feat):
         feat.apply(self)
         self.feats[feat.name] = feat
-        for event in feat.events():
-            if event not in self.feats_by_event:
-                self.feats_by_event[event] = []
-            self.feats_by_event[event].append(feat)
+        self.events.add(feat)
 
     def has_feat(self, name: str):
         return name in self.feats
 
     def feat(self, name: str):
         return self.feats[name]
-
-    def feats_for_event(self, event: str):
-        if event not in self.feats_by_event:
-            return []
-        return self.feats_by_event[event]
-
-    def has_feats_for_event(self, event: str):
-        return event in self.feats_by_event
 
     def mod(self, stat: str):
         if stat == "none":
@@ -110,53 +100,36 @@ class Character:
         log.record("Turn", 1)
         self.actions = 1
         self.used_bonus = False
-        for feat in self.feats_for_event("begin_turn"):
-            feat.begin_turn(target)
+        self.events.emit("begin_turn", target)
 
     def end_turn(self, target: Target):
-        for feat in self.feats_for_event("end_turn"):
-            feat.end_turn(target)
+        self.events.emit("end_turn", target)
         if not self.used_bonus:
             log.record(f"Bonus (None)", 1)
         log.output(lambda: "")
 
     def turn(self, target: Target):
         self.begin_turn(target)
-        self.before_action(target)
+        self.events.emit("before_action", target)
         while self.actions > 0:
-            self.action(target)
+            self.events.emit("action", target)
             self.actions -= 1
-        self.after_action(target)
+        self.events.emit("after_action", target)
         self.end_turn(target)
         for minion in self.minions:
             minion.turn(target)
 
-    def before_action(self, target: Target):
-        for feat in self.feats_for_event("before_action"):
-            feat.before_action(target)
-
-    def action(self, target: Target):
-        for feat in self.feats_for_event("action"):
-            feat.action(target)
-
-    def after_action(self, target: Target):
-        for feat in self.feats_for_event("after_action"):
-            feat.after_action(target)
-
     def short_rest(self):
         self.effects = set()
-        for feat in self.feats_for_event("short_rest"):
-            feat.short_rest()
+        self.events.emit("short_rest")
 
     def long_rest(self):
         self.spells.reset_spell_slots()
         self.short_rest()
-        for feat in self.feats_for_event("long_rest"):
-            feat.long_rest()
+        self.events.emit("long_rest")
 
     def enemy_turn(self, target: Target):
-        for feat in self.feats_for_event("enemy_turn"):
-            feat.enemy_turn(target)
+        self.events.emit("enemy_turn", target)
 
     # ============================
     #      WEAPON ATTACKS
@@ -182,7 +155,7 @@ class Character:
             mod=weapon.mod(self),
         )
         log.record(f"Attack:{args.weapon.name}", 1)
-        self.before_attack()
+        self.events.emit("before_attack")
         to_hit = weapon.to_hit(self)
         result = self.roll_attack(attack=args, to_hit=to_hit)
         roll = result.roll()
@@ -193,10 +166,6 @@ class Character:
             self.hit(attack=args, crit=crit, roll=roll)
         else:
             self.miss(attack=args)
-
-    def before_attack(self):
-        for feat in self.feats_for_event("before_attack"):
-            feat.before_attack()
 
     def roll_attack(self, attack: AttackArgs, to_hit: int) -> AttackRollArgs:
         args = AttackRollArgs(attack=attack, to_hit=to_hit)
@@ -210,15 +179,13 @@ class Character:
         if attack.target.semistunned:
             args.adv = True
             args.attack.target.semistunned = False
-        for feat in self.feats_for_event("roll_attack"):
-            feat.roll_attack(args)
+        self.events.emit("roll_attack", args)
         return args
 
     def weapon_roll(self, weapon: Weapon, crit: bool = False):
         rolls = weapon.rolls(crit=crit)
         args = WeaponRollArgs(weapon=weapon, rolls=rolls, crit=crit)
-        for feat in self.feats_for_event("weapon_roll"):
-            feat.weapon_roll(args)
+        self.events.emit("weapon_roll", args)
         return sum(args.rolls)
 
     def hit(
@@ -235,13 +202,11 @@ class Character:
             log.record(f"Crit:{weapon.name}", 1)
         dmg = weapon.damage(self, args)
         args.add_damage(f"Weapon:{weapon.name}", dmg)
-        for feat in self.feats_for_event("hit"):
-            feat.hit(args)
+        self.events.emit("hit", args)
         log.output(lambda: str(args._dmg))
         for key in args._dmg:
             target.damage_source(key, args.dmg_multiplier * args._dmg[key])
 
     def miss(self, attack: AttackArgs):
         args = MissArgs(attack)
-        for feat in self.feats_for_event("miss"):
-            feat.miss(args)
+        self.events.emit("miss", args)
