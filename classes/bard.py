@@ -130,7 +130,7 @@ class CMEMulticlass(Character):
         weapon = Scimitar()
         base_feats.append(CMEMulticlassAction(level, weapon))
         if level >= 4:
-            base_feats.append(DualWielder())
+            base_feats.append(DualWielder(weapon))
         if level >= 8:
             base_feats.append(ASI([["dex", 2]]))
         if level >= 12:

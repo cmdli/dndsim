@@ -294,23 +294,21 @@ class TWFFighter(Character):
         )
         if level >= 2:
             base_feats.append(ActionSurge(2 if level >= 17 else 1))
+        if level >= 4:
+            base_feats.append(GreatWeaponMaster(weapon))
+        if level >= 6:
+            base_feats.append(DualWielder("str", weapon))
+        if level >= 8:
+            base_feats.append(ASI([["str", 2]]))
         if level >= 10:
             base_feats.append(HeroicAdvantage())
         if level >= 13:
             base_feats.append(StudiedAttacks())
-        feats = [
-            GreatWeaponMaster(weapon),
-            DualWielder("str", weapon),
-            ASI([["str", 2]]),
-            ASI(),
-            ASI(),
-            ASI(),
-            IrresistibleOffense("str"),
-        ]
+        if level >= 19:
+            base_feats.append(IrresistibleOffense("str"))
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 10],
-            feats=feats,
             base_feats=base_feats,
             feat_schedule=[4, 6, 8, 12, 14, 16, 19],
         )

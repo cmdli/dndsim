@@ -63,6 +63,7 @@ class Target:
     def log_damage_sources(self):
         for key in self._dmg_log:
             log.record(f"Damage ({key})", self._dmg_log[key])
+        log.record(f"Damage (Total)", self.dmg)
 
     def save(self, dc):
         roll = random.randint(1, 20)

@@ -16,6 +16,7 @@ from sim.feats import (
     TwoWeaponFighting,
     WeaponMasteries,
     IrresistibleOffense,
+    AttackAction,
 )
 from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from sim.spells import HuntersMark
@@ -24,8 +25,7 @@ from sim.summons import SummonFey
 from util.log import log
 
 
-# ranger casts either summon fey or hunter's mark, returns true if ranger still has action
-def cast_spell(character: Character, summon_fey_threshold: int) -> bool:
+def maybe_cast_summon_fey(character: Character, summon_fey_threshold: int):
     slot = character.spells.highest_slot()
     if (
         summon_fey_threshold
@@ -38,13 +38,20 @@ def cast_spell(character: Character, summon_fey_threshold: int) -> bool:
             to_hit=character.prof + character.mod("wis"),
         )
         character.spells.cast(spell)
-        return False
-    else:
-        if not character.spells.is_concentrating() and character.use_bonus(
-            "HuntersMark"
-        ):
-            character.spells.cast(HuntersMark(slot))
         return True
+    return False
+
+
+def maybe_cast_hunters_mark(character: Character):
+    slot = character.spells.lowest_slot()
+    if (
+        slot > 0
+        and not character.spells.is_concentrating()
+        and character.use_bonus("HuntersMark")
+    ):
+        character.spells.cast(HuntersMark(slot))
+        return True
+    return False
 
 
 class RangerAction(Feat):
@@ -53,11 +60,12 @@ class RangerAction(Feat):
         self.summon_fey_threshold = summon_fey_threshold
 
     def action(self, target: Target):
-        has_action = cast_spell(self.character, self.summon_fey_threshold)
-        if has_action:
-            for weapon in self.attacks:
-                log.record("main attack", 1)
-                self.character.attack(target, weapon, tags=["main_action"])
+        if maybe_cast_summon_fey(self.character, self.summon_fey_threshold):
+            return
+        maybe_cast_hunters_mark(self)
+        for weapon in self.attacks:
+            log.record("main attack", 1)
+            self.character.attack(target, weapon, tags=["main_action"])
 
 
 class HuntersMarkFeat(Feat):
@@ -202,21 +210,21 @@ class PrimalCompanion(Character):
 
 
 class BeastMaul(Weapon):
-    def __init__(self, ranger, **kwargs):
+    def __init__(self, ranger: Character, **kwargs):
         super().__init__(name="Beast Maul", num_dice=1, die=8, **kwargs)
         self.ranger = ranger
 
     def to_hit(self, character):
         return self.ranger.prof + self.ranger.mod("wis")
 
-    def damage(self, character, args: HitArgs):
-        return character.weapon_roll(self, crit=args.crit) + 2 + self.ranger.prof
+    def damage(self, character: Character, args: HitArgs):
+        return character.weapon_roll(self, crit=args.crit) + 2 + self.ranger.mod("wis")
 
 
 class BeastMasterAction(Feat):
     def __init__(
         self,
-        beast: Character,
+        beast: PrimalCompanion,
         main_hand: Weapon,
         off_hand_nick: Weapon,
         off_hand_other: Weapon,
@@ -227,23 +235,29 @@ class BeastMasterAction(Feat):
         self.main_hand = main_hand
 
     def action(self, target: Target):
-        has_action = cast_spell(self.character, None)
-        if has_action:
-            if self.character.level >= 3:
-                if self.character.use_bonus("beast"):
-                    log.output(lambda: "Use bonus action for beast attack")
+        if maybe_cast_summon_fey(self.character, summon_fey_threshold=None):
+            return
+        maybe_cast_hunters_mark(self.character)
+        if self.character.level >= 3:
+            commanded_beast = False
+            if self.character.use_bonus("beast"):
+                log.output(lambda: "Use bonus action for beast attack")
+                self.beast.do_attack(target)
+                commanded_beast = True
+            num_attacks = 2 if self.character.level >= 5 else 1
+            for _ in range(num_attacks):
+                if not commanded_beast:
                     self.beast.do_attack(target)
-                    self.character.attack(target, self.main_hand)
-                elif self.character.level >= 5:
-                    self.beast.do_attack(target)
-                self.character.attack(target, self.main_hand)
-                self.character.attack(target, self.off_hand_nick, tags=["light"])
-            else:
-                self.character.attack(target, self.main_hand)
-                if self.character.use_bonus("light weapon"):
-                    self.character.attack(target, self.off_hand_other, tags=["light"])
+                    commanded_beast = True
                 else:
-                    self.character.attack(target, self.off_hand_nick, tags=["light"])
+                    self.character.attack(target, self.main_hand)
+            self.character.attack(target, self.off_hand_nick, tags=["light"])
+        else:
+            self.character.attack(target, self.main_hand)
+            if self.character.use_bonus("light weapon"):
+                self.character.attack(target, self.off_hand_other, tags=["light"])
+            else:
+                self.character.attack(target, self.off_hand_nick, tags=["light"])
 
 
 class BeastMasterRanger(Character):
@@ -262,7 +276,7 @@ class BeastMasterRanger(Character):
         if level >= 2:
             base_feats.append(TwoWeaponFighting())
         if level >= 4:
-            base_feats.append(DualWielder("dex"))
+            base_feats.append(DualWielder("dex", shortsword))
         if level >= 8:
             base_feats.append(ASI([["dex", 2]]))
         if level >= 12:

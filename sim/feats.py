@@ -69,19 +69,6 @@ class Archery(Feat):
             args.situational_bonus += 2
 
 
-class DualWielder(Feat):
-    def __init__(self, weapon: Weapon):
-        self.weapon = weapon
-
-    def apply(self, character):
-        super().apply(character)
-        character.dex += 1
-
-    def after_actions(self, target: Target):
-        if self.character.use_bonus("DualWielder"):
-            self.character.attack(target, self.weapon)
-
-
 class TwoWeaponFighting(Feat):
     def roll_attack(self, args: AttackRollArgs):
         if args.attack.has_tag("light"):
@@ -255,12 +242,17 @@ class WeaponMaster(Feat):
 
 
 class DualWielder(Feat):
-    def __init__(self, mod: str) -> None:
+    def __init__(self, mod: str, weapon: Weapon) -> None:
         self.mod = mod
+        self.weapon = weapon
 
     def apply(self, character):
         super().apply(character)
         character.increase_stat(self.mod, 1)
+
+    def after_action(self, target: Target):
+        if self.character.use_bonus("DualWielder"):
+            self.character.attack(target, self.weapon, tags=["light"])
 
 
 class SavageAttacker(Feat):

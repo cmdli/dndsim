@@ -129,14 +129,12 @@ class Barbarian(Character):
                 base_feats.append(PolearmMaster(GlaiveButt(magic_bonus=magic_weapon)))
             else:
                 base_feats.append(ASI([["str", 2]]))
-        if level >= 12 and use_pam:
-            base_feats.append(ASI([["str", 1]]))
-        if level >= 17:
-            base_feats.append(BrutalStrike(num_dice=2))
-        elif level >= 9:
-            base_feats.append(BrutalStrike(num_dice=1))
+        if level >= 9:
+            base_feats.append(BrutalStrike(num_dice=2 if level >= 17 else 1))
         if level >= 10:
             base_feats.append(Retaliation(weapon))
+        if level >= 12 and use_pam:
+            base_feats.append(ASI([["str", 1]]))
         if level >= 19:
             base_feats.append(IrresistibleOffense("str"))
         if level >= 20:
