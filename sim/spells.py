@@ -18,7 +18,7 @@ class Spell:
     def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
         pass
 
-    def end(self):
+    def end(self, character: "sim.character.Character"):
         pass
 
 

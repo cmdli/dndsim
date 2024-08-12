@@ -32,11 +32,7 @@ def maybe_cast_summon_fey(character: Character, summon_fey_threshold: int):
         and slot >= summon_fey_threshold
         and not character.spells.is_concentrating()
     ):
-        spell = SummonFey(
-            slot,
-            caster_level=character.level,
-            to_hit=character.prof + character.mod("wis"),
-        )
+        spell = SummonFey(slot)
         character.spells.cast(spell)
         return True
     return False
@@ -62,7 +58,7 @@ class RangerAction(Feat):
     def action(self, target: Target):
         if maybe_cast_summon_fey(self.character, self.summon_fey_threshold):
             return
-        maybe_cast_hunters_mark(self)
+        maybe_cast_hunters_mark(self.character)
         for weapon in self.attacks:
             log.record("main attack", 1)
             self.character.attack(target, weapon, tags=["main_action"])
@@ -122,6 +118,31 @@ class Gloomstalker(Feat):
         self.used_attack = False
 
 
+class DreadAmbusher(Feat):
+    def __init__(self, level: int, weapon: Weapon) -> None:
+        self.die = 8 if level >= 11 else 6
+        self.weapon = weapon if level >= 11 else None
+
+    def apply(self, character: Character):
+        super().apply(character)
+        self.max_uses = character.mod("wis")
+        self.uses = self.max_uses
+
+    def long_rest(self):
+        self.uses = self.max_uses
+
+    def begin_turn(self, target: Target):
+        self.used = False
+
+    def hit(self, args: HitArgs):
+        if not self.used and self.uses > 0:
+            self.used = True
+            self.uses -= 1
+            args.add_damage("DreadAmbusher", roll_dice(2, self.die))
+            if self.weapon:
+                self.character.attack(args.attack.target, self.weapon)
+
+
 class BeastChargeFeat(Feat):
     def __init__(self, character: "Character"):
         self.character = character
@@ -167,13 +188,11 @@ class GloomstalkerRanger(Character):
         base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
         base_feats.append(HuntersMarkFeat(10 if level >= 20 else 6, level >= 17))
         if level >= 3:
-            base_feats.append(Gloomstalker(weapon))
+            base_feats.append(DreadAmbusher(level, weapon))
         if level >= 4:
             base_feats.append(CrossbowExpert(weapon))
         if level >= 8:
             base_feats.append(ASI([["dex", 2]]))
-        if level >= 11:
-            base_feats.append(StalkersFlurry(weapon))
         if level >= 12:
             base_feats.append(ASI([["wis", 2]]))
         if level >= 16:
@@ -184,6 +203,8 @@ class GloomstalkerRanger(Character):
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
             base_feats=base_feats,
+            spell_mod="wis",
+            spellcaster=Spellcaster.HALF,
         )
 
 
@@ -235,7 +256,7 @@ class BeastMasterAction(Feat):
         self.main_hand = main_hand
 
     def action(self, target: Target):
-        if maybe_cast_summon_fey(self.character, summon_fey_threshold=None):
+        if maybe_cast_summon_fey(self.character, summon_fey_threshold=4):
             return
         maybe_cast_hunters_mark(self.character)
         if self.character.level >= 3:
@@ -299,5 +320,6 @@ class BeastMasterRanger(Character):
             stats=[10, 17, 10, 10, 16, 10],
             base_feats=base_feats,
             spellcaster=Spellcaster.HALF,
+            spell_mod="wis",
         )
         self.add_minion(beast)

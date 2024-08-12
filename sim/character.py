@@ -32,9 +32,6 @@ class Character:
         self.events = EventLoop()
         self.effects = set()
         self.spells = Spellcasting(self, spell_mod, [(spellcaster, level)])
-        self.spellcaster = spellcaster
-        self.spell_mod = spell_mod
-        self.concentration = None
         self.masteries = []
         self.feats: Dict[str, Feat] = dict()
         for feat in [Vex(), Topple(), Graze()]:
@@ -120,7 +117,7 @@ class Character:
         self.events.emit("short_rest")
 
     def long_rest(self):
-        self.spells.reset_spell_slots()
+        self.spells.reset()
         self.short_rest()
         self.events.emit("long_rest")
 

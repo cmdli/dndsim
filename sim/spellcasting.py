@@ -5,6 +5,7 @@ import sim.target
 import sim.character
 from typing import List, Tuple
 import math
+from util.log import log
 
 
 class Spellcaster(Enum):
@@ -38,8 +39,9 @@ class Spellcasting:
         self.spellcaster_level = spellcaster_level(spellcaster_levels)
         self.concentration: "sim.spells.Spell" = None
 
-    def reset_spell_slots(self):
+    def reset(self):
         self.slots = spell_slots(self.spellcaster_level)
+        self.set_concentration(None)
 
     def dc(self):
         return 8 + self.mod(self.mod) + self.character.prof
@@ -51,6 +53,7 @@ class Spellcasting:
         return lowest_spell_slot(self.slots, min=min)
 
     def cast(self, spell: "sim.spells.Spell", target: "sim.target.Target" = None):
+        log.record(f"Cast ({spell.name})", 1)
         if spell.slot > 0:
             self.slots[spell.slot] -= 1
         if spell.concentration:
@@ -59,7 +62,7 @@ class Spellcasting:
 
     def set_concentration(self, spell: "sim.spells.Spell"):
         if self.concentration:
-            self.concentration.end(self)
+            self.concentration.end(self.character)
         self.concentration = spell
 
     def concentrating_on(self, name: str) -> bool:

@@ -1,3 +1,4 @@
+from typing import List
 from sim.events import AttackRollArgs, HitArgs
 from sim.feats import Feat
 from util.util import do_roll, roll_dice
@@ -6,21 +7,6 @@ from util.log import log
 from sim.character import Character
 from sim.weapons import Weapon
 from sim.spells import Spell
-
-
-class SummonHit(Feat):
-    def __init__(self, slot: int, bonus_dmg: int) -> None:
-        self.bonus_dmg = bonus_dmg
-        self.slot = slot
-
-    def hit(self, args: HitArgs):
-        num = args.attack.weapon.num_dice
-        if args.crit:
-            num *= 2
-        args.attack.target.damage_source(
-            self.name,
-            roll_dice(num, args.attack.weapon.die) + self.bonus_dmg + self.slot,
-        )
 
 
 class SummonAction(Feat):
@@ -33,30 +19,35 @@ class SummonAction(Feat):
             self.character.attack(target, self.weapon)
 
 
+class SummonWeapon(Weapon):
+    def __init__(self, caster: Character = None, **kwargs):
+        super().__init__(**kwargs)
+        self.caster = caster
+
+    def to_hit(self, character: Character):
+        return self.caster.prof + self.caster.mod(self.caster.spells.mod)
+
+    def damage(self, character: Character, args: HitArgs):
+        return character.weapon_roll(self, crit=args.crit) + self.dmg_bonus
+
+
 class Summon(Character):
-    def __init__(
-        self,
-        slot: int,
-        caster_level: int,
-        weapon: Weapon,
-        bonus_dmg: int,
-        feats=[],
-        **kwargs
-    ):
+    def __init__(self, slot: int, weapon: Weapon, feats=[], **kwargs):
         base_feats = []
         base_feats.append(SummonAction(slot, weapon))
-        base_feats.append(SummonHit(slot, bonus_dmg))
         base_feats.extend(feats)
         super().init(
-            level=caster_level,
+            level=1,
             stats=[10, 10, 10, 10, 10, 10],
             base_feats=base_feats,
         )
 
 
-class FeyWeapon(Weapon):
-    def __init__(self, **kwargs):
-        super().__init__(name="FeyWeapon", num_dice=2, die=6, **kwargs)
+class FeyWeapon(SummonWeapon):
+    def __init__(self, slot: int, **kwargs):
+        super().__init__(
+            name="FeyWeapon", num_dice=2, die=6, dmg_bonus=2 + slot, **kwargs
+        )
 
 
 class Mirthful(Feat):
@@ -70,46 +61,38 @@ class Mirthful(Feat):
 
 
 class FeySummon(Summon):
-    def __init__(self, slot: int, caster_level: int, to_hit: int):
+    def __init__(self, slot: int, caster: Character):
         super().__init__(
-            caster_level=caster_level,
             slot=slot,
-            to_hit=to_hit,
-            bonus_dmg=3,
-            weapon=FeyWeapon(bonus=3 + slot),
+            weapon=FeyWeapon(slot, caster=caster),
             feats=[Mirthful()],
         )
 
 
 class SummonSpell(Spell):
-    def __init__(self, name: str, slot: int, caster_level: int, to_hit: int):
+    def __init__(self, name: str, slot: int):
         super().__init__(name, slot, concentration=True)
-        self.caster_level = caster_level
-        self.to_hit = to_hit
+        self.character = None
 
-    def summon(self):
+    def summon(self, caster: Character):
         return None
 
-    def begin(self, character):
-        self.minion = self.summon()
+    def cast(self, character: Character, target: Target):
+        self.minion = self.summon(character)
         character.add_minion(self.minion)
         self.character = character
 
-    def end(self):
+    def end(self, character: Character):
         if self.character is not None:
             self.character.remove_minion(self.minion)
 
 
 class SummonFey(SummonSpell):
-    def __init__(self, slot: int, caster_level: int, to_hit: int):
+    def __init__(self, slot: int):
         super().__init__(
             "SummonFey",
             slot,
-            caster_level=caster_level,
-            to_hit=to_hit,
         )
 
-    def summon(self):
-        return FeySummon(
-            caster_level=self.caster_level, slot=self.slot, to_hit=self.to_hit
-        )
+    def summon(self, caster: Character):
+        return FeySummon(self.slot, caster)
