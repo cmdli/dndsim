@@ -1,6 +1,6 @@
 from util.util import prof_bonus
 from sim.feat import Feat
-from sim.feats import Vex, Feat, Topple
+from sim.feats import Vex, Feat, Topple, Graze
 from sim.target import Target
 from sim.weapons import Weapon
 from sim.events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
@@ -16,15 +16,10 @@ class Character:
         self,
         level=None,
         stats=None,
-        feats=None,
         base_feats: List[Feat] = None,
-        feat_schedule=[4, 8, 12, 16, 19],
-        default_feats=None,
         spellcaster: Spellcaster = Spellcaster.NONE,
         spell_mod: str = None,
     ):
-        if default_feats is None:
-            default_feats = [Vex(), Topple()]
         self.level = level
         self.prof = prof_bonus(level)
         self.str = stats[0]
@@ -42,13 +37,10 @@ class Character:
         self.concentration = None
         self.masteries = []
         self.feats: Dict[str, Feat] = dict()
-        for feat in default_feats:
+        for feat in [Vex(), Topple(), Graze()]:
             self.add_feat(feat)
         for feat in base_feats:
             self.add_feat(feat)
-        for [target, feat] in zip(feat_schedule, feats):
-            if level >= target:
-                self.add_feat(feat)
 
     def add_feat(self, feat: Feat):
         feat.apply(self)
@@ -65,6 +57,10 @@ class Character:
         if stat == "none":
             return 0
         return (self.__getattribute__(stat) - 10) // 2
+
+    def increase_stat(self, stat: str, amount: int):
+        new_val = getattr(self, stat) + amount
+        setattr(self, stat, new_val)
 
     def dc(self, stat: str):
         return self.mod(stat) + self.prof + 8

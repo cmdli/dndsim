@@ -171,10 +171,6 @@ class Fighter(Character):
         use_topple=True,
         **kwargs
     ):
-        base_feats = []
-        base_feats.append(WeaponMasteries(["topple", "graze"]))
-        base_feats.append(SavageAttacker())
-        base_feats.append(GreatWeaponFighting())
         magic_weapon = get_magic_weapon(level)
         if use_pam:
             weapon = Glaive(magic_bonus=magic_weapon, min_crit=min_crit)
@@ -188,44 +184,33 @@ class Fighter(Character):
             num_attacks = 2
         else:
             num_attacks = 1
+        base_feats = []
+        base_feats.append(WeaponMasteries(["topple", "graze"]))
+        base_feats.append(SavageAttacker())
+        base_feats.append(GreatWeaponFighting())
         if use_topple and level >= 5:
             maul = Maul(magic_bonus=magic_weapon, min_crit=min_crit)
             base_feats.append(ToppleIfNecessaryAttackAction(num_attacks, maul, weapon))
         else:
             base_feats.append(AttackAction(attacks=(num_attacks * [weapon])))
+        if level >= 2:
+            base_feats.append(ActionSurge(2 if level >= 17 else 1))
+        if level >= 4:
+            base_feats.append(GreatWeaponMaster(weapon))
+        if level >= 6:
+            if use_pam:
+                butt = GlaiveButt(bonus=magic_weapon, min_crit=min_crit)
+                base_feats.append(PolearmMaster(butt))
+            else:
+                base_feats.append(ASI([["str", 2]]))
         if level >= 13:
             base_feats.append(StudiedAttacks())
-        if level >= 17:
-            base_feats.append(ActionSurge(2))
-        elif level >= 2:
-            base_feats.append(ActionSurge(1))
+        if level >= 19:
+            base_feats.append(IrresistibleOffense("str"))
         base_feats.extend(subclass_feats)
-        if use_pam:
-            butt = GlaiveButt(bonus=magic_weapon, min_crit=min_crit)
-            feats = [
-                GreatWeaponMaster(weapon),
-                PolearmMaster(butt),
-                ASI([["str", 1]]),
-                ASI(),
-                ASI(),
-                ASI(),
-                IrresistibleOffense("str"),
-            ]
-        else:
-            feats = [
-                GreatWeaponMaster(weapon),
-                ASI([["str", 2]]),
-                ASI(),
-                ASI(),
-                ASI(),
-                ASI(),
-                IrresistibleOffense("str"),
-            ]
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 10],
-            feat_schedule=[4, 6, 8, 12, 14, 16, 19],
-            feats=feats,
             base_feats=base_feats,
         )
 

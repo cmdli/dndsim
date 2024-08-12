@@ -52,7 +52,7 @@ class ElvenAccuracy(Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+        character.increase_stat(self.mod, 1)
 
     def roll_attack(self, args: AttackRollArgs):
         if args.adv:
@@ -122,7 +122,7 @@ class ASI(Feat):
     def apply(self, character):
         super().apply(character)
         for [stat, increase] in self.stat_increases:
-            character.__setattr__(stat, character.__getattribute__(stat) + increase)
+            character.increase_stat(stat, increase)
 
 
 class AttackAction(Feat):
@@ -224,7 +224,7 @@ class IrresistibleOffense(Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+        character.increase_stat(self.mod, 1)
 
     def hit(self, args: HitArgs):
         if args.roll == 20:
@@ -251,7 +251,7 @@ class WeaponMaster(Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+        character.increase_stat(self.mod, 1)
 
 
 class DualWielder(Feat):
@@ -260,7 +260,7 @@ class DualWielder(Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+        character.increase_stat(self.mod, 1)
 
 
 class SavageAttacker(Feat):
@@ -285,7 +285,7 @@ class Piercer(Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.__setattr__(self.mod, character.__getattribute__(self.mod) + 1)
+        character.increase_stat(self.mod, 1)
 
     def hit(self, args: HitArgs):
         if args.crit and args.attack.weapon.damage_type == "piercing":

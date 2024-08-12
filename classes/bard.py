@@ -88,22 +88,22 @@ class ValorBard(Character):
         base_feats.append(
             TrueStrikeAction(weapon, attacks=attacks, nick_attacks=[scimitar])
         )
+        if level >= 4:
+            base_feats.append(ASI([["cha", 2]]))
+        if level >= 8:
+            base_feats.append(ASI([["cha", 1], ["dex", 1]]))
         if level >= 10:
             base_feats.append(HolyWeaponFeat(weapon))
+        if level >= 12:
+            base_feats.append(ASI([["dex", 2]]))
         if level >= 14:
             base_feats.append(ValorBardBonusAttack(weapon))
-        feats = [
-            ASI([["cha", 2]]),
-            ASI([["cha", 1], ["dex", 1]]),
-            ASI([["dex", 2]]),
-            ASI([["dex", 1]]),
-            ASI(),
-        ]
+        if level >= 16:
+            base_feats.append(ASI([["dex", 1]]))
         super().init(
             level=level,
             stats=[10, 16, 10, 10, 10, 17],
             base_feats=base_feats,
-            feats=feats,
             spellcaster=Spellcaster.FULL,
             spell_mod="cha",
         )
@@ -129,18 +129,18 @@ class CMEMulticlass(Character):
         base_feats = []
         weapon = Scimitar()
         base_feats.append(CMEMulticlassAction(level, weapon))
-        feats = [
-            DualWielder(),
-            ASI([["dex", 2]]),
-            ASI([["cha", 2]]),
-            ASI([["cha", 1]]),
-            ASI(),
-        ]
+        if level >= 4:
+            base_feats.append(DualWielder())
+        if level >= 8:
+            base_feats.append(ASI([["dex", 2]]))
+        if level >= 12:
+            base_feats.append(ASI([["cha", 2]]))
+        if level >= 16:
+            base_feats.append(ASI([["cha", 1]]))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 10, 16],
             base_feats=base_feats,
-            feats=feats,
             spellcaster=Spellcaster.FULL,
             spell_mod="cha",
         )

@@ -51,8 +51,6 @@ class Summon(Character):
             level=caster_level,
             stats=[10, 10, 10, 10, 10, 10],
             base_feats=base_feats,
-            feats=[],
-            feat_schedule=[],
         )
 
 

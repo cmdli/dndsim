@@ -13,6 +13,7 @@ from sim.feats import (
     TwoWeaponFighting,
     GreatWeaponFighting,
     WeaponMasteries,
+    IrresistibleOffense,
 )
 from sim.weapons import Greatsword, Shortsword, Scimitar
 from util.log import log
@@ -71,6 +72,7 @@ class Paladin(Character):
     def __init__(self, level: int, use_twf=False, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
+        base_feats.append(DivineFavorFeat())
         if use_twf:
             base_feats.append(WeaponMasteries(["vex", "nick"]))
             scimitar = Scimitar(magic_bonus=magic_weapon)
@@ -89,31 +91,26 @@ class Paladin(Character):
         base_feats.append(AttackAction(attacks=attacks, nick_attacks=nick_attacks))
         if level >= 2:
             base_feats.append(DivineSmiteFeat())
-        if level >= 11:
-            base_feats.append(ImprovedDivineSmite())
         if level >= 3:
             base_feats.append(SacredWeapon())
-        base_feats.append(DivineFavorFeat())
-        if use_twf:
-            feats = [
-                ASI([["str", 1]]),
-                ASI([["str", 2]]),
-                ASI([["cha", 2]]),
-                ASI([["cha", 2]]),
-                ASI(),
-            ]
-        else:
-            feats = [
-                GreatWeaponMaster(weapon),
-                ASI([["str", 2]]),
-                ASI([["cha", 2]]),
-                ASI([["cha", 2]]),
-                ASI(),
-            ]
+        if level >= 4:
+            if use_twf:
+                base_feats.append(ASI([["str", 1]]))
+            else:
+                base_feats.append(GreatWeaponMaster(weapon))
+        if level >= 8:
+            base_feats.append(ASI([["str", 2]]))
+        if level >= 11:
+            base_feats.append(ImprovedDivineSmite())
+        if level >= 12:
+            base_feats.append(ASI([["cha", 2]]))
+        if level >= 16:
+            base_feats.append(ASI([["cha", 2]]))
+        if level >= 19:
+            base_feats.append(IrresistibleOffense("str"))
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 16],
-            feats=feats,
             base_feats=base_feats,
             spellcaster=Spellcaster.HALF,
         )

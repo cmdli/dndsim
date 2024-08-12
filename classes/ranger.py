@@ -15,6 +15,7 @@ from sim.feats import (
     DualWielder,
     TwoWeaponFighting,
     WeaponMasteries,
+    IrresistibleOffense,
 )
 from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from sim.spells import HuntersMark
@@ -156,26 +157,24 @@ class GloomstalkerRanger(Character):
         else:
             attacks = [weapon]
         base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
-        if level >= 20:
-            base_feats.append(HuntersMarkFeat(10, True))
-        elif level >= 17:
-            base_feats.append(HuntersMarkFeat(6, True))
-        else:
-            base_feats.append(HuntersMarkFeat(6, False))
+        base_feats.append(HuntersMarkFeat(10 if level >= 20 else 6, level >= 17))
         if level >= 3:
             base_feats.append(Gloomstalker(weapon))
+        if level >= 4:
+            base_feats.append(CrossbowExpert(weapon))
+        if level >= 8:
+            base_feats.append(ASI([["dex", 2]]))
         if level >= 11:
             base_feats.append(StalkersFlurry(weapon))
+        if level >= 12:
+            base_feats.append(ASI([["wis", 2]]))
+        if level >= 16:
+            base_feats.append(ASI([["wis", 2]]))
+        if level >= 19:
+            base_feats.append(IrresistibleOffense("dex"))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
-            feats=[
-                CrossbowExpert(weapon),
-                ASI([["dex", 2]]),
-                ASI([["wis", 2]]),
-                ASI([["wis", 2]]),
-                ASI(),
-            ],
             base_feats=base_feats,
         )
 
@@ -191,7 +190,6 @@ class PrimalCompanion(Character):
         super().init(
             level=level,
             stats=[10, 10, 10, 10, 10, 10],
-            feats=[],
             base_feats=base_feats,
         )
 
@@ -263,12 +261,17 @@ class BeastMasterRanger(Character):
         scimitar = Scimitar(magic_bonus=magic_weapon)
         if level >= 2:
             base_feats.append(TwoWeaponFighting())
-        if level >= 20:
-            base_feats.append(HuntersMarkFeat(10, True))
-        elif level >= 17:
-            base_feats.append(HuntersMarkFeat(6, True))
-        else:
-            base_feats.append(HuntersMarkFeat(6, False))
+        if level >= 4:
+            base_feats.append(DualWielder("dex"))
+        if level >= 8:
+            base_feats.append(ASI([["dex", 2]]))
+        if level >= 12:
+            base_feats.append(ASI([["wis", 2]]))
+        if level >= 16:
+            base_feats.append(ASI([["wis", 2]]))
+        if level >= 19:
+            base_feats.append(IrresistibleOffense("dex"))
+        base_feats.append(HuntersMarkFeat(10 if level >= 20 else 6, level >= 17))
         base_feats.append(
             BeastMasterAction(
                 beast=beast,
@@ -280,13 +283,6 @@ class BeastMasterRanger(Character):
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
-            feats=[
-                DualWielder("dex"),
-                ASI([["dex", 2]]),
-                ASI([["wis", 2]]),
-                ASI([["wis", 2]]),
-                ASI(),
-            ],
             base_feats=base_feats,
             spellcaster=Spellcaster.HALF,
         )

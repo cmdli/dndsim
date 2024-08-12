@@ -114,6 +114,10 @@ class AssassinRogue(Character):
         if level >= 3:
             base_feats.append(SteadyAim())
             base_feats.append(Assassinate(level))
+        if level >= 4:
+            base_feats.append(ASI([["dex", 2]]))
+        if level >= 8:
+            base_feats.append(ASI([["dex", 1]]))
         if level >= 17:
             base_feats.append(DeathStrike())
         if level >= 20:
@@ -121,7 +125,6 @@ class AssassinRogue(Character):
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 10, 10],
-            feats=[ASI([["dex", 2]]), ASI([["dex", 1]])],
             base_feats=base_feats,
         )
 
@@ -135,6 +138,8 @@ class ArcaneTricksterRogue(Character):
         base_feats.append(SneakAttack(sneak_attack))
         if level >= 3:
             base_feats.append(SteadyAim())
+        if level >= 4:
+            base_feats.append(ASI([["dex", 2]]))
         if level >= 5:
             rapier = Rapier(magic_bonus=magic_weapon)
             base_feats.append(BoomingBlade(self, rapier))
@@ -144,11 +149,12 @@ class ArcaneTricksterRogue(Character):
             base_feats.append(
                 AttackAction(attacks=[shortsword], nick_attacks=[scimitar])
             )
+        if level >= 8:
+            base_feats.append(ASI([["dex", 1]]))
         if level >= 20:
             base_feats.append(StrokeOfLuck())
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 10, 10],
-            feats=[ASI([["dex", 2]]), ASI([["dex", 1]])],
             base_feats=base_feats,
         )

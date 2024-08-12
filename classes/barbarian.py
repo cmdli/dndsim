@@ -122,33 +122,27 @@ class Barbarian(Character):
         base_feats.append(AttackAction(attacks=attacks))
         if level >= 3:
             base_feats.append(Beserker(num_dice=rage_dmg))
+        if level >= 4:
+            base_feats.append(GreatWeaponMaster(weapon))
+        if level >= 8:
+            if use_pam:
+                base_feats.append(PolearmMaster(GlaiveButt(magic_bonus=magic_weapon)))
+            else:
+                base_feats.append(ASI([["str", 2]]))
+        if level >= 12 and use_pam:
+            base_feats.append(ASI([["str", 1]]))
         if level >= 17:
             base_feats.append(BrutalStrike(num_dice=2))
         elif level >= 9:
             base_feats.append(BrutalStrike(num_dice=1))
         if level >= 10:
             base_feats.append(Retaliation(weapon))
+        if level >= 19:
+            base_feats.append(IrresistibleOffense("str"))
         if level >= 20:
             base_feats.append(PrimalChampion())
-        if use_pam:
-            feats = [
-                GreatWeaponMaster(weapon),
-                PolearmMaster(GlaiveButt(magic_bonus=magic_weapon)),
-                ASI([["str", 1], ["con", 1]]),
-                ASI(),
-                IrresistibleOffense("str"),
-            ]
-        else:
-            feats = [
-                GreatWeaponMaster(weapon),
-                ASI([["str", 2]]),
-                ASI(),
-                ASI(),
-                IrresistibleOffense("str"),
-            ]
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 10],
-            feats=feats,
             base_feats=base_feats,
         )

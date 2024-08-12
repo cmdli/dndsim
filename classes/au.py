@@ -1,3 +1,8 @@
+#
+# My (roughly optimized) 5e character in the old system, Assault Unit 21
+# Samarai Fighter, uses the crossbow expert + sharpshooter build
+#
+
 from sim.character import Character
 from sim.events import AttackRollArgs, HitArgs
 from sim.feats import Feat, ASI, AttackAction
@@ -98,31 +103,22 @@ class AssaultUnit(Character):
         else:
             attacks = [weapon]
         base_feats.append(AttackAction(attacks=attacks))
-        if level >= 17:
-            base_feats.append(ActionSurge(max_surges=2))
-        elif level >= 2:
-            base_feats.append(ActionSurge(max_surges=1))
-        if level >= 10:
-            base_feats.append(FightingSpirit(regain_on_initiative=True))
-        elif level >= 3:
-            base_feats.append(FightingSpirit())
+        if level >= 2:
+            base_feats.append(ActionSurge(max_surges=2 if level >= 17 else 1))
+        if level >= 3:
+            base_feats.append(FightingSpirit(regain_on_initiative=level >= 10))
+        if level >= 4:
+            base_feats.append(OldCrossbowExpert(weapon))
+        if level >= 6:
+            base_feats.append(OldSharpshooter())
+        if level >= 8:
+            base_feats.append(ASI([["dex", 1]]))
         if level >= 15:
             base_feats.append(RapidStrike())
         if blessed:
             base_feats.append(Blessed())
-        feats = [
-            OldCrossbowExpert(weapon),
-            OldSharpshooter(),
-            ASI([["dex", 1]]),
-            ASI(),
-            ASI(),
-            ASI(),
-            ASI(),
-        ]
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 10, 10],
             base_feats=base_feats,
-            feats=feats,
-            feat_schedule=[4, 6, 8, 12, 14, 16, 19],
         )

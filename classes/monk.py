@@ -170,29 +170,25 @@ class Monk(Character):
         base_feats.append(FlurryOfBlows(num_attacks=bonus_attacks, weapon=fists))
         if level >= 3:
             base_feats.append(OpenHandTechnique())
+        if level >= 4:
+            if use_nick:
+                base_feats.append(WeaponMaster("dex"))
+            else:
+                base_feats.append(Grappler() if use_grappler else ASI([["dex", 1]]))
         if level >= 5:
             base_feats.append(StunningStrike(weapon_die, avoid_on_grapple=not use_nick))
+        if level >= 8:
+            base_feats.append(ASI([["dex", 2]]))
+        if level >= 12:
+            base_feats.append(ASI([["wis", 2]]))
+        if level >= 16:
+            base_feats.append(ASI([["wis", 2]]))
+        if level >= 19:
+            base_feats.append(IrresistibleOffense("dex"))
         if level >= 20:
             base_feats.append(BodyAndMind())
-        if use_nick:
-            feats = [
-                WeaponMaster("dex"),
-                ASI([["dex", 2]]),
-                ASI([["wis", 2]]),
-                ASI([["wis", 2]]),
-                IrresistibleOffense("dex"),
-            ]
-        else:
-            feats = [
-                Grappler() if use_grappler else ASI([["dex", 1]]),
-                ASI([["dex", 2]]),
-                ASI([["wis", 2]]),
-                ASI([["wis", 2]]),
-                IrresistibleOffense("dex"),
-            ]
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
             base_feats=base_feats,
-            feats=feats,
         )
