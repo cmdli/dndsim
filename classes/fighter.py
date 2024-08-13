@@ -202,7 +202,7 @@ class Fighter(Character):
                 butt = GlaiveButt(bonus=magic_weapon, min_crit=min_crit)
                 base_feats.append(PolearmMaster(butt))
             else:
-                base_feats.append(ASI([["str", 2]]))
+                base_feats.append(ASI(["str"]))
         if level >= 13:
             base_feats.append(StudiedAttacks())
         if level >= 19:
@@ -299,7 +299,7 @@ class TWFFighter(Character):
         if level >= 6:
             base_feats.append(DualWielder("str", weapon))
         if level >= 8:
-            base_feats.append(ASI([["str", 2]]))
+            base_feats.append(ASI(["str"]))
         if level >= 10:
             base_feats.append(HeroicAdvantage())
         if level >= 13:

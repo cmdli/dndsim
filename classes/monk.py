@@ -174,15 +174,15 @@ class Monk(Character):
             if use_nick:
                 base_feats.append(WeaponMaster("dex"))
             else:
-                base_feats.append(Grappler() if use_grappler else ASI([["dex", 1]]))
+                base_feats.append(Grappler() if use_grappler else ASI(["dex", "con"]))
         if level >= 5:
             base_feats.append(StunningStrike(weapon_die, avoid_on_grapple=not use_nick))
         if level >= 8:
-            base_feats.append(ASI([["dex", 2]]))
+            base_feats.append(ASI(["dex"]))
         if level >= 12:
-            base_feats.append(ASI([["wis", 2]]))
+            base_feats.append(ASI(["wis"]))
         if level >= 16:
-            base_feats.append(ASI([["wis", 2]]))
+            base_feats.append(ASI(["wis"]))
         if level >= 19:
             base_feats.append(IrresistibleOffense("dex"))
         if level >= 20:

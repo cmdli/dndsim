@@ -95,17 +95,17 @@ class Paladin(Character):
             base_feats.append(SacredWeapon())
         if level >= 4:
             if use_twf:
-                base_feats.append(ASI([["str", 1]]))
+                base_feats.append(ASI(["str", "con"]))
             else:
                 base_feats.append(GreatWeaponMaster(weapon))
         if level >= 8:
-            base_feats.append(ASI([["str", 2]]))
+            base_feats.append(ASI(["str"]))
         if level >= 11:
             base_feats.append(ImprovedDivineSmite())
         if level >= 12:
-            base_feats.append(ASI([["cha", 2]]))
+            base_feats.append(ASI(["cha"]))
         if level >= 16:
-            base_feats.append(ASI([["cha", 2]]))
+            base_feats.append(ASI(["cha"]))
         if level >= 19:
             base_feats.append(IrresistibleOffense("str"))
         super().init(

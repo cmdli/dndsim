@@ -89,17 +89,17 @@ class ValorBard(Character):
             TrueStrikeAction(weapon, attacks=attacks, nick_attacks=[scimitar])
         )
         if level >= 4:
-            base_feats.append(ASI([["cha", 2]]))
+            base_feats.append(ASI(["cha"]))
         if level >= 8:
-            base_feats.append(ASI([["cha", 1], ["dex", 1]]))
+            base_feats.append(ASI(["cha", "dex"]))
         if level >= 10:
             base_feats.append(HolyWeaponFeat(weapon))
         if level >= 12:
-            base_feats.append(ASI([["dex", 2]]))
+            base_feats.append(ASI(["dex"]))
         if level >= 14:
             base_feats.append(ValorBardBonusAttack(weapon))
         if level >= 16:
-            base_feats.append(ASI([["dex", 1]]))
+            base_feats.append(ASI(["dex", "wis"]))
         super().init(
             level=level,
             stats=[10, 16, 10, 10, 10, 17],
@@ -132,11 +132,11 @@ class CMEMulticlass(Character):
         if level >= 4:
             base_feats.append(DualWielder(weapon))
         if level >= 8:
-            base_feats.append(ASI([["dex", 2]]))
+            base_feats.append(ASI(["dex"]))
         if level >= 12:
-            base_feats.append(ASI([["cha", 2]]))
+            base_feats.append(ASI(["cha"]))
         if level >= 16:
-            base_feats.append(ASI([["cha", 1]]))
+            base_feats.append(ASI(["cha", "wis"]))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 10, 16],

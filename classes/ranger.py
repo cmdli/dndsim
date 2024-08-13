@@ -192,11 +192,11 @@ class GloomstalkerRanger(Character):
         if level >= 4:
             base_feats.append(CrossbowExpert(weapon))
         if level >= 8:
-            base_feats.append(ASI([["dex", 2]]))
+            base_feats.append(ASI(["dex"]))
         if level >= 12:
-            base_feats.append(ASI([["wis", 2]]))
+            base_feats.append(ASI(["wis"]))
         if level >= 16:
-            base_feats.append(ASI([["wis", 2]]))
+            base_feats.append(ASI(["wis"]))
         if level >= 19:
             base_feats.append(IrresistibleOffense("dex"))
         super().init(
@@ -299,11 +299,11 @@ class BeastMasterRanger(Character):
         if level >= 4:
             base_feats.append(DualWielder("dex", shortsword))
         if level >= 8:
-            base_feats.append(ASI([["dex", 2]]))
+            base_feats.append(ASI(["dex"]))
         if level >= 12:
-            base_feats.append(ASI([["wis", 2]]))
+            base_feats.append(ASI(["wis"]))
         if level >= 16:
-            base_feats.append(ASI([["wis", 2]]))
+            base_feats.append(ASI(["wis"]))
         if level >= 19:
             base_feats.append(IrresistibleOffense("dex"))
         base_feats.append(HuntersMarkFeat(10 if level >= 20 else 6, level >= 17))

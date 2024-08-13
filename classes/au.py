@@ -112,7 +112,7 @@ class AssaultUnit(Character):
         if level >= 6:
             base_feats.append(OldSharpshooter())
         if level >= 8:
-            base_feats.append(ASI([["dex", 1]]))
+            base_feats.append(ASI(["dex", "str"]))
         if level >= 15:
             base_feats.append(RapidStrike())
         if blessed:

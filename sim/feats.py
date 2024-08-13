@@ -5,6 +5,7 @@ from sim.weapons import Weapon
 from util.log import log
 from typing import List
 from sim.feat import Feat
+import sim.character
 
 
 class PolearmMaster(Feat):
@@ -106,9 +107,10 @@ class ASI(Feat):
     def __init__(self, stat_increases=[]):
         self.stat_increases = stat_increases
 
-    def apply(self, character):
+    def apply(self, character: "sim.character.Character"):
         super().apply(character)
-        for [stat, increase] in self.stat_increases:
+        increase = 2 if len(self.stat_increases) == 1 else 1
+        for stat in self.stat_increases:
             character.increase_stat(stat, increase)
 
 
@@ -125,7 +127,7 @@ class AttackAction(Feat):
 
 
 class BoomingBlade(Feat):
-    def __init__(self, character, weapon: Weapon):
+    def __init__(self, character: "sim.character.Character", weapon: Weapon):
         self.weapon = weapon
         self.character = character
 
@@ -211,6 +213,7 @@ class IrresistibleOffense(Feat):
 
     def apply(self, character):
         super().apply(character)
+        character.increase_stat_max(self.mod, 1)
         character.increase_stat(self.mod, 1)
 
     def hit(self, args: HitArgs):
@@ -221,7 +224,8 @@ class IrresistibleOffense(Feat):
 class CombatProwess(Feat):
     def apply(self, character):
         super().apply(character)
-        character.str += 1
+        character.increase_stat_max("str", 1)
+        character.increase_stat("str", 1)
 
     def begin_turn(self, target: Target):
         self.used = False

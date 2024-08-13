@@ -10,6 +10,9 @@ from typing import List
 from typing import Callable, Any, Dict
 from sim.spellcasting import Spellcasting, Spellcaster
 
+STATS = ["str", "dex", "con", "int", "wis", "cha"]
+DEFAULT_STAT_MAX = 20
+
 
 class Character:
     def init(
@@ -28,6 +31,7 @@ class Character:
         self.int = stats[3]
         self.wis = stats[4]
         self.cha = stats[5]
+        self.stat_max = {stat: DEFAULT_STAT_MAX for stat in STATS}
         self.minions: List[Character] = []
         self.events = EventLoop()
         self.effects = set()
@@ -55,8 +59,13 @@ class Character:
             return 0
         return (self.__getattribute__(stat) - 10) // 2
 
+    def increase_stat_max(self, stat: str, amount: int):
+        self.stat_max[stat] += amount
+
     def increase_stat(self, stat: str, amount: int):
         new_val = getattr(self, stat) + amount
+        if new_val > self.stat_max[stat]:
+            new_val = self.stat_max[stat]
         setattr(self, stat, new_val)
 
     def dc(self, stat: str):
