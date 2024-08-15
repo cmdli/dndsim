@@ -1,9 +1,7 @@
 from typing import List
 from sim.events import AttackRollArgs, HitArgs
 from sim.feats import Feat
-from util.util import do_roll, roll_dice
 from sim.target import Target
-from util.log import log
 from sim.character import Character
 from sim.weapons import Weapon
 from sim.spells import Spell
@@ -43,10 +41,28 @@ class Summon(Character):
         )
 
 
+class SummonSpell(Spell):
+    def __init__(self, name: str, slot: int):
+        super().__init__(name, slot, concentration=True)
+        self.character = None
+
+    def summon(self, caster: Character):
+        return None
+
+    def cast(self, character: Character, target: Target):
+        self.minion = self.summon(character)
+        character.add_minion(self.minion)
+        self.character = character
+
+    def end(self, character: Character):
+        if self.character is not None:
+            self.character.remove_minion(self.minion)
+
+
 class FeyWeapon(SummonWeapon):
     def __init__(self, slot: int, **kwargs):
         super().__init__(
-            name="FeyWeapon", num_dice=2, die=6, dmg_bonus=2 + slot, **kwargs
+            name="FeyWeapon", num_dice=2, die=6, dmg_bonus=3 + slot, **kwargs
         )
 
 
@@ -69,24 +85,6 @@ class FeySummon(Summon):
         )
 
 
-class SummonSpell(Spell):
-    def __init__(self, name: str, slot: int):
-        super().__init__(name, slot, concentration=True)
-        self.character = None
-
-    def summon(self, caster: Character):
-        return None
-
-    def cast(self, character: Character, target: Target):
-        self.minion = self.summon(character)
-        character.add_minion(self.minion)
-        self.character = character
-
-    def end(self, character: Character):
-        if self.character is not None:
-            self.character.remove_minion(self.minion)
-
-
 class SummonFey(SummonSpell):
     def __init__(self, slot: int):
         super().__init__(
@@ -96,3 +94,25 @@ class SummonFey(SummonSpell):
 
     def summon(self, caster: Character):
         return FeySummon(self.slot, caster)
+
+
+class CelestialWeapon(SummonWeapon):
+    def __init__(self, slot: int, **kwargs):
+        super().__init__(
+            name="CelestialWeapon", num_dice=2, die=6, dmg_bonus=2 + slot, **kwargs
+        )
+
+
+class CelestialSummon(Summon):
+    def __init__(self, slot: int, caster: Character):
+        super().__init__(
+            slot=slot, weapon=CelestialWeapon(slot=slot, caster=caster), feats=[]
+        )
+
+
+class SummonCelestial(SummonSpell):
+    def __init__(self, slot: int):
+        super().__init__("SummonCelestial", slot)
+
+    def summon(self, caster: Character):
+        return CelestialSummon(self.slot, caster)

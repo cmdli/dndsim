@@ -46,7 +46,7 @@ class Character:
     def add_feat(self, feat: Feat):
         feat.apply(self)
         self.feats[feat.name()] = feat
-        self.events.add(feat)
+        self.events.add(feat, feat.events())
 
     def has_feat(self, name: str):
         return name in self.feats

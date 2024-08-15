@@ -210,3 +210,8 @@ class Dagger(Weapon):
             tags=["finesse", "light"],
             **kwargs,
         )
+
+
+class Warhammer(Weapon):
+    def __init__(self, **kwargs):
+        super().__init__(name="Warhammer", num_dice=1, die=8, damage_type="bludgeoning")

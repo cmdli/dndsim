@@ -38,13 +38,16 @@ class Spellcasting:
         self.mod = mod
         self.spellcaster_level = spellcaster_level(spellcaster_levels)
         self.concentration: "sim.spells.Spell" = None
+        self.spells: List["sim.spells.Spell"] = []
 
     def reset(self):
         self.slots = spell_slots(self.spellcaster_level)
         self.set_concentration(None)
+        for spell in self.spells:
+            spell.end(self.character)
 
     def dc(self):
-        return 8 + self.mod(self.mod) + self.character.prof
+        return 8 + self.character.mod(self.mod) + self.character.prof
 
     def highest_slot(self, max: int = 9) -> int:
         return highest_spell_slot(self.slots, max=max)
@@ -59,9 +62,16 @@ class Spellcasting:
         if spell.concentration:
             self.set_concentration(spell)
         spell.cast(self.character, target)
+        if spell.duration > 0 or spell.concentration:
+            self.spells.append(spell)
+
+    def end_spell(self, spell: "sim.spells.Spell"):
+        self.spells.remove(spell)
+        spell.end(self.character)
 
     def set_concentration(self, spell: "sim.spells.Spell"):
         if self.concentration:
+            self.spells.remove(self.concentration)
             self.concentration.end(self.character)
         self.concentration = spell
 

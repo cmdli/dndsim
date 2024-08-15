@@ -1,4 +1,5 @@
 import random
+from enum import Enum
 
 from util.log import log
 from sim.target import Target
