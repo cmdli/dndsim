@@ -38,8 +38,14 @@ class Target:
         else:
             self.ability = 3
         self.save_bonus = self.prof + self.ability
+        self.long_rest()
+
+    def long_rest(self):
         self.dmg = 0
         self._dmg_log = defaultdict(int)
+        self.short_rest()
+
+    def short_rest(self):
         self.stunned = False
         self.stun_turns = 0
         self.grappled = False
