@@ -1,6 +1,8 @@
 from util.util import roll_dice
 from typing import List
 import sim.events
+import sim.spells
+import sim.character
 
 """
 Overlooked things for weapons:
@@ -41,6 +43,7 @@ class Weapon:
         dmg_bonus=0,
         tags: List[str] = None,
         override_mod=None,
+        spell: "sim.spells.Spell" = None,
     ) -> None:
         self.name = name
         self.num_dice = num_dice
@@ -52,8 +55,9 @@ class Weapon:
         self.override_mod = override_mod
         self.mastery = mastery
         self.tags = tags or []
+        self.spell = spell
 
-    def mod(self, character):
+    def mod(self, character: "sim.character.Character"):
         if self.override_mod is not None:
             return self.override_mod
         elif self.has_tag("ranged"):
@@ -63,14 +67,19 @@ class Weapon:
         else:
             return "str"
 
-    def to_hit(self, character):
+    def to_hit(self, character: "sim.character.Character"):
         mod = self.mod(character)
         return character.prof + character.mod(mod) + self.attack_bonus
 
-    def damage(self, character, args: "sim.events.HitArgs"):
-        dmg = character.weapon_roll(self, crit=args.crit) + self.dmg_bonus
-        if not args.attack.has_tag("light"):
-            dmg += character.mod(args.attack.mod)
+    def damage(
+        self,
+        character: "sim.character.Character",
+        attack: "sim.events.AttackArgs",
+        crit: bool,
+    ):
+        dmg = character.weapon_roll(self, crit=crit) + self.dmg_bonus
+        if not attack.has_tag("light"):
+            dmg += character.mod(attack.mod)
         return dmg
 
     def rolls(self, crit: bool = False):

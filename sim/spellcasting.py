@@ -1,8 +1,10 @@
-from util.util import spell_slots, highest_spell_slot, lowest_spell_slot
+from util.util import spell_slots, highest_spell_slot, lowest_spell_slot, cantrip_dice
 from enum import Enum
 import sim.spells
 import sim.target
 import sim.character
+import sim.target
+from sim.weapons import Weapon
 from typing import List, Tuple
 import math
 from util.log import log
@@ -27,6 +29,19 @@ def spellcaster_level(levels: List[Tuple[Spellcaster, int]]):
     return total
 
 
+class SpellWeapon(Weapon):
+    def __init__(self, mod: str, **kwargs):
+        super().__init__(
+            name="SpellWeapon",
+            num_dice=1,
+            die=1,
+            override_mod=mod,
+            damage_type="none",
+            min_crit=20,
+            **kwargs,
+        )
+
+
 class Spellcasting:
     def __init__(
         self,
@@ -39,6 +54,7 @@ class Spellcasting:
         self.spellcaster_level = spellcaster_level(spellcaster_levels)
         self.concentration: "sim.spells.Spell" = None
         self.spells: List["sim.spells.Spell"] = []
+        self.spell_weapon = SpellWeapon(self.mod)
 
     def reset(self):
         self.slots = spell_slots(self.spellcaster_level)
@@ -80,3 +96,12 @@ class Spellcasting:
 
     def is_concentrating(self) -> bool:
         return self.concentration is not None
+
+    def cantrip_dice(self):
+        if self.character.level >= 17:
+            return 4
+        elif self.character.level >= 11:
+            return 3
+        elif self.character.level >= 5:
+            return 2
+        return 1

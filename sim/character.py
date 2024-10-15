@@ -202,7 +202,7 @@ class Character:
         log.record(f"Hit:{weapon.name}", 1)
         if crit:
             log.record(f"Crit:{weapon.name}", 1)
-        dmg = weapon.damage(self, args)
+        dmg = weapon.damage(self, args.attack, crit)
         args.add_damage(f"Weapon:{weapon.name}", dmg)
         self.events.emit("hit", args)
         log.output(lambda: str(args._dmg))

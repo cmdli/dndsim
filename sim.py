@@ -46,6 +46,7 @@ def parse_unknown_args(args: List[str]) -> Dict[str, bool]:
     return {arg: True for arg in parsed_args}
 
 
+@click.command()
 @click.option("-s", "--start", default=1, help="Start of the level range")
 @click.option("-e", "--end", default=20, help="End of the level range")
 @click.option("--characters", default="all", help="Characters to test")

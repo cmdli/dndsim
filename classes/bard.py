@@ -5,7 +5,9 @@ from sim.events import HitArgs, AttackRollArgs
 from util.util import roll_dice, get_magic_weapon
 from sim.target import Target
 from typing import List
-from sim.spells import TrueStrike, HolyWeapon, EldritchBlast
+from spells.wizard import TrueStrike
+from spells.paladin import HolyWeapon
+from spells.warlock import EldritchBlast
 from sim.spellcasting import Spellcaster
 
 

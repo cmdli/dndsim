@@ -16,8 +16,7 @@ from sim.feats import (
     IrresistibleOffense,
 )
 from sim.weapons import Greatsword, Shortsword, Scimitar
-from util.log import log
-from sim.spells import DivineSmite, DivineFavor
+from spells.paladin import DivineFavor, DivineSmite
 from sim.spellcasting import Spellcaster
 
 

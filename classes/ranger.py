@@ -19,7 +19,7 @@ from sim.feats import (
     AttackAction,
 )
 from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
-from sim.spells import HuntersMark
+from spells.ranger import HuntersMark
 from sim.spellcasting import Spellcaster
 from sim.summons import SummonFey
 from util.log import log

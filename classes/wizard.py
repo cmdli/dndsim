@@ -1,3 +1,4 @@
+from sim.events import HitArgs, MissArgs
 from util.util import (
     prof_bonus,
     get_magic_weapon,
@@ -7,6 +8,24 @@ from util.util import (
     roll_dice,
     do_roll,
 )
+from util.log import log
+from sim.target import Target
+from sim.character import Character
+from sim.spellcasting import Spellcaster
+from sim.feat import Feat
+from sim.events import AttackArgs
+from spells.wizard import (
+    MeteorSwarm,
+    Fireball,
+    Firebolt,
+    MagicMissile,
+    FingerOfDeath,
+    Blight,
+    ChainLightning,
+    ScorchingRay,
+)
+from sim.summons import SummonFey
+from sim.feats import ASI
 
 
 class Wizard:
@@ -158,3 +177,62 @@ class Wizard:
                 target.damage(roll_dice(4, 6) + 3 + self.fey_summon)
             elif roll + self.to_hit >= target.ac:
                 target.damage(roll_dice(2, 6) + 3 + self.fey_summon)
+
+
+class PotentCantrip(Feat):
+    # TODO: Add damage when enemy saves against a cantrip
+    def miss(self, args: MissArgs):
+        weapon = args.attack.weapon
+        if weapon.spell is not None and weapon.spell.slot == 0:
+            damage = weapon.damage(
+                self.character,
+                args.attack,
+                crit=False,
+            )
+            args.attack.target.damage_source("PotentCantrip", damage // 2)
+
+
+class WizardAction(Feat):
+    def action(self, target: Target):
+        slot = self.character.spells.highest_slot()
+        spell = None
+        # if slot >= 3 and not self.character.spells.is_concentrating():
+        #     spell = SummonFey(slot)
+        # elif slot >= 9:
+        #     spell = MeteorSwarm(slot)
+        # elif slot >= 7:
+        #     spell = FingerOfDeath(slot)
+        # elif slot >= 6:
+        #     spell = ChainLightning(slot)
+        # elif slot >= 4:
+        #     spell = Blight(slot)
+        # elif slot >= 3:
+        #     spell = Fireball(slot)
+        # else:
+        #     if slot >= 2 and self.character.level < 11:
+        #         spell = ScorchingRay(slot)
+        #     elif slot >= 1 and self.character.level < 5:
+        #         spell = MagicMissile(slot)
+        #     else:
+        spell = Firebolt()
+        if spell is not None:
+            self.character.spells.cast(spell, target)
+
+
+class Wizard2(Character):
+    def __init__(self, level: int) -> None:
+        feats = []
+        feats.append(WizardAction())
+        if level >= 3:
+            feats.append(PotentCantrip())
+        if level >= 4:
+            feats.append(ASI(["int"]))
+        if level >= 8:
+            feats.append(ASI(["int"]))
+        super().init(
+            level=level,
+            stats=[10, 10, 10, 17, 10, 10],
+            base_feats=feats,
+            spellcaster=Spellcaster.FULL,
+            spell_mod="int",
+        )

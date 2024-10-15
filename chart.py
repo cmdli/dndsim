@@ -1,9 +1,5 @@
 import plotly.express as px
-import plotly
-import csv
 import pandas
-
-import plotly.graph_objects
 
 if __name__ == "__main__":
     data = pandas.read_csv("data.csv", header=0)
