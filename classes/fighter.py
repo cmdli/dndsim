@@ -1,5 +1,5 @@
 import random
-from sim.events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
+from sim.events import AttackRollArgs, HitArgs
 from sim.target import Target
 from util.util import get_magic_weapon, roll_dice
 from sim.feats import (

@@ -69,11 +69,11 @@ class Wizard:
         #     elif slot >= 5 and not self.used_overchannel:
         #         self.blight(target, slot, overchannel=True)
         #         self.used_overchannel = True
-        #     elif slot >= 4:
-        #         self.blight(target, slot)
-        #     elif slot >= 3:
-        #         self.fireball(target, slot)
-        if slot >= 2 and self.level < 11:
+        if slot >= 4:
+            self.blight(target, slot)
+        elif slot >= 3:
+            self.fireball(target, slot)
+        elif slot >= 2 and self.level < 11:
             self.scorching_ray(target, slot)
         elif slot >= 1 and self.level < 5:
             self.magic_missile(target, slot)
@@ -125,6 +125,8 @@ class Wizard:
             dmg = num_dice * 8
         else:
             dmg = roll_dice(num_dice, 8)
+        if self.level >= 10:
+            dmg += self.int
         if target.save(self.dc):
             target.damage(dmg // 2)
         else:
@@ -141,7 +143,9 @@ class Wizard:
             target.damage_source("EmpoweredEvocation", self.int)
 
     def fireball(self, target, slot):
-        dmg = roll_dice(8 + (slot - 3), 6) + self.int
+        dmg = roll_dice(5 + slot, 6)
+        if self.level >= 10:
+            dmg += self.int
         if not target.save(self.dc):
             target.damage(dmg)
         else:
@@ -217,12 +221,11 @@ class WizardAction(Feat):
         #     spell = FingerOfDeath(slot)
         # elif slot >= 6:
         #     spell = ChainLightning(slot)
-        # elif slot >= 4:
-        #     spell = Blight(slot)
-        # elif slot >= 3:
-        #     spell = Fireball(slot)
-        # else:
-        if slot >= 2 and self.character.level < 11:
+        if slot >= 4:
+            spell = Blight(slot)
+        elif slot >= 3:
+            spell = Fireball(slot)
+        elif slot >= 2 and self.character.level < 11:
             spell = ScorchingRay(slot)
         elif slot >= 1 and self.character.level < 5:
             spell = MagicMissile(slot)
