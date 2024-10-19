@@ -1,4 +1,4 @@
-from sim.events import AttackRollArgs, HitArgs, MissArgs
+from sim.events import AttackRollArgs
 from util.util import (
     prof_bonus,
     get_magic_weapon,
@@ -198,9 +198,9 @@ class WandOfTheWarMage(Feat):
 
 class PotentCantrip(Feat):
     # TODO: Add damage when enemy saves against a cantrip
-    def miss(self, args: MissArgs):
+    def attack_result(self, args):
         weapon = args.attack.weapon
-        if weapon.spell is not None and weapon.spell.slot == 0:
+        if args.misses() and weapon.spell is not None and weapon.spell.slot == 0:
             damage = weapon.damage(
                 self.character,
                 args.attack,

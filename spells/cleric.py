@@ -1,8 +1,8 @@
+from typing import override
 from sim.spells import ConcentrationSpell, Spell
 from util.util import roll_dice, cantrip_dice
 from sim.character import Character
 from sim.target import Target
-from sim.events import HitArgs
 from sim.weapons import Weapon
 
 
@@ -73,8 +73,9 @@ class SpiritualWeaponWeapon(Weapon):
     def to_hit(self, character: Character):
         return character.prof + character.mod("wis")
 
-    def damage(self, character: Character, args: HitArgs):
-        return character.weapon_roll(self, crit=args.crit) + character.mod(
+    @override
+    def damage(self, character: Character, attack, crit):
+        return character.weapon_roll(self, crit=crit) + character.mod(
             character.spells.mod
         )
 

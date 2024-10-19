@@ -1,5 +1,4 @@
-import random
-from util.util import get_magic_weapon, do_roll, roll_dice
+from util.util import get_magic_weapon, roll_dice
 from sim.character import Character
 from sim.feats import (
     ASI,
@@ -9,7 +8,6 @@ from sim.feats import (
     Feat,
     IrresistibleOffense,
     SavageAttacker,
-    CombatProwess,
     WeaponMasteries,
 )
 from sim.weapons import Glaive, Greatsword, GlaiveButt
@@ -23,8 +21,8 @@ class Beserker(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def hit(self, args):
-        if not self.used:
+    def attack_result(self, args):
+        if args.hits() and not self.used:
             self.used = True
             num = 2 * self.num_dice if args.crit else self.num_dice
             args.add_damage("Berserker", roll_dice(num, 6))
@@ -43,8 +41,8 @@ class BrutalStrike(Feat):
             args.attack.add_tag("brutal_strike")
             self.used = True
 
-    def hit(self, args):
-        if args.attack.has_tag("brutal_strike"):
+    def attack_result(self, args):
+        if args.hits() and args.attack.has_tag("brutal_strike"):
             num = 2 * self.num_dice if args.crit else self.num_dice
             args.add_damage("BrutalStrike", roll_dice(num, 10))
 
@@ -58,7 +56,6 @@ class Retaliation(Feat):
 
 
 class PrimalChampion(Feat):
-
     def apply(self, character):
         super().apply(character)
         character.str += 4
@@ -77,8 +74,8 @@ class Rage(Feat):
         if not self.raging and self.character.use_bonus("rage"):
             self.raging = True
 
-    def hit(self, args):
-        if self.raging:
+    def attack_result(self, args):
+        if args.hits() and self.raging:
             args.add_damage("Rage", self.dmg)
 
 

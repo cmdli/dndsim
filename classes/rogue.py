@@ -7,7 +7,6 @@ from util.util import (
 from sim.character import Character
 from sim.feats import ASI, AttackAction, Feat, BoomingBlade, WeaponMasteries
 from sim.weapons import Shortsword, Scimitar, Rapier
-from sim.events import HitArgs
 from util.log import log
 
 
@@ -18,8 +17,8 @@ class SneakAttack(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def hit(self, args):
-        if not self.used:
+    def attack_result(self, args):
+        if args.hits() and not self.used:
             self.used = True
             num = 2 * self.num if args.crit else self.num
             args.add_damage("SneakAttack", roll_dice(num, 6))
@@ -71,8 +70,8 @@ class Assassinate(Feat):
         if self.adv:
             args.adv = True
 
-    def hit(self, args):
-        if self.first_turn and not self.used_dmg:
+    def attack_result(self, args):
+        if args.hits() and self.first_turn and not self.used_dmg:
             self.used_dmg = True
             args.add_damage("Assassinate", self.dmg)
 
@@ -85,8 +84,8 @@ class DeathStrike(Feat):
     def short_rest(self):
         self.enabled = True
 
-    def hit(self, args: HitArgs):
-        if self.enabled:
+    def attack_result(self, args):
+        if args.hits() and self.enabled:
             self.enabled = False
             if not args.attack.target.save(self.character.dc("dex")):
                 args.dmg_multiplier *= 2

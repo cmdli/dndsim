@@ -3,7 +3,7 @@ from sim.feat import Feat
 from sim.feats import Vex, Feat, Topple, Graze
 from sim.target import Target
 from sim.weapons import Weapon
-from sim.events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
+from sim.events import AttackRollArgs, AttackArgs, WeaponRollArgs, AttackResultArgs
 from sim.event_loop import EventLoop
 from util.log import log
 from typing import List
@@ -164,10 +164,8 @@ class Character:
         crit = roll >= args.weapon.min_crit
         roll_total = roll + to_hit + result.situational_bonus
         log.output(lambda: f"{args.weapon.name} total {roll_total} vs {args.target.ac}")
-        if roll_total >= args.target.ac:
-            self.hit(attack=args, crit=crit, roll=roll)
-        else:
-            self.miss(attack=args)
+        hit = roll_total >= args.target.ac
+        self.attack_result(hit=hit, attack=args, crit=crit, roll=roll)
 
     def roll_attack(self, attack: AttackArgs, to_hit: int) -> AttackRollArgs:
         args = AttackRollArgs(attack=attack, to_hit=to_hit)
@@ -190,13 +188,14 @@ class Character:
         self.events.emit("weapon_roll", args)
         return sum(args.rolls)
 
-    def hit(
+    def attack_result(
         self,
+        hit: bool,
         attack: AttackArgs,
         crit: bool = False,
         roll: int = 0,
     ):
-        args = HitArgs(attack=attack, crit=crit, roll=roll)
+        args = AttackResultArgs(hit=hit, attack=attack, crit=crit, roll=roll)
         target = attack.target
         weapon = attack.weapon
         log.record(f"Hit:{weapon.name}", 1)
@@ -208,7 +207,3 @@ class Character:
         log.output(lambda: str(args._dmg))
         for key in args._dmg:
             target.damage_source(key, args.dmg_multiplier * args._dmg[key])
-
-    def miss(self, attack: AttackArgs):
-        args = MissArgs(attack)
-        self.events.emit("miss", args)

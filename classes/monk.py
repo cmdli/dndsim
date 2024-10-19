@@ -8,7 +8,7 @@ from sim.feats import (
     WeaponMaster,
 )
 from sim.weapons import Weapon
-from sim.events import HitArgs, WeaponRollArgs
+from sim.events import WeaponRollArgs
 from sim.target import Target
 from util.log import log
 
@@ -46,8 +46,8 @@ class FlurryOfBlows(Feat):
 
 
 class OpenHandTechnique(Feat):
-    def hit(self, args: HitArgs):
-        if args.attack.has_tag("flurry"):
+    def attack_result(self, args):
+        if args.hits() and args.attack.has_tag("flurry"):
             if not args.attack.target.save(self.character.dc("wis")):
                 log.record("Knocked prone", 1)
                 args.attack.target.prone = True
@@ -58,8 +58,8 @@ class Grappler(Feat):
         super().apply(character)
         character.dex += 1
 
-    def hit(self, args: HitArgs):
-        if args.attack.has_tag("main_action"):
+    def attack_result(self, args):
+        if args.hits() and args.attack.has_tag("main_action"):
             args.attack.target.grapple()
 
     def roll_attack(self, args):
@@ -77,7 +77,9 @@ class StunningStrike(Feat):
         self.used = False
         target.stunned = False
 
-    def hit(self, args: HitArgs):
+    def attack_result(self, args):
+        if args.misses():
+            return
         if self.used or self.character.ki == 0:
             return
         if args.attack.target.grappled and self.avoid_on_grapple:
@@ -127,8 +129,8 @@ class MagicInitiateHuntersMark(Feat):
             self.used = True
             self.enabled = True
 
-    def hit(self, args: HitArgs):
-        if self.enabled:
+    def attack_result(self, args):
+        if args.hits() and self.enabled:
             args.add_damage("HuntersMark", roll_dice(1, 6))
 
 

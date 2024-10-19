@@ -1,4 +1,4 @@
-from sim.events import HitArgs, AttackRollArgs, AttackArgs, MissArgs, WeaponRollArgs
+from sim.events import AttackRollArgs, AttackArgs, WeaponRollArgs
 from util.util import roll_dice
 from sim.target import Target
 from sim.weapons import Weapon
@@ -36,7 +36,9 @@ class GreatWeaponMaster(Feat):
     def begin_turn(self, target: Target):
         self.bonus_attack_enabled = False
 
-    def hit(self, args: HitArgs):
+    def attack_result(self, args):
+        if args.misses():
+            return
         if args.attack.weapon.has_tag("heavy"):
             args.add_damage("GreatWeaponMaster", self.character.prof)
         if args.crit:
@@ -136,8 +138,8 @@ class BoomingBlade(Feat):
             target, self.weapon, tags=["main_action", "booming_blade"]
         )
 
-    def hit(self, args: HitArgs):
-        if not args.attack.has_tag("booming_blade"):
+    def attack_result(self, args):
+        if args.misses() or not args.attack.has_tag("booming_blade"):
             return
         if self.character.level >= 17:
             extra_dice = 3
@@ -173,13 +175,19 @@ class Vex(Feat):
             args.adv = True
             self.vexing = False
 
-    def hit(self, args: HitArgs):
-        if args.attack.weapon.mastery == "vex" and self.character.has_mastery("vex"):
+    def attack_result(self, args):
+        if (
+            args.hits()
+            and args.attack.weapon.mastery == "vex"
+            and self.character.has_mastery("vex")
+        ):
             self.vexing = True
 
 
 class Topple(Feat):
-    def hit(self, args: HitArgs):
+    def attack_result(self, args):
+        if args.misses():
+            return
         weapon = args.attack.weapon
         target = args.attack.target
         if weapon.mastery == "topple" and self.character.has_mastery("topple"):
@@ -189,7 +197,9 @@ class Topple(Feat):
 
 
 class Graze(Feat):
-    def miss(self, args: MissArgs):
+    def attack_result(self, args):
+        if not args.misses():
+            return
         if args.attack.weapon.mastery == "graze" and self.character.has_mastery(
             "graze"
         ):
@@ -216,24 +226,9 @@ class IrresistibleOffense(Feat):
         character.increase_stat_max(self.mod, 1)
         character.increase_stat(self.mod, 1)
 
-    def hit(self, args: HitArgs):
-        if args.roll == 20:
+    def attack_result(self, args):
+        if args.hits() and args.roll == 20:
             args.add_damage("IrresistibleOffense", self.character.str)
-
-
-class CombatProwess(Feat):
-    def apply(self, character):
-        super().apply(character)
-        character.increase_stat_max("str", 1)
-        character.increase_stat("str", 1)
-
-    def begin_turn(self, target: Target):
-        self.used = False
-
-    def miss(self, args: MissArgs):
-        if not self.used:
-            self.used = True
-            self.character.hit(args.attack)
 
 
 class WeaponMaster(Feat):
@@ -283,6 +278,6 @@ class Piercer(Feat):
         super().apply(character)
         character.increase_stat(self.mod, 1)
 
-    def hit(self, args: HitArgs):
-        if args.crit and args.attack.weapon.damage_type == "piercing":
+    def attack_result(self, args):
+        if args.hits() and args.crit and args.attack.weapon.damage_type == "piercing":
             args.add_damage("PiercerCrit", roll_dice(1, args.attack.weapon.die))

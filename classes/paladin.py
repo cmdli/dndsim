@@ -1,4 +1,4 @@
-from sim.events import AttackRollArgs, HitArgs
+from sim.events import AttackRollArgs
 from sim.target import Target
 from util.util import (
     get_magic_weapon,
@@ -24,7 +24,9 @@ class DivineSmiteFeat(Feat):
     def begin_turn(self, target: Target):
         self.used = False
 
-    def hit(self, args: HitArgs):
+    def attack_result(self, args):
+        if args.misses():
+            return
         slot = self.character.spells.highest_slot()
         if not self.used and slot >= 1 and self.character.use_bonus("DivineSmite"):
             self.used = True
@@ -34,7 +36,9 @@ class DivineSmiteFeat(Feat):
 
 
 class ImprovedDivineSmite(Feat):
-    def hit(self, args: HitArgs):
+    def attack_result(self, args):
+        if args.misses():
+            return
         num = 2 if args.crit else 1
         args.add_damage("ImprovedDivineSmite", roll_dice(num, 8))
 
@@ -62,8 +66,8 @@ class DivineFavorFeat(Feat):
         ):
             self.character.spells.cast(DivineFavor(slot))
 
-    def hit(self, args: HitArgs):
-        if self.character.spells.concentrating_on("DivineFavor"):
+    def attack_result(self, args):
+        if args.hits() and self.character.spells.concentrating_on("DivineFavor"):
             args.add_damage("DivineFavor", roll_dice(1, 4))
 
 

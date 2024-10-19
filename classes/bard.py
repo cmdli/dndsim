@@ -1,7 +1,7 @@
 from sim.character import Character
 from sim.feats import Feat, ASI, AttackAction, DualWielder
 from sim.weapons import Weapon, Shortsword, Scimitar
-from sim.events import HitArgs, AttackRollArgs
+from sim.events import AttackRollArgs
 from util.util import roll_dice, get_magic_weapon
 from sim.target import Target
 from typing import List
@@ -29,8 +29,8 @@ class TrueStrikeFeat(Feat):
                 self.spell_mod
             ) - self.character.mod(args.mod)
 
-    def hit(self, args: HitArgs):
-        if args.attack.has_tag("truestrike"):
+    def attack_result(self, args):
+        if args.hits() and args.attack.has_tag("truestrike"):
             args.add_damage("TrueStrike", roll_dice(self.num_dice, 6))
 
 
@@ -63,8 +63,8 @@ class HolyWeaponFeat(Feat):
         ):
             self.character.spells.cast(HolyWeapon(self.character.spells.highest_slot()))
 
-    def hit(self, args: HitArgs):
-        if args.attack.weapon.name == self.weapon.name:
+    def attack_result(self, args):
+        if args.hits() and args.attack.weapon.name == self.weapon.name:
             args.add_damage("HolyWeapon", roll_dice(2, 8))
 
 

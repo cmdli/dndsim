@@ -1,5 +1,5 @@
 import random
-from sim.events import AttackRollArgs, HitArgs
+from sim.events import AttackRollArgs
 from sim.target import Target
 from util.util import get_magic_weapon, roll_dice
 from sim.feats import (
@@ -48,8 +48,9 @@ class StudiedAttacks(Feat):
             args.adv = True
             self.enabled = False
 
-    def miss(self, args):
-        self.enabled = True
+    def attack_result(self, args):
+        if args.misses():
+            self.enabled = True
 
 
 class HeroicAdvantage(Feat):
@@ -100,7 +101,9 @@ class PrecisionAttack(Feat):
 
 
 class TrippingAttack(Feat):
-    def hit(self, args: HitArgs):
+    def attack_result(self, args):
+        if args.misses():
+            return
         if args.attack.has_tag("used_maneuver"):
             return
         if args.attack.target.prone:

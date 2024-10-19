@@ -118,34 +118,6 @@ class EnemyDamageArgs:
         self.spell = spell
 
 
-class HitArgs:
-    def __init__(
-        self,
-        attack: AttackArgs,
-        crit: bool = False,
-        roll: int = 0,
-    ):
-        self._dmg = defaultdict(int)
-        self.dmg_multiplier = 1
-        self.attack = attack
-        self.crit = crit
-        self.roll = roll
-
-    def add_damage(self, source: str, dmg: int):
-        self._dmg[source] += dmg
-
-    def total_damage(self):
-        total = 0
-        for key in self._dmg:
-            total += self._dmg[key]
-        return total
-
-
-class MissArgs:
-    def __init__(self, attack: AttackArgs):
-        self.attack = attack
-
-
 class WeaponRollArgs:
     def __init__(
         self, weapon: sim.weapons.Weapon, rolls: List[int], crit: bool = False

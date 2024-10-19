@@ -1,5 +1,5 @@
-from typing import List
-from sim.events import AttackRollArgs, HitArgs
+from typing import override
+from sim.events import AttackRollArgs
 from sim.feats import Feat
 from sim.target import Target
 from sim.character import Character
@@ -12,6 +12,7 @@ class SummonAction(Feat):
         self.slot = slot
         self.weapon = weapon
 
+    @override
     def action(self, target: Target):
         for _ in range(self.slot // 2):
             self.character.attack(target, self.weapon)
@@ -22,11 +23,13 @@ class SummonWeapon(Weapon):
         super().__init__(**kwargs)
         self.caster = caster
 
-    def to_hit(self, character: Character):
+    @override
+    def to_hit(self, character):
         return self.caster.prof + self.caster.mod(self.caster.spells.mod)
 
-    def damage(self, character: Character, args: HitArgs):
-        return character.weapon_roll(self, crit=args.crit) + self.dmg_bonus
+    @override
+    def damage(self, character, attack, crit):
+        return character.weapon_roll(self, crit=crit) + self.dmg_bonus
 
 
 class Summon(Character):
@@ -49,11 +52,13 @@ class SummonSpell(Spell):
     def summon(self, caster: Character):
         return None
 
+    @override
     def cast(self, character: Character, target: Target):
         self.minion = self.summon(character)
         character.add_minion(self.minion)
         self.character = character
 
+    @override
     def end(self, character: Character):
         if self.character is not None:
             self.character.remove_minion(self.minion)

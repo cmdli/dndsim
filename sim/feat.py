@@ -11,8 +11,7 @@ EVENT_NAMES = set(
         "before_attack",
         "attack",
         "roll_attack",
-        "hit",
-        "miss",
+        "attack_result",
         "end_turn",
         "enemy_turn",
         "short_rest",
@@ -64,10 +63,7 @@ class Feat:
     def weapon_roll(self, args: "sim.events.WeaponRollArgs"):
         pass
 
-    def hit(self, args: "sim.events.HitArgs"):
-        pass
-
-    def miss(self, args: "sim.events.MissArgs"):
+    def attack_result(self, args: "sim.events.AttackResultArgs"):
         pass
 
     def enemy_turn(self, target: "sim.target.Target"):

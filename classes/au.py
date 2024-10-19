@@ -4,7 +4,7 @@
 #
 
 from sim.character import Character
-from sim.events import AttackRollArgs, HitArgs
+from sim.events import AttackRollArgs
 from sim.feats import Feat, ASI, AttackAction
 from sim.target import Target
 from sim.weapons import Weapon
@@ -35,8 +35,8 @@ class OldSharpshooter(Feat):
         args.situational_bonus -= 5
         args.attack.add_tag("Sharpshooter")
 
-    def hit(self, args: HitArgs):
-        if args.attack.has_tag("Sharpshooter"):
+    def attack_result(self, args):
+        if args.hits() and args.attack.has_tag("Sharpshooter"):
             args.add_damage("Sharpshooter", 10)
 
 

@@ -1,12 +1,7 @@
 import random
 from util.util import (
-    prof_bonus,
     get_magic_weapon,
-    cantrip_dice,
-    highest_spell_slot,
-    spell_slots,
     roll_dice,
-    do_roll,
 )
 import sim.character
 from sim.spellcasting import Spellcaster
@@ -57,8 +52,8 @@ class BlessedStrikes(Feat):
     def begin_turn(self, target: sim.character.Target):
         self.used = False
 
-    def hit(self, args: sim.character.HitArgs):
-        if not self.used:
+    def attack_result(self, args):
+        if args.hits() and not self.used:
             self.used = True
             args.add_damage("BlessedStrikes", roll_dice(self.num_dice, 8))
 

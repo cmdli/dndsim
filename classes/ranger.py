@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, override
 
-from sim.events import AttackArgs, AttackRollArgs, HitArgs, MissArgs
+from sim.events import AttackArgs, AttackRollArgs
 from sim.target import Target
 from util.util import (
     roll_dice,
@@ -16,7 +16,6 @@ from sim.feats import (
     TwoWeaponFighting,
     WeaponMasteries,
     IrresistibleOffense,
-    AttackAction,
 )
 from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells.ranger import HuntersMark
@@ -80,8 +79,8 @@ class HuntersMarkFeat(Feat):
         if self.caster.spells.concentrating_on("HuntersMark") and self.adv:
             args.adv = True
 
-    def hit(self, args: HitArgs):
-        if self.caster.spells.concentrating_on("HuntersMark"):
+    def attack_result(self, args):
+        if args.hits() and self.caster.spells.concentrating_on("HuntersMark"):
             num = 2 if args.crit else 1
             args.add_damage("HuntersMark", roll_dice(num, self.die))
 
@@ -103,8 +102,8 @@ class Gloomstalker(Feat):
     def attack(self, args: AttackArgs):
         self.used_attack = True
 
-    def hit(self, args: HitArgs):
-        if self.using:
+    def attack_result(self, args):
+        if args.hits() and self.using:
             num = 2 if args.crit else 1
             args.add_damage("Gloomstalker", roll_dice(num, 8))
 
@@ -134,8 +133,8 @@ class DreadAmbusher(Feat):
     def begin_turn(self, target: Target):
         self.used = False
 
-    def hit(self, args: HitArgs):
-        if not self.used and self.uses > 0:
+    def attack_result(self, args):
+        if args.hits() and not self.used and self.uses > 0:
             self.used = True
             self.uses -= 1
             args.add_damage("DreadAmbusher", roll_dice(2, self.die))
@@ -147,8 +146,8 @@ class BeastChargeFeat(Feat):
     def __init__(self, character: "Character"):
         self.character = character
 
-    def hit(self, args: HitArgs):
-        if isinstance(args.attack.weapon, BeastMaul):
+    def attack_result(self, args):
+        if args.hits() and isinstance(args.attack.weapon, BeastMaul):
             num = 2 if args.crit else 1
             args.add_damage("Charge", roll_dice(num, 6))
             if not args.attack.target.prone and not args.attack.target.save(
@@ -165,8 +164,9 @@ class StalkersFlurry(Feat):
     def begin_turn(self, target: Target):
         self.missed_attack = False
 
-    def miss(self, args: MissArgs):
-        self.missed_attack = True
+    def attack_result(self, args):
+        if args.misses():
+            self.missed_attack = True
 
     def after_action(self, target):
         if self.missed_attack:
@@ -235,11 +235,13 @@ class BeastMaul(Weapon):
         super().__init__(name="Beast Maul", num_dice=1, die=8, **kwargs)
         self.ranger = ranger
 
+    @override
     def to_hit(self, character):
         return self.ranger.prof + self.ranger.mod("wis")
 
-    def damage(self, character: Character, args: HitArgs):
-        return character.weapon_roll(self, crit=args.crit) + 2 + self.ranger.mod("wis")
+    @override
+    def damage(self, character: Character, attack, crit):
+        return character.weapon_roll(self, crit=crit) + 2 + self.ranger.mod("wis")
 
 
 class BeastMasterAction(Feat):
