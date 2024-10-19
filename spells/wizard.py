@@ -60,6 +60,17 @@ class ScorchingRayWeapon(Weapon):
             spell=spell,
         )
 
+    def damage(
+        self,
+        character: sim.character.Character,
+        attack: sim.character.AttackArgs,
+        crit: bool,
+    ):
+        num_dice = 2
+        if crit:
+            num_dice *= 2
+        return roll_dice(num_dice, 6)
+
 
 class ScorchingRay(BasicSaveSpell):
     def __init__(self, slot: int):

@@ -1,4 +1,4 @@
-from sim.events import HitArgs, MissArgs
+from sim.events import AttackRollArgs, HitArgs, MissArgs
 from util.util import (
     prof_bonus,
     get_magic_weapon,
@@ -56,33 +56,33 @@ class Wizard:
 
     def turn(self, target):
         slot = highest_spell_slot(self.slots)
-        if slot >= 3 and not self.concentration:
-            self.fey_summon = slot
-            self.concentration = True
+        # if slot >= 3 and not self.concentration:
+        #     self.fey_summon = slot
+        #     self.concentration = True
+        # else:
+        #     if slot >= 9:
+        #         self.meteor_swarm(target)
+        #     elif slot >= 7:
+        #         self.finger_of_death(target)
+        #     elif slot >= 6:
+        #         self.chain_lightning(target)
+        #     elif slot >= 5 and not self.used_overchannel:
+        #         self.blight(target, slot, overchannel=True)
+        #         self.used_overchannel = True
+        #     elif slot >= 4:
+        #         self.blight(target, slot)
+        #     elif slot >= 3:
+        #         self.fireball(target, slot)
+        if slot >= 2 and self.level < 11:
+            self.scorching_ray(target, slot)
+        elif slot >= 1 and self.level < 5:
+            self.magic_missile(target, slot)
         else:
-            if slot >= 9:
-                self.meteor_swarm(target)
-            elif slot >= 7:
-                self.finger_of_death(target)
-            elif slot >= 6:
-                self.chain_lightning(target)
-            elif slot >= 5 and not self.used_overchannel:
-                self.blight(target, slot, overchannel=True)
-                self.used_overchannel = True
-            elif slot >= 4:
-                self.blight(target, slot)
-            elif slot >= 3:
-                self.fireball(target, slot)
-            elif slot >= 2 and self.level < 11:
-                self.scorching_ray(target, slot)
-            elif slot >= 1 and self.level < 5:
-                self.magic_missile(target, slot)
-            else:
-                self.firebolt(target)
+            self.firebolt(target)
         if slot >= 1:
             self.slots[slot] -= 1
-        if self.fey_summon > 0:
-            self.summon_fey(target)
+        # if self.fey_summon > 0:
+        #     self.summon_fey(target)
 
     def enemy_turn(self, target):
         pass
@@ -131,13 +131,14 @@ class Wizard:
             target.damage(dmg)
 
     def scorching_ray(self, target, slot):
-        for _ in range(3 + (slot - 2)):
+        for _ in range(1 + slot):
             roll = do_roll()
             if roll == 20:
-                target.damage(roll_dice(4, 6))
+                target.damage_source("ScorchingRay", roll_dice(4, 6))
             elif roll + self.to_hit >= target.ac:
-                target.damage(roll_dice(2, 6))
-        target.damage(self.int)
+                target.damage_source("ScorchingRay", roll_dice(2, 6))
+        if self.level >= 10:
+            target.damage_source("EmpoweredEvocation", self.int)
 
     def fireball(self, target, slot):
         dmg = roll_dice(8 + (slot - 3), 6) + self.int
@@ -154,7 +155,9 @@ class Wizard:
             target.damage(dmg // 2)
 
     def magic_missile(self, target, slot):
-        target.damage(roll_dice(3 + (slot - 1), 4) + self.int)
+        target.damage_source("MagicMissile", roll_dice(2 + slot, 4) + 2 + slot)
+        if self.level >= 10:
+            target.damage_source("EmpoweredEvocation", self.int)
 
     def firebolt(self, target, adv=False):
         roll = do_roll(adv=adv)
@@ -177,6 +180,16 @@ class Wizard:
                 target.damage(roll_dice(4, 6) + 3 + self.fey_summon)
             elif roll + self.to_hit >= target.ac:
                 target.damage(roll_dice(2, 6) + 3 + self.fey_summon)
+
+
+class WandOfTheWarMage(Feat):
+    def __init__(self, bonus: int) -> None:
+        super().__init__()
+        self.bonus = bonus
+
+    def roll_attack(self, args: AttackRollArgs):
+        if args.attack.weapon.spell != None:
+            args.situational_bonus += self.bonus
 
 
 class PotentCantrip(Feat):
@@ -209,26 +222,28 @@ class WizardAction(Feat):
         # elif slot >= 3:
         #     spell = Fireball(slot)
         # else:
-        #     if slot >= 2 and self.character.level < 11:
-        #         spell = ScorchingRay(slot)
-        #     elif slot >= 1 and self.character.level < 5:
-        #         spell = MagicMissile(slot)
-        #     else:
-        spell = Firebolt()
+        if slot >= 2 and self.character.level < 11:
+            spell = ScorchingRay(slot)
+        elif slot >= 1 and self.character.level < 5:
+            spell = MagicMissile(slot)
+        else:
+            spell = Firebolt()
         if spell is not None:
             self.character.spells.cast(spell, target)
 
 
 class Wizard2(Character):
     def __init__(self, level: int) -> None:
+        magic_weapon = get_magic_weapon(level)
         feats = []
         feats.append(WizardAction())
+        feats.append(WandOfTheWarMage(magic_weapon))
         if level >= 3:
             feats.append(PotentCantrip())
         if level >= 4:
             feats.append(ASI(["int"]))
         if level >= 8:
-            feats.append(ASI(["int"]))
+            feats.append(ASI(["int", "wis"]))
         super().init(
             level=level,
             stats=[10, 10, 10, 17, 10, 10],
