@@ -1,4 +1,4 @@
-from util.util import prof_bonus
+from util.util import prof_bonus, roll_dice
 from sim.feat import Feat
 from sim.feats import Vex, Feat, Topple, Graze
 from sim.target import Target
@@ -147,8 +147,10 @@ class Character:
         self,
         target: Target,
         weapon: Weapon,
-        tags: List[str] = [],
+        tags: List[str] = None,
     ):
+        if tags is None:
+            tags = []
         args = AttackArgs(
             character=self,
             target=target,
@@ -196,14 +198,18 @@ class Character:
         roll: int = 0,
     ):
         args = AttackResultArgs(hit=hit, attack=attack, crit=crit, roll=roll)
-        target = attack.target
-        weapon = attack.weapon
-        log.record(f"Hit:{weapon.name}", 1)
+        if hit:
+            log.record(f"Hit:{attack.weapon.name}", 1)
+        else:
+            log.record(f"Miss:{attack.weapon.name}", 1)
         if crit:
-            log.record(f"Crit:{weapon.name}", 1)
-        dmg = weapon.damage(self, args.attack, crit)
-        args.add_damage(f"Weapon:{weapon.name}", dmg)
-        self.events.emit("hit", args)
-        log.output(lambda: str(args._dmg))
-        for key in args._dmg:
-            target.damage_source(key, args.dmg_multiplier * args._dmg[key])
+            log.record(f"Crit:{attack.weapon.name}", 1)
+        attack.weapon.attack_result(args)
+        self.events.emit("attack_result", args)
+        for key in args._dice:
+            roll = 0
+            for die in args._dice[key]:
+                roll += roll_dice(2 if crit else 1, die)
+            attack.target.damage_source(key, args.dmg_multiplier * roll)
+        for key in args._flat_dmg:
+            attack.target.damage_source(key, args.dmg_multiplier * args._flat_dmg[key])

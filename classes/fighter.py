@@ -26,6 +26,7 @@ from sim.weapons import (
     Rapier,
 )
 from util.log import log
+from typing import List
 
 
 def get_num_attacks(level: int):
@@ -109,9 +110,9 @@ class TrippingAttack(Feat):
         if args.attack.target.prone:
             return
         maneuvers = self.character.feat("Maneuvers")
-        roll = maneuvers.roll()
-        if roll > 0:
-            args.add_damage("TrippingAttack", roll)
+        die = maneuvers.use()
+        if die > 0:
+            args.add_damage_dice("TrippingAttack", 1, die)
             if not args.attack.target.save(self.character.dc("str")):
                 args.attack.target.prone = True
             args.attack.add_tag("used_maneuver")
@@ -140,13 +141,19 @@ class Maneuvers(Feat):
     def begin_turn(self, target: Target):
         self.used_relentless = False
 
-    def roll(self):
+    def use(self):
         if self.superiority_dice > 0:
             self.superiority_dice -= 1
-            return roll_dice(1, self.superiority_size)
+            return self.superiority_size
         elif self.enabled_relentless and self.used_relentless:
             self.used_relentless = True
-            return roll_dice(1, 8)
+            return 8
+        return 0
+
+    def roll(self):
+        die = self.use()
+        if die > 0:
+            return roll_dice(1, die)
         return 0
 
 
@@ -187,7 +194,7 @@ class Fighter(Character):
             num_attacks = 2
         else:
             num_attacks = 1
-        base_feats = []
+        base_feats: List[Feat] = []
         base_feats.append(WeaponMasteries(["topple", "graze"]))
         base_feats.append(SavageAttacker())
         base_feats.append(GreatWeaponFighting())
@@ -248,7 +255,7 @@ class TrippingFighter(Fighter):
 
 class BattlemasterFighter(Fighter):
     def __init__(self, level: int, **kwargs):
-        feats = []
+        feats: List[Feat] = []
         if level >= 3:
             feats.append(Maneuvers(level))
         super().__init__(level, subclass_feats=feats, **kwargs)
@@ -256,7 +263,7 @@ class BattlemasterFighter(Fighter):
 
 class PrecisionFighter(Fighter):
     def __init__(self, level: int, low: int = 8, **kwargs):
-        feats = []
+        feats: List[Feat] = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(PrecisionAttack(low=low))
@@ -265,7 +272,7 @@ class PrecisionFighter(Fighter):
 
 class PrecisionTrippingFighter(Fighter):
     def __init__(self, level: int, low: int = 1, **kwargs):
-        feats = []
+        feats: List[Feat] = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(TrippingAttack())
@@ -282,7 +289,7 @@ class TWFFighter(Character):
         else:
             min_crit = 20
         magic_weapon = get_magic_weapon(level)
-        base_feats = []
+        base_feats: List[Feat] = []
         base_feats.append(WeaponMasteries(["vex", "nick"]))
         base_feats.append(TwoWeaponFighting())
         base_feats.append(SavageAttacker())

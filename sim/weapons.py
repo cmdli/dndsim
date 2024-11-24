@@ -91,6 +91,13 @@ class Weapon:
     def has_tag(self, tag: str):
         return tag in self.tags
 
+    def attack_result(self, args: "sim.events.AttackResultArgs"):
+        args.add_damage_dice(self.name, self.num_dice, self.die)
+        if not args.attack.has_tag("light"):
+            args.add_flat_damage(
+                self.name, args.attack.character.mod(args.attack.mod) + self.dmg_bonus
+            )
+
 
 class Glaive(Weapon):
     def __init__(self, **kwargs):

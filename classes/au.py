@@ -11,6 +11,7 @@ from sim.weapons import Weapon
 from util.util import get_magic_weapon
 from classes.fighter import ActionSurge
 import random
+from typing import List
 
 
 class OldCrossbowExpert(Feat):
@@ -37,7 +38,7 @@ class OldSharpshooter(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("Sharpshooter"):
-            args.add_damage("Sharpshooter", 10)
+            args.add_flat_damage("Sharpshooter", 10)
 
 
 class FightingSpirit(Feat):
@@ -93,7 +94,7 @@ class AssaultUnit(Character):
     def __init__(self, level: int, blessed: bool = False, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
         weapon = OldHandCrossbow(bonus=magic_weapon)
-        base_feats = []
+        base_feats: List[Feat] = []
         if level >= 20:
             attacks = 4 * [weapon]
         elif level >= 11:

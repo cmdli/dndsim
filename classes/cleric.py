@@ -1,21 +1,21 @@
-import random
 from util.util import (
     get_magic_weapon,
-    roll_dice,
 )
 import sim.character
 from sim.spellcasting import Spellcaster
 from sim.feat import Feat
 from sim.feats import ASI
+from sim.spells import Spell
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
 from sim.summons import SummonCelestial
 from sim.weapons import Weapon, Warhammer
+from typing import List, Optional
 
 
 class ClericAction(Feat):
     def action(self, target: sim.character.Target):
         slot = self.character.spells.highest_slot()
-        spell = None
+        spell: Optional[Spell] = None
         if not self.character.spells.is_concentrating() and slot >= 3:
             if slot >= 5:
                 spell = SummonCelestial(slot)
@@ -55,14 +55,14 @@ class BlessedStrikes(Feat):
     def attack_result(self, args):
         if args.hits() and not self.used:
             self.used = True
-            args.add_damage("BlessedStrikes", roll_dice(self.num_dice, 8))
+            args.add_damage_dice("BlessedStrikes", self.num_dice, 8)
 
 
 class Cleric(sim.character.Character):
     def __init__(self, level: int) -> None:
         magic_weapon = get_magic_weapon(level)
         weapon = Warhammer(magic_bonus=magic_weapon)
-        base_feats = []
+        base_feats: List[Feat] = []
         base_feats.append(ClericAction())
         if level >= 3:
             base_feats.append(WarPriest(weapon))

@@ -26,6 +26,8 @@ from spells.wizard import (
 )
 from sim.summons import SummonFey
 from sim.feats import ASI
+from sim.spells import Spell
+from typing import List
 
 
 class Wizard:
@@ -212,7 +214,7 @@ class PotentCantrip(Feat):
 class WizardAction(Feat):
     def action(self, target: Target):
         slot = self.character.spells.highest_slot()
-        spell = None
+        spell: Spell = None
         # if slot >= 3 and not self.character.spells.is_concentrating():
         #     spell = SummonFey(slot)
         # elif slot >= 9:
@@ -238,7 +240,7 @@ class WizardAction(Feat):
 class Wizard2(Character):
     def __init__(self, level: int) -> None:
         magic_weapon = get_magic_weapon(level)
-        feats = []
+        feats: List[Feat] = []
         feats.append(WizardAction())
         feats.append(WandOfTheWarMage(magic_weapon))
         if level >= 3:

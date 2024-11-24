@@ -40,7 +40,7 @@ class GreatWeaponMaster(Feat):
         if args.misses():
             return
         if args.attack.weapon.has_tag("heavy"):
-            args.add_damage("GreatWeaponMaster", self.character.prof)
+            args.add_flat_damage("GreatWeaponMaster", self.character.prof)
         if args.crit:
             self.bonus_attack_enabled = True
 
@@ -149,9 +149,7 @@ class BoomingBlade(Feat):
             extra_dice = 1
         else:
             return
-        if args.crit:
-            extra_dice *= 2
-        args.add_damage("BoomingBlade", roll_dice(extra_dice, 8))
+        args.add_damage_dice("BoomingBlade", extra_dice, 8)
 
 
 class LightWeaponBonusAttack(Feat):
@@ -228,7 +226,7 @@ class IrresistibleOffense(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.roll == 20:
-            args.add_damage("IrresistibleOffense", self.character.str)
+            args.add_flat_damage("IrresistibleOffense", self.character.str)
 
 
 class WeaponMaster(Feat):
@@ -280,4 +278,4 @@ class Piercer(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.crit and args.attack.weapon.damage_type == "piercing":
-            args.add_damage("PiercerCrit", roll_dice(1, args.attack.weapon.die))
+            args.add_damage_dice("PiercerCrit", 1, args.attack.weapon.die)

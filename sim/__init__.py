@@ -42,4 +42,3 @@ class Simulation:
                 self.target.turn()
             self.character.short_rest()
             self.target.log_damage_sources()
-        return self.target.dmg

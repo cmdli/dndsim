@@ -1,9 +1,6 @@
 from sim.events import AttackRollArgs
 from sim.target import Target
-from util.util import (
-    get_magic_weapon,
-    roll_dice,
-)
+from util.util import get_magic_weapon
 from sim.character import Character
 from sim.feats import (
     ASI,
@@ -18,6 +15,7 @@ from sim.feats import (
 from sim.weapons import Greatsword, Shortsword, Scimitar
 from spells.paladin import DivineFavor, DivineSmite
 from sim.spellcasting import Spellcaster
+from typing import List
 
 
 class DivineSmiteFeat(Feat):
@@ -37,10 +35,8 @@ class DivineSmiteFeat(Feat):
 
 class ImprovedDivineSmite(Feat):
     def attack_result(self, args):
-        if args.misses():
-            return
-        num = 2 if args.crit else 1
-        args.add_damage("ImprovedDivineSmite", roll_dice(num, 8))
+        if args.hits():
+            args.add_damage_dice("ImprovedDivineSmite", 1, 8)
 
 
 class SacredWeapon(Feat):
@@ -68,13 +64,13 @@ class DivineFavorFeat(Feat):
 
     def attack_result(self, args):
         if args.hits() and self.character.spells.concentrating_on("DivineFavor"):
-            args.add_damage("DivineFavor", roll_dice(1, 4))
+            args.add_damage_dice("DivineFavor", 1, 4)
 
 
 class Paladin(Character):
     def __init__(self, level: int, use_twf=False, **kwargs):
         magic_weapon = get_magic_weapon(level)
-        base_feats = []
+        base_feats: List[Feat] = []
         base_feats.append(DivineFavorFeat())
         if use_twf:
             base_feats.append(WeaponMasteries(["vex", "nick"]))

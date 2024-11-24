@@ -11,6 +11,7 @@ from sim.weapons import Weapon
 from sim.events import WeaponRollArgs
 from sim.target import Target
 from util.log import log
+from typing import List
 
 
 def martial_arts_die(level: int):
@@ -78,20 +79,19 @@ class StunningStrike(Feat):
         target.stunned = False
 
     def attack_result(self, args):
-        if args.misses():
+        target = args.attack.target
+        if args.misses() or self.used or self.character.ki == 0:
             return
-        if self.used or self.character.ki == 0:
+        if target.grappled and self.avoid_on_grapple:
             return
-        if args.attack.target.grappled and self.avoid_on_grapple:
-            return
-        if args.attack.target.stunned:
+        if target.stunned:
             return
         self.used = True
         self.character.ki -= 1
-        if not args.attack.target.save(self.character.dc("wis")):
-            args.attack.target.stunned = True
+        if not target.save(self.character.dc("wis")):
+            target.stunned = True
         else:
-            args.attack.target.semistunned = True
+            target.semistunned = True
 
 
 class Ki(Feat):
@@ -131,7 +131,7 @@ class MagicInitiateHuntersMark(Feat):
 
     def attack_result(self, args):
         if args.hits() and self.enabled:
-            args.add_damage("HuntersMark", roll_dice(1, 6))
+            args.add_damage_dice("HuntersMark", 1, 6)
 
 
 class TavernBrawler(Feat):
@@ -149,7 +149,7 @@ class Monk(Character):
         self, level, use_nick: bool = False, use_grappler: bool = True, **kwargs
     ):
         magic_weapon = get_magic_weapon(level)
-        base_feats = []
+        base_feats: List[Feat] = []
         weapon_die = martial_arts_die(level)
         base_feats.append(TavernBrawler(weapon_die))
         fists = Fists(weapon_die, bonus=magic_weapon)

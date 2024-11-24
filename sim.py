@@ -1,6 +1,7 @@
 import csv
 import click
 from typing import Set, List, Dict
+import random
 
 import configs
 from sim.target import Target
@@ -12,13 +13,16 @@ NUM_FIGHTS = 3
 NUM_TURNS = 5
 NUM_SIMS = 500
 
+random.seed(1234)
+
 
 def test_dpr(character: "sim.character.Character", level: int):
     damage = 0
     for _ in range(NUM_SIMS):
         target = Target(level)
         simulation = Simulation(character, target, NUM_FIGHTS, NUM_TURNS)
-        damage += simulation.run()
+        simulation.run()
+        damage += simulation.target.dmg
     return damage / (NUM_SIMS * NUM_FIGHTS * NUM_TURNS)
 
 

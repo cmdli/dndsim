@@ -11,6 +11,7 @@ from spells.warlock import EldritchBlast
 from sim.spellcasting import Spellcaster
 
 
+# TODO: Refactor this into a spell
 class TrueStrikeFeat(Feat):
     def __init__(self, level: int, spell_mod: str) -> None:
         self.spell_mod = spell_mod
@@ -27,11 +28,11 @@ class TrueStrikeFeat(Feat):
         if args.attack.has_tag("truestrike"):
             args.situational_bonus += self.character.mod(
                 self.spell_mod
-            ) - self.character.mod(args.mod)
+            ) - self.character.mod(args.attack.weapon.mod(self.character))
 
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("truestrike"):
-            args.add_damage("TrueStrike", roll_dice(self.num_dice, 6))
+            args.add_damage_dice("TrueStrike", self.num_dice, 6)
 
 
 class TrueStrikeAction(Feat):
@@ -65,7 +66,7 @@ class HolyWeaponFeat(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.attack.weapon.name == self.weapon.name:
-            args.add_damage("HolyWeapon", roll_dice(2, 8))
+            args.add_damage_dice("HolyWeapon", 2, 8)
 
 
 class ValorBardBonusAttack(Feat):
@@ -80,11 +81,11 @@ class ValorBardBonusAttack(Feat):
 class ValorBard(Character):
     def __init__(self, level: int, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
-        base_feats = []
+        base_feats: List[Feat] = []
         weapon = Shortsword(magic_bonus=magic_weapon)
         scimitar = Scimitar(magic_bonus=magic_weapon)
         base_feats.append(TrueStrikeFeat(level, "cha"))
-        attacks = []
+        attacks: List[Weapon] = []
         if level >= 6:
             attacks = [weapon]
         base_feats.append(
@@ -128,11 +129,11 @@ class CMEMulticlass(Character):
         # Valor Bard 5
         # Warlock 1
         # Valor Bard 19
-        base_feats = []
+        base_feats: List[Feat] = []
         weapon = Scimitar()
         base_feats.append(CMEMulticlassAction(level, weapon))
         if level >= 4:
-            base_feats.append(DualWielder(weapon))
+            base_feats.append(DualWielder("dex", weapon))
         if level >= 8:
             base_feats.append(ASI(["dex"]))
         if level >= 12:

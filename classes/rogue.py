@@ -8,6 +8,7 @@ from sim.character import Character
 from sim.feats import ASI, AttackAction, Feat, BoomingBlade, WeaponMasteries
 from sim.weapons import Shortsword, Scimitar, Rapier
 from util.log import log
+from typing import List
 
 
 class SneakAttack(Feat):
@@ -20,8 +21,7 @@ class SneakAttack(Feat):
     def attack_result(self, args):
         if args.hits() and not self.used:
             self.used = True
-            num = 2 * self.num if args.crit else self.num
-            args.add_damage("SneakAttack", roll_dice(num, 6))
+            args.add_damage_dice("SneakAttack", self.num, 6)
 
 
 class SteadyAim(Feat):
@@ -73,7 +73,7 @@ class Assassinate(Feat):
     def attack_result(self, args):
         if args.hits() and self.first_turn and not self.used_dmg:
             self.used_dmg = True
-            args.add_damage("Assassinate", self.dmg)
+            args.add_flat_damage("Assassinate", self.dmg)
 
     def end_turn(self, target):
         self.adv = False
@@ -98,7 +98,7 @@ class AssassinRogue(Character):
     def __init__(self, level: int, booming_blade: bool = False):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
-        base_feats = []
+        base_feats: List[Feat] = []
         base_feats.append(WeaponMasteries(["vex", "nick"]))
         if level >= 5 and booming_blade:
             rapier = Rapier(magic_bonus=magic_weapon)

@@ -76,21 +76,19 @@ class AttackResultArgs:
         crit: bool = False,
         roll: int = 0,
     ):
-        self._dmg = defaultdict(int)
+        self._dice = defaultdict(list)
+        self._flat_dmg = defaultdict(int)
         self.hit = hit
         self.dmg_multiplier = 1
         self.attack = attack
         self.crit = crit
         self.roll = roll
 
-    def add_damage(self, source: str, dmg: int):
-        self._dmg[source] += dmg
+    def add_damage_dice(self, source: str, num: int, size: int):
+        self._dice[source].extend([size] * num)
 
-    def total_damage(self):
-        total = 0
-        for key in self._dmg:
-            total += self._dmg[key]
-        return total
+    def add_flat_damage(self, source: str, damage: int):
+        self._flat_dmg[source] += damage
 
     def hits(self) -> bool:
         return self.hit
