@@ -1,0 +1,16 @@
+On branch main
+Your branch is ahead of 'origin/main' by 4 commits.
+  (use "git push" to publish your local commits)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   sim/character.py
+	modified:   sim/spellcasting.py
+	new file:   sim/spellcasting_test.py
+	new file:   sim/test_helpers.py
+	new file:   sim/weapons_test.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	requirements.txt
+

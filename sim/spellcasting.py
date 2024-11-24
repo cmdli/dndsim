@@ -55,6 +55,7 @@ class Spellcasting:
         self.concentration: "sim.spells.Spell" = None
         self.spells: List["sim.spells.Spell"] = []
         self.spell_weapon = SpellWeapon(self.mod)
+        self.slots = spell_slots(self.spellcaster_level)
 
     def reset(self):
         self.slots = spell_slots(self.spellcaster_level)

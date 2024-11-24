@@ -23,6 +23,7 @@ class Character:
         spellcaster: Spellcaster = Spellcaster.NONE,
         spell_mod: str = None,
     ):
+        base_feats = base_feats or []
         self.level = level
         self.prof = prof_bonus(level)
         self.str = stats[0]
