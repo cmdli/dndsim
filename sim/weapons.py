@@ -78,7 +78,7 @@ class Weapon:
         crit: bool,
     ):
         dmg = character.weapon_roll(self, crit=crit) + self.dmg_bonus
-        if not attack.has_tag("light"):
+        if not attack.has_tag("light") and not attack.has_tag("spell"):
             dmg += character.mod(attack.mod)
         return dmg
 
@@ -92,11 +92,13 @@ class Weapon:
         return tag in self.tags
 
     def attack_result(self, args: "sim.events.AttackResultArgs"):
-        args.add_damage_dice(self.name, self.num_dice, self.die)
-        if not args.attack.has_tag("light"):
-            args.add_flat_damage(
-                self.name, args.attack.character.mod(args.attack.mod) + self.dmg_bonus
-            )
+        if args.hits():
+            args.add_damage_dice(self.name, self.num_dice, self.die)
+            if not args.attack.has_tag("light") and not args.attack.has_tag("spell"):
+                args.add_flat_damage(
+                    self.name,
+                    args.attack.character.mod(args.attack.mod) + self.dmg_bonus,
+                )
 
 
 class Glaive(Weapon):

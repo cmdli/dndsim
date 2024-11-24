@@ -71,16 +71,16 @@ class Wizard:
         #     elif slot >= 5 and not self.used_overchannel:
         #         self.blight(target, slot, overchannel=True)
         #         self.used_overchannel = True
-        if slot >= 4:
-            self.blight(target, slot)
-        elif slot >= 3:
-            self.fireball(target, slot)
-        elif slot >= 2 and self.level < 11:
-            self.scorching_ray(target, slot)
-        elif slot >= 1 and self.level < 5:
-            self.magic_missile(target, slot)
-        else:
-            self.firebolt(target)
+        # if slot >= 4:
+        #     self.blight(target, slot)
+        # if slot >= 3:
+        #     self.fireball(target, slot)
+        # elif slot >= 2 and self.level < 11:
+        #     self.scorching_ray(target, slot)
+        # elif slot >= 1 and self.level < 5:
+        #     self.magic_missile(target, slot)
+        # else:
+        self.firebolt(target)
         if slot >= 1:
             self.slots[slot] -= 1
         # if self.fey_summon > 0:
@@ -169,9 +169,13 @@ class Wizard:
         roll = do_roll(adv=adv)
         num_dice = self.cantrip_dice
         if roll == 20:
+            log.record("Crit:Firebolt", 1)
             num_dice *= 2
-        dmg = roll_dice(num_dice, 10) + self.int
+        dmg = roll_dice(num_dice, 10)
+        if self.level >= 10:
+            dmg += self.int
         if roll + self.to_hit >= target.ac:
+            log.record("Hit:Firebolt", 1)
             target.damage(dmg)
         elif self.level >= 2:
             target.damage(dmg // 2)
@@ -208,7 +212,7 @@ class PotentCantrip(Feat):
                 args.attack,
                 crit=False,
             )
-            args.attack.target.damage_source("PotentCantrip", damage // 2)
+            args.add_flat_damage("PotentCantrip", damage // 2)
 
 
 class WizardAction(Feat):
@@ -223,16 +227,16 @@ class WizardAction(Feat):
         #     spell = FingerOfDeath(slot)
         # elif slot >= 6:
         #     spell = ChainLightning(slot)
-        if slot >= 4:
-            spell = Blight(slot)
-        elif slot >= 3:
-            spell = Fireball(slot)
-        elif slot >= 2 and self.character.level < 11:
-            spell = ScorchingRay(slot)
-        elif slot >= 1 and self.character.level < 5:
-            spell = MagicMissile(slot)
-        else:
-            spell = Firebolt()
+        # if slot >= 4:
+        #     spell = Blight(slot)
+        # if slot >= 3:
+        #     spell = Fireball(slot)
+        # elif slot >= 2 and self.character.level < 11:
+        #     spell = ScorchingRay(slot)
+        # elif slot >= 1 and self.character.level < 5:
+        #     spell = MagicMissile(slot)
+        # else:
+        spell = Firebolt()
         if spell is not None:
             self.character.spells.cast(spell, target)
 
