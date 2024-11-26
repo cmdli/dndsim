@@ -2,7 +2,7 @@ from collections import defaultdict
 
 
 class Log:
-    def __init__(self, detailed = False):
+    def __init__(self, detailed=False):
         self.record_ = defaultdict(int)
         self.detailed = detailed
 
@@ -10,11 +10,13 @@ class Log:
         self.record_[type] += val
 
     def printReport(self):
-        for key in self.record_:
-            print(f"Type: {key} Value: {self.record_[key]}")
+        keys = sorted(self.record_.keys())
+        for key in keys:
+            print(f"{key} - {self.record_[key]}")
 
     def output(self, message):
-        if (self.detailed):
+        if self.detailed:
             print(message())
+
 
 log = Log(detailed=False)

@@ -1,6 +1,7 @@
 import random
 from enum import Enum
 
+from util.util import roll_dice
 from util.log import log
 from sim.target import Target
 import sim.weapons
@@ -84,11 +85,20 @@ class AttackResultArgs:
         self.crit = crit
         self.roll = roll
 
+    def add_damage(self, source: str, dice: List[int] = None, damage: int = 0):
+        if damage:
+            self._flat_dmg[source] += damage
+        if dice:
+            self._dice[source].extend(dice)
+
     def add_damage_dice(self, source: str, num: int, size: int):
-        self._dice[source].extend([size] * num)
+        self.add_damage(source, dice=[size] * num)
 
     def add_flat_damage(self, source: str, damage: int):
-        self._flat_dmg[source] += damage
+        self.add_damage(source, damage=damage)
+
+    def damage_sources(self) -> Set[str]:
+        return set(self._dice.keys()).union(set(self._flat_dmg.keys()))
 
     def hits(self) -> bool:
         return self.hit
@@ -123,3 +133,30 @@ class WeaponRollArgs:
         self.weapon = weapon
         self.rolls = rolls
         self.crit = crit
+
+
+class CastSpellArgs:
+    def __init__(self, spell: "sim.spells.Spell") -> None:
+        self.spell = spell
+
+
+class DamageRollArgs:
+    def __init__(
+        self,
+        target: Target = None,
+        dice: List[int] = None,
+        flat_dmg: int = 0,
+        attack: AttackArgs = None,
+        spell: "sim.spells.Spell" = None,
+    ) -> None:
+        self.target = target
+        self.dice = dice or []
+        self.flat_dmg = flat_dmg
+        self.spell = spell
+        self.attack = attack
+
+    def damage_total(self):
+        total = self.flat_dmg
+        for die in self.dice:
+            total += roll_dice(1, die)
+        return total

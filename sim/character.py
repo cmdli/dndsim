@@ -6,9 +6,10 @@ from sim.weapons import Weapon
 from sim.events import AttackRollArgs, AttackArgs, WeaponRollArgs, AttackResultArgs
 from sim.event_loop import EventLoop
 from util.log import log
-from typing import List
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, List, Tuple
 from sim.spellcasting import Spellcasting, Spellcaster
+import sim.events
+import math
 
 STATS = ["str", "dex", "con", "int", "wis", "cha"]
 DEFAULT_STAT_MAX = 20
@@ -207,10 +208,32 @@ class Character:
             log.record(f"Crit:{attack.weapon.name}", 1)
         attack.weapon.attack_result(args)
         self.events.emit("attack_result", args)
-        for key in args._dice:
-            roll = 0
-            for die in args._dice[key]:
-                roll += roll_dice(2 if crit else 1, die)
-            attack.target.damage_source(key, args.dmg_multiplier * roll)
-        for key in args._flat_dmg:
-            attack.target.damage_source(key, args.dmg_multiplier * args._flat_dmg[key])
+        for key in args.damage_sources():
+            dice = args._dice[key]
+            if crit:
+                dice = 2 * dice
+            self.do_damage(
+                target=attack.target,
+                source=key,
+                dice=dice,
+                flat_dmg=args._flat_dmg[key],
+                attack=attack,
+                spell=attack.weapon.spell,
+                multiplier=args.dmg_multiplier,
+            )
+
+    def do_damage(
+        self,
+        target: Target,
+        source: str,
+        dice: List[int] = None,
+        flat_dmg: int = 0,
+        attack: "sim.events.AttackArgs" = None,
+        spell: "sim.spells.Spell" = None,
+        multiplier: float = 1.0,
+    ):
+        args = sim.events.DamageRollArgs(
+            target=target, dice=dice, flat_dmg=flat_dmg, attack=attack, spell=spell
+        )
+        self.events.emit("damage_roll", args)
+        target.damage_source(source, math.floor(args.damage_total() * multiplier))

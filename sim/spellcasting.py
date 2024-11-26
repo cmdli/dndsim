@@ -8,6 +8,7 @@ from sim.weapons import Weapon
 from typing import List, Tuple
 import math
 from util.log import log
+from sim.events import CastSpellArgs
 
 
 class Spellcaster(Enum):
@@ -74,6 +75,8 @@ class Spellcasting:
 
     def cast(self, spell: "sim.spells.Spell", target: "sim.target.Target" = None):
         log.record(f"Cast ({spell.name})", 1)
+        args = CastSpellArgs(spell)
+        self.character.events.emit("CastSpell", args)
         if spell.slot > 0:
             self.slots[spell.slot] -= 1
         if spell.concentration:

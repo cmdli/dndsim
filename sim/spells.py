@@ -13,12 +13,19 @@ class Spell:
         self.concentration = concentration
         self.character: "sim.character.Character" = None
         self.duration = duration
+        self.tags = set()
 
     def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
         self.character = character
 
     def end(self, character: "sim.character.Character"):
         self.character = None
+
+    def add_tag(self, tag: str):
+        self.tags.add(tag)
+
+    def has_tag(self, tag: str):
+        return tag in self.tags
 
 
 class ConcentrationSpell(Spell):

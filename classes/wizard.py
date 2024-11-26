@@ -1,4 +1,4 @@
-from sim.events import AttackRollArgs
+from sim.events import AttackResultArgs, AttackRollArgs, CastSpellArgs, DamageRollArgs
 from util.util import (
     prof_bonus,
     get_magic_weapon,
@@ -73,14 +73,14 @@ class Wizard:
         #         self.used_overchannel = True
         # if slot >= 4:
         #     self.blight(target, slot)
-        # if slot >= 3:
+        # elif slot >= 3:
         #     self.fireball(target, slot)
-        # elif slot >= 2 and self.level < 11:
-        #     self.scorching_ray(target, slot)
-        # elif slot >= 1 and self.level < 5:
-        #     self.magic_missile(target, slot)
-        # else:
-        self.firebolt(target)
+        if slot >= 2 and self.level < 11:
+            self.scorching_ray(target, slot)
+        elif slot >= 1 and self.level < 5:
+            self.magic_missile(target, slot)
+        else:
+            self.firebolt(target)
         if slot >= 1:
             self.slots[slot] -= 1
         # if self.fey_summon > 0:
@@ -130,9 +130,9 @@ class Wizard:
         if self.level >= 10:
             dmg += self.int
         if target.save(self.dc):
-            target.damage(dmg // 2)
+            target.damage_source("Blight", dmg // 2)
         else:
-            target.damage(dmg)
+            target.damage_source("Blight", dmg)
 
     def scorching_ray(self, target, slot):
         for _ in range(1 + slot):
@@ -176,9 +176,9 @@ class Wizard:
             dmg += self.int
         if roll + self.to_hit >= target.ac:
             log.record("Hit:Firebolt", 1)
-            target.damage(dmg)
+            target.damage_source("Firebolt", dmg)
         elif self.level >= 2:
-            target.damage(dmg // 2)
+            target.damage_source("PotentCantrip", dmg // 2)
 
     def summon_fey(self, target):
         adv = True  # Advantage on first attack
@@ -207,12 +207,24 @@ class PotentCantrip(Feat):
     def attack_result(self, args):
         weapon = args.attack.weapon
         if args.misses() and weapon.spell is not None and weapon.spell.slot == 0:
-            damage = weapon.damage(
-                self.character,
-                args.attack,
-                crit=False,
+            self.character.do_damage(
+                target=args.attack.target,
+                source="PotentCantrip",
+                dice=weapon.num_dice * [weapon.die],
+                spell=weapon.spell,
+                multiplier=0.5,
             )
-            args.add_flat_damage("PotentCantrip", damage // 2)
+
+
+class EmpoweredEvocation(Feat):
+    def damage_roll(self, args: DamageRollArgs):
+        if args.spell is not None and not args.spell.has_tag("EmpoweredEvocationUsed"):
+            args.spell.add_tag("EmpoweredEvocationUsed")
+            self.character.do_damage(
+                args.target,
+                source="EmpoweredEvocation",
+                flat_dmg=self.character.mod("int"),
+            )
 
 
 class WizardAction(Feat):
@@ -229,14 +241,14 @@ class WizardAction(Feat):
         #     spell = ChainLightning(slot)
         # if slot >= 4:
         #     spell = Blight(slot)
-        # if slot >= 3:
+        # elif slot >= 3:
         #     spell = Fireball(slot)
-        # elif slot >= 2 and self.character.level < 11:
-        #     spell = ScorchingRay(slot)
-        # elif slot >= 1 and self.character.level < 5:
-        #     spell = MagicMissile(slot)
-        # else:
-        spell = Firebolt()
+        if slot >= 2 and self.character.level < 11:
+            spell = ScorchingRay(slot)
+        elif slot >= 1 and self.character.level < 5:
+            spell = MagicMissile(slot)
+        else:
+            spell = Firebolt()
         if spell is not None:
             self.character.spells.cast(spell, target)
 
@@ -253,6 +265,8 @@ class Wizard2(Character):
             feats.append(ASI(["int"]))
         if level >= 8:
             feats.append(ASI(["int", "wis"]))
+        if level >= 10:
+            feats.append(EmpoweredEvocation())
         super().init(
             level=level,
             stats=[10, 10, 10, 17, 10, 10],

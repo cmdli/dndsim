@@ -17,6 +17,8 @@ EVENT_NAMES = set(
         "short_rest",
         "long_rest",
         "weapon_roll",
+        "cast_spell",
+        "damage_roll",
     ]
 )
 
@@ -73,4 +75,10 @@ class Feat:
         pass
 
     def long_rest(self):
+        pass
+
+    def cast_spell(self, args: "sim.events.CastSpellArgs"):
+        pass
+
+    def damage_roll(self, args: "sim.events.DamageRollArgs"):
         pass
