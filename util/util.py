@@ -59,7 +59,7 @@ def do_roll(adv=False, disadv=False):
     return random.randint(1, 20)
 
 
-def roll_dice(num: int, size: int, max_reroll: int = 0) -> float:
+def roll_dice(num: int, size: int, max_reroll: int = 0) -> int:
     total = 0
     for _ in range(num):
         roll = random.randint(1, size)

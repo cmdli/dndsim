@@ -2,6 +2,7 @@ import sim.target
 import sim.character
 from sim.target import Target
 import sim.events
+from typing import List
 
 
 class Spell:
@@ -44,10 +45,18 @@ class ConcentrationSpell(Spell):
 class BasicSaveSpell(Spell):
     def cast(self, character: "sim.character.Character", target: Target):
         super().cast(character, target)
-        dmg = self.damage()
-        if target.save(character.spells.dc()):
-            dmg = dmg // 2
-        target.damage_source(self.name, dmg)
+        saved = target.save(character.spells.dc())
+        character.do_damage(
+            target,
+            self.name,
+            dice=self.dice(),
+            flat_dmg=self.flat_damage(),
+            spell=self,
+            multiplier=0.5 if saved else 1,
+        )
 
-    def damage(self):
+    def dice(self) -> List[int]:
+        return []
+
+    def flat_damage(self) -> int:
         return 0

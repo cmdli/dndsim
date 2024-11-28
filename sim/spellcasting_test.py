@@ -17,8 +17,8 @@ def sample_character():
 
 
 class ExampleSpell(sim.spells.BasicSaveSpell):
-    def damage(self):
-        return 10
+    def dice(self):
+        return [10]
 
 
 class ExampleConcentrationSpell(sim.spells.ConcentrationSpell):

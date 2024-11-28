@@ -73,9 +73,9 @@ class Wizard:
         #         self.used_overchannel = True
         # if slot >= 4:
         #     self.blight(target, slot)
-        # elif slot >= 3:
-        #     self.fireball(target, slot)
-        if slot >= 2 and self.level < 11:
+        if slot >= 3:
+            self.fireball(target, slot)
+        elif slot >= 2 and self.level < 11:
             self.scorching_ray(target, slot)
         elif slot >= 1 and self.level < 5:
             self.magic_missile(target, slot)
@@ -135,23 +135,29 @@ class Wizard:
             target.damage_source("Blight", dmg)
 
     def scorching_ray(self, target, slot):
+        hits = False
         for _ in range(1 + slot):
             roll = do_roll()
             if roll == 20:
+                hits = True
+                log.record("Hit (ScorchingRay)", 1)
                 target.damage_source("ScorchingRay", roll_dice(4, 6))
             elif roll + self.to_hit >= target.ac:
+                hits = True
+                log.record("Hit (ScorchingRay)", 1)
                 target.damage_source("ScorchingRay", roll_dice(2, 6))
-        if self.level >= 10:
-            target.damage_source("EmpoweredEvocation", self.int)
+        if self.level >= 10 and hits:
+            target.damage_source("ScorchingRay", self.int)
 
     def fireball(self, target, slot):
+        log.record("Cast (Fireball)", 1)
         dmg = roll_dice(5 + slot, 6)
         if self.level >= 10:
             dmg += self.int
         if not target.save(self.dc):
-            target.damage(dmg)
+            target.damage_source("Fireball", dmg)
         else:
-            target.damage(dmg // 2)
+            target.damage_source("Fireball", dmg // 2)
 
     def erupting_earth(self, target, slot):
         dmg = roll_dice(3 + (slot - 3), 12)
@@ -163,7 +169,7 @@ class Wizard:
     def magic_missile(self, target, slot):
         target.damage_source("MagicMissile", roll_dice(2 + slot, 4) + 2 + slot)
         if self.level >= 10:
-            target.damage_source("EmpoweredEvocation", self.int)
+            target.damage_source("MagicMissile", self.int)
 
     def firebolt(self, target, adv=False):
         roll = do_roll(adv=adv)
@@ -220,11 +226,7 @@ class EmpoweredEvocation(Feat):
     def damage_roll(self, args: DamageRollArgs):
         if args.spell is not None and not args.spell.has_tag("EmpoweredEvocationUsed"):
             args.spell.add_tag("EmpoweredEvocationUsed")
-            self.character.do_damage(
-                args.target,
-                source="EmpoweredEvocation",
-                flat_dmg=self.character.mod("int"),
-            )
+            args.flat_dmg += self.character.mod("int")
 
 
 class WizardAction(Feat):
@@ -241,9 +243,9 @@ class WizardAction(Feat):
         #     spell = ChainLightning(slot)
         # if slot >= 4:
         #     spell = Blight(slot)
-        # elif slot >= 3:
-        #     spell = Fireball(slot)
-        if slot >= 2 and self.character.level < 11:
+        if slot >= 3:
+            spell = Fireball(slot)
+        elif slot >= 2 and self.character.level < 11:
             spell = ScorchingRay(slot)
         elif slot >= 1 and self.character.level < 5:
             spell = MagicMissile(slot)

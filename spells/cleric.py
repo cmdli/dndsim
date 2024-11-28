@@ -1,5 +1,5 @@
-from typing import override
-from sim.spells import ConcentrationSpell, Spell
+from typing import List, override
+from sim.spells import ConcentrationSpell, Spell, BasicSaveSpell
 from util.util import roll_dice, cantrip_dice
 from sim.character import Character
 from sim.target import Target
@@ -21,7 +21,7 @@ class SpiritGuardians(ConcentrationSpell):
         dmg = roll_dice(self.slot, 8)
         if target.save(self.character.spells.dc()):
             dmg = dmg // 2
-        target.damage_source("SpiritGuardians", dmg // 2)
+        target.damage_source("SpiritGuardians", dmg)
 
 
 class TollTheDead(Spell):
@@ -39,29 +39,22 @@ class TollTheDead(Spell):
             target.damage_source("TollTheDead", dmg)
 
 
-class Harm(Spell):
+class Harm(BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__("Harm", slot=slot)
+        assert slot >= 6
 
-    def cast(self, character: Character, target: Target):
-        super().cast(character, target)
-        dmg = roll_dice(14, 6)
-        if target.save(character.spells.dc()):
-            dmg = dmg // 2
-        target.damage_source("Harm", dmg)
+    def dice(self) -> List[int]:
+        return 14 * [6]
 
 
-class InflictWounds(Spell):
+class InflictWounds(BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__("InflictWounds", slot)
 
-    def cast(self, character: Character, target: Target):
-        super().cast(character, target)
+    def dice(self) -> List[int]:
         num_dice = 1 + self.slot
-        dmg = roll_dice(num_dice, 10)
-        if target.save(character.spells.dc()):
-            dmg = dmg // 2
-        target.damage_source("InflictWounds", dmg)
+        return num_dice * [10]
 
 
 class SpiritualWeaponWeapon(Weapon):

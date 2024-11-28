@@ -12,8 +12,8 @@ class MeteorSwarm(BasicSaveSpell):
         super().__init__("MeteorSwarm", slot)
         assert slot == 9
 
-    def damage(self):
-        return roll_dice(40, 6)
+    def dice(self) -> List[int]:
+        return 40 * [6]
 
 
 class FingerOfDeath(BasicSaveSpell):
@@ -21,32 +21,37 @@ class FingerOfDeath(BasicSaveSpell):
         super().__init__("FingerOfDeath", slot)
         assert slot >= 7
 
-    def damage(self):
-        return roll_dice(7, 8) + 30
+    def dice(self) -> List[int]:
+        return 7 * [8]
+
+    def flat_damage(self) -> int:
+        return 30
 
 
 class ChainLightning(BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__("ChainLightning", slot)
 
-    def damage(self):
-        return roll_dice(10, 8)
+    def dice(self) -> List[int]:
+        return 10 * [8]
 
 
 class Blight(BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__("Blight", slot)
 
-    def damage(self):
-        return roll_dice(4 + self.slot, 8)
+    def dice(self) -> List[int]:
+        num_dice = 4 + self.slot
+        return num_dice * [8]
 
 
 class Fireball(BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__("Fireball", slot)
 
-    def damage(self):
-        return roll_dice(5 + self.slot, 6)
+    def dice(self):
+        num_dice = 5 + self.slot
+        return num_dice * [6]
 
 
 class ScorchingRayWeapon(Weapon):
@@ -59,17 +64,6 @@ class ScorchingRayWeapon(Weapon):
             override_mod=character.spells.mod,
             spell=spell,
         )
-
-    def damage(
-        self,
-        character: sim.character.Character,
-        attack: sim.character.AttackArgs,
-        crit: bool,
-    ):
-        num_dice = 2
-        if crit:
-            num_dice *= 2
-        return roll_dice(num_dice, 6)
 
 
 class ScorchingRay(BasicSaveSpell):
@@ -89,7 +83,10 @@ class MagicMissile(Spell):
 
     def cast(self, character: "sim.character.Character", target: Target):
         super().cast(character, target)
-        target.damage_source(self.name, roll_dice(2 + self.slot, 4) + 2 + self.slot)
+        num_dice = 2 + self.slot
+        character.do_damage(
+            target, self.name, dice=num_dice * [4], flat_dmg=2 + self.slot, spell=self
+        )
 
 
 class FireboltWeapon(Weapon):
