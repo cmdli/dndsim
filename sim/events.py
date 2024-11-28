@@ -8,12 +8,13 @@ import sim.weapons
 from collections import defaultdict
 from typing import Set, List
 import sim.spells
+import sim.character
 
 
 class AttackArgs:
     def __init__(
         self,
-        character,
+        character: "sim.character.Character",
         target: Target,
         weapon: sim.weapons.Weapon,
         tags: List[str] = None,
@@ -80,7 +81,7 @@ class AttackResultArgs:
         self._dice = defaultdict(list)
         self._flat_dmg = defaultdict(int)
         self.hit = hit
-        self.dmg_multiplier = 1
+        self.dmg_multiplier = 1.0
         self.attack = attack
         self.crit = crit
         self.roll = roll

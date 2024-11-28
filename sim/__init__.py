@@ -41,4 +41,4 @@ class Simulation:
                 self.character.enemy_turn(self.target)
                 self.target.turn()
             self.character.short_rest()
-            self.target.log_damage_sources()
+        self.target.log_damage_sources()

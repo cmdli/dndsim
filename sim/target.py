@@ -62,10 +62,6 @@ class Target:
         self.dmg += damage
         self._dmg_log[source] += damage
 
-    def print_damage_log(self):
-        for key in self._dmg_log:
-            print(f"Source: {key} - Damage: {self._dmg_log[key]}")
-
     def log_damage_sources(self):
         for key in self._dmg_log:
             log.record(f"Damage ({key})", self._dmg_log[key])

@@ -6,7 +6,7 @@ class Log:
         self.record_ = defaultdict(int)
         self.detailed = detailed
 
-    def record(self, type, val):
+    def record(self, type: str, val: int):
         self.record_[type] += val
 
     def printReport(self):

@@ -48,7 +48,6 @@ class Wizard:
     def long_rest(self):
         self.short_rest()
         self.slots = spell_slots(self.level)
-        self.used_arcane_recovery = False
         self.used_overchannel = self.level < 14
 
     def short_rest(self):
@@ -135,11 +134,13 @@ class Wizard:
             target.damage_source("Blight", dmg)
 
     def scorching_ray(self, target, slot):
+        log.record("Cast (ScorchingRay)", 1)
         hits = False
         for _ in range(1 + slot):
             roll = do_roll()
             if roll == 20:
                 hits = True
+                log.record("Crit:ScorchingRay", 1)
                 log.record("Hit (ScorchingRay)", 1)
                 target.damage_source("ScorchingRay", roll_dice(4, 6))
             elif roll + self.to_hit >= target.ac:
@@ -213,6 +214,7 @@ class PotentCantrip(Feat):
     def attack_result(self, args):
         weapon = args.attack.weapon
         if args.misses() and weapon.spell is not None and weapon.spell.slot == 0:
+            log.record(f"PotentCantrip ({weapon.spell.name})", 1)
             self.character.do_damage(
                 target=args.attack.target,
                 source="PotentCantrip",

@@ -66,7 +66,7 @@ class ScorchingRayWeapon(Weapon):
         )
 
 
-class ScorchingRay(BasicSaveSpell):
+class ScorchingRay(Spell):
     def __init__(self, slot: int):
         super().__init__("ScorchingRay", slot)
 
