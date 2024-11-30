@@ -8,7 +8,7 @@ from sim.feats import (
     WeaponMaster,
 )
 from sim.weapons import Weapon
-from sim.events import WeaponRollArgs
+from sim.events import DamageRollArgs
 from sim.target import Target
 from util.log import log
 from typing import List
@@ -41,9 +41,9 @@ class FlurryOfBlows(Feat):
         if self.character.ki > 0 and self.character.use_bonus("FlurryOfBlows"):
             self.character.ki -= 1
             for _ in range(self.num_attacks):
-                self.character.attack(target, self.weapon, tags=["flurry"])
+                self.character.weapon_attack(target, self.weapon, tags=["flurry"])
         elif self.character.use_bonus("BonusAttack"):
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class OpenHandTechnique(Feat):
@@ -63,7 +63,7 @@ class Grappler(Feat):
         if args.hits() and args.attack.has_tag("main_action"):
             args.attack.target.grapple()
 
-    def roll_attack(self, args):
+    def attack_roll(self, args):
         if args.attack.target.grappled:
             args.adv = True
 
@@ -138,10 +138,10 @@ class TavernBrawler(Feat):
     def __init__(self, die: int) -> None:
         self.die = die
 
-    def weapon_roll(self, args: WeaponRollArgs):
+    def damage_roll(self, args: DamageRollArgs):
         for i in range(len(args.rolls)):
             if args.rolls[i] == 1:
-                args.rolls[i] = roll_dice(1, self.die)
+                args.rolls[i] = roll_dice(1, args.dice[i])
 
 
 class Monk(Character):

@@ -1,8 +1,10 @@
 from util.util import roll_dice
-from typing import List
+from typing import List, Optional
 import sim.events
 import sim.spells
 import sim.character
+import sim.attack
+from util.taggable import Taggable
 
 """
 Overlooked things for weapons:
@@ -29,33 +31,34 @@ WEAPON_MASTERIES = [
 ]
 
 
-class Weapon:
+class Weapon(Taggable):
     def __init__(
         self,
-        name=None,
-        num_dice=0,
-        die=6,
-        damage_type="unknown",
-        min_crit=20,
-        mastery: str = None,
-        magic_bonus=0,
-        attack_bonus=0,
-        dmg_bonus=0,
-        tags: List[str] = None,
-        override_mod=None,
-        spell: "sim.spells.Spell" = None,
+        name: Optional[str] = None,
+        num_dice: int = 0,
+        die: int = 6,
+        damage_type: str = "unknown",
+        min_crit: int = 20,
+        mastery: Optional[str] = None,
+        magic_bonus: int = 0,
+        attack_bonus: int = 0,
+        dmg_bonus: int = 0,
+        tags: Optional[List[str]] = None,
+        override_mod: Optional[str] = None,
+        spell: Optional["sim.spells.Spell"] = None,
     ) -> None:
-        self.name = name
+        self._name = name
         self.num_dice = num_dice
         self.die = die
         self.damage_type = damage_type
-        self.min_crit = min_crit
+        self._min_crit = min_crit
         self.attack_bonus = magic_bonus + attack_bonus
         self.dmg_bonus = magic_bonus + dmg_bonus
         self.override_mod = override_mod
         self.mastery = mastery
-        self.tags = tags or []
         self.spell = spell
+        if tags:
+            self.add_tags(tags)
 
     def mod(self, character: "sim.character.Character"):
         if self.override_mod is not None:
@@ -71,16 +74,8 @@ class Weapon:
         mod = self.mod(character)
         return character.prof + character.mod(mod) + self.attack_bonus
 
-    def damage(
-        self,
-        character: "sim.character.Character",
-        attack: "sim.events.AttackArgs",
-        crit: bool,
-    ):
-        dmg = character.weapon_roll(self, crit=crit) + self.dmg_bonus
-        if not attack.has_tag("light") and not attack.has_tag("spell"):
-            dmg += character.mod(attack.mod)
-        return dmg
+    def name(self):
+        return self._name
 
     def rolls(self, crit: bool = False):
         num_dice = self.num_dice
@@ -88,17 +83,41 @@ class Weapon:
             num_dice *= 2
         return [roll_dice(1, self.die) for _ in range(num_dice)]
 
-    def has_tag(self, tag: str):
-        return tag in self.tags
-
-    def attack_result(self, args: "sim.events.AttackResultArgs"):
+    def attack_result(
+        self, args: "sim.events.AttackResultArgs", character: "sim.character.Character"
+    ):
         if args.hits():
-            args.add_damage_dice(self.name, self.num_dice, self.die)
+            args.add_damage_dice(self.name(), self.num_dice, self.die)
             if not args.attack.has_tag("light") and not args.attack.has_tag("spell"):
+                mod = self.mod(character)
                 args.add_flat_damage(
-                    self.name,
-                    args.attack.character.mod(args.attack.mod) + self.dmg_bonus,
+                    self.name(),
+                    character.mod(mod),
                 )
+            args.add_flat_damage(self.name(), self.dmg_bonus)
+
+    def min_crit(self) -> int:
+        return self._min_crit
+
+
+class WeaponAttack(sim.attack.Attack):
+    def __init__(self, weapon: Weapon) -> None:
+        super().__init__(weapon.name())
+        self.weapon = weapon
+
+    def to_hit(self, character: "sim.character.Character"):
+        return self.weapon.to_hit(character)
+
+    def attack_result(
+        self, args: "sim.events.AttackResultArgs", character: "sim.character.Character"
+    ):
+        self.weapon.attack_result(args, character)
+
+    def min_crit(self):
+        return self.weapon.min_crit()
+
+    def is_ranged(self):
+        return self.weapon.has_tag("ranged")
 
 
 class Glaive(Weapon):
@@ -109,7 +128,7 @@ class Glaive(Weapon):
             die=10,
             damage_type="slashing",
             mastery="graze",
-            tags=["heavy"],
+            tags=["heavy", "twohanded"],
             **kwargs,
         )
 
@@ -122,7 +141,7 @@ class GlaiveButt(Weapon):
             die=4,
             damage_type="bludgeoning",
             mastery="graze",
-            tags=["heavy"],
+            tags=["heavy", "twohanded"],
             **kwargs,
         )
 
@@ -135,7 +154,7 @@ class Greatsword(Weapon):
             die=6,
             damage_type="slashing",
             mastery="graze",
-            tags=["heavy"],
+            tags=["heavy", "twohanded"],
             **kwargs,
         )
 
@@ -187,7 +206,7 @@ class Maul(Weapon):
             die=6,
             damage_type="bludgeoning",
             mastery="topple",
-            tags=["heavy"],
+            tags=["heavy", "twohanded"],
             **kwargs,
         )
 
@@ -200,6 +219,7 @@ class Quarterstaff(Weapon):
             die=8,
             damage_type="bludgeoning",
             mastery="topple",
+            tags=["twohanded"],
             **kwargs,
         )
 

@@ -42,7 +42,7 @@ class WarPriest(Feat):
 
     def after_action(self, target: sim.character.Target):
         if self.uses > 0 and self.character.use_bonus("WarPriest"):
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class BlessedStrikes(Feat):

@@ -27,7 +27,7 @@ from spells.wizard import (
 from sim.summons import SummonFey
 from sim.feats import ASI
 from sim.spells import Spell
-from typing import List
+from typing import List, Optional
 
 
 class Wizard:
@@ -204,8 +204,8 @@ class WandOfTheWarMage(Feat):
         super().__init__()
         self.bonus = bonus
 
-    def roll_attack(self, args: AttackRollArgs):
-        if args.attack.weapon.spell != None:
+    def attack_roll(self, args: AttackRollArgs):
+        if args.attack.spell != None:
             args.situational_bonus += self.bonus
 
 
@@ -234,7 +234,7 @@ class EmpoweredEvocation(Feat):
 class WizardAction(Feat):
     def action(self, target: Target):
         slot = self.character.spells.highest_slot()
-        spell: Spell = None
+        spell: Optional[Spell] = None
         # if slot >= 3 and not self.character.spells.is_concentrating():
         #     spell = SummonFey(slot)
         # elif slot >= 9:

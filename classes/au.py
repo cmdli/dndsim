@@ -24,7 +24,7 @@ class OldCrossbowExpert(Feat):
 
     def end_turn(self, target):
         if self.character.use_bonus("CrossbowExpert"):
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class OldSharpshooter(Feat):
@@ -32,7 +32,7 @@ class OldSharpshooter(Feat):
         super().apply(character)
         character.dex += 1
 
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         args.situational_bonus -= 5
         args.attack.add_tag("Sharpshooter")
 
@@ -59,7 +59,7 @@ class FightingSpirit(Feat):
             self.fighting_spirit -= 1
             self.enabled = True
 
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         if self.enabled:
             args.adv = True
 
@@ -74,10 +74,11 @@ class RapidStrike(Feat):
     def begin_turn(self, target: Target):
         self.used = False
 
-    def roll_attack(self, args: AttackRollArgs):
-        if not self.used and args.adv and args.attack.has_tag("main_action"):
+    def attack_roll(self, args: AttackRollArgs):
+        weapon = args.attack.weapon
+        if weapon and not self.used and args.adv and args.attack.has_tag("main_action"):
             self.used = True
-            self.character.attack(args.attack.target, args.attack.weapon)
+            self.character.weapon_attack(args.attack.target, weapon)
 
 
 class OldHandCrossbow(Weapon):
@@ -86,7 +87,7 @@ class OldHandCrossbow(Weapon):
 
 
 class Blessed(Feat):
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         args.situational_bonus += random.randint(1, 4)
 
 

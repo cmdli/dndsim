@@ -1,6 +1,6 @@
-from typing import List, override
+from typing import List, override, Optional
 
-from sim.events import AttackArgs, AttackRollArgs
+from sim.events import AttackArgs, AttackResultArgs, AttackRollArgs
 from sim.target import Target
 from util.util import (
     roll_dice,
@@ -50,7 +50,7 @@ def maybe_cast_hunters_mark(character: Character):
 
 
 class RangerAction(Feat):
-    def __init__(self, attacks, summon_fey_threshold: int = None) -> None:
+    def __init__(self, attacks, summon_fey_threshold: int) -> None:
         self.attacks = attacks
         self.summon_fey_threshold = summon_fey_threshold
 
@@ -60,11 +60,16 @@ class RangerAction(Feat):
         maybe_cast_hunters_mark(self.character)
         for weapon in self.attacks:
             log.record("main attack", 1)
-            self.character.attack(target, weapon, tags=["main_action"])
+            self.character.weapon_attack(target, weapon, tags=["main_action"])
 
 
 class HuntersMarkFeat(Feat):
-    def __init__(self, die: int, adv: bool = False, caster: Character = None) -> None:
+    def __init__(
+        self,
+        die: int,
+        caster: Character,
+        adv: bool = False,
+    ) -> None:
         self.die = die
         self.adv = adv
         self.filter = filter
@@ -75,7 +80,7 @@ class HuntersMarkFeat(Feat):
         if self.caster is None:
             self.caster = character
 
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         if self.caster.spells.concentrating_on("HuntersMark") and self.adv:
             args.adv = True
 
@@ -109,7 +114,7 @@ class Gloomstalker(Feat):
         if self.first_turn and self.used_attack:
             self.using = True
             log.record("gloom attack", 1)
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
             self.using = False
         self.first_turn = False
         self.used_attack = False
@@ -137,7 +142,7 @@ class DreadAmbusher(Feat):
             self.uses -= 1
             args.add_damage_dice("DreadAmbusher", 2, self.die)
             if self.weapon:
-                self.character.attack(args.attack.target, self.weapon)
+                self.character.weapon_attack(args.attack.target, self.weapon)
 
 
 class BeastChargeFeat(Feat):
@@ -167,7 +172,7 @@ class StalkersFlurry(Feat):
 
     def after_action(self, target):
         if self.missed_attack:
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class GloomstalkerRanger(Character):
@@ -221,7 +226,7 @@ class PrimalCompanion(Character):
 
     def do_attack(self, target: Target):
         for _ in range(self.num_attacks):
-            self.attack(target, self.weapon)
+            self.weapon_attack(target, self.weapon)
 
     def get_to_hit(self):
         return self.ranger.prof + self.ranger.mod("wis")
@@ -237,8 +242,11 @@ class BeastMaul(Weapon):
         return self.ranger.prof + self.ranger.mod("wis")
 
     @override
-    def damage(self, character: Character, attack, crit):
-        return character.weapon_roll(self, crit=crit) + 2 + self.ranger.mod("wis")
+    def attack_result(self, args: AttackResultArgs, character: Character):
+        if not args.hits():
+            return
+        num_dice = 2 if args.crit else 1
+        args.add_damage(self.name(), num_dice * [8], 2 + self.ranger.mod("wis"))
 
 
 class BeastMasterAction(Feat):
@@ -270,14 +278,16 @@ class BeastMasterAction(Feat):
                     self.beast.do_attack(target)
                     commanded_beast = True
                 else:
-                    self.character.attack(target, self.main_hand)
-            self.character.attack(target, self.off_hand_nick, tags=["light"])
+                    self.character.weapon_attack(target, self.main_hand)
+            self.character.weapon_attack(target, self.off_hand_nick, tags=["light"])
         else:
-            self.character.attack(target, self.main_hand)
+            self.character.weapon_attack(target, self.main_hand)
             if self.character.use_bonus("light weapon"):
-                self.character.attack(target, self.off_hand_other, tags=["light"])
+                self.character.weapon_attack(
+                    target, self.off_hand_other, tags=["light"]
+                )
             else:
-                self.character.attack(target, self.off_hand_nick, tags=["light"])
+                self.character.weapon_attack(target, self.off_hand_nick, tags=["light"])
 
 
 class BeastMasterRanger(Character):

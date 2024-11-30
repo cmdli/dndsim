@@ -16,6 +16,7 @@ from sim.weapons import Greatsword, Shortsword, Scimitar
 from spells.paladin import DivineFavor, DivineSmite
 from sim.spellcasting import Spellcaster
 from typing import List
+import sim.weapons
 
 
 class DivineSmiteFeat(Feat):
@@ -47,7 +48,7 @@ class SacredWeapon(Feat):
         if not self.enabled and self.character.use_bonus("SacredWeapon"):
             self.enabled = True
 
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         if self.enabled:
             args.situational_bonus += self.character.mod("cha")
 
@@ -76,7 +77,7 @@ class Paladin(Character):
             base_feats.append(WeaponMasteries(["vex", "nick"]))
             scimitar = Scimitar(magic_bonus=magic_weapon)
             base_feats.append(TwoWeaponFighting())
-            weapon = Shortsword(magic_bonus=magic_weapon)
+            weapon: "sim.weapons.Weapon" = Shortsword(magic_bonus=magic_weapon)
             nick_attacks = [scimitar]
         else:
             base_feats.append(WeaponMasteries(["graze", "topple"]))

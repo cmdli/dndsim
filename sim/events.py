@@ -6,37 +6,28 @@ from util.log import log
 from sim.target import Target
 import sim.weapons
 from collections import defaultdict
-from typing import Set, List
+from typing import Set, List, Optional
 import sim.spells
 import sim.character
+import util.taggable
+import sim.attack
 
 
-class AttackArgs:
+class AttackArgs(util.taggable.Taggable):
     def __init__(
         self,
-        character: "sim.character.Character",
         target: Target,
-        weapon: sim.weapons.Weapon,
-        tags: List[str] = None,
-        mod: str = "none",
+        attack: "sim.attack.Attack",
+        weapon: Optional["sim.weapons.Weapon"] = None,
+        spell: Optional["sim.spells.Spell"] = None,
+        tags: Optional[List[str]] = None,
     ):
-        self.character = character
         self.target = target
-        self.weapon = weapon
-        self.mod = mod
-        self.tags = set(tags) if tags is not None else None
-
-    def has_tag(self, tag: str):
-        return self.tags is not None and tag in self.tags
-
-    def add_tag(self, tag: str):
-        if self.tags is None:
-            self.tags = set()
-        self.tags.add(tag)
-
-    def remove_tag(self, tag: str):
-        if self.tags is not None and tag in self.tags:
-            self.tags.remove(tag)
+        self.attack = attack
+        self.weapon: Optional["sim.weapons.Weapon"] = weapon
+        self.spell = spell
+        if tags:
+            self.add_tags(tags)
 
 
 class AttackRollArgs:
@@ -74,19 +65,19 @@ class AttackResultArgs:
     def __init__(
         self,
         attack: AttackArgs,
-        hit: bool = False,
-        crit: bool = False,
-        roll: int = 0,
+        hit: bool,
+        crit: bool,
+        roll: int,
     ):
-        self._dice = defaultdict(list)
-        self._flat_dmg = defaultdict(int)
+        self._dice: defaultdict[str, List[int]] = defaultdict(list)
+        self._flat_dmg: defaultdict[str, int] = defaultdict(int)
         self.hit = hit
         self.dmg_multiplier = 1.0
         self.attack = attack
         self.crit = crit
         self.roll = roll
 
-    def add_damage(self, source: str, dice: List[int] = None, damage: int = 0):
+    def add_damage(self, source: str, dice: List[int], damage: int = 0):
         if damage:
             self._flat_dmg[source] += damage
         if dice:
@@ -96,7 +87,7 @@ class AttackResultArgs:
         self.add_damage(source, dice=[size] * num)
 
     def add_flat_damage(self, source: str, damage: int):
-        self.add_damage(source, damage=damage)
+        self.add_damage(source, [], damage=damage)
 
     def damage_sources(self) -> Set[str]:
         return set(self._dice.keys()).union(set(self._flat_dmg.keys()))
@@ -113,29 +104,6 @@ class EnemySavingThrowArgs:
         pass
 
 
-class EnemyDamageArgs:
-    def __init__(
-        self,
-        rolls: List[int],
-        flat_damage: int,
-        weapon: "sim.weapons.Weapon" = None,
-        spell: "sim.spells.Spell" = None,
-    ) -> None:
-        self.rolls = rolls
-        self.flat_damage = flat_damage
-        self.weapon = weapon
-        self.spell = spell
-
-
-class WeaponRollArgs:
-    def __init__(
-        self, weapon: sim.weapons.Weapon, rolls: List[int], crit: bool = False
-    ) -> None:
-        self.weapon = weapon
-        self.rolls = rolls
-        self.crit = crit
-
-
 class CastSpellArgs:
     def __init__(self, spell: "sim.spells.Spell") -> None:
         self.spell = spell
@@ -144,20 +112,18 @@ class CastSpellArgs:
 class DamageRollArgs:
     def __init__(
         self,
-        target: Target = None,
-        dice: List[int] = None,
+        target: Target,
+        dice: List[int],
         flat_dmg: int = 0,
-        attack: AttackArgs = None,
-        spell: "sim.spells.Spell" = None,
+        attack: Optional[AttackArgs] = None,
+        spell: Optional["sim.spells.Spell"] = None,
     ) -> None:
         self.target = target
         self.dice = dice or []
+        self.rolls = [roll_dice(1, die) for die in self.dice]
         self.flat_dmg = flat_dmg
         self.spell = spell
         self.attack = attack
 
     def damage_total(self):
-        total = self.flat_dmg
-        for die in self.dice:
-            total += roll_dice(1, die)
-        return total
+        return self.flat_dmg + sum(self.rolls)

@@ -1,6 +1,7 @@
 import sim.character
 import sim.target
 import sim.events
+from sim.event_loop import Listener
 
 EVENT_NAMES = set(
     [
@@ -10,7 +11,7 @@ EVENT_NAMES = set(
         "after_action",
         "before_attack",
         "attack",
-        "roll_attack",
+        "attack_roll",
         "attack_result",
         "end_turn",
         "enemy_turn",
@@ -23,7 +24,7 @@ EVENT_NAMES = set(
 )
 
 
-class Feat:
+class Feat(Listener):
     def name(self) -> str:
         return type(self).__name__
 
@@ -59,10 +60,7 @@ class Feat:
     def attack(self, args: "sim.events.AttackArgs"):
         pass
 
-    def roll_attack(self, args: "sim.events.AttackRollArgs"):
-        pass
-
-    def weapon_roll(self, args: "sim.events.WeaponRollArgs"):
+    def attack_roll(self, args: "sim.events.AttackRollArgs"):
         pass
 
     def attack_result(self, args: "sim.events.AttackResultArgs"):

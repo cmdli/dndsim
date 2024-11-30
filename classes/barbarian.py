@@ -34,7 +34,7 @@ class BrutalStrike(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def roll_attack(self, args):
+    def attack_roll(self, args):
         if not self.used and args.adv:
             args.adv = False
             args.attack.add_tag("brutal_strike")
@@ -50,7 +50,7 @@ class Retaliation(Feat):
         self.weapon = weapon
 
     def enemy_turn(self, target):
-        self.character.attack(target, weapon=self.weapon)
+        self.character.weapon_attack(target, weapon=self.weapon)
 
 
 class PrimalChampion(Feat):
@@ -81,7 +81,7 @@ class RecklessAttack(Feat):
     def begin_turn(self, target):
         self.enabled = True
 
-    def roll_attack(self, args):
+    def attack_roll(self, args):
         if self.enabled:
             args.adv = True
 

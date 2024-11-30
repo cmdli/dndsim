@@ -1,4 +1,4 @@
-from sim.events import AttackRollArgs, AttackArgs, WeaponRollArgs
+from sim.events import AttackRollArgs, AttackArgs, DamageRollArgs
 from util.util import roll_dice
 from sim.target import Target
 from sim.weapons import Weapon
@@ -22,7 +22,7 @@ class PolearmMaster(Feat):
     def end_turn(self, target: Target):
         if not self.used and self.character.use_bonus("PAM"):
             self.used = True
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class GreatWeaponMaster(Feat):
@@ -46,7 +46,7 @@ class GreatWeaponMaster(Feat):
 
     def after_action(self, target: Target):
         if self.bonus_attack_enabled and self.character.use_bonus("GreatWeaponMaster"):
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class ElvenAccuracy(Feat):
@@ -57,7 +57,7 @@ class ElvenAccuracy(Feat):
         super().apply(character)
         character.increase_stat(self.mod, 1)
 
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         if args.adv:
             roll = roll_dice(1, 20)
             if args.roll1 < args.roll2 and args.roll1 < roll:
@@ -67,22 +67,27 @@ class ElvenAccuracy(Feat):
 
 
 class Archery(Feat):
-    def roll_attack(self, args: AttackRollArgs):
-        if args.attack.weapon.has_tag("ranged"):
+    def attack_roll(self, args: AttackRollArgs):
+        weapon = args.attack.weapon
+        if weapon and weapon.has_tag("ranged"):
             args.situational_bonus += 2
 
 
 class TwoWeaponFighting(Feat):
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         if args.attack.has_tag("light"):
             args.attack.remove_tag("light")
 
 
 class GreatWeaponFighting(Feat):
-    def weapon_roll(self, args: WeaponRollArgs):
-        for i in range(len(args.rolls)):
-            if args.rolls[i] == 1 or args.rolls[i] == 2:
-                args.rolls[i] = 3
+    def damage_roll(self, args: DamageRollArgs):
+        attack = args.attack
+        if attack:
+            weapon = attack.weapon
+        if weapon and weapon.has_tag("twohanded"):
+            for i in range(len(args.rolls)):
+                if args.rolls[i] == 1 or args.rolls[i] == 2:
+                    args.rolls[i] = 3
 
 
 class CrossbowExpert(Feat):
@@ -102,7 +107,7 @@ class CrossbowExpert(Feat):
     def end_turn(self, target):
         if self.used_attack and self.character.use_bonus("CrossbowExpert"):
             log.record("bonus attack", 1)
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class ASI(Feat):
@@ -123,9 +128,9 @@ class AttackAction(Feat):
 
     def action(self, target):
         for weapon in self.base_attacks:
-            self.character.attack(target, weapon, tags=["main_action"])
+            self.character.weapon_attack(target, weapon, tags=["main_action"])
         for weapon in self.nick_attacks:
-            self.character.attack(target, weapon, tags=["main_action", "light"])
+            self.character.weapon_attack(target, weapon, tags=["main_action", "light"])
 
 
 class BoomingBlade(Feat):
@@ -134,7 +139,7 @@ class BoomingBlade(Feat):
         self.character = character
 
     def action(self, target):
-        self.character.attack(
+        self.character.weapon_attack(
             target, self.weapon, tags=["main_action", "booming_blade"]
         )
 
@@ -158,7 +163,7 @@ class LightWeaponBonusAttack(Feat):
 
     def end_turn(self, target):
         if self.character.use_bonus("LightWeaponBonusAttack"):
-            self.character.attack(target, self.weapon, tags=["light"])
+            self.character.weapon_attack(target, self.weapon, tags=["light"])
 
 
 class Vex(Feat):
@@ -168,7 +173,7 @@ class Vex(Feat):
     def short_rest(self):
         self.vexing = False
 
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         if self.vexing:
             args.adv = True
             self.vexing = False
@@ -184,26 +189,27 @@ class Vex(Feat):
 
 class Topple(Feat):
     def attack_result(self, args):
-        if args.misses():
-            return
         weapon = args.attack.weapon
+        if not weapon or args.misses():
+            return
         target = args.attack.target
         if weapon.mastery == "topple" and self.character.has_mastery("topple"):
-            if not target.save(self.character.dc(args.attack.mod)):
+            mod = weapon.mod(self.character)
+            if not target.save(self.character.dc(mod)):
                 log.output(lambda: "Knocked prone")
                 target.prone = True
 
 
 class Graze(Feat):
     def attack_result(self, args):
-        if not args.misses():
+        weapon = args.attack.weapon
+        if not weapon or not args.misses():
             return
         if args.attack.weapon.mastery == "graze" and self.character.has_mastery(
             "graze"
         ):
-            args.attack.target.damage_source(
-                "Graze", self.character.mod(args.attack.mod)
-            )
+            mod = weapon.mod(self.character)
+            args.attack.target.damage_source("Graze", self.character.mod(mod))
 
 
 class WeaponMasteries(Feat):
@@ -249,7 +255,7 @@ class DualWielder(Feat):
 
     def after_action(self, target: Target):
         if self.character.use_bonus("DualWielder"):
-            self.character.attack(target, self.weapon, tags=["light"])
+            self.character.weapon_attack(target, self.weapon, tags=["light"])
 
 
 class SavageAttacker(Feat):
@@ -259,11 +265,11 @@ class SavageAttacker(Feat):
     def begin_turn(self, target: Target):
         self.used = False
 
-    def weapon_roll(self, args: WeaponRollArgs):
+    def damage_roll(self, args: DamageRollArgs):
         if self.used:
             return
         self.used = True
-        new_rolls = args.weapon.rolls(crit=args.crit)
+        new_rolls = [roll_dice(1, die) for die in args.dice]
         if sum(new_rolls) > sum(args.rolls):
             args.rolls = new_rolls
 

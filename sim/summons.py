@@ -1,5 +1,5 @@
-from typing import override
-from sim.events import AttackRollArgs
+from typing import override, Optional, List
+from sim.events import AttackResultArgs, AttackRollArgs
 from sim.feats import Feat
 from sim.target import Target
 from sim.character import Character
@@ -15,11 +15,11 @@ class SummonAction(Feat):
     @override
     def action(self, target: Target):
         for _ in range(self.slot // 2):
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class SummonWeapon(Weapon):
-    def __init__(self, caster: Character = None, **kwargs):
+    def __init__(self, caster: Optional[Character] = None, **kwargs):
         super().__init__(**kwargs)
         self.caster = caster
 
@@ -27,14 +27,19 @@ class SummonWeapon(Weapon):
     def to_hit(self, character):
         return self.caster.prof + self.caster.mod(self.caster.spells.mod)
 
-    @override
-    def damage(self, character, attack, crit):
-        return character.weapon_roll(self, crit=crit) + self.dmg_bonus
+    def attack_result(self, args: AttackResultArgs, character: Character):
+        num_dice = self.num_dice
+        if args.crit:
+            num_dice *= 2
+        args.add_damage(self.name(), num_dice * [self.die], self.dmg_bonus)
 
 
 class Summon(Character):
-    def __init__(self, slot: int, weapon: Weapon, feats=[], **kwargs):
-        base_feats = []
+    def __init__(
+        self, slot: int, weapon: Weapon, feats: Optional[List[Feat]] = None, **kwargs
+    ):
+        feats = feats or []
+        base_feats: List[Feat] = []
         base_feats.append(SummonAction(slot, weapon))
         base_feats.extend(feats)
         super().init(
@@ -47,21 +52,18 @@ class Summon(Character):
 class SummonSpell(Spell):
     def __init__(self, name: str, slot: int):
         super().__init__(name, slot, concentration=True)
-        self.character = None
 
     def summon(self, caster: Character):
         return None
 
     @override
-    def cast(self, character: Character, target: Target):
+    def cast(self, character: Character, target: Optional[Target] = None):
         self.minion = self.summon(character)
         character.add_minion(self.minion)
-        self.character = character
 
     @override
     def end(self, character: Character):
-        if self.character is not None:
-            self.character.remove_minion(self.minion)
+        character.remove_minion(self.minion)
 
 
 class FeyWeapon(SummonWeapon):
@@ -75,7 +77,7 @@ class Mirthful(Feat):
     def begin_turn(self, target: Target):
         self.used = False
 
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         if not self.used:
             args.adv = True
             self.used = True

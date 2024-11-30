@@ -24,11 +24,12 @@ class TrueStrikeFeat(Feat):
         else:
             self.num_dice = 0
 
-    def roll_attack(self, args: AttackRollArgs):
-        if args.attack.has_tag("truestrike"):
+    def attack_roll(self, args: AttackRollArgs):
+        weapon = args.attack.weapon
+        if weapon and args.attack.has_tag("truestrike"):
             args.situational_bonus += self.character.mod(
                 self.spell_mod
-            ) - self.character.mod(args.attack.weapon.mod(self.character))
+            ) - self.character.mod(weapon.mod(self.character))
 
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("truestrike"):
@@ -49,9 +50,9 @@ class TrueStrikeAction(Feat):
     def action(self, target: Target):
         self.character.spells.cast(TrueStrike(self.truestrike_weapon), target)
         for attack in self.attacks:
-            self.character.attack(target, attack)
+            self.character.weapon_attack(target, attack)
         for attack in self.nick_attacks:
-            self.character.attack(target, attack, tags=["light"])
+            self.character.weapon_attack(target, attack, tags=["light"])
 
 
 class HolyWeaponFeat(Feat):
@@ -75,7 +76,7 @@ class ValorBardBonusAttack(Feat):
 
     def after_action(self, target: Target):
         if self.character.use_bonus("ValorBardBonusAttack"):
-            self.character.attack(target, self.weapon)
+            self.character.weapon_attack(target, self.weapon)
 
 
 class ValorBard(Character):
@@ -120,8 +121,8 @@ class CMEMulticlassAction(Feat):
     def action(self, target):
         if self.level >= 7:
             self.character.cast(EldritchBlast(self.level))
-        self.character.attack(target, self.weapon)
-        self.character.attack(target, self.weapon)
+        self.character.weapon_attack(target, self.weapon)
+        self.character.weapon_attack(target, self.weapon)
 
 
 class CMEMulticlass(Character):

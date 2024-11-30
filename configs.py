@@ -48,7 +48,7 @@ SHORTCUTS = {
 def get_configs(names: Set[str]):
     for name in names:
         if name in SHORTCUTS:
-            names = SHORTCUTS[name]
+            names = set(SHORTCUTS[name])
             break
     characters = []
     for name in names:

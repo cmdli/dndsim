@@ -5,7 +5,7 @@ import sim.target
 import sim.character
 import sim.target
 from sim.weapons import Weapon
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import math
 from util.log import log
 from sim.events import CastSpellArgs
@@ -53,7 +53,7 @@ class Spellcasting:
         self.character = character
         self.mod = mod
         self.spellcaster_level = spellcaster_level(spellcaster_levels)
-        self.concentration: "sim.spells.Spell" = None
+        self.concentration: Optional["sim.spells.Spell"] = None
         self.spells: List["sim.spells.Spell"] = []
         self.spell_weapon = SpellWeapon(self.mod)
         self.slots = spell_slots(self.spellcaster_level)
@@ -73,7 +73,9 @@ class Spellcasting:
     def lowest_slot(self, min: int = 1) -> int:
         return lowest_spell_slot(self.slots, min=min)
 
-    def cast(self, spell: "sim.spells.Spell", target: "sim.target.Target" = None):
+    def cast(
+        self, spell: "sim.spells.Spell", target: Optional["sim.target.Target"] = None
+    ):
         log.record(f"Cast ({spell.name})", 1)
         args = CastSpellArgs(spell)
         self.character.events.emit("CastSpell", args)

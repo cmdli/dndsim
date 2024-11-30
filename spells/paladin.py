@@ -2,6 +2,7 @@ from sim.spells import Spell, ConcentrationSpell
 import sim.character
 import sim.target
 from util.util import roll_dice
+from typing import Optional
 
 
 class DivineSmite(Spell):
@@ -9,7 +10,13 @@ class DivineSmite(Spell):
         super().__init__("DivineSmite", slot=slot)
         self.crit = crit
 
-    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
+    def cast(
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
+    ):
+        if not target:
+            return
         num_dice = 1 + self.slot
         if self.crit:
             num_dice *= 2

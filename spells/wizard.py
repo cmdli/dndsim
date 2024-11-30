@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sim.spells import Spell, BasicSaveSpell
 from sim.target import Target
 from sim.weapons import Weapon
@@ -70,18 +70,26 @@ class ScorchingRay(Spell):
     def __init__(self, slot: int):
         super().__init__("ScorchingRay", slot)
 
-    def cast(self, character: "sim.character.Character", target: Target):
+    def cast(
+        self, character: "sim.character.Character", target: Optional[Target] = None
+    ):
+        if not target:
+            return
         super().cast(character, target)
         weapon = ScorchingRayWeapon(character, self)
         for _ in range(1 + self.slot):
-            character.attack(target, weapon, tags=["spell"])
+            character.weapon_attack(target, weapon, tags=["spell"])
 
 
 class MagicMissile(Spell):
     def __init__(self, slot: int):
         super().__init__("MagicMissile", slot)
 
-    def cast(self, character: "sim.character.Character", target: Target):
+    def cast(
+        self, character: "sim.character.Character", target: Optional[Target] = None
+    ):
+        if not target:
+            return
         super().cast(character, target)
         num_dice = 2 + self.slot
         character.do_damage(
@@ -105,10 +113,14 @@ class Firebolt(Spell):
     def __init__(self):
         super().__init__("Firebolt", slot=0)
 
-    def cast(self, character: "sim.character.Character", target: Target):
+    def cast(
+        self, character: "sim.character.Character", target: Optional[Target] = None
+    ):
+        if not target:
+            return
         super().cast(character, target)
         weapon = FireboltWeapon(character, self)
-        character.attack(target, weapon, tags=["spell"])
+        character.weapon_attack(target, weapon, tags=["spell"])
 
 
 class TrueStrike(Spell):
@@ -116,5 +128,9 @@ class TrueStrike(Spell):
         super().__init__("TrueStrike", 0)
         self.weapon = weapon
 
-    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
-        character.attack(target, self.weapon, tags=["truestrike"])
+    def cast(
+        self, character: "sim.character.Character", target: Optional[Target] = None
+    ):
+        if not target:
+            return
+        character.weapon_attack(target, self.weapon, tags=["truestrike"])

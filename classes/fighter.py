@@ -27,6 +27,7 @@ from sim.weapons import (
 )
 from util.log import log
 from typing import List
+import sim.weapons
 
 
 def get_num_attacks(level: int):
@@ -44,7 +45,7 @@ class StudiedAttacks(Feat):
     def __init__(self) -> None:
         self.enabled = False
 
-    def roll_attack(self, args):
+    def attack_roll(self, args):
         if self.enabled:
             args.adv = True
             self.enabled = False
@@ -58,7 +59,7 @@ class HeroicAdvantage(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def roll_attack(self, args):
+    def attack_roll(self, args):
         if self.used or args.adv:
             return
         if args.disadv:
@@ -91,7 +92,7 @@ class PrecisionAttack(Feat):
     def __init__(self, low=5) -> None:
         self.low = low
 
-    def roll_attack(self, args: AttackRollArgs):
+    def attack_roll(self, args: AttackRollArgs):
         if args.attack.has_tag("used_maneuver"):
             return
         maneuvers = self.character.feat("Maneuvers")
@@ -168,7 +169,7 @@ class ToppleIfNecessaryAttackAction(Feat):
             weapon = self.default_weapon
             if not target.prone and i < self.num_attacks - 1:
                 weapon = self.topple_weapon
-            self.character.attack(target, weapon, tags=["main_action"])
+            self.character.weapon_attack(target, weapon, tags=["main_action"])
 
 
 class Fighter(Character):
@@ -183,7 +184,9 @@ class Fighter(Character):
     ):
         magic_weapon = get_magic_weapon(level)
         if use_pam:
-            weapon = Glaive(magic_bonus=magic_weapon, min_crit=min_crit)
+            weapon: "sim.weapons.Weapon" = Glaive(
+                magic_bonus=magic_weapon, min_crit=min_crit
+            )
         else:
             weapon = Greatsword(magic_bonus=magic_weapon, min_crit=min_crit)
         if level >= 20:
@@ -246,7 +249,7 @@ class ChampionFighter(Fighter):
 
 class TrippingFighter(Fighter):
     def __init__(self, level: int, **kwargs):
-        feats = []
+        feats: List[Feat] = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(TrippingAttack())
@@ -294,7 +297,9 @@ class TWFFighter(Character):
         base_feats.append(TwoWeaponFighting())
         base_feats.append(SavageAttacker())
         if level >= 6:
-            weapon = Rapier(magic_bonus=magic_weapon, min_crit=min_crit)
+            weapon: "sim.weapons.Weapon" = Rapier(
+                magic_bonus=magic_weapon, min_crit=min_crit
+            )
         else:
             weapon = Shortsword(magic_bonus=magic_weapon, min_crit=min_crit)
         scimitar = Scimitar(magic_bonus=magic_weapon, min_crit=min_crit)
@@ -320,5 +325,4 @@ class TWFFighter(Character):
             level=level,
             stats=[17, 10, 10, 10, 10, 10],
             base_feats=base_feats,
-            feat_schedule=[4, 6, 8, 12, 14, 16, 19],
         )

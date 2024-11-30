@@ -2,38 +2,39 @@ import sim.target
 import sim.character
 from sim.target import Target
 import sim.events
-from typing import List
+from typing import List, Optional
+import util.taggable
 
 
-class Spell:
+class Spell(util.taggable.Taggable):
     def __init__(
         self, name: str, slot: int, concentration: bool = False, duration: int = 0
     ):
         self.name = name
         self.slot = slot
         self.concentration = concentration
-        self.character: "sim.character.Character" = None
         self.duration = duration
-        self.tags = set()
 
-    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
+    def cast(
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
+    ):
         self.character = character
 
     def end(self, character: "sim.character.Character"):
-        self.character = None
-
-    def add_tag(self, tag: str):
-        self.tags.add(tag)
-
-    def has_tag(self, tag: str):
-        return tag in self.tags
+        pass
 
 
 class ConcentrationSpell(Spell):
     def __init__(self, name: str, slot: int, **kwargs):
         super().__init__(name, slot, concentration=True, **kwargs)
 
-    def cast(self, character: "sim.character.Character", target: "sim.target.Target"):
+    def cast(
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
+    ):
         super().cast(character, target)
         character.add_effect(self.name)
 
@@ -43,7 +44,13 @@ class ConcentrationSpell(Spell):
 
 
 class BasicSaveSpell(Spell):
-    def cast(self, character: "sim.character.Character", target: Target):
+    def cast(
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
+    ):
+        if not target:
+            return
         super().cast(character, target)
         saved = target.save(character.spells.dc())
         character.do_damage(

@@ -2,14 +2,16 @@ from util.util import prof_bonus, roll_dice
 from sim.feat import Feat
 from sim.feats import Vex, Feat, Topple, Graze
 from sim.target import Target
-from sim.weapons import Weapon
-from sim.events import AttackRollArgs, AttackArgs, WeaponRollArgs, AttackResultArgs
+from sim.weapons import Weapon, WeaponAttack
+from sim.events import AttackRollArgs, AttackArgs, AttackResultArgs
 from sim.event_loop import EventLoop
 from util.log import log
-from typing import Callable, Any, Dict, List, Tuple
+from typing import Callable, Any, Dict, List, Tuple, Optional, Set
 from sim.spellcasting import Spellcasting, Spellcaster
 import sim.events
 import math
+import sim.attack
+import sim.spells
 
 STATS = ["str", "dex", "con", "int", "wis", "cha"]
 DEFAULT_STAT_MAX = 20
@@ -18,11 +20,11 @@ DEFAULT_STAT_MAX = 20
 class Character:
     def init(
         self,
-        level=None,
-        stats=None,
-        base_feats: List[Feat] = None,
+        level: int,
+        stats: List[int],
+        base_feats: Optional[List[Feat]] = None,
         spellcaster: Spellcaster = Spellcaster.NONE,
-        spell_mod: str = None,
+        spell_mod: str = "none",
     ):
         base_feats = base_feats or []
         self.level = level
@@ -36,9 +38,10 @@ class Character:
         self.stat_max = {stat: DEFAULT_STAT_MAX for stat in STATS}
         self.minions: List[Character] = []
         self.events = EventLoop()
-        self.effects = set()
+        self.effects: Set[str] = set()
         self.spells = Spellcasting(self, spell_mod, [(spellcaster, level)])
-        self.masteries = []
+        self.masteries: List[str] = []
+        self.used_bonus = False
         self.feats: Dict[str, Feat] = dict()
         for feat in [Vex(), Topple(), Graze()]:
             self.add_feat(feat)
@@ -145,95 +148,88 @@ class Character:
     def has_mastery(self, mastery: str) -> bool:
         return mastery in self.masteries
 
-    def attack(
+    def weapon_attack(
         self,
         target: Target,
         weapon: Weapon,
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
     ):
-        if tags is None:
-            tags = []
+        tags = tags or []
         args = AttackArgs(
-            character=self,
             target=target,
+            attack=WeaponAttack(weapon),
             weapon=weapon,
             tags=tags,
-            mod=weapon.mod(self),
         )
-        log.record(f"Attack:{args.weapon.name}", 1)
-        self.events.emit("before_attack")
-        to_hit = weapon.to_hit(self)
-        result = self.roll_attack(attack=args, to_hit=to_hit)
-        roll = result.roll()
-        crit = roll >= args.weapon.min_crit
-        roll_total = roll + to_hit + result.situational_bonus
-        log.output(lambda: f"{args.weapon.name} total {roll_total} vs {args.target.ac}")
-        hit = roll_total >= args.target.ac
-        self.attack_result(hit=hit, attack=args, crit=crit, roll=roll)
+        self.attack(args)
 
-    def roll_attack(self, attack: AttackArgs, to_hit: int) -> AttackRollArgs:
-        args = AttackRollArgs(attack=attack, to_hit=to_hit)
-        if attack.target.stunned:
-            args.adv = True
-        if attack.target.prone:
-            if args.attack.weapon.has_tag("ranged"):
-                args.disadv = True
-            else:
-                args.adv = True
-        if attack.target.semistunned:
-            args.adv = True
-            args.attack.target.semistunned = False
-        self.events.emit("roll_attack", args)
-        return args
-
-    def weapon_roll(self, weapon: Weapon, crit: bool = False):
-        rolls = weapon.rolls(crit=crit)
-        args = WeaponRollArgs(weapon=weapon, rolls=rolls, crit=crit)
-        self.events.emit("weapon_roll", args)
-        return sum(args.rolls)
-
-    def attack_result(
+    def attack(
         self,
-        hit: bool,
-        attack: AttackArgs,
-        crit: bool = False,
-        roll: int = 0,
+        args: AttackArgs,
     ):
-        args = AttackResultArgs(hit=hit, attack=attack, crit=crit, roll=roll)
+        log.record(f"Attack:{args.attack.name}", 1)
+        self.events.emit("before_attack")
+        to_hit = args.attack.to_hit(self)
+        roll_result = self.attack_roll(attack=args, to_hit=to_hit)
+        roll = roll_result.roll()
+        crit = roll >= args.attack.min_crit()
+        roll_total = roll + to_hit + roll_result.situational_bonus
+        hit = roll_total >= args.target.ac
+        result = AttackResultArgs(attack=args, hit=hit, crit=crit, roll=roll)
         if hit:
-            log.record(f"Hit:{attack.weapon.name}", 1)
+            log.record(f"Hit ({args.attack.name})", 1)
         else:
-            log.record(f"Miss:{attack.weapon.name}", 1)
+            log.record(f"Miss ({args.attack.name})", 1)
         if crit:
-            log.record(f"Crit:{attack.weapon.name}", 1)
-        attack.weapon.attack_result(args)
-        self.events.emit("attack_result", args)
-        for key in args.damage_sources():
-            dice = args._dice[key]
+            log.record(f"Crit ({args.attack.name})", 1)
+        args.attack.attack_result(result, self)
+        self.events.emit("attack_result", result)
+        for key in result.damage_sources():
+            dice = result._dice[key]
             if crit:
                 dice = 2 * dice
             self.do_damage(
-                target=attack.target,
+                target=args.target,
                 source=key,
                 dice=dice,
-                flat_dmg=args._flat_dmg[key],
-                attack=attack,
-                spell=attack.weapon.spell,
-                multiplier=args.dmg_multiplier,
+                flat_dmg=result._flat_dmg[key],
+                attack=args,
+                spell=args.spell,
+                multiplier=result.dmg_multiplier,
             )
+
+    def attack_roll(self, attack: AttackArgs, to_hit: int) -> AttackRollArgs:
+        target = attack.target
+        args = AttackRollArgs(attack=attack, to_hit=to_hit)
+        if target.stunned:
+            args.adv = True
+        if target.prone:
+            if attack.attack.is_ranged():
+                args.disadv = True
+            else:
+                args.adv = True
+        if target.semistunned:
+            args.adv = True
+            target.semistunned = False
+        self.events.emit("attack_roll", args)
+        return args
 
     def do_damage(
         self,
         target: Target,
         source: str,
-        dice: List[int] = None,
+        dice: List[int],
         flat_dmg: int = 0,
-        attack: "sim.events.AttackArgs" = None,
-        spell: "sim.spells.Spell" = None,
+        attack: Optional["sim.events.AttackArgs"] = None,
+        spell: Optional["sim.spells.Spell"] = None,
         multiplier: float = 1.0,
     ):
         args = sim.events.DamageRollArgs(
-            target=target, dice=dice, flat_dmg=flat_dmg, attack=attack, spell=spell
+            target=target,
+            dice=dice,
+            flat_dmg=flat_dmg,
+            attack=attack,
+            spell=spell,
         )
         self.events.emit("damage_roll", args)
         target.damage_source(source, math.floor(args.damage_total() * multiplier))

@@ -29,7 +29,7 @@ class SteadyAim(Feat):
         if self.character.use_bonus("SteadyAim"):
             self.enabled = True
 
-    def roll_attack(self, args):
+    def attack_roll(self, args):
         if self.enabled:
             args.adv = True
             self.enabled = False
@@ -42,7 +42,7 @@ class StrokeOfLuck(Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def roll_attack(self, args):
+    def attack_roll(self, args):
         if not self.used and args.roll() < 10:
             self.used = True
             args.roll1 = 20
@@ -66,7 +66,7 @@ class Assassinate(Feat):
             if do_roll(adv=True) + self.character.mod("dex") > do_roll():
                 self.adv = True
 
-    def roll_attack(self, args):
+    def attack_roll(self, args):
         if self.adv:
             args.adv = True
 
