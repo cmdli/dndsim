@@ -2,16 +2,18 @@ from util.util import prof_bonus, roll_dice
 from sim.feat import Feat
 from sim.feats import Vex, Feat, Topple, Graze
 from sim.target import Target
-from sim.weapons import Weapon, WeaponAttack
+from sim.weapons import Weapon
 from sim.events import AttackRollArgs, AttackArgs, AttackResultArgs
 from sim.event_loop import EventLoop
 from util.log import log
 from typing import Callable, Any, Dict, List, Tuple, Optional, Set
 from sim.spellcasting import Spellcasting, Spellcaster
+from sim.attack import WeaponAttack, SpellAttack
 import sim.events
 import math
 import sim.attack
 import sim.spells
+import sim.weapons
 
 STATS = ["str", "dex", "con", "int", "wis", "cha"]
 DEFAULT_STAT_MAX = 20
@@ -154,19 +156,30 @@ class Character:
         weapon: Weapon,
         tags: Optional[List[str]] = None,
     ):
-        tags = tags or []
-        args = AttackArgs(
-            target=target,
-            attack=WeaponAttack(weapon),
-            weapon=weapon,
-            tags=tags,
-        )
-        self.attack(args)
+        attack = WeaponAttack(weapon)
+        self.attack(target=target, attack=attack, weapon=weapon, tags=tags)
+
+    def spell_attack(
+        self,
+        target: Target,
+        spell: "sim.spells.Spell",
+        callback: Optional["sim.events.AttackResultCallback"] = None,
+        is_ranged: bool = False,
+    ):
+        attack = SpellAttack(spell, callback=callback, is_ranged=is_ranged)
+        self.attack(target=target, attack=attack, spell=spell)
 
     def attack(
         self,
-        args: AttackArgs,
+        target: Target,
+        attack: "sim.attack.Attack",
+        weapon: Optional["sim.weapons.Weapon"] = None,
+        spell: Optional["sim.spells.Spell"] = None,
+        tags: Optional[List[str]] = None,
     ):
+        args = AttackArgs(
+            target=target, attack=attack, weapon=weapon, spell=spell, tags=tags
+        )
         log.record(f"Attack:{args.attack.name}", 1)
         self.events.emit("before_attack")
         to_hit = args.attack.to_hit(self)

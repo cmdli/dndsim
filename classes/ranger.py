@@ -67,15 +67,15 @@ class HuntersMarkFeat(Feat):
     def __init__(
         self,
         die: int,
-        caster: Character,
+        caster: Optional[Character] = None,
         adv: bool = False,
     ) -> None:
         self.die = die
         self.adv = adv
-        self.filter = filter
         self.caster = caster
+        self.filter = filter
 
-    def apply(self, character):
+    def apply(self, character: Character):
         super().apply(character)
         if self.caster is None:
             self.caster = character
@@ -188,7 +188,9 @@ class GloomstalkerRanger(Character):
         else:
             attacks = [weapon]
         base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
-        base_feats.append(HuntersMarkFeat(10 if level >= 20 else 6, level >= 17))
+        base_feats.append(
+            HuntersMarkFeat(die=10 if level >= 20 else 6, adv=level >= 17)
+        )
         if level >= 3:
             base_feats.append(DreadAmbusher(level, weapon))
         if level >= 4:
@@ -315,7 +317,9 @@ class BeastMasterRanger(Character):
             base_feats.append(ASI(["wis"]))
         if level >= 19:
             base_feats.append(IrresistibleOffense("dex"))
-        base_feats.append(HuntersMarkFeat(10 if level >= 20 else 6, level >= 17))
+        base_feats.append(
+            HuntersMarkFeat(die=10 if level >= 20 else 6, adv=level >= 17)
+        )
         base_feats.append(
             BeastMasterAction(
                 beast=beast,

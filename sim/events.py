@@ -1,12 +1,12 @@
 import random
 from enum import Enum
+from typing import Set, List, Optional, TypeAlias, Callable, Any
+from collections import defaultdict
 
 from util.util import roll_dice
 from util.log import log
 from sim.target import Target
 import sim.weapons
-from collections import defaultdict
-from typing import Set, List, Optional
 import sim.spells
 import sim.character
 import util.taggable
@@ -24,7 +24,7 @@ class AttackArgs(util.taggable.Taggable):
     ):
         self.target = target
         self.attack = attack
-        self.weapon: Optional["sim.weapons.Weapon"] = weapon
+        self.weapon = weapon
         self.spell = spell
         if tags:
             self.add_tags(tags)
@@ -97,6 +97,11 @@ class AttackResultArgs:
 
     def misses(self) -> bool:
         return not self.hit
+
+
+AttackResultCallback: TypeAlias = Callable[
+    [AttackResultArgs, "sim.character.Character"], Any
+]
 
 
 class EnemySavingThrowArgs:

@@ -1,12 +1,15 @@
-from util.util import spell_slots, highest_spell_slot, lowest_spell_slot, cantrip_dice
+from typing import List, Tuple, Optional, Callable
+import math
 from enum import Enum
+
+from util.util import spell_slots, highest_spell_slot, lowest_spell_slot, cantrip_dice
 import sim.spells
 import sim.target
 import sim.character
 import sim.target
+import sim.attack
+import sim.events
 from sim.weapons import Weapon
-from typing import List, Tuple, Optional
-import math
 from util.log import log
 from sim.events import CastSpellArgs
 
@@ -111,3 +114,6 @@ class Spellcasting:
         elif self.character.level >= 5:
             return 2
         return 1
+
+    def to_hit(self):
+        return self.character.mod(self.mod) + self.character.prof
