@@ -1,9 +1,9 @@
+from typing import Optional
+
 import sim.weapons
 import sim.spells
 import sim.character
 import sim.target
-
-from typing import Optional
 
 
 class EldritchBlastBolt(sim.weapons.Weapon):

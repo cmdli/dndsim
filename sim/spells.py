@@ -55,6 +55,11 @@ class ConcentrationSpell(Spell):
 
 
 class BasicSaveSpell(Spell):
+    def __init__(self, name: str, slot: int, dice: List[int], flat_dmg: int):
+        super().__init__(name, slot)
+        self.dice = dice
+        self.flat_dmg = flat_dmg
+
     def cast(
         self,
         character: "sim.character.Character",
@@ -67,14 +72,8 @@ class BasicSaveSpell(Spell):
         character.do_damage(
             target,
             self.name,
-            dice=self.dice(),
-            flat_dmg=self.flat_damage(),
+            dice=self.dice,
+            flat_dmg=self.flat_dmg,
             spell=self,
             multiplier=0.5 if saved else 1,
         )
-
-    def dice(self) -> List[int]:
-        return []
-
-    def flat_damage(self) -> int:
-        return 0

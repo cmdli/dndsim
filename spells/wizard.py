@@ -1,60 +1,40 @@
 from typing import List, Optional
+
+
 import sim.attack
 from sim.spells import Spell, BasicSaveSpell
 from sim.target import Target
-from sim.weapons import Weapon
 import sim.character
 import sim.events
 import sim.spells
-
-from util.util import roll_dice
+import sim.weapons
 
 
 class MeteorSwarm(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("MeteorSwarm", slot)
+        super().__init__("MeteorSwarm", slot, dice=40 * [6])
         assert slot == 9
-
-    def dice(self) -> List[int]:
-        return 40 * [6]
 
 
 class FingerOfDeath(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("FingerOfDeath", slot)
+        super().__init__("FingerOfDeath", slot, dice=7 * [8], flat_dmg=30)
         assert slot >= 7
-
-    def dice(self) -> List[int]:
-        return 7 * [8]
-
-    def flat_damage(self) -> int:
-        return 30
 
 
 class ChainLightning(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("ChainLightning", slot)
-
-    def dice(self) -> List[int]:
-        return 10 * [8]
+        super().__init__("ChainLightning", slot, dice=10 * [8])
 
 
-class Blight(BasicSaveSpell):
+class Blight(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("Blight", slot)
-
-    def dice(self) -> List[int]:
-        num_dice = 4 + self.slot
-        return num_dice * [8]
+        super().__init__("Blight", slot, dice=(4 + self.slot) * [8])
 
 
 class Fireball(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("Fireball", slot)
-
-    def dice(self):
-        num_dice = 5 + self.slot
-        return num_dice * [6]
+        super().__init__("Fireball", slot, dice=(5 + self.slot) * [6])
 
 
 class ScorchingRay(sim.spells.TargetedSpell):

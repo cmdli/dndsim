@@ -1,22 +1,24 @@
 from typing import List, override, Optional
-from sim.events import AttackResultArgs
-from sim.spells import ConcentrationSpell, Spell, BasicSaveSpell
+
 from util.util import roll_dice, cantrip_dice
-from sim.character import Character
 from sim.target import Target
-from sim.weapons import Weapon
 import sim.event_loop
+import sim.spells
+import sim.weapons
+import sim.character
 
 
-class SpiritGuardians(ConcentrationSpell, sim.event_loop.Listener):
+class SpiritGuardians(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
     def __init__(self, slot: int, **kwargs):
         super().__init__("SpiritGuardians", slot=slot, **kwargs)
 
-    def cast(self, character: Character, target: Optional[Target] = None):
+    def cast(
+        self, character: "sim.character.Character", target: Optional[Target] = None
+    ):
         super().cast(character, target)
         character.events.add(self, ["enemy_turn"])
 
-    def end(self, character: Character):
+    def end(self, character: "sim.character.Character"):
         character.events.remove(self)
 
     def enemy_turn(self, target: Target):
@@ -26,14 +28,11 @@ class SpiritGuardians(ConcentrationSpell, sim.event_loop.Listener):
         target.damage_source("SpiritGuardians", dmg)
 
 
-class TollTheDead(Spell):
+class TollTheDead(sim.spells.TargetedSpell):
     def __init__(self):
         super().__init__("TollTheDead", slot=0, concentration=False)
 
-    def cast(self, character: Character, target: Optional[Target] = None):
-        super().cast(character, target)
-        if not target:
-            return
+    def cast_target(self, character: "sim.character.Character", target: Target):
         num_dice = cantrip_dice(character.level)
         if not target.save(character.spells.dc()):
             if target.dmg > 0:
@@ -43,25 +42,18 @@ class TollTheDead(Spell):
             target.damage_source("TollTheDead", dmg)
 
 
-class Harm(BasicSaveSpell):
+class Harm(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("Harm", slot=slot)
+        super().__init__("Harm", slot=slot, dice=14 * [6])
         assert slot >= 6
 
-    def dice(self) -> List[int]:
-        return 14 * [6]
 
-
-class InflictWounds(BasicSaveSpell):
+class InflictWounds(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("InflictWounds", slot)
-
-    def dice(self) -> List[int]:
-        num_dice = 1 + self.slot
-        return num_dice * [10]
+        super().__init__("InflictWounds", slot, dice=(1 + self.slot) * [10])
 
 
-class SpiritualWeaponWeapon(Weapon):
+class SpiritualWeaponWeapon(sim.weapons.Weapon):
     def __init__(self, slot: int, **kwargs):
         super().__init__(
             name="SpiritualWeaponWeapon",
@@ -71,20 +63,22 @@ class SpiritualWeaponWeapon(Weapon):
             override_mod="wis",
         )
 
-    def to_hit(self, character: Character):
+    def to_hit(self, character: "sim.character.Character"):
         return character.prof + character.mod("wis")
 
 
-class SpiritualWeapon(Spell, sim.event_loop.Listener):
+class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
     def __init__(self, slot: int, concentration: bool = True):
         super().__init__("SpiritualWeapon", slot=slot, concentration=concentration)
         self.weapon = SpiritualWeaponWeapon(slot=self.slot)
 
-    def cast(self, character: Character, target: Optional[Target] = None):
+    def cast(
+        self, character: "sim.character.Character", target: Optional[Target] = None
+    ):
         super().cast(character, target)
         character.events.add(self, ["after_action"])
 
-    def end(self, character: Character):
+    def end(self, character: "sim.character.Character"):
         super().end(character)
         character.events.remove(self)
 
@@ -93,16 +87,18 @@ class SpiritualWeapon(Spell, sim.event_loop.Listener):
             self.character.weapon_attack(target, self.weapon)
 
 
-class GuardianOfFaith(Spell, sim.event_loop.Listener):
+class GuardianOfFaith(sim.spells.Spell, sim.event_loop.Listener):
     def __init__(self, slot: int):
         super().__init__("GuardianOfFaith", slot, duration=10)
         self.dmg = 60
 
-    def cast(self, character: Character, target: Optional[Target] = None):
+    def cast(
+        self, character: "sim.character.Character", target: Optional[Target] = None
+    ):
         super().cast(character, target)
         character.events.add(self, ["enemy_turn"])
 
-    def end(self, character: Character):
+    def end(self, character: "sim.character.Character"):
         super().end(character)
         character.events.remove(self)
 

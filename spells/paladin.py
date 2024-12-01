@@ -1,33 +1,30 @@
-from sim.spells import Spell, ConcentrationSpell
 import sim.character
 import sim.target
+import sim.spells
 from util.util import roll_dice
-from typing import Optional
 
 
-class DivineSmite(Spell):
+class DivineSmite(sim.spells.TargetedSpell):
     def __init__(self, slot: int, crit: bool):
         super().__init__("DivineSmite", slot=slot)
         self.crit = crit
 
-    def cast(
+    def cast_target(
         self,
         character: "sim.character.Character",
-        target: Optional["sim.target.Target"] = None,
+        target: "sim.target.Target",
     ):
-        if not target:
-            return
         num_dice = 1 + self.slot
         if self.crit:
             num_dice *= 2
         target.damage_source("DivineSmite", roll_dice(num_dice, 8))
 
 
-class DivineFavor(ConcentrationSpell):
+class DivineFavor(sim.spells.ConcentrationSpell):
     def __init__(self, slot: int):
         super().__init__("DivineFavor", slot)
 
 
-class HolyWeapon(ConcentrationSpell):
+class HolyWeapon(sim.spells.ConcentrationSpell):
     def __init__(self, slot: int, **kwargs):
         super().__init__("HolyWeapon", slot=slot, **kwargs)
