@@ -1,9 +1,24 @@
-from typing import Optional
+from typing import Optional, List
 
 import sim.character
 import sim.events
 import sim.weapons
 import sim.spells
+
+
+class DamageRoll:
+    def __init__(
+        self,
+        dice: Optional[List[int]],
+        num_dice: int = 0,
+        die: int = 0,
+        flat_dmg: int = 0,
+    ) -> None:
+        if dice:
+            self.dice = dice
+        else:
+            self.dice = num_dice * die
+        self.flat_dmg = flat_dmg
 
 
 class Attack:
@@ -29,6 +44,7 @@ class SpellAttack(Attack):
     def __init__(
         self,
         spell: "sim.spells.Spell",
+        damage: Optional[DamageRoll] = None,
         callback: Optional["sim.events.AttackResultCallback"] = None,
         is_ranged: bool = False,
     ) -> None:
@@ -36,6 +52,7 @@ class SpellAttack(Attack):
         self.spell = spell
         self.callback = callback
         self.ranged = is_ranged
+        self.damage = damage
 
     def to_hit(self, character: "sim.character.Character"):
         return character.spells.to_hit()
@@ -45,6 +62,8 @@ class SpellAttack(Attack):
         args: "sim.character.AttackResultArgs",
         character: "sim.character.Character",
     ):
+        dice = 2 * self.damage.dice if args.crit else self.damage.dice
+        args.add_damage(self.spell.name, dice=dice, damage=self.damage.flat_dmg)
         if self.callback:
             self.callback(args, character)
 

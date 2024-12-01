@@ -163,10 +163,16 @@ class Character:
         self,
         target: Target,
         spell: "sim.spells.Spell",
+        damage: Optional["sim.attack.DamageRoll"] = None,
         callback: Optional["sim.events.AttackResultCallback"] = None,
         is_ranged: bool = False,
     ):
-        attack = SpellAttack(spell, callback=callback, is_ranged=is_ranged)
+        attack = SpellAttack(
+            spell,
+            callback=callback,
+            is_ranged=is_ranged,
+            damage=damage,
+        )
         self.attack(target=target, attack=attack, spell=spell)
 
     def attack(

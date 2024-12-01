@@ -1,8 +1,11 @@
 from typing import List, Optional
+import sim.attack
 from sim.spells import Spell, BasicSaveSpell
 from sim.target import Target
 from sim.weapons import Weapon
 import sim.character
+import sim.events
+import sim.spells
 
 from util.util import roll_dice
 
@@ -54,73 +57,47 @@ class Fireball(BasicSaveSpell):
         return num_dice * [6]
 
 
-class ScorchingRayWeapon(Weapon):
-    def __init__(self, character: "sim.character.Character", spell: Spell):
-        super().__init__(
-            name="ScorchingRay",
-            num_dice=2,
-            die=6,
-            damage_type="fire",
-            override_mod=character.spells.mod,
-            spell=spell,
-        )
-
-
-class ScorchingRay(Spell):
+class ScorchingRay(sim.spells.TargetedSpell):
     def __init__(self, slot: int):
         super().__init__("ScorchingRay", slot)
 
-    def cast(
-        self, character: "sim.character.Character", target: Optional[Target] = None
-    ):
-        if not target:
-            return
-        super().cast(character, target)
-        weapon = ScorchingRayWeapon(character, self)
+    def cast_target(self, character: "sim.character.Character", target: Target):
         for _ in range(1 + self.slot):
-            character.weapon_attack(target, weapon, tags=["spell"])
+            character.spell_attack(
+                target=target,
+                spell=self,
+                damage=sim.attack.DamageRoll(dice=[6, 6]),
+                is_ranged=True,
+            )
 
 
-class MagicMissile(Spell):
+class MagicMissile(sim.spells.TargetedSpell):
     def __init__(self, slot: int):
         super().__init__("MagicMissile", slot)
 
-    def cast(
-        self, character: "sim.character.Character", target: Optional[Target] = None
-    ):
-        if not target:
-            return
-        super().cast(character, target)
+    def cast_target(self, character: "sim.character.Character", target: Target):
         num_dice = 2 + self.slot
         character.do_damage(
-            target, self.name, dice=num_dice * [4], flat_dmg=2 + self.slot, spell=self
+            target,
+            source=self.name,
+            dice=num_dice * [4],
+            flat_dmg=2 + self.slot,
+            spell=self,
         )
 
 
-class FireboltWeapon(Weapon):
-    def __init__(self, character: "sim.character.Character", spell: Spell):
-        super().__init__(
-            "Firebolt",
-            num_dice=character.spells.cantrip_dice(),
-            die=10,
-            damage_type="fire",
-            override_mod=character.spells.mod,
-            spell=spell,
-        )
-
-
-class Firebolt(Spell):
+class Firebolt(sim.spells.TargetedSpell):
     def __init__(self):
         super().__init__("Firebolt", slot=0)
 
-    def cast(
-        self, character: "sim.character.Character", target: Optional[Target] = None
-    ):
-        if not target:
-            return
-        super().cast(character, target)
-        weapon = FireboltWeapon(character, self)
-        character.weapon_attack(target, weapon, tags=["spell"])
+    def cast_target(self, character: "sim.character.Character", target: Target):
+        character.spell_attack(
+            target=target,
+            spell=self,
+            damage=sim.attack.DamageRoll(
+                num_dice=character.spells.cantrip_dice(), die=10
+            ),
+        )
 
 
 class TrueStrike(Spell):

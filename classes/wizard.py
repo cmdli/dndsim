@@ -212,21 +212,21 @@ class WandOfTheWarMage(Feat):
 class PotentCantrip(Feat):
     # TODO: Add damage when enemy saves against a cantrip
     def attack_result(self, args):
-        weapon = args.attack.weapon
-        if args.misses() and weapon.spell is not None and weapon.spell.slot == 0:
-            log.record(f"PotentCantrip ({weapon.spell.name})", 1)
+        spell = args.attack.spell
+        if args.misses() and spell is not None and spell.slot == 0:
+            log.record(f"PotentCantrip ({spell.name})", 1)
             self.character.do_damage(
                 target=args.attack.target,
                 source="PotentCantrip",
                 dice=weapon.num_dice * [weapon.die],
-                spell=weapon.spell,
+                spell=spell,
                 multiplier=0.5,
             )
 
 
 class EmpoweredEvocation(Feat):
     def damage_roll(self, args: DamageRollArgs):
-        if args.spell is not None and not args.spell.has_tag("EmpoweredEvocationUsed"):
+        if args.spell and not args.spell.has_tag("EmpoweredEvocationUsed"):
             args.spell.add_tag("EmpoweredEvocationUsed")
             args.flat_dmg += self.character.mod("int")
 

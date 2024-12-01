@@ -26,6 +26,17 @@ class Spell(util.taggable.Taggable):
         pass
 
 
+class TargetedSpell(Spell):
+    def cast(self, character: "sim.character.Character", target: Target | None = None):
+        super().cast(character, target)
+        if not target:
+            return
+        self.cast_target(character, target)
+
+    def cast_target(self, character: "sim.character.Character", target: Target):
+        pass
+
+
 class ConcentrationSpell(Spell):
     def __init__(self, name: str, slot: int, **kwargs):
         super().__init__(name, slot, concentration=True, **kwargs)

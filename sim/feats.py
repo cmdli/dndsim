@@ -179,9 +179,11 @@ class Vex(Feat):
             self.vexing = False
 
     def attack_result(self, args):
+        weapon = args.attack.weapon
         if (
             args.hits()
-            and args.attack.weapon.mastery == "vex"
+            and weapon
+            and weapon.mastery == "vex"
             and self.character.has_mastery("vex")
         ):
             self.vexing = True
@@ -205,9 +207,7 @@ class Graze(Feat):
         weapon = args.attack.weapon
         if not weapon or not args.misses():
             return
-        if args.attack.weapon.mastery == "graze" and self.character.has_mastery(
-            "graze"
-        ):
+        if weapon.mastery == "graze" and self.character.has_mastery("graze"):
             mod = weapon.mod(self.character)
             args.attack.target.damage_source("Graze", self.character.mod(mod))
 
