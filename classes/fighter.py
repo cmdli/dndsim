@@ -113,7 +113,7 @@ class TrippingAttack(Feat):
         maneuvers = self.character.feat("Maneuvers")
         die = maneuvers.use()
         if die > 0:
-            args.add_damage_dice("TrippingAttack", 1, die)
+            args.add_damage(source="TrippingAttack", dice=[die])
             if not args.attack.target.save(self.character.dc("str")):
                 args.attack.target.prone = True
             args.attack.add_tag("used_maneuver")

@@ -69,28 +69,23 @@ class AttackResultArgs:
         crit: bool,
         roll: int,
     ):
-        self._dice: defaultdict[str, List[int]] = defaultdict(list)
-        self._flat_dmg: defaultdict[str, int] = defaultdict(int)
+        self.damage_rolls: List["sim.attack.DamageRoll"] = []
         self.hit = hit
         self.dmg_multiplier = 1.0
         self.attack = attack
         self.crit = crit
         self.roll = roll
 
-    def add_damage(self, source: str, dice: List[int], damage: int = 0):
-        if damage:
-            self._flat_dmg[source] += damage
-        if dice:
-            self._dice[source].extend(dice)
-
-    def add_damage_dice(self, source: str, num: int, size: int):
-        self.add_damage(source, dice=[size] * num)
-
-    def add_flat_damage(self, source: str, damage: int):
-        self.add_damage(source, [], damage=damage)
-
-    def damage_sources(self) -> Set[str]:
-        return set(self._dice.keys()).union(set(self._flat_dmg.keys()))
+    def add_damage(
+        self,
+        source: str,
+        dice: Optional[List[int]] = None,
+        damage: int = 0,
+    ):
+        dice = dice or []
+        self.damage_rolls.append(
+            sim.attack.DamageRoll(source=source, dice=dice, flat_dmg=damage)
+        )
 
     def hits(self) -> bool:
         return self.hit
@@ -118,17 +113,11 @@ class DamageRollArgs:
     def __init__(
         self,
         target: Target,
-        dice: List[int],
-        flat_dmg: int = 0,
+        damage: sim.attack.DamageRoll,
         attack: Optional[AttackArgs] = None,
         spell: Optional["sim.spells.Spell"] = None,
     ) -> None:
         self.target = target
-        self.dice = dice or []
-        self.rolls = [roll_dice(1, die) for die in self.dice]
-        self.flat_dmg = flat_dmg
+        self.damage = damage
         self.spell = spell
         self.attack = attack
-
-    def damage_total(self):
-        return self.flat_dmg + sum(self.rolls)

@@ -81,12 +81,16 @@ class HuntersMarkFeat(Feat):
             self.caster = character
 
     def attack_roll(self, args: AttackRollArgs):
-        if self.caster.spells.concentrating_on("HuntersMark") and self.adv:
+        if (
+            self.caster
+            and self.caster.spells.concentrating_on("HuntersMark")
+            and self.adv
+        ):
             args.adv = True
 
     def attack_result(self, args):
         if args.hits() and self.caster.spells.concentrating_on("HuntersMark"):
-            args.add_damage_dice("HuntersMark", 1, self.die)
+            args.add_damage(source="HuntersMark", dice=[self.die])
 
 
 class Gloomstalker(Feat):
@@ -108,7 +112,7 @@ class Gloomstalker(Feat):
 
     def attack_result(self, args):
         if args.hits() and self.using:
-            args.add_damage_dice("Gloomstalker", 1, 8)
+            args.add_damage(source="Gloomstalker", dice=[8])
 
     def end_turn(self, target):
         if self.first_turn and self.used_attack:
@@ -140,7 +144,7 @@ class DreadAmbusher(Feat):
         if args.hits() and not self.used and self.uses > 0:
             self.used = True
             self.uses -= 1
-            args.add_damage_dice("DreadAmbusher", 2, self.die)
+            args.add_damage(source="DreadAmbusher", dice=2 * [self.die])
             if self.weapon:
                 self.character.weapon_attack(args.attack.target, self.weapon)
 
@@ -151,7 +155,7 @@ class BeastChargeFeat(Feat):
 
     def attack_result(self, args):
         if args.hits() and isinstance(args.attack.weapon, BeastMaul):
-            args.add_damage_dice("Charge", 1, 6)
+            args.add_damage(source="Charge", dice=[6])
             if not args.attack.target.prone and not args.attack.target.save(
                 self.character.dc("wis")
             ):

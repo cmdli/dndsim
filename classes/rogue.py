@@ -21,7 +21,7 @@ class SneakAttack(Feat):
     def attack_result(self, args):
         if args.hits() and not self.used:
             self.used = True
-            args.add_damage_dice("SneakAttack", self.num, 6)
+            args.add_damage(source="SneakAttack", dice=self.num * [6])
 
 
 class SteadyAim(Feat):
@@ -73,7 +73,7 @@ class Assassinate(Feat):
     def attack_result(self, args):
         if args.hits() and self.first_turn and not self.used_dmg:
             self.used_dmg = True
-            args.add_flat_damage("Assassinate", self.dmg)
+            args.add_damage(source="Assassinate", damage=self.dmg)
 
     def end_turn(self, target):
         self.adv = False

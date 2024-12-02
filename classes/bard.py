@@ -33,7 +33,7 @@ class TrueStrikeFeat(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("truestrike"):
-            args.add_damage_dice("TrueStrike", self.num_dice, 6)
+            args.add_damage(source="TrueStrike", dice=self.num_dice * [6])
 
 
 class TrueStrikeAction(Feat):
@@ -67,7 +67,7 @@ class HolyWeaponFeat(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.attack.weapon.name == self.weapon.name:
-            args.add_damage_dice("HolyWeapon", 2, 8)
+            args.add_damage(source="HolyWeapon", dice=[8, 8])
 
 
 class ValorBardBonusAttack(Feat):

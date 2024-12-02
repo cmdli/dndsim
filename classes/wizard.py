@@ -7,6 +7,7 @@ from util.util import (
     spell_slots,
     roll_dice,
     do_roll,
+    safe_cast,
 )
 from util.log import log
 from sim.target import Target
@@ -28,6 +29,8 @@ from sim.summons import SummonFey
 from sim.feats import ASI
 from sim.spells import Spell
 from typing import List, Optional
+
+import sim.attack
 
 
 class Wizard:
@@ -212,13 +215,16 @@ class WandOfTheWarMage(Feat):
 class PotentCantrip(Feat):
     # TODO: Add damage when enemy saves against a cantrip
     def attack_result(self, args):
-        spell = args.attack.spell
-        if args.misses() and spell is not None and spell.slot == 0:
+        if args.misses():
+            return
+        attack = safe_cast(sim.attack.SpellAttack, args.attack.attack)
+        if attack and attack.spell.slot == 0:
+            spell = attack.spell
             log.record(f"PotentCantrip ({spell.name})", 1)
             self.character.do_damage(
                 target=args.attack.target,
                 source="PotentCantrip",
-                dice=weapon.num_dice * [weapon.die],
+                dice=attack.damage.dice,
                 spell=spell,
                 multiplier=0.5,
             )
@@ -228,7 +234,7 @@ class EmpoweredEvocation(Feat):
     def damage_roll(self, args: DamageRollArgs):
         if args.spell and not args.spell.has_tag("EmpoweredEvocationUsed"):
             args.spell.add_tag("EmpoweredEvocationUsed")
-            args.flat_dmg += self.character.mod("int")
+            args.damage.flat_dmg += self.character.mod("int")
 
 
 class WizardAction(Feat):

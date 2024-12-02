@@ -203,15 +203,12 @@ class Character:
             log.record(f"Crit ({args.attack.name})", 1)
         args.attack.attack_result(result, self)
         self.events.emit("attack_result", result)
-        for key in result.damage_sources():
-            dice = result._dice[key]
+        for damage in result.damage_rolls:
             if crit:
-                dice = 2 * dice
+                damage.dice = 2 * damage.dice
             self.do_damage(
                 target=args.target,
-                source=key,
-                dice=dice,
-                flat_dmg=result._flat_dmg[key],
+                damage=damage,
                 attack=args,
                 spell=args.spell,
                 multiplier=result.dmg_multiplier,
@@ -236,19 +233,18 @@ class Character:
     def do_damage(
         self,
         target: Target,
-        source: str,
-        dice: List[int],
-        flat_dmg: int = 0,
+        damage: sim.attack.DamageRoll,
         attack: Optional["sim.events.AttackArgs"] = None,
         spell: Optional["sim.spells.Spell"] = None,
         multiplier: float = 1.0,
     ):
         args = sim.events.DamageRollArgs(
             target=target,
-            dice=dice,
-            flat_dmg=flat_dmg,
+            damage=damage,
             attack=attack,
             spell=spell,
         )
         self.events.emit("damage_roll", args)
-        target.damage_source(source, math.floor(args.damage_total() * multiplier))
+        target.damage_source(
+            damage.source, math.floor(args.damage.total() * multiplier)
+        )

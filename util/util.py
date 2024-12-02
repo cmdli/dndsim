@@ -1,6 +1,7 @@
 import random
 import math
 from collections import defaultdict
+from typing import Optional, Any, Type
 
 from util.log import log
 
@@ -98,3 +99,10 @@ def cantrip_dice(level):
     elif level >= 5:
         return 2
     return 1
+
+
+def safe_cast[T](cls: type[T], obj: Any) -> Optional[T]:
+    if isinstance(obj, cls):
+        return obj
+    else:
+        return None

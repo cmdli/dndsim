@@ -29,12 +29,12 @@ class ChainLightning(BasicSaveSpell):
 
 class Blight(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("Blight", slot, dice=(4 + self.slot) * [8])
+        super().__init__("Blight", slot, dice=(4 + slot) * [8])
 
 
 class Fireball(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("Fireball", slot, dice=(5 + self.slot) * [6])
+        super().__init__("Fireball", slot, dice=(5 + slot) * [6])
 
 
 class ScorchingRay(sim.spells.TargetedSpell):
@@ -46,7 +46,7 @@ class ScorchingRay(sim.spells.TargetedSpell):
             character.spell_attack(
                 target=target,
                 spell=self,
-                damage=sim.attack.DamageRoll(dice=[6, 6]),
+                damage=sim.attack.DamageRoll(source=self.name, dice=[6, 6]),
                 is_ranged=True,
             )
 
@@ -59,9 +59,12 @@ class MagicMissile(sim.spells.TargetedSpell):
         num_dice = 2 + self.slot
         character.do_damage(
             target,
-            source=self.name,
-            dice=num_dice * [4],
-            flat_dmg=2 + self.slot,
+            damage=sim.attack.DamageRoll(
+                source=self.name,
+                num_dice=num_dice,
+                die=4,
+                flat_dmg=2 + self.slot,
+            ),
             spell=self,
         )
 
@@ -75,7 +78,9 @@ class Firebolt(sim.spells.TargetedSpell):
             target=target,
             spell=self,
             damage=sim.attack.DamageRoll(
-                num_dice=character.spells.cantrip_dice(), die=10
+                source=self.name,
+                num_dice=character.spells.cantrip_dice(),
+                die=10,
             ),
         )
 

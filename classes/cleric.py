@@ -55,7 +55,7 @@ class BlessedStrikes(Feat):
     def attack_result(self, args):
         if args.hits() and not self.used:
             self.used = True
-            args.add_damage_dice("BlessedStrikes", self.num_dice, 8)
+            args.add_damage("BlessedStrikes", dice=self.num_dice * [8])
 
 
 class Cleric(sim.character.Character):

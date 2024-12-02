@@ -5,20 +5,28 @@ import sim.events
 import sim.weapons
 import sim.spells
 
+from util.util import roll_dice
+
 
 class DamageRoll:
     def __init__(
         self,
-        dice: Optional[List[int]],
+        source: str = "Unknown",
+        dice: Optional[List[int]] = None,
         num_dice: int = 0,
         die: int = 0,
         flat_dmg: int = 0,
     ) -> None:
+        self.source = source
         if dice:
             self.dice = dice
         else:
-            self.dice = num_dice * die
+            self.dice = num_dice * [die]
         self.flat_dmg = flat_dmg
+        self.rolls = [roll_dice(1, die) for die in self.dice]
+
+    def total(self):
+        return self.flat_dmg + sum(self.rolls)
 
 
 class Attack:
@@ -62,8 +70,9 @@ class SpellAttack(Attack):
         args: "sim.character.AttackResultArgs",
         character: "sim.character.Character",
     ):
-        dice = 2 * self.damage.dice if args.crit else self.damage.dice
-        args.add_damage(self.spell.name, dice=dice, damage=self.damage.flat_dmg)
+        if self.damage:
+            dice = 2 * self.damage.dice if args.crit else self.damage.dice
+            args.add_damage(self.spell.name, dice=dice, damage=self.damage.flat_dmg)
         if self.callback:
             self.callback(args, character)
 

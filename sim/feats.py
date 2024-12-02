@@ -40,7 +40,7 @@ class GreatWeaponMaster(Feat):
         if args.misses():
             return
         if args.attack.weapon.has_tag("heavy"):
-            args.add_flat_damage("GreatWeaponMaster", self.character.prof)
+            args.add_damage(source="GreatWeaponMaster", damage=self.character.prof)
         if args.crit:
             self.bonus_attack_enabled = True
 
@@ -85,9 +85,9 @@ class GreatWeaponFighting(Feat):
         if attack:
             weapon = attack.weapon
         if weapon and weapon.has_tag("twohanded"):
-            for i in range(len(args.rolls)):
-                if args.rolls[i] == 1 or args.rolls[i] == 2:
-                    args.rolls[i] = 3
+            for i in range(len(args.damage.rolls)):
+                if args.damage.rolls[i] == 1 or args.damage.rolls[i] == 2:
+                    args.damage.rolls[i] = 3
 
 
 class CrossbowExpert(Feat):
@@ -154,7 +154,7 @@ class BoomingBlade(Feat):
             extra_dice = 1
         else:
             return
-        args.add_damage_dice("BoomingBlade", extra_dice, 8)
+        args.add_damage(source="BoomingBlade", dice=extra_dice * [8])
 
 
 class LightWeaponBonusAttack(Feat):
@@ -232,7 +232,7 @@ class IrresistibleOffense(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.roll == 20:
-            args.add_flat_damage("IrresistibleOffense", self.character.str)
+            args.add_damage(source="IrresistibleOffense", damage=self.character.str)
 
 
 class WeaponMaster(Feat):
@@ -269,9 +269,9 @@ class SavageAttacker(Feat):
         if self.used:
             return
         self.used = True
-        new_rolls = [roll_dice(1, die) for die in args.dice]
-        if sum(new_rolls) > sum(args.rolls):
-            args.rolls = new_rolls
+        new_rolls = [roll_dice(1, die) for die in args.damage.dice]
+        if sum(new_rolls) > sum(args.damage.rolls):
+            args.damage.rolls = new_rolls
 
 
 class Piercer(Feat):
@@ -284,4 +284,4 @@ class Piercer(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.crit and args.attack.weapon.damage_type == "piercing":
-            args.add_damage_dice("PiercerCrit", 1, args.attack.weapon.die)
+            args.add_damage(source="PiercerCrit", dice=[args.attack.weapon.die])

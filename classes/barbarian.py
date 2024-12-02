@@ -24,7 +24,7 @@ class Beserker(Feat):
     def attack_result(self, args):
         if args.hits() and not self.used:
             self.used = True
-            args.add_damage_dice("Berserker", self.num_dice, 6)
+            args.add_damage(source="Berserker", dice=self.num_dice * [6])
 
 
 class BrutalStrike(Feat):
@@ -42,7 +42,7 @@ class BrutalStrike(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("brutal_strike"):
-            args.add_damage_dice("BrutalStrike", self.num_dice, 10)
+            args.add_damage(source="BrutalStrike", dice=self.num_dice * [10])
 
 
 class Retaliation(Feat):
@@ -74,7 +74,7 @@ class Rage(Feat):
 
     def attack_result(self, args):
         if args.hits() and self.raging:
-            args.add_flat_damage("Rage", self.dmg)
+            args.add_damage(source="Rage", damage=self.dmg)
 
 
 class RecklessAttack(Feat):

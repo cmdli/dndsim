@@ -38,7 +38,7 @@ class OldSharpshooter(Feat):
 
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("Sharpshooter"):
-            args.add_flat_damage("Sharpshooter", 10)
+            args.add_damage(source="Sharpshooter", damage=10)
 
 
 class FightingSpirit(Feat):

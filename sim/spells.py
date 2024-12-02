@@ -1,8 +1,9 @@
+from typing import List, Optional
+
 import sim.target
 import sim.character
-from sim.target import Target
 import sim.events
-from typing import List, Optional
+import sim.attack
 import util.taggable
 
 
@@ -27,13 +28,19 @@ class Spell(util.taggable.Taggable):
 
 
 class TargetedSpell(Spell):
-    def cast(self, character: "sim.character.Character", target: Target | None = None):
+    def cast(
+        self,
+        character: "sim.character.Character",
+        target: "sim.target.Target" | None = None,
+    ):
         super().cast(character, target)
         if not target:
             return
         self.cast_target(character, target)
 
-    def cast_target(self, character: "sim.character.Character", target: Target):
+    def cast_target(
+        self, character: "sim.character.Character", target: "sim.target.Target"
+    ):
         pass
 
 
@@ -55,7 +62,7 @@ class ConcentrationSpell(Spell):
 
 
 class BasicSaveSpell(Spell):
-    def __init__(self, name: str, slot: int, dice: List[int], flat_dmg: int):
+    def __init__(self, name: str, slot: int, dice: List[int], flat_dmg: int = 0):
         super().__init__(name, slot)
         self.dice = dice
         self.flat_dmg = flat_dmg
@@ -71,9 +78,11 @@ class BasicSaveSpell(Spell):
         saved = target.save(character.spells.dc())
         character.do_damage(
             target,
-            self.name,
-            dice=self.dice,
-            flat_dmg=self.flat_dmg,
+            damage=sim.attack.DamageRoll(
+                source=self.name,
+                dice=self.dice,
+                flat_dmg=self.flat_dmg,
+            ),
             spell=self,
             multiplier=0.5 if saved else 1,
         )

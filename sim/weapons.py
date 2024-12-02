@@ -87,37 +87,17 @@ class Weapon(Taggable):
         self, args: "sim.events.AttackResultArgs", character: "sim.character.Character"
     ):
         if args.hits():
-            args.add_damage_dice(self.name(), self.num_dice, self.die)
+            damage = self.dmg_bonus
+            args.add_damage(source=self.name(), dice=self.num_dice * [self.die])
             if not args.attack.has_tag("light") and not args.attack.has_tag("spell"):
                 mod = self.mod(character)
-                args.add_flat_damage(
-                    self.name(),
-                    character.mod(mod),
-                )
-            args.add_flat_damage(self.name(), self.dmg_bonus)
+                damage += character.mod(mod)
+            args.add_damage(
+                source=self.name(), dice=self.num_dice * [self.die], damage=damage
+            )
 
     def min_crit(self) -> int:
         return self._min_crit
-
-
-class WeaponAttack(sim.attack.Attack):
-    def __init__(self, weapon: Weapon) -> None:
-        super().__init__(weapon.name())
-        self.weapon = weapon
-
-    def to_hit(self, character: "sim.character.Character"):
-        return self.weapon.to_hit(character)
-
-    def attack_result(
-        self, args: "sim.events.AttackResultArgs", character: "sim.character.Character"
-    ):
-        self.weapon.attack_result(args, character)
-
-    def min_crit(self):
-        return self.weapon.min_crit()
-
-    def is_ranged(self):
-        return self.weapon.has_tag("ranged")
 
 
 class Glaive(Weapon):

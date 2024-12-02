@@ -37,7 +37,7 @@ class DivineSmiteFeat(Feat):
 class ImprovedDivineSmite(Feat):
     def attack_result(self, args):
         if args.hits():
-            args.add_damage_dice("ImprovedDivineSmite", 1, 8)
+            args.add_damage(source="ImprovedDivineSmite", dice=[8])
 
 
 class SacredWeapon(Feat):
@@ -65,7 +65,7 @@ class DivineFavorFeat(Feat):
 
     def attack_result(self, args):
         if args.hits() and self.character.spells.concentrating_on("DivineFavor"):
-            args.add_damage_dice("DivineFavor", 1, 4)
+            args.add_damage(source="DivineFavor", dice=[4])
 
 
 class Paladin(Character):

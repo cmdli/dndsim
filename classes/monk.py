@@ -131,7 +131,7 @@ class MagicInitiateHuntersMark(Feat):
 
     def attack_result(self, args):
         if args.hits() and self.enabled:
-            args.add_damage_dice("HuntersMark", 1, 6)
+            args.add_damage(source="HuntersMark", dice=[6])
 
 
 class TavernBrawler(Feat):
@@ -139,9 +139,9 @@ class TavernBrawler(Feat):
         self.die = die
 
     def damage_roll(self, args: DamageRollArgs):
-        for i in range(len(args.rolls)):
-            if args.rolls[i] == 1:
-                args.rolls[i] = roll_dice(1, args.dice[i])
+        for i in range(len(args.damage.rolls)):
+            if args.damage.rolls[i] == 1:
+                args.damage.rolls[i] = roll_dice(1, args.damage.dice[i])
 
 
 class Monk(Character):
