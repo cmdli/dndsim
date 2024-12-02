@@ -1,3 +1,5 @@
+from typing import List
+
 from util.util import get_magic_weapon, roll_dice
 from sim.character import Character
 from feats import (
@@ -6,12 +8,12 @@ from feats import (
     IrresistibleOffense,
     WeaponMaster,
 )
-from sim.feat import Feat
 from sim.weapons import Weapon
 from sim.events import DamageRollArgs
 from sim.target import Target
 from util.log import log
-from typing import List
+
+import sim.feat
 
 
 def martial_arts_die(level: int):
@@ -25,14 +27,14 @@ def martial_arts_die(level: int):
         return 6
 
 
-class BodyAndMind(Feat):
+class BodyAndMind(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
         character.dex += 4
         character.wis += 4
 
 
-class FlurryOfBlows(Feat):
+class FlurryOfBlows(sim.feat.Feat):
     def __init__(self, num_attacks, weapon):
         self.num_attacks = num_attacks
         self.weapon = weapon
@@ -46,7 +48,7 @@ class FlurryOfBlows(Feat):
             self.character.weapon_attack(target, self.weapon)
 
 
-class OpenHandTechnique(Feat):
+class OpenHandTechnique(sim.feat.Feat):
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("flurry"):
             if not args.attack.target.save(self.character.dc("wis")):
@@ -54,7 +56,7 @@ class OpenHandTechnique(Feat):
                 args.attack.target.prone = True
 
 
-class Grappler(Feat):
+class Grappler(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
         character.dex += 1
@@ -68,7 +70,7 @@ class Grappler(Feat):
             args.adv = True
 
 
-class StunningStrike(Feat):
+class StunningStrike(sim.feat.Feat):
     def __init__(self, weapon_die, avoid_on_grapple: bool = False):
         self.weapon_die = weapon_die
         self.stuns = []
@@ -94,7 +96,7 @@ class StunningStrike(Feat):
             target.semistunned = True
 
 
-class Ki(Feat):
+class Ki(sim.feat.Feat):
     def __init__(self, max_ki):
         self.max_ki = max_ki
 
@@ -113,7 +115,7 @@ class Fists(Weapon):
         )
 
 
-class MagicInitiateHuntersMark(Feat):
+class MagicInitiateHuntersMark(sim.feat.Feat):
     def __init__(self) -> None:
         self.enabled = False
         self.used = False
@@ -134,7 +136,7 @@ class MagicInitiateHuntersMark(Feat):
             args.add_damage(source="HuntersMark", dice=[6])
 
 
-class TavernBrawler(Feat):
+class TavernBrawler(sim.feat.Feat):
     def __init__(self, die: int) -> None:
         self.die = die
 
@@ -149,7 +151,7 @@ class Monk(Character):
         self, level, use_nick: bool = False, use_grappler: bool = True, **kwargs
     ):
         magic_weapon = get_magic_weapon(level)
-        base_feats: List[Feat] = []
+        base_feats: List[sim.feat.Feat] = []
         weapon_die = martial_arts_die(level)
         base_feats.append(TavernBrawler(weapon_die))
         fists = Fists(weapon_die, bonus=magic_weapon)

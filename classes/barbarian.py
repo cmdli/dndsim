@@ -1,3 +1,5 @@
+from typing import List
+
 from util.util import get_magic_weapon, roll_dice
 from sim.character import Character
 from feats import (
@@ -9,11 +11,12 @@ from feats import (
     SavageAttacker,
     WeaponMasteries,
 )
-from sim.feat import Feat
 from sim.weapons import Glaive, Greatsword, GlaiveButt
 
+import sim.feat
 
-class Beserker(Feat):
+
+class Beserker(sim.feat.Feat):
     def __init__(self, num_dice: int):
         self.used = False
         self.num_dice = num_dice
@@ -27,7 +30,7 @@ class Beserker(Feat):
             args.add_damage(source="Berserker", dice=self.num_dice * [6])
 
 
-class BrutalStrike(Feat):
+class BrutalStrike(sim.feat.Feat):
     def __init__(self, num_dice: int):
         self.num_dice = num_dice
 
@@ -45,7 +48,7 @@ class BrutalStrike(Feat):
             args.add_damage(source="BrutalStrike", dice=self.num_dice * [10])
 
 
-class Retaliation(Feat):
+class Retaliation(sim.feat.Feat):
     def __init__(self, weapon):
         self.weapon = weapon
 
@@ -53,14 +56,14 @@ class Retaliation(Feat):
         self.character.weapon_attack(target, weapon=self.weapon)
 
 
-class PrimalChampion(Feat):
+class PrimalChampion(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
         character.str += 4
         character.con += 4
 
 
-class Rage(Feat):
+class Rage(sim.feat.Feat):
     def __init__(self, dmg):
         self.raging = False
         self.dmg = dmg
@@ -77,7 +80,7 @@ class Rage(Feat):
             args.add_damage(source="Rage", damage=self.dmg)
 
 
-class RecklessAttack(Feat):
+class RecklessAttack(sim.feat.Feat):
     def begin_turn(self, target):
         self.enabled = True
 
@@ -101,7 +104,7 @@ class Barbarian(Character):
     def __init__(self, level, use_pam=False, **kwargs):
         rage_dmg = rage_damage(level)
         magic_weapon = get_magic_weapon(level)
-        base_feats = []
+        base_feats: List["sim.feat.Feat"] = []
         base_feats.append(WeaponMasteries(["graze"]))
         base_feats.append(SavageAttacker())
         base_feats.append(Rage(dmg=rage_dmg))

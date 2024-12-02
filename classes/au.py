@@ -2,6 +2,7 @@
 # My (roughly optimized) 5e character in the old system, Assault Unit 21
 # Samarai Fighter, uses the crossbow expert + sharpshooter build
 #
+import random
 
 from sim.character import Character
 from sim.events import AttackRollArgs
@@ -10,12 +11,12 @@ from sim.target import Target
 from sim.weapons import Weapon
 from util.util import get_magic_weapon
 from classes.fighter import ActionSurge
-from sim.feat import Feat
-import random
 from typing import List
 
+import sim.feat
 
-class OldCrossbowExpert(Feat):
+
+class OldCrossbowExpert(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
@@ -28,7 +29,7 @@ class OldCrossbowExpert(Feat):
             self.character.weapon_attack(target, self.weapon)
 
 
-class OldSharpshooter(Feat):
+class OldSharpshooter(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
         character.dex += 1
@@ -42,7 +43,7 @@ class OldSharpshooter(Feat):
             args.add_damage(source="Sharpshooter", damage=10)
 
 
-class FightingSpirit(Feat):
+class FightingSpirit(sim.feat.Feat):
     def __init__(self, regain_on_initiative: bool = False) -> None:
         self.enabled = False
         self.fighting_spirit = 3
@@ -68,7 +69,7 @@ class FightingSpirit(Feat):
         self.enabled = False
 
 
-class RapidStrike(Feat):
+class RapidStrike(sim.feat.Feat):
     def __init__(self) -> None:
         self.used = False
 
@@ -87,7 +88,7 @@ class OldHandCrossbow(Weapon):
         super().__init__(name="OldHandCrossbow", num_dice=1, die=6, **kwargs)
 
 
-class Blessed(Feat):
+class Blessed(sim.feat.Feat):
     def attack_roll(self, args: AttackRollArgs):
         args.situational_bonus += random.randint(1, 4)
 
@@ -96,7 +97,7 @@ class AssaultUnit(Character):
     def __init__(self, level: int, blessed: bool = False, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
         weapon = OldHandCrossbow(bonus=magic_weapon)
-        base_feats: List[Feat] = []
+        base_feats: List["sim.feat.Feat"] = []
         if level >= 20:
             attacks = 4 * [weapon]
         elif level >= 11:

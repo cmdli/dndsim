@@ -1,6 +1,5 @@
 from sim.character import Character
-from sim.feat import Feat
-from feats import ASI, AttackAction, DualWielder
+from feats import ASI, DualWielder
 from sim.weapons import Weapon, Shortsword, Scimitar
 from sim.events import AttackRollArgs
 from util.util import roll_dice, get_magic_weapon
@@ -11,9 +10,11 @@ from spells.paladin import HolyWeapon
 from spells.warlock import EldritchBlast
 from sim.spellcasting import Spellcaster
 
+import sim.feat
+
 
 # TODO: Refactor this into a spell
-class TrueStrikeFeat(Feat):
+class TrueStrikeFeat(sim.feat.Feat):
     def __init__(self, level: int, spell_mod: str) -> None:
         self.spell_mod = spell_mod
         if level >= 17:
@@ -37,7 +38,7 @@ class TrueStrikeFeat(Feat):
             args.add_damage(source="TrueStrike", dice=self.num_dice * [6])
 
 
-class TrueStrikeAction(Feat):
+class TrueStrikeAction(sim.feat.Feat):
     def __init__(
         self,
         truestrike_weapon: Weapon,
@@ -56,7 +57,7 @@ class TrueStrikeAction(Feat):
             self.character.weapon_attack(target, attack, tags=["light"])
 
 
-class HolyWeaponFeat(Feat):
+class HolyWeaponFeat(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
@@ -71,7 +72,7 @@ class HolyWeaponFeat(Feat):
             args.add_damage(source="HolyWeapon", dice=[8, 8])
 
 
-class ValorBardBonusAttack(Feat):
+class ValorBardBonusAttack(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
@@ -83,7 +84,7 @@ class ValorBardBonusAttack(Feat):
 class ValorBard(Character):
     def __init__(self, level: int, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
-        base_feats: List[Feat] = []
+        base_feats: List["sim.feat.Feat"] = []
         weapon = Shortsword(magic_bonus=magic_weapon)
         scimitar = Scimitar(magic_bonus=magic_weapon)
         base_feats.append(TrueStrikeFeat(level, "cha"))
@@ -114,7 +115,7 @@ class ValorBard(Character):
         )
 
 
-class CMEMulticlassAction(Feat):
+class CMEMulticlassAction(sim.feat.Feat):
     def __init__(self, level: int, weapon: Weapon) -> None:
         self.level = level
         self.weapon = weapon
@@ -131,7 +132,7 @@ class CMEMulticlass(Character):
         # Valor Bard 5
         # Warlock 1
         # Valor Bard 19
-        base_feats: List[Feat] = []
+        base_feats: List[sim.feat.Feat] = []
         weapon = Scimitar()
         base_feats.append(CMEMulticlassAction(level, weapon))
         if level >= 4:

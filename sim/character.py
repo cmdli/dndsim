@@ -1,19 +1,20 @@
-from util.util import prof_bonus, roll_dice
-from sim.feat import Feat
+from typing import Dict, List, Optional, Set
+import math
+
+from util.util import prof_bonus
 from feats import Vex, Topple, Graze
-from sim.target import Target
 from sim.weapons import Weapon
 from sim.events import AttackRollArgs, AttackArgs, AttackResultArgs
 from sim.event_loop import EventLoop
 from util.log import log
-from typing import Callable, Any, Dict, List, Tuple, Optional, Set
 from sim.spellcasting import Spellcasting, Spellcaster
 from sim.attack import WeaponAttack, SpellAttack
 import sim.events
-import math
 import sim.attack
 import sim.spells
 import sim.weapons
+import sim.feat
+import sim.target
 
 STATS = ["str", "dex", "con", "int", "wis", "cha"]
 DEFAULT_STAT_MAX = 20
@@ -24,7 +25,7 @@ class Character:
         self,
         level: int,
         stats: List[int],
-        base_feats: Optional[List[Feat]] = None,
+        base_feats: Optional[List["sim.feat.Feat"]] = None,
         spellcaster: Spellcaster = Spellcaster.NONE,
         spell_mod: str = "none",
     ):
@@ -44,13 +45,13 @@ class Character:
         self.spells = Spellcasting(self, spell_mod, [(spellcaster, level)])
         self.masteries: List[str] = []
         self.used_bonus = False
-        self.feats: Dict[str, Feat] = dict()
+        self.feats: Dict[str, "sim.feat.Feat"] = dict()
         for feat in [Vex(), Topple(), Graze()]:
             self.add_feat(feat)
         for feat in base_feats:
             self.add_feat(feat)
 
-    def add_feat(self, feat: Feat):
+    def add_feat(self, feat: "sim.feat.Feat"):
         feat.apply(self)
         self.feats[feat.name()] = feat
         self.events.add(feat, feat.events())
@@ -105,19 +106,19 @@ class Character:
     #       LIFECYCLE EVENTS
     # =============================
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         log.record("Turn", 1)
         self.actions = 1
         self.used_bonus = False
         self.events.emit("begin_turn", target)
 
-    def end_turn(self, target: Target):
+    def end_turn(self, target: "sim.target.Target"):
         self.events.emit("end_turn", target)
         if not self.used_bonus:
             log.record(f"Bonus (None)", 1)
         log.output(lambda: "")
 
-    def turn(self, target: Target):
+    def turn(self, target: "sim.target.Target"):
         self.begin_turn(target)
         self.events.emit("before_action", target)
         while self.actions > 0:
@@ -137,7 +138,7 @@ class Character:
         self.short_rest()
         self.events.emit("long_rest")
 
-    def enemy_turn(self, target: Target):
+    def enemy_turn(self, target: "sim.target.Target"):
         self.events.emit("enemy_turn", target)
 
     # ============================
@@ -152,7 +153,7 @@ class Character:
 
     def weapon_attack(
         self,
-        target: Target,
+        target: "sim.target.Target",
         weapon: Weapon,
         tags: Optional[List[str]] = None,
     ):
@@ -161,7 +162,7 @@ class Character:
 
     def spell_attack(
         self,
-        target: Target,
+        target: "sim.target.Target",
         spell: "sim.spells.Spell",
         damage: Optional["sim.attack.DamageRoll"] = None,
         callback: Optional["sim.events.AttackResultCallback"] = None,
@@ -177,7 +178,7 @@ class Character:
 
     def attack(
         self,
-        target: Target,
+        target: "sim.target.Target",
         attack: "sim.attack.Attack",
         weapon: Optional["sim.weapons.Weapon"] = None,
         spell: Optional["sim.spells.Spell"] = None,
@@ -232,8 +233,8 @@ class Character:
 
     def do_damage(
         self,
-        target: Target,
-        damage: sim.attack.DamageRoll,
+        target: "sim.target.Target",
+        damage: "sim.attack.DamageRoll",
         attack: Optional["sim.events.AttackArgs"] = None,
         spell: Optional["sim.spells.Spell"] = None,
         multiplier: float = 1.0,

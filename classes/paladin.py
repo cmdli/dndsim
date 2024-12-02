@@ -1,8 +1,9 @@
+from typing import List
+
 from sim.events import AttackRollArgs
 from sim.target import Target
 from util.util import get_magic_weapon
 from sim.character import Character
-from sim.feat import Feat
 from feats import (
     ASI,
     AttackAction,
@@ -15,11 +16,12 @@ from feats import (
 from sim.weapons import Greatsword, Shortsword, Scimitar
 from spells.paladin import DivineFavor, DivineSmite
 from sim.spellcasting import Spellcaster
-from typing import List
+
 import sim.weapons
+import sim.feat
 
 
-class DivineSmiteFeat(Feat):
+class DivineSmiteFeat(sim.feat.Feat):
     def begin_turn(self, target: Target):
         self.used = False
 
@@ -34,13 +36,13 @@ class DivineSmiteFeat(Feat):
             )
 
 
-class ImprovedDivineSmite(Feat):
+class ImprovedDivineSmite(sim.feat.Feat):
     def attack_result(self, args):
         if args.hits():
             args.add_damage(source="ImprovedDivineSmite", dice=[8])
 
 
-class SacredWeapon(Feat):
+class SacredWeapon(sim.feat.Feat):
     def short_rest(self):
         self.enabled = False
 
@@ -53,7 +55,7 @@ class SacredWeapon(Feat):
             args.situational_bonus += self.character.mod("cha")
 
 
-class DivineFavorFeat(Feat):
+class DivineFavorFeat(sim.feat.Feat):
     def begin_turn(self, target: Target):
         slot = self.character.spells.lowest_slot()
         if (
@@ -71,7 +73,7 @@ class DivineFavorFeat(Feat):
 class Paladin(Character):
     def __init__(self, level: int, use_twf=False, **kwargs):
         magic_weapon = get_magic_weapon(level)
-        base_feats: List[Feat] = []
+        base_feats: List["sim.feat.Feat"] = []
         base_feats.append(DivineFavorFeat())
         if use_twf:
             base_feats.append(WeaponMasteries(["vex", "nick"]))

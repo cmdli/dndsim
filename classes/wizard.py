@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from sim.events import AttackResultArgs, AttackRollArgs, CastSpellArgs, DamageRollArgs
 from util.util import (
     prof_bonus,
@@ -13,7 +15,6 @@ from util.log import log
 from sim.target import Target
 from sim.character import Character
 from sim.spellcasting import Spellcaster
-from sim.feat import Feat
 from sim.events import AttackArgs
 from spells.wizard import (
     MeteorSwarm,
@@ -28,9 +29,9 @@ from spells.wizard import (
 from sim.summons import SummonFey
 from feats import ASI
 from sim.spells import Spell
-from typing import List, Optional
 
 import sim.attack
+import sim.feat
 
 
 class Wizard:
@@ -202,7 +203,7 @@ class Wizard:
                 target.damage(roll_dice(2, 6) + 3 + self.fey_summon)
 
 
-class WandOfTheWarMage(Feat):
+class WandOfTheWarMage(sim.feat.Feat):
     def __init__(self, bonus: int) -> None:
         super().__init__()
         self.bonus = bonus
@@ -212,7 +213,7 @@ class WandOfTheWarMage(Feat):
             args.situational_bonus += self.bonus
 
 
-class PotentCantrip(Feat):
+class PotentCantrip(sim.feat.Feat):
     # TODO: Add damage when enemy saves against a cantrip
     def attack_result(self, args):
         if args.misses():
@@ -230,14 +231,14 @@ class PotentCantrip(Feat):
             )
 
 
-class EmpoweredEvocation(Feat):
+class EmpoweredEvocation(sim.feat.Feat):
     def damage_roll(self, args: DamageRollArgs):
         if args.spell and not args.spell.has_tag("EmpoweredEvocationUsed"):
             args.spell.add_tag("EmpoweredEvocationUsed")
             args.damage.flat_dmg += self.character.mod("int")
 
 
-class WizardAction(Feat):
+class WizardAction(sim.feat.Feat):
     def action(self, target: Target):
         slot = self.character.spells.highest_slot()
         spell: Optional[Spell] = None
@@ -266,7 +267,7 @@ class WizardAction(Feat):
 class Wizard2(Character):
     def __init__(self, level: int) -> None:
         magic_weapon = get_magic_weapon(level)
-        feats: List[Feat] = []
+        feats: List["sim.feat.Feat"] = []
         feats.append(WizardAction())
         feats.append(WandOfTheWarMage(magic_weapon))
         if level >= 3:

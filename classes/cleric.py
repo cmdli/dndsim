@@ -1,19 +1,22 @@
+from typing import List, Optional
+
 from util.util import (
     get_magic_weapon,
 )
-import sim.character
 from sim.spellcasting import Spellcaster
-from sim.feat import Feat
 from feats import ASI
 from sim.spells import Spell
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
 from sim.summons import SummonCelestial
 from sim.weapons import Weapon, Warhammer
-from typing import List, Optional
+
+import sim.character
+import sim.target
+import sim.feat
 
 
-class ClericAction(Feat):
-    def action(self, target: sim.character.Target):
+class ClericAction(sim.feat.Feat):
+    def action(self, target: "sim.target.Target"):
         slot = self.character.spells.highest_slot()
         spell: Optional[Spell] = None
         if not self.character.spells.is_concentrating() and slot >= 3:
@@ -33,23 +36,23 @@ class ClericAction(Feat):
             self.character.spells.cast(spell, target)
 
 
-class WarPriest(Feat):
+class WarPriest(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
     def short_rest(self):
         self.uses = self.character.mod("wis")
 
-    def after_action(self, target: sim.character.Target):
+    def after_action(self, target: sim.target.Target):
         if self.uses > 0 and self.character.use_bonus("WarPriest"):
             self.character.weapon_attack(target, self.weapon)
 
 
-class BlessedStrikes(Feat):
+class BlessedStrikes(sim.feat.Feat):
     def __init__(self, num_dice: int) -> None:
         self.num_dice = num_dice
 
-    def begin_turn(self, target: sim.character.Target):
+    def begin_turn(self, target: sim.target.Target):
         self.used = False
 
     def attack_result(self, args):
@@ -62,7 +65,7 @@ class Cleric(sim.character.Character):
     def __init__(self, level: int) -> None:
         magic_weapon = get_magic_weapon(level)
         weapon = Warhammer(magic_bonus=magic_weapon)
-        base_feats: List[Feat] = []
+        base_feats: List["sim.feat.Feat"] = []
         base_feats.append(ClericAction())
         if level >= 3:
             base_feats.append(WarPriest(weapon))

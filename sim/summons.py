@@ -1,13 +1,13 @@
 from typing import override, Optional, List
 from sim.events import AttackResultArgs, AttackRollArgs
-from sim.feat import Feat
 from sim.target import Target
 from sim.character import Character
 from sim.weapons import Weapon
 from sim.spells import Spell
+import sim.feat
 
 
-class SummonAction(Feat):
+class SummonAction(sim.feat.Feat):
     def __init__(self, slot: int, weapon: Weapon) -> None:
         self.slot = slot
         self.weapon = weapon
@@ -36,10 +36,14 @@ class SummonWeapon(Weapon):
 
 class Summon(Character):
     def __init__(
-        self, slot: int, weapon: Weapon, feats: Optional[List[Feat]] = None, **kwargs
+        self,
+        slot: int,
+        weapon: Weapon,
+        feats: Optional[List["sim.feat.Feat"]] = None,
+        **kwargs
     ):
         feats = feats or []
-        base_feats: List[Feat] = []
+        base_feats: List["sim.feat.Feat"] = []
         base_feats.append(SummonAction(slot, weapon))
         base_feats.extend(feats)
         super().init(
@@ -73,7 +77,7 @@ class FeyWeapon(SummonWeapon):
         )
 
 
-class Mirthful(Feat):
+class Mirthful(sim.feat.Feat):
     def begin_turn(self, target: Target):
         self.used = False
 

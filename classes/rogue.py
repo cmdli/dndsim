@@ -6,13 +6,14 @@ from util.util import (
     do_roll,
 )
 from sim.character import Character
-from sim.feat import Feat
 from feats import ASI, AttackAction, BoomingBlade, WeaponMasteries
 from sim.weapons import Shortsword, Scimitar, Rapier
 from util.log import log
 
+import sim.feat
 
-class SneakAttack(Feat):
+
+class SneakAttack(sim.feat.Feat):
     def __init__(self, num):
         self.num = num
 
@@ -25,7 +26,7 @@ class SneakAttack(Feat):
             args.add_damage(source="SneakAttack", dice=self.num * [6])
 
 
-class SteadyAim(Feat):
+class SteadyAim(sim.feat.Feat):
     def before_action(self, target):
         if self.character.use_bonus("SteadyAim"):
             self.enabled = True
@@ -39,7 +40,7 @@ class SteadyAim(Feat):
         self.enabled = False
 
 
-class StrokeOfLuck(Feat):
+class StrokeOfLuck(sim.feat.Feat):
     def begin_turn(self, target):
         self.used = False
 
@@ -50,7 +51,7 @@ class StrokeOfLuck(Feat):
             args.roll2 = 20
 
 
-class Assassinate(Feat):
+class Assassinate(sim.feat.Feat):
     def __init__(self, dmg):
         self.dmg = dmg
         self.first_turn = False
@@ -81,7 +82,7 @@ class Assassinate(Feat):
         self.first_turn = False
 
 
-class DeathStrike(Feat):
+class DeathStrike(sim.feat.Feat):
     def short_rest(self):
         self.enabled = True
 
@@ -99,7 +100,7 @@ class AssassinRogue(Character):
     def __init__(self, level: int, booming_blade: bool = False):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
-        base_feats: List[Feat] = []
+        base_feats: List["sim.feat.Feat"] = []
         base_feats.append(WeaponMasteries(["vex", "nick"]))
         if level >= 5 and booming_blade:
             rapier = Rapier(magic_bonus=magic_weapon)

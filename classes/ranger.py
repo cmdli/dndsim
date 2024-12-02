@@ -13,12 +13,13 @@ from feats import (
     WeaponMasteries,
     IrresistibleOffense,
 )
-from sim.feat import Feat
 from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells.ranger import HuntersMark
 from sim.spellcasting import Spellcaster
 from sim.summons import SummonFey
 from util.log import log
+
+import sim.feat
 
 
 def maybe_cast_summon_fey(character: Character, summon_fey_threshold: int):
@@ -46,7 +47,7 @@ def maybe_cast_hunters_mark(character: Character):
     return False
 
 
-class RangerAction(Feat):
+class RangerAction(sim.feat.Feat):
     def __init__(self, attacks, summon_fey_threshold: int) -> None:
         self.attacks = attacks
         self.summon_fey_threshold = summon_fey_threshold
@@ -60,7 +61,7 @@ class RangerAction(Feat):
             self.character.weapon_attack(target, weapon, tags=["main_action"])
 
 
-class HuntersMarkFeat(Feat):
+class HuntersMarkFeat(sim.feat.Feat):
     def __init__(
         self,
         die: int,
@@ -90,7 +91,7 @@ class HuntersMarkFeat(Feat):
             args.add_damage(source="HuntersMark", dice=[self.die])
 
 
-class Gloomstalker(Feat):
+class Gloomstalker(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
         self.using = False
@@ -121,7 +122,7 @@ class Gloomstalker(Feat):
         self.used_attack = False
 
 
-class DreadAmbusher(Feat):
+class DreadAmbusher(sim.feat.Feat):
     def __init__(self, level: int, weapon: Weapon) -> None:
         self.die = 8 if level >= 11 else 6
         self.weapon = weapon if level >= 11 else None
@@ -146,7 +147,7 @@ class DreadAmbusher(Feat):
                 self.character.weapon_attack(args.attack.target, self.weapon)
 
 
-class BeastChargeFeat(Feat):
+class BeastChargeFeat(sim.feat.Feat):
     def __init__(self, character: "Character"):
         self.character = character
 
@@ -160,7 +161,7 @@ class BeastChargeFeat(Feat):
                 log.output(lambda: "Knocked prone by Charge")
 
 
-class StalkersFlurry(Feat):
+class StalkersFlurry(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
@@ -218,7 +219,7 @@ class PrimalCompanion(Character):
         self.ranger = ranger
         self.num_attacks = 2 if level >= 11 else 1
         self.weapon = BeastMaul(self)
-        base_feats: List[Feat] = [BeastChargeFeat(ranger)]
+        base_feats: List[sim.feat.Feat] = [BeastChargeFeat(ranger)]
         if level >= 11:
             base_feats += [HuntersMarkFeat(die=10 if level >= 20 else 6, caster=ranger)]
         super().init(
@@ -252,7 +253,7 @@ class BeastMaul(Weapon):
         args.add_damage(self.name(), num_dice * [8], 2 + self.ranger.mod("wis"))
 
 
-class BeastMasterAction(Feat):
+class BeastMasterAction(sim.feat.Feat):
     def __init__(
         self,
         beast: PrimalCompanion,

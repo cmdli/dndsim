@@ -1,8 +1,8 @@
 import random
+
 from sim.events import AttackRollArgs
 from sim.target import Target
 from util.util import get_magic_weapon, roll_dice
-from sim.feat import Feat
 from feats import (
     GreatWeaponMaster,
     AttackAction,
@@ -27,6 +27,8 @@ from sim.weapons import (
 )
 from util.log import log
 from typing import List
+
+import sim.feat
 import sim.weapons
 
 
@@ -41,7 +43,7 @@ def get_num_attacks(level: int):
         return 1
 
 
-class StudiedAttacks(Feat):
+class StudiedAttacks(sim.feat.Feat):
     def __init__(self) -> None:
         self.enabled = False
 
@@ -55,7 +57,7 @@ class StudiedAttacks(Feat):
             self.enabled = True
 
 
-class HeroicAdvantage(Feat):
+class HeroicAdvantage(sim.feat.Feat):
     def begin_turn(self, target):
         self.used = False
 
@@ -75,7 +77,7 @@ class HeroicAdvantage(Feat):
                 args.adv = True
 
 
-class ActionSurge(Feat):
+class ActionSurge(sim.feat.Feat):
     def __init__(self, max_surges) -> None:
         self.max_surges = max_surges
 
@@ -88,7 +90,7 @@ class ActionSurge(Feat):
         self.surges = self.max_surges
 
 
-class PrecisionAttack(Feat):
+class PrecisionAttack(sim.feat.Feat):
     def __init__(self, low=5) -> None:
         self.low = low
 
@@ -102,7 +104,7 @@ class PrecisionAttack(Feat):
             args.attack.add_tag("used_maneuver")
 
 
-class TrippingAttack(Feat):
+class TrippingAttack(sim.feat.Feat):
     def attack_result(self, args):
         if args.misses():
             return
@@ -119,7 +121,7 @@ class TrippingAttack(Feat):
             args.attack.add_tag("used_maneuver")
 
 
-class Maneuvers(Feat):
+class Maneuvers(sim.feat.Feat):
     def __init__(self, level) -> None:
         if level >= 15:
             self.max_dice = 6
@@ -158,7 +160,7 @@ class Maneuvers(Feat):
         return 0
 
 
-class ToppleIfNecessaryAttackAction(Feat):
+class ToppleIfNecessaryAttackAction(sim.feat.Feat):
     def __init__(self, num_attacks, topple_weapon, default_weapon) -> None:
         self.topple_weapon = topple_weapon
         self.default_weapon = default_weapon
@@ -197,7 +199,7 @@ class Fighter(Character):
             num_attacks = 2
         else:
             num_attacks = 1
-        base_feats: List[Feat] = []
+        base_feats: List["sim.feat.Feat"] = []
         base_feats.append(WeaponMasteries(["topple", "graze"]))
         base_feats.append(SavageAttacker())
         base_feats.append(GreatWeaponFighting())
@@ -249,7 +251,7 @@ class ChampionFighter(Fighter):
 
 class TrippingFighter(Fighter):
     def __init__(self, level: int, **kwargs):
-        feats: List[Feat] = []
+        feats: List["sim.feat.Feat"] = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(TrippingAttack())
@@ -258,7 +260,7 @@ class TrippingFighter(Fighter):
 
 class BattlemasterFighter(Fighter):
     def __init__(self, level: int, **kwargs):
-        feats: List[Feat] = []
+        feats: List["sim.feat.Feat"] = []
         if level >= 3:
             feats.append(Maneuvers(level))
         super().__init__(level, subclass_feats=feats, **kwargs)
@@ -266,7 +268,7 @@ class BattlemasterFighter(Fighter):
 
 class PrecisionFighter(Fighter):
     def __init__(self, level: int, low: int = 8, **kwargs):
-        feats: List[Feat] = []
+        feats: List[sim.feat.Feat] = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(PrecisionAttack(low=low))
@@ -275,7 +277,7 @@ class PrecisionFighter(Fighter):
 
 class PrecisionTrippingFighter(Fighter):
     def __init__(self, level: int, low: int = 1, **kwargs):
-        feats: List[Feat] = []
+        feats: List["sim.feat.Feat"] = []
         if level >= 3:
             feats.append(Maneuvers(level))
             feats.append(TrippingAttack())
@@ -292,7 +294,7 @@ class TWFFighter(Character):
         else:
             min_crit = 20
         magic_weapon = get_magic_weapon(level)
-        base_feats: List[Feat] = []
+        base_feats: List["sim.feat.Feat"] = []
         base_feats.append(WeaponMasteries(["vex", "nick"]))
         base_feats.append(TwoWeaponFighting())
         base_feats.append(SavageAttacker())
