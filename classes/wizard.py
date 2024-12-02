@@ -12,10 +12,7 @@ from util.util import (
     safe_cast,
 )
 from util.log import log
-from sim.target import Target
-from sim.character import Character
 from sim.spellcasting import Spellcaster
-from sim.events import AttackArgs
 from spells.wizard import (
     MeteorSwarm,
     Fireball,
@@ -32,6 +29,8 @@ from sim.spells import Spell
 
 import sim.attack
 import sim.feat
+import sim.character
+import sim.target
 
 
 class Wizard:
@@ -239,7 +238,7 @@ class EmpoweredEvocation(sim.feat.Feat):
 
 
 class WizardAction(sim.feat.Feat):
-    def action(self, target: Target):
+    def action(self, target: "sim.target.Target"):
         slot = self.character.spells.highest_slot()
         spell: Optional[Spell] = None
         # if slot >= 3 and not self.character.spells.is_concentrating():
@@ -264,7 +263,7 @@ class WizardAction(sim.feat.Feat):
             self.character.spells.cast(spell, target)
 
 
-class Wizard2(Character):
+class Wizard2(sim.character.Character):
     def __init__(self, level: int) -> None:
         magic_weapon = get_magic_weapon(level)
         feats: List["sim.feat.Feat"] = []

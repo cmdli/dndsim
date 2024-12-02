@@ -5,12 +5,12 @@ from util.util import (
     get_magic_weapon,
     do_roll,
 )
-from sim.character import Character
 from feats import ASI, AttackAction, BoomingBlade, WeaponMasteries
 from sim.weapons import Shortsword, Scimitar, Rapier
 from util.log import log
 
 import sim.feat
+import sim.character
 
 
 class SneakAttack(sim.feat.Feat):
@@ -96,7 +96,7 @@ class DeathStrike(sim.feat.Feat):
         self.enabled = False
 
 
-class AssassinRogue(Character):
+class AssassinRogue(sim.character.Character):
     def __init__(self, level: int, booming_blade: bool = False):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
@@ -130,7 +130,7 @@ class AssassinRogue(Character):
         )
 
 
-class ArcaneTricksterRogue(Character):
+class ArcaneTricksterRogue(sim.character.Character):
     def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)

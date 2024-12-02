@@ -15,7 +15,6 @@ from feats import (
     SavageAttacker,
     GreatWeaponFighting,
 )
-from sim.character import Character
 from sim.weapons import (
     Glaive,
     Greatsword,
@@ -30,6 +29,7 @@ from typing import List
 
 import sim.feat
 import sim.weapons
+import sim.character
 
 
 def get_num_attacks(level: int):
@@ -174,7 +174,7 @@ class ToppleIfNecessaryAttackAction(sim.feat.Feat):
             self.character.weapon_attack(target, weapon, tags=["main_action"])
 
 
-class Fighter(Character):
+class Fighter(sim.character.Character):
     def __init__(
         self,
         level: int,
@@ -285,7 +285,7 @@ class PrecisionTrippingFighter(Fighter):
         super().__init__(level, subclass_feats=feats, **kwargs)
 
 
-class TWFFighter(Character):
+class TWFFighter(sim.character.Character):
     def __init__(self, level: int, **kwargs) -> None:
         if level >= 15:
             min_crit = 18

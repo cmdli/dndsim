@@ -1,16 +1,17 @@
-from sim.character import Character
+from typing import List
+
 from feats import ASI, DualWielder
 from sim.weapons import Weapon, Shortsword, Scimitar
 from sim.events import AttackRollArgs
 from util.util import roll_dice, get_magic_weapon
 from sim.target import Target
-from typing import List
 from spells.wizard import TrueStrike
 from spells.paladin import HolyWeapon
 from spells.warlock import EldritchBlast
 from sim.spellcasting import Spellcaster
 
 import sim.feat
+import sim.character
 
 
 # TODO: Refactor this into a spell
@@ -81,7 +82,7 @@ class ValorBardBonusAttack(sim.feat.Feat):
             self.character.weapon_attack(target, self.weapon)
 
 
-class ValorBard(Character):
+class ValorBard(sim.character.Character):
     def __init__(self, level: int, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
         base_feats: List["sim.feat.Feat"] = []
@@ -127,7 +128,7 @@ class CMEMulticlassAction(sim.feat.Feat):
         self.character.weapon_attack(target, self.weapon)
 
 
-class CMEMulticlass(Character):
+class CMEMulticlass(sim.character.Character):
     def __init__(self, level: int) -> None:
         # Valor Bard 5
         # Warlock 1

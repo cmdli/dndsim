@@ -1,7 +1,6 @@
 from typing import List
 
 from util.util import get_magic_weapon, roll_dice
-from sim.character import Character
 from feats import (
     ASI,
     GreatWeaponMaster,
@@ -14,6 +13,7 @@ from feats import (
 from sim.weapons import Glaive, Greatsword, GlaiveButt
 
 import sim.feat
+import sim.character
 
 
 class Beserker(sim.feat.Feat):
@@ -100,7 +100,7 @@ def rage_damage(level: int):
     return 2
 
 
-class Barbarian(Character):
+class Barbarian(sim.character.Character):
     def __init__(self, level, use_pam=False, **kwargs):
         rage_dmg = rage_damage(level)
         magic_weapon = get_magic_weapon(level)

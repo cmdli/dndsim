@@ -3,7 +3,6 @@ from typing import List, override, Optional
 from sim.events import AttackArgs, AttackResultArgs, AttackRollArgs
 from sim.target import Target
 from util.util import get_magic_weapon
-from sim.character import Character
 from feats import (
     ASI,
     Archery,
@@ -20,9 +19,12 @@ from sim.summons import SummonFey
 from util.log import log
 
 import sim.feat
+import sim.character
 
 
-def maybe_cast_summon_fey(character: Character, summon_fey_threshold: int):
+def maybe_cast_summon_fey(
+    character: "sim.character.Character", summon_fey_threshold: int
+):
     slot = character.spells.highest_slot()
     if (
         summon_fey_threshold
@@ -35,7 +37,7 @@ def maybe_cast_summon_fey(character: Character, summon_fey_threshold: int):
     return False
 
 
-def maybe_cast_hunters_mark(character: Character):
+def maybe_cast_hunters_mark(character: "sim.character.Character"):
     slot = character.spells.lowest_slot()
     if (
         slot > 0
@@ -65,7 +67,7 @@ class HuntersMarkFeat(sim.feat.Feat):
     def __init__(
         self,
         die: int,
-        caster: Optional[Character] = None,
+        caster: Optional["sim.character.Character"] = None,
         adv: bool = False,
     ) -> None:
         self.die = die
@@ -73,7 +75,7 @@ class HuntersMarkFeat(sim.feat.Feat):
         self.caster = caster
         self.filter = filter
 
-    def apply(self, character: Character):
+    def apply(self, character: "sim.character.Character"):
         super().apply(character)
         if self.caster is None:
             self.caster = character
@@ -127,7 +129,7 @@ class DreadAmbusher(sim.feat.Feat):
         self.die = 8 if level >= 11 else 6
         self.weapon = weapon if level >= 11 else None
 
-    def apply(self, character: Character):
+    def apply(self, character: "sim.character.Character"):
         super().apply(character)
         self.max_uses = character.mod("wis")
         self.uses = self.max_uses
@@ -148,7 +150,7 @@ class DreadAmbusher(sim.feat.Feat):
 
 
 class BeastChargeFeat(sim.feat.Feat):
-    def __init__(self, character: "Character"):
+    def __init__(self, character: "sim.character.Character"):
         self.character = character
 
     def attack_result(self, args):
@@ -177,7 +179,7 @@ class StalkersFlurry(sim.feat.Feat):
             self.character.weapon_attack(target, self.weapon)
 
 
-class GloomstalkerRanger(Character):
+class GloomstalkerRanger(sim.character.Character):
     def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
@@ -214,8 +216,8 @@ class GloomstalkerRanger(Character):
         )
 
 
-class PrimalCompanion(Character):
-    def __init__(self, level: int, ranger: Character, **kwargs):
+class PrimalCompanion(sim.character.Character):
+    def __init__(self, level: int, ranger: "sim.character.Character", **kwargs):
         self.ranger = ranger
         self.num_attacks = 2 if level >= 11 else 1
         self.weapon = BeastMaul(self)
@@ -237,7 +239,7 @@ class PrimalCompanion(Character):
 
 
 class BeastMaul(Weapon):
-    def __init__(self, ranger: Character, **kwargs):
+    def __init__(self, ranger: "sim.character.Character", **kwargs):
         super().__init__(name="Beast Maul", num_dice=1, die=8, **kwargs)
         self.ranger = ranger
 
@@ -246,7 +248,9 @@ class BeastMaul(Weapon):
         return self.ranger.prof + self.ranger.mod("wis")
 
     @override
-    def attack_result(self, args: AttackResultArgs, character: Character):
+    def attack_result(
+        self, args: AttackResultArgs, character: "sim.character.Character"
+    ):
         if not args.hits():
             return
         num_dice = 2 if args.crit else 1
@@ -294,7 +298,7 @@ class BeastMasterAction(sim.feat.Feat):
                 self.character.weapon_attack(target, self.off_hand_nick, tags=["light"])
 
 
-class BeastMasterRanger(Character):
+class BeastMasterRanger(sim.character.Character):
     def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []

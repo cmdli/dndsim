@@ -1,7 +1,6 @@
 from typing import List
 
 from util.util import get_magic_weapon, roll_dice
-from sim.character import Character
 from feats import (
     ASI,
     AttackAction,
@@ -14,6 +13,7 @@ from sim.target import Target
 from util.log import log
 
 import sim.feat
+import sim.character
 
 
 def martial_arts_die(level: int):
@@ -146,7 +146,7 @@ class TavernBrawler(sim.feat.Feat):
                 args.damage.rolls[i] = roll_dice(1, args.damage.dice[i])
 
 
-class Monk(Character):
+class Monk(sim.character.Character):
     def __init__(
         self, level, use_nick: bool = False, use_grappler: bool = True, **kwargs
     ):

@@ -4,7 +4,6 @@
 #
 import random
 
-from sim.character import Character
 from sim.events import AttackRollArgs
 from feats import ASI, AttackAction
 from sim.target import Target
@@ -14,6 +13,7 @@ from classes.fighter import ActionSurge
 from typing import List
 
 import sim.feat
+import sim.character
 
 
 class OldCrossbowExpert(sim.feat.Feat):
@@ -93,7 +93,7 @@ class Blessed(sim.feat.Feat):
         args.situational_bonus += random.randint(1, 4)
 
 
-class AssaultUnit(Character):
+class AssaultUnit(sim.character.Character):
     def __init__(self, level: int, blessed: bool = False, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
         weapon = OldHandCrossbow(bonus=magic_weapon)

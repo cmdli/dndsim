@@ -3,7 +3,6 @@ from typing import List
 from sim.events import AttackRollArgs
 from sim.target import Target
 from util.util import get_magic_weapon
-from sim.character import Character
 from feats import (
     ASI,
     AttackAction,
@@ -19,6 +18,7 @@ from sim.spellcasting import Spellcaster
 
 import sim.weapons
 import sim.feat
+import sim.character
 
 
 class DivineSmiteFeat(sim.feat.Feat):
@@ -70,7 +70,7 @@ class DivineFavorFeat(sim.feat.Feat):
             args.add_damage(source="DivineFavor", dice=[4])
 
 
-class Paladin(Character):
+class Paladin(sim.character.Character):
     def __init__(self, level: int, use_twf=False, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats: List["sim.feat.Feat"] = []
