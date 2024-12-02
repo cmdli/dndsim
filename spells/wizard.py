@@ -25,6 +25,7 @@ class FingerOfDeath(BasicSaveSpell):
 class ChainLightning(BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__("ChainLightning", slot, dice=10 * [8])
+        assert slot >= 6
 
 
 class Blight(sim.spells.BasicSaveSpell):

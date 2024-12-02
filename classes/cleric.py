@@ -4,7 +4,7 @@ from util.util import (
 import sim.character
 from sim.spellcasting import Spellcaster
 from sim.feat import Feat
-from sim.feats import ASI
+from feats import ASI
 from sim.spells import Spell
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
 from sim.summons import SummonCelestial

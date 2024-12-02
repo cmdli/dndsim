@@ -2,7 +2,7 @@ from sim.events import AttackRollArgs
 from sim.target import Target
 from util.util import get_magic_weapon
 from sim.character import Character
-from sim.feats import (
+from feats import (
     ASI,
     AttackAction,
     GreatWeaponMaster,

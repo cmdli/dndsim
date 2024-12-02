@@ -5,7 +5,7 @@ from util.util import (
     do_roll,
 )
 from sim.character import Character
-from sim.feats import ASI, AttackAction, Feat, BoomingBlade, WeaponMasteries
+from feats import ASI, AttackAction, Feat, BoomingBlade, WeaponMasteries
 from sim.weapons import Shortsword, Scimitar, Rapier
 from util.log import log
 from typing import List

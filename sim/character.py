@@ -1,6 +1,6 @@
 from util.util import prof_bonus, roll_dice
 from sim.feat import Feat
-from sim.feats import Vex, Feat, Topple, Graze
+from feats import Vex, Feat, Topple, Graze
 from sim.target import Target
 from sim.weapons import Weapon
 from sim.events import AttackRollArgs, AttackArgs, AttackResultArgs

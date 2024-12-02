@@ -1,6 +1,6 @@
 from util.util import get_magic_weapon, roll_dice
 from sim.character import Character
-from sim.feats import (
+from feats import (
     ASI,
     GreatWeaponMaster,
     PolearmMaster,

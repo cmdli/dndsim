@@ -5,7 +5,7 @@
 
 from sim.character import Character
 from sim.events import AttackRollArgs
-from sim.feats import Feat, ASI, AttackAction
+from feats import Feat, ASI, AttackAction
 from sim.target import Target
 from sim.weapons import Weapon
 from util.util import get_magic_weapon

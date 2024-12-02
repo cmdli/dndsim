@@ -1,6 +1,6 @@
 from typing import override, Optional, List
 from sim.events import AttackResultArgs, AttackRollArgs
-from sim.feats import Feat
+from sim.feat import Feat
 from sim.target import Target
 from sim.character import Character
 from sim.weapons import Weapon

@@ -7,7 +7,7 @@ from util.util import (
     get_magic_weapon,
 )
 from sim.character import Character
-from sim.feats import (
+from feats import (
     ASI,
     Archery,
     CrossbowExpert,

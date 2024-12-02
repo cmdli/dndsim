@@ -1,5 +1,6 @@
 from sim.character import Character
-from sim.feats import Feat, ASI, AttackAction, DualWielder
+from sim.feat import Feat
+from feats import ASI, AttackAction, DualWielder
 from sim.weapons import Weapon, Shortsword, Scimitar
 from sim.events import AttackRollArgs
 from util.util import roll_dice, get_magic_weapon

@@ -26,7 +26,7 @@ from spells.wizard import (
     ScorchingRay,
 )
 from sim.summons import SummonFey
-from sim.feats import ASI
+from feats import ASI
 from sim.spells import Spell
 from typing import List, Optional
 

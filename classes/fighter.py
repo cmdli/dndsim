@@ -2,7 +2,8 @@ import random
 from sim.events import AttackRollArgs
 from sim.target import Target
 from util.util import get_magic_weapon, roll_dice
-from sim.feats import (
+from sim.feat import Feat
+from feats import (
     GreatWeaponMaster,
     AttackAction,
     ASI,
