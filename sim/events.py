@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from util.util import roll_dice
 from util.log import log
-from sim.target import Target
+import sim.target
 import sim.weapons
 import sim.spells
 import sim.character
@@ -16,7 +16,7 @@ import sim.attack
 class AttackArgs(util.taggable.Taggable):
     def __init__(
         self,
-        target: Target,
+        target: "sim.target.Target",
         attack: "sim.attack.Attack",
         weapon: Optional["sim.weapons.Weapon"] = None,
         spell: Optional["sim.spells.Spell"] = None,
@@ -112,7 +112,7 @@ class CastSpellArgs:
 class DamageRollArgs:
     def __init__(
         self,
-        target: Target,
+        target: "sim.target.Target",
         damage: sim.attack.DamageRoll,
         attack: Optional[AttackArgs] = None,
         spell: Optional["sim.spells.Spell"] = None,

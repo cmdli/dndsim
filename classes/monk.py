@@ -7,13 +7,13 @@ from feats import (
     IrresistibleOffense,
     WeaponMaster,
 )
-from sim.weapons import Weapon
 from sim.events import DamageRollArgs
-from sim.target import Target
 from util.log import log
 
 import sim.feat
 import sim.character
+import sim.target
+import sim.weapons
 
 
 def martial_arts_die(level: int):
@@ -39,7 +39,7 @@ class FlurryOfBlows(sim.feat.Feat):
         self.num_attacks = num_attacks
         self.weapon = weapon
 
-    def before_action(self, target: Target):
+    def before_action(self, target: "sim.target.Target"):
         if self.character.ki > 0 and self.character.use_bonus("FlurryOfBlows"):
             self.character.ki -= 1
             for _ in range(self.num_attacks):
@@ -76,7 +76,7 @@ class StunningStrike(sim.feat.Feat):
         self.stuns = []
         self.avoid_on_grapple = avoid_on_grapple
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used = False
         target.stunned = False
 
@@ -104,7 +104,7 @@ class Ki(sim.feat.Feat):
         self.character.ki = self.max_ki
 
 
-class Fists(Weapon):
+class Fists(sim.weapons.Weapon):
     def __init__(self, weapon_die, bonus=0):
         super().__init__(
             name="Fists",
@@ -126,7 +126,7 @@ class MagicInitiateHuntersMark(sim.feat.Feat):
     def short_rest(self):
         self.enabled = False
 
-    def before_action(self, target: Target):
+    def before_action(self, target: "sim.target.Target"):
         if not self.used and self.character.use_bonus("HuntersMark"):
             self.used = True
             self.enabled = True

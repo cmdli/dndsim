@@ -3,8 +3,7 @@ from typing import List
 from feats import ASI, DualWielder
 from sim.weapons import Weapon, Shortsword, Scimitar
 from sim.events import AttackRollArgs
-from util.util import roll_dice, get_magic_weapon
-from sim.target import Target
+from util.util import get_magic_weapon
 from spells.wizard import TrueStrike
 from spells.paladin import HolyWeapon
 from spells.warlock import EldritchBlast
@@ -12,6 +11,7 @@ from sim.spellcasting import Spellcaster
 
 import sim.feat
 import sim.character
+import sim.target
 
 
 # TODO: Refactor this into a spell
@@ -50,7 +50,7 @@ class TrueStrikeAction(sim.feat.Feat):
         self.attacks = attacks
         self.nick_attacks = nick_attacks
 
-    def action(self, target: Target):
+    def action(self, target: "sim.target.Target"):
         self.character.spells.cast(TrueStrike(self.truestrike_weapon), target)
         for attack in self.attacks:
             self.character.weapon_attack(target, attack)
@@ -62,7 +62,7 @@ class HolyWeaponFeat(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
-    def before_action(self, target: Target):
+    def before_action(self, target: "sim.target.Target"):
         if not self.character.has_effect("HolyWeapon") and self.character.use_bonus(
             "HolyWeapon"
         ):
@@ -77,7 +77,7 @@ class ValorBardBonusAttack(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
-    def after_action(self, target: Target):
+    def after_action(self, target: "sim.target.Target"):
         if self.character.use_bonus("ValorBardBonusAttack"):
             self.character.weapon_attack(target, self.weapon)
 

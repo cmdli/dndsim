@@ -3,7 +3,6 @@ import math
 
 from util.util import prof_bonus
 from feats import Vex, Topple, Graze
-from sim.weapons import Weapon
 from sim.events import AttackRollArgs, AttackArgs, AttackResultArgs
 from sim.event_loop import EventLoop
 from util.log import log
@@ -15,6 +14,7 @@ import sim.spells
 import sim.weapons
 import sim.feat
 import sim.target
+import sim.weapons
 
 STATS = ["str", "dex", "con", "int", "wis", "cha"]
 DEFAULT_STAT_MAX = 20
@@ -154,7 +154,7 @@ class Character:
     def weapon_attack(
         self,
         target: "sim.target.Target",
-        weapon: Weapon,
+        weapon: "sim.weapons.Weapon",
         tags: Optional[List[str]] = None,
     ):
         attack = WeaponAttack(weapon)

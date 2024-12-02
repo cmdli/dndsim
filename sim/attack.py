@@ -70,7 +70,7 @@ class SpellAttack(Attack):
         args: "sim.character.AttackResultArgs",
         character: "sim.character.Character",
     ):
-        if self.damage:
+        if args.hits() and self.damage:
             dice = 2 * self.damage.dice if args.crit else self.damage.dice
             args.add_damage(self.spell.name, dice=dice, damage=self.damage.flat_dmg)
         if self.callback:

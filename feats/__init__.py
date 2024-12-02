@@ -1,11 +1,13 @@
+from typing import List
+
 from sim.events import AttackRollArgs, AttackArgs, DamageRollArgs
 from util.util import roll_dice
-from sim.target import Target
-from sim.weapons import Weapon
 from util.log import log
-from typing import List
+
 import sim.character
 import sim.feat
+import sim.weapons
+import sim.target
 
 
 class PolearmMaster(sim.feat.Feat):
@@ -19,21 +21,21 @@ class PolearmMaster(sim.feat.Feat):
     def begin_turn(self, target):
         self.used = False
 
-    def end_turn(self, target: Target):
+    def end_turn(self, target: "sim.target.Target"):
         if not self.used and self.character.use_bonus("PAM"):
             self.used = True
             self.character.weapon_attack(target, self.weapon)
 
 
 class GreatWeaponMaster(sim.feat.Feat):
-    def __init__(self, weapon: Weapon):
+    def __init__(self, weapon: "sim.weapons.Weapon"):
         self.weapon = weapon
 
     def apply(self, character):
         super().apply(character)
         character.str += 1
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.bonus_attack_enabled = False
 
     def attack_result(self, args):
@@ -44,7 +46,7 @@ class GreatWeaponMaster(sim.feat.Feat):
         if args.crit:
             self.bonus_attack_enabled = True
 
-    def after_action(self, target: Target):
+    def after_action(self, target: "sim.target.Target"):
         if self.bonus_attack_enabled and self.character.use_bonus("GreatWeaponMaster"):
             self.character.weapon_attack(target, self.weapon)
 
@@ -91,14 +93,14 @@ class GreatWeaponFighting(sim.feat.Feat):
 
 
 class CrossbowExpert(sim.feat.Feat):
-    def __init__(self, weapon: Weapon) -> None:
+    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
 
     def apply(self, character):
         super().apply(character)
         character.dex += 1
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used_attack = False
 
     def attack(self, args: AttackArgs):
@@ -134,7 +136,9 @@ class AttackAction(sim.feat.Feat):
 
 
 class BoomingBlade(sim.feat.Feat):
-    def __init__(self, character: "sim.character.Character", weapon: Weapon):
+    def __init__(
+        self, character: "sim.character.Character", weapon: "sim.weapons.Weapon"
+    ):
         self.weapon = weapon
         self.character = character
 
@@ -158,7 +162,7 @@ class BoomingBlade(sim.feat.Feat):
 
 
 class LightWeaponBonusAttack(sim.feat.Feat):
-    def __init__(self, weapon: Weapon) -> None:
+    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
 
     def end_turn(self, target):
@@ -245,7 +249,7 @@ class WeaponMaster(sim.feat.Feat):
 
 
 class DualWielder(sim.feat.Feat):
-    def __init__(self, mod: str, weapon: Weapon) -> None:
+    def __init__(self, mod: str, weapon: "sim.weapons.Weapon") -> None:
         self.mod = mod
         self.weapon = weapon
 
@@ -253,7 +257,7 @@ class DualWielder(sim.feat.Feat):
         super().apply(character)
         character.increase_stat(self.mod, 1)
 
-    def after_action(self, target: Target):
+    def after_action(self, target: "sim.target.Target"):
         if self.character.use_bonus("DualWielder"):
             self.character.weapon_attack(target, self.weapon, tags=["light"])
 
@@ -262,7 +266,7 @@ class SavageAttacker(sim.feat.Feat):
     def __init__(self) -> None:
         self.used = False
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used = False
 
     def damage_roll(self, args: DamageRollArgs):

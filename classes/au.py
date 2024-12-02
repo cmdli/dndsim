@@ -6,18 +6,18 @@ import random
 
 from sim.events import AttackRollArgs
 from feats import ASI, AttackAction
-from sim.target import Target
-from sim.weapons import Weapon
 from util.util import get_magic_weapon
 from classes.fighter import ActionSurge
 from typing import List
 
 import sim.feat
 import sim.character
+import sim.target
+import sim.weapons
 
 
 class OldCrossbowExpert(sim.feat.Feat):
-    def __init__(self, weapon: Weapon) -> None:
+    def __init__(self, weapon: sim.weapons.Weapon) -> None:
         self.weapon = weapon
 
     def apply(self, character):
@@ -56,7 +56,7 @@ class FightingSpirit(sim.feat.Feat):
         if self.regain_on_initiative and self.fighting_spirit == 0:
             self.fighting_spirit = 1
 
-    def before_action(self, target: Target):
+    def before_action(self, target: "sim.target.Target"):
         if self.fighting_spirit > 0 and self.character.use_bonus("FightingSpirit"):
             self.fighting_spirit -= 1
             self.enabled = True
@@ -73,7 +73,7 @@ class RapidStrike(sim.feat.Feat):
     def __init__(self) -> None:
         self.used = False
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used = False
 
     def attack_roll(self, args: AttackRollArgs):
@@ -83,7 +83,7 @@ class RapidStrike(sim.feat.Feat):
             self.character.weapon_attack(args.attack.target, weapon)
 
 
-class OldHandCrossbow(Weapon):
+class OldHandCrossbow(sim.weapons.Weapon):
     def __init__(self, **kwargs):
         super().__init__(name="OldHandCrossbow", num_dice=1, die=6, **kwargs)
 

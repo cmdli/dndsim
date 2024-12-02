@@ -1,25 +1,26 @@
 from typing import override, Optional, List
 from sim.events import AttackResultArgs, AttackRollArgs
-from sim.target import Target
-from sim.character import Character
-from sim.weapons import Weapon
 from sim.spells import Spell
+
 import sim.feat
+import sim.target
+import sim.character
+import sim.weapons
 
 
 class SummonAction(sim.feat.Feat):
-    def __init__(self, slot: int, weapon: Weapon) -> None:
+    def __init__(self, slot: int, weapon: "sim.weapons.Weapon") -> None:
         self.slot = slot
         self.weapon = weapon
 
     @override
-    def action(self, target: Target):
+    def action(self, target: "sim.target.Target"):
         for _ in range(self.slot // 2):
             self.character.weapon_attack(target, self.weapon)
 
 
-class SummonWeapon(Weapon):
-    def __init__(self, caster: Optional[Character] = None, **kwargs):
+class SummonWeapon(sim.weapons.Weapon):
+    def __init__(self, caster: Optional["sim.character.Character"] = None, **kwargs):
         super().__init__(**kwargs)
         self.caster = caster
 
@@ -27,18 +28,20 @@ class SummonWeapon(Weapon):
     def to_hit(self, character):
         return self.caster.prof + self.caster.mod(self.caster.spells.mod)
 
-    def attack_result(self, args: AttackResultArgs, character: Character):
+    def attack_result(
+        self, args: AttackResultArgs, character: "sim.character.Character"
+    ):
         num_dice = self.num_dice
         if args.crit:
             num_dice *= 2
         args.add_damage(self.name(), num_dice * [self.die], self.dmg_bonus)
 
 
-class Summon(Character):
+class Summon(sim.character.Character):
     def __init__(
         self,
         slot: int,
-        weapon: Weapon,
+        weapon: "sim.weapons.Weapon",
         feats: Optional[List["sim.feat.Feat"]] = None,
         **kwargs
     ):
@@ -57,16 +60,20 @@ class SummonSpell(Spell):
     def __init__(self, name: str, slot: int):
         super().__init__(name, slot, concentration=True)
 
-    def summon(self, caster: Character):
+    def summon(self, caster: "sim.character.Character"):
         return None
 
     @override
-    def cast(self, character: Character, target: Optional[Target] = None):
+    def cast(
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
+    ):
         self.minion = self.summon(character)
         character.add_minion(self.minion)
 
     @override
-    def end(self, character: Character):
+    def end(self, character: "sim.character.Character"):
         character.remove_minion(self.minion)
 
 
@@ -78,7 +85,7 @@ class FeyWeapon(SummonWeapon):
 
 
 class Mirthful(sim.feat.Feat):
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used = False
 
     def attack_roll(self, args: AttackRollArgs):
@@ -88,7 +95,7 @@ class Mirthful(sim.feat.Feat):
 
 
 class FeySummon(Summon):
-    def __init__(self, slot: int, caster: Character):
+    def __init__(self, slot: int, caster: "sim.character.Character"):
         super().__init__(
             slot=slot,
             weapon=FeyWeapon(slot, caster=caster),
@@ -103,7 +110,7 @@ class SummonFey(SummonSpell):
             slot,
         )
 
-    def summon(self, caster: Character):
+    def summon(self, caster: "sim.character.Character"):
         return FeySummon(self.slot, caster)
 
 
@@ -115,7 +122,7 @@ class CelestialWeapon(SummonWeapon):
 
 
 class CelestialSummon(Summon):
-    def __init__(self, slot: int, caster: Character):
+    def __init__(self, slot: int, caster: "sim.character.Character"):
         super().__init__(
             slot=slot, weapon=CelestialWeapon(slot=slot, caster=caster), feats=[]
         )
@@ -125,5 +132,5 @@ class SummonCelestial(SummonSpell):
     def __init__(self, slot: int):
         super().__init__("SummonCelestial", slot)
 
-    def summon(self, caster: Character):
+    def summon(self, caster: "sim.character.Character"):
         return CelestialSummon(self.slot, caster)

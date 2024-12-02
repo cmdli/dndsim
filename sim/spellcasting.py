@@ -1,17 +1,17 @@
-from typing import List, Tuple, Optional, Callable
+from typing import List, Tuple, Optional
 import math
 from enum import Enum
 
-from util.util import spell_slots, highest_spell_slot, lowest_spell_slot, cantrip_dice
+from util.log import log
+from sim.events import CastSpellArgs
+from util.util import spell_slots, highest_spell_slot, lowest_spell_slot
+
 import sim.spells
 import sim.target
 import sim.character
 import sim.target
 import sim.attack
 import sim.events
-from sim.weapons import Weapon
-from util.log import log
-from sim.events import CastSpellArgs
 
 
 class Spellcaster(Enum):
@@ -33,19 +33,6 @@ def spellcaster_level(levels: List[Tuple[Spellcaster, int]]):
     return total
 
 
-class SpellWeapon(Weapon):
-    def __init__(self, mod: str, **kwargs):
-        super().__init__(
-            name="SpellWeapon",
-            num_dice=1,
-            die=1,
-            override_mod=mod,
-            damage_type="none",
-            min_crit=20,
-            **kwargs,
-        )
-
-
 class Spellcasting:
     def __init__(
         self,
@@ -58,7 +45,6 @@ class Spellcasting:
         self.spellcaster_level = spellcaster_level(spellcaster_levels)
         self.concentration: Optional["sim.spells.Spell"] = None
         self.spells: List["sim.spells.Spell"] = []
-        self.spell_weapon = SpellWeapon(self.mod)
         self.slots = spell_slots(self.spellcaster_level)
 
     def reset(self):

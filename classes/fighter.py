@@ -1,7 +1,7 @@
 import random
+from typing import List
 
 from sim.events import AttackRollArgs
-from sim.target import Target
 from util.util import get_magic_weapon, roll_dice
 from feats import (
     GreatWeaponMaster,
@@ -24,12 +24,11 @@ from sim.weapons import (
     Scimitar,
     Rapier,
 )
-from util.log import log
-from typing import List
 
 import sim.feat
 import sim.weapons
 import sim.character
+import sim.target
 
 
 def get_num_attacks(level: int):
@@ -141,7 +140,7 @@ class Maneuvers(sim.feat.Feat):
     def short_rest(self):
         self.superiority_dice = self.max_dice
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used_relentless = False
 
     def use(self):
@@ -166,7 +165,7 @@ class ToppleIfNecessaryAttackAction(sim.feat.Feat):
         self.default_weapon = default_weapon
         self.num_attacks = num_attacks
 
-    def action(self, target: Target):
+    def action(self, target: "sim.target.Target"):
         for i in range(self.num_attacks):
             weapon = self.default_weapon
             if not target.prone and i < self.num_attacks - 1:

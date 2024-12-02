@@ -1,7 +1,7 @@
 from typing import List, override, Optional
 
 from util.util import roll_dice, cantrip_dice
-from sim.target import Target
+import sim.target
 import sim.event_loop
 import sim.spells
 import sim.weapons
@@ -13,7 +13,9 @@ class SpiritGuardians(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
         super().__init__("SpiritGuardians", slot=slot, **kwargs)
 
     def cast(
-        self, character: "sim.character.Character", target: Optional[Target] = None
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
     ):
         super().cast(character, target)
         character.events.add(self, ["enemy_turn"])
@@ -21,7 +23,7 @@ class SpiritGuardians(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
     def end(self, character: "sim.character.Character"):
         character.events.remove(self)
 
-    def enemy_turn(self, target: Target):
+    def enemy_turn(self, target: "sim.target.Target"):
         dmg = roll_dice(self.slot, 8)
         if target.save(self.character.spells.dc()):
             dmg = dmg // 2
@@ -32,7 +34,9 @@ class TollTheDead(sim.spells.TargetedSpell):
     def __init__(self):
         super().__init__("TollTheDead", slot=0, concentration=False)
 
-    def cast_target(self, character: "sim.character.Character", target: Target):
+    def cast_target(
+        self, character: "sim.character.Character", target: "sim.target.Target"
+    ):
         num_dice = cantrip_dice(character.level)
         if not target.save(character.spells.dc()):
             if target.dmg > 0:
@@ -73,7 +77,9 @@ class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
         self.weapon = SpiritualWeaponWeapon(slot=self.slot)
 
     def cast(
-        self, character: "sim.character.Character", target: Optional[Target] = None
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
     ):
         super().cast(character, target)
         character.events.add(self, ["after_action"])
@@ -82,7 +88,7 @@ class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
         super().end(character)
         character.events.remove(self)
 
-    def after_action(self, target: Target):
+    def after_action(self, target: "sim.target.Target"):
         if self.character.use_bonus("SpiritualWeapon"):
             self.character.weapon_attack(target, self.weapon)
 
@@ -93,7 +99,9 @@ class GuardianOfFaith(sim.spells.Spell, sim.event_loop.Listener):
         self.dmg = 60
 
     def cast(
-        self, character: "sim.character.Character", target: Optional[Target] = None
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
     ):
         super().cast(character, target)
         character.events.add(self, ["enemy_turn"])
@@ -102,7 +110,7 @@ class GuardianOfFaith(sim.spells.Spell, sim.event_loop.Listener):
         super().end(character)
         character.events.remove(self)
 
-    def enemy_turn(self, target: Target):
+    def enemy_turn(self, target: "sim.target.Target"):
         if not target.save(self.character.spells.dc()):
             target.damage_source("GuardianOfFaith", 20)
             self.dmg -= 20

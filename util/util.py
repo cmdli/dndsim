@@ -1,7 +1,6 @@
+from typing import Optional, Any, List
 import random
 import math
-from collections import defaultdict
-from typing import Optional, Any, Type
 
 from util.log import log
 
@@ -30,17 +29,17 @@ SPELL_SLOTS_ARR = [
 ]
 
 
-def spell_slots(level, half=False):
+def spell_slots(level: int, half: bool = False):
     if half:
         level = math.ceil(level / 2)
     return SPELL_SLOTS_ARR[level].copy()
 
 
-def prof_bonus(level):
+def prof_bonus(level: int) -> int:
     return ((level - 1) // 4) + 2
 
 
-def get_magic_weapon(level):
+def get_magic_weapon(level: int):
     if level >= 15:
         return 3
     elif level >= 10:
@@ -50,7 +49,7 @@ def get_magic_weapon(level):
     return 0
 
 
-def do_roll(adv=False, disadv=False):
+def do_roll(adv: bool = False, disadv: bool = False) -> int:
     if adv and disadv:
         return random.randint(1, 20)
     elif adv:
@@ -72,7 +71,7 @@ def roll_dice(num: int, size: int, max_reroll: int = 0) -> int:
     return total
 
 
-def highest_spell_slot(slots, max=9):
+def highest_spell_slot(slots: List[int], max: int = 9) -> int:
     # Finds the highest level spell slot available
     slot = max
     while slot > 0:
@@ -82,7 +81,7 @@ def highest_spell_slot(slots, max=9):
     return 0
 
 
-def lowest_spell_slot(slots, min=1):
+def lowest_spell_slot(slots: List[int], min: int = 1) -> int:
     slot = min
     while slot <= 9:
         if slots[slot] > 0:
@@ -91,7 +90,7 @@ def lowest_spell_slot(slots, min=1):
     return 0
 
 
-def cantrip_dice(level):
+def cantrip_dice(level: int):
     if level >= 17:
         return 4
     elif level >= 11:

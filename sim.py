@@ -3,11 +3,12 @@ import click
 from typing import Set, List, Dict
 import random
 
-import configs
-from sim.target import Target
-import sim.character
 from util.log import log
 from sim import CharacterConfig, Simulation
+import configs
+import sim.character
+import sim.target
+
 
 NUM_FIGHTS = 3
 NUM_TURNS = 5
@@ -19,7 +20,7 @@ random.seed(1234)
 def test_dpr(character: "sim.character.Character", level: int):
     damage = 0
     for _ in range(NUM_SIMS):
-        target = Target(level)
+        target = sim.target.Target(level)
         simulation = Simulation(character, target, NUM_FIGHTS, NUM_TURNS)
         simulation.run()
         damage += simulation.target.dmg

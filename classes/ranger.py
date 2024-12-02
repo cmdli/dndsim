@@ -1,7 +1,6 @@
 from typing import List, override, Optional
 
 from sim.events import AttackArgs, AttackResultArgs, AttackRollArgs
-from sim.target import Target
 from util.util import get_magic_weapon
 from feats import (
     ASI,
@@ -20,6 +19,7 @@ from util.log import log
 
 import sim.feat
 import sim.character
+import sim.target
 
 
 def maybe_cast_summon_fey(
@@ -54,7 +54,7 @@ class RangerAction(sim.feat.Feat):
         self.attacks = attacks
         self.summon_fey_threshold = summon_fey_threshold
 
-    def action(self, target: Target):
+    def action(self, target: "sim.target.Target"):
         if maybe_cast_summon_fey(self.character, self.summon_fey_threshold):
             return
         maybe_cast_hunters_mark(self.character)
@@ -104,7 +104,7 @@ class Gloomstalker(sim.feat.Feat):
         self.first_turn = True
         self.used = False
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used_attack = False
 
     def attack(self, args: AttackArgs):
@@ -137,7 +137,7 @@ class DreadAmbusher(sim.feat.Feat):
     def long_rest(self):
         self.uses = self.max_uses
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used = False
 
     def attack_result(self, args):
@@ -167,7 +167,7 @@ class StalkersFlurry(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.missed_attack = False
 
     def attack_result(self, args):
@@ -230,7 +230,7 @@ class PrimalCompanion(sim.character.Character):
             base_feats=base_feats,
         )
 
-    def do_attack(self, target: Target):
+    def do_attack(self, target: "sim.target.Target"):
         for _ in range(self.num_attacks):
             self.weapon_attack(target, self.weapon)
 
@@ -270,7 +270,7 @@ class BeastMasterAction(sim.feat.Feat):
         self.off_hand_nick = off_hand_nick
         self.main_hand = main_hand
 
-    def action(self, target: Target):
+    def action(self, target: "sim.target.Target"):
         if maybe_cast_summon_fey(self.character, summon_fey_threshold=4):
             return
         maybe_cast_hunters_mark(self.character)

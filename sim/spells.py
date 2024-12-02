@@ -31,7 +31,7 @@ class TargetedSpell(Spell):
     def cast(
         self,
         character: "sim.character.Character",
-        target: "sim.target.Target" | None = None,
+        target: Optional["sim.target.Target"] = None,
     ):
         super().cast(character, target)
         if not target:

@@ -1,9 +1,9 @@
 from typing import List, Optional
 
+from sim.spells import Spell, BasicSaveSpell
 
 import sim.attack
-from sim.spells import Spell, BasicSaveSpell
-from sim.target import Target
+import sim.target
 import sim.character
 import sim.events
 import sim.spells
@@ -42,7 +42,9 @@ class ScorchingRay(sim.spells.TargetedSpell):
     def __init__(self, slot: int):
         super().__init__("ScorchingRay", slot)
 
-    def cast_target(self, character: "sim.character.Character", target: Target):
+    def cast_target(
+        self, character: "sim.character.Character", target: "sim.target.Target"
+    ):
         for _ in range(1 + self.slot):
             character.spell_attack(
                 target=target,
@@ -56,7 +58,9 @@ class MagicMissile(sim.spells.TargetedSpell):
     def __init__(self, slot: int):
         super().__init__("MagicMissile", slot)
 
-    def cast_target(self, character: "sim.character.Character", target: Target):
+    def cast_target(
+        self, character: "sim.character.Character", target: "sim.target.Target"
+    ):
         num_dice = 2 + self.slot
         character.do_damage(
             target,
@@ -74,7 +78,9 @@ class Firebolt(sim.spells.TargetedSpell):
     def __init__(self):
         super().__init__("Firebolt", slot=0)
 
-    def cast_target(self, character: "sim.character.Character", target: Target):
+    def cast_target(
+        self, character: "sim.character.Character", target: "sim.target.Target"
+    ):
         character.spell_attack(
             target=target,
             spell=self,
@@ -92,7 +98,9 @@ class TrueStrike(Spell):
         self.weapon = weapon
 
     def cast(
-        self, character: "sim.character.Character", target: Optional[Target] = None
+        self,
+        character: "sim.character.Character",
+        target: Optional["sim.target.Target"] = None,
     ):
         if not target:
             return

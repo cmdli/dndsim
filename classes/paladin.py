@@ -1,7 +1,6 @@
 from typing import List
 
 from sim.events import AttackRollArgs
-from sim.target import Target
 from util.util import get_magic_weapon
 from feats import (
     ASI,
@@ -19,10 +18,11 @@ from sim.spellcasting import Spellcaster
 import sim.weapons
 import sim.feat
 import sim.character
+import sim.target
 
 
 class DivineSmiteFeat(sim.feat.Feat):
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         self.used = False
 
     def attack_result(self, args):
@@ -46,7 +46,7 @@ class SacredWeapon(sim.feat.Feat):
     def short_rest(self):
         self.enabled = False
 
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         if not self.enabled and self.character.use_bonus("SacredWeapon"):
             self.enabled = True
 
@@ -56,7 +56,7 @@ class SacredWeapon(sim.feat.Feat):
 
 
 class DivineFavorFeat(sim.feat.Feat):
-    def begin_turn(self, target: Target):
+    def begin_turn(self, target: "sim.target.Target"):
         slot = self.character.spells.lowest_slot()
         if (
             not self.character.spells.is_concentrating()

@@ -215,7 +215,7 @@ class WandOfTheWarMage(sim.feat.Feat):
 class PotentCantrip(sim.feat.Feat):
     # TODO: Add damage when enemy saves against a cantrip
     def attack_result(self, args):
-        if args.misses():
+        if args.hits():
             return
         attack = safe_cast(sim.attack.SpellAttack, args.attack.attack)
         if attack and attack.spell.slot == 0:
@@ -223,8 +223,9 @@ class PotentCantrip(sim.feat.Feat):
             log.record(f"PotentCantrip ({spell.name})", 1)
             self.character.do_damage(
                 target=args.attack.target,
-                source="PotentCantrip",
-                dice=attack.damage.dice,
+                damage=sim.attack.DamageRoll(
+                    source="PotentCantrip", dice=attack.damage.dice
+                ),
                 spell=spell,
                 multiplier=0.5,
             )
