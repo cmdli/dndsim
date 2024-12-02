@@ -8,7 +8,6 @@ from feats import (
     AttackAction,
     ASI,
     PolearmMaster,
-    Feat,
     IrresistibleOffense,
     TwoWeaponFighting,
     WeaponMasteries,

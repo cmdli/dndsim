@@ -5,11 +5,11 @@ from feats import (
     GreatWeaponMaster,
     PolearmMaster,
     AttackAction,
-    Feat,
     IrresistibleOffense,
     SavageAttacker,
     WeaponMasteries,
 )
+from sim.feat import Feat
 from sim.weapons import Glaive, Greatsword, GlaiveButt
 
 

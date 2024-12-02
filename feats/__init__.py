@@ -4,11 +4,11 @@ from sim.target import Target
 from sim.weapons import Weapon
 from util.log import log
 from typing import List
-from sim.feat import Feat
 import sim.character
+import sim.feat
 
 
-class PolearmMaster(Feat):
+class PolearmMaster(sim.feat.Feat):
     def __init__(self, weapon):
         self.weapon = weapon
 
@@ -25,7 +25,7 @@ class PolearmMaster(Feat):
             self.character.weapon_attack(target, self.weapon)
 
 
-class GreatWeaponMaster(Feat):
+class GreatWeaponMaster(sim.feat.Feat):
     def __init__(self, weapon: Weapon):
         self.weapon = weapon
 
@@ -49,7 +49,7 @@ class GreatWeaponMaster(Feat):
             self.character.weapon_attack(target, self.weapon)
 
 
-class ElvenAccuracy(Feat):
+class ElvenAccuracy(sim.feat.Feat):
     def __init__(self, mod: str):
         self.mod = mod
 
@@ -66,20 +66,20 @@ class ElvenAccuracy(Feat):
                 args.roll2 = roll
 
 
-class Archery(Feat):
+class Archery(sim.feat.Feat):
     def attack_roll(self, args: AttackRollArgs):
         weapon = args.attack.weapon
         if weapon and weapon.has_tag("ranged"):
             args.situational_bonus += 2
 
 
-class TwoWeaponFighting(Feat):
+class TwoWeaponFighting(sim.feat.Feat):
     def attack_roll(self, args: AttackRollArgs):
         if args.attack.has_tag("light"):
             args.attack.remove_tag("light")
 
 
-class GreatWeaponFighting(Feat):
+class GreatWeaponFighting(sim.feat.Feat):
     def damage_roll(self, args: DamageRollArgs):
         attack = args.attack
         if attack:
@@ -90,7 +90,7 @@ class GreatWeaponFighting(Feat):
                     args.damage.rolls[i] = 3
 
 
-class CrossbowExpert(Feat):
+class CrossbowExpert(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
@@ -110,7 +110,7 @@ class CrossbowExpert(Feat):
             self.character.weapon_attack(target, self.weapon)
 
 
-class ASI(Feat):
+class ASI(sim.feat.Feat):
     def __init__(self, stat_increases=[]):
         self.stat_increases = stat_increases
 
@@ -121,7 +121,7 @@ class ASI(Feat):
             character.increase_stat(stat, increase)
 
 
-class AttackAction(Feat):
+class AttackAction(sim.feat.Feat):
     def __init__(self, attacks, nick_attacks=[]):
         self.base_attacks = attacks
         self.nick_attacks = nick_attacks
@@ -133,7 +133,7 @@ class AttackAction(Feat):
             self.character.weapon_attack(target, weapon, tags=["main_action", "light"])
 
 
-class BoomingBlade(Feat):
+class BoomingBlade(sim.feat.Feat):
     def __init__(self, character: "sim.character.Character", weapon: Weapon):
         self.weapon = weapon
         self.character = character
@@ -157,7 +157,7 @@ class BoomingBlade(Feat):
         args.add_damage(source="BoomingBlade", dice=extra_dice * [8])
 
 
-class LightWeaponBonusAttack(Feat):
+class LightWeaponBonusAttack(sim.feat.Feat):
     def __init__(self, weapon: Weapon) -> None:
         self.weapon = weapon
 
@@ -166,7 +166,7 @@ class LightWeaponBonusAttack(Feat):
             self.character.weapon_attack(target, self.weapon, tags=["light"])
 
 
-class Vex(Feat):
+class Vex(sim.feat.Feat):
     def __init__(self) -> None:
         self.vexing = False
 
@@ -189,7 +189,7 @@ class Vex(Feat):
             self.vexing = True
 
 
-class Topple(Feat):
+class Topple(sim.feat.Feat):
     def attack_result(self, args):
         weapon = args.attack.weapon
         if not weapon or args.misses():
@@ -202,7 +202,7 @@ class Topple(Feat):
                 target.prone = True
 
 
-class Graze(Feat):
+class Graze(sim.feat.Feat):
     def attack_result(self, args):
         weapon = args.attack.weapon
         if not weapon or not args.misses():
@@ -212,7 +212,7 @@ class Graze(Feat):
             args.attack.target.damage_source("Graze", self.character.mod(mod))
 
 
-class WeaponMasteries(Feat):
+class WeaponMasteries(sim.feat.Feat):
     def __init__(self, masteries: List[str]) -> None:
         self.masteries = masteries
 
@@ -221,7 +221,7 @@ class WeaponMasteries(Feat):
         character.add_masteries(self.masteries)
 
 
-class IrresistibleOffense(Feat):
+class IrresistibleOffense(sim.feat.Feat):
     def __init__(self, mod: str) -> None:
         self.mod = mod
 
@@ -235,7 +235,7 @@ class IrresistibleOffense(Feat):
             args.add_damage(source="IrresistibleOffense", damage=self.character.str)
 
 
-class WeaponMaster(Feat):
+class WeaponMaster(sim.feat.Feat):
     def __init__(self, mod: str) -> None:
         self.mod = mod
 
@@ -244,7 +244,7 @@ class WeaponMaster(Feat):
         character.increase_stat(self.mod, 1)
 
 
-class DualWielder(Feat):
+class DualWielder(sim.feat.Feat):
     def __init__(self, mod: str, weapon: Weapon) -> None:
         self.mod = mod
         self.weapon = weapon
@@ -258,7 +258,7 @@ class DualWielder(Feat):
             self.character.weapon_attack(target, self.weapon, tags=["light"])
 
 
-class SavageAttacker(Feat):
+class SavageAttacker(sim.feat.Feat):
     def __init__(self) -> None:
         self.used = False
 
@@ -274,7 +274,7 @@ class SavageAttacker(Feat):
             args.damage.rolls = new_rolls
 
 
-class Piercer(Feat):
+class Piercer(sim.feat.Feat):
     def __init__(self, mod: str) -> None:
         self.mod = mod
 

@@ -3,10 +3,10 @@ from sim.character import Character
 from feats import (
     ASI,
     AttackAction,
-    Feat,
     IrresistibleOffense,
     WeaponMaster,
 )
+from sim.feat import Feat
 from sim.weapons import Weapon
 from sim.events import DamageRollArgs
 from sim.target import Target

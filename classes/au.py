@@ -5,11 +5,12 @@
 
 from sim.character import Character
 from sim.events import AttackRollArgs
-from feats import Feat, ASI, AttackAction
+from feats import ASI, AttackAction
 from sim.target import Target
 from sim.weapons import Weapon
 from util.util import get_magic_weapon
 from classes.fighter import ActionSurge
+from sim.feat import Feat
 import random
 from typing import List
 

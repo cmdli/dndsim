@@ -1,14 +1,15 @@
 import math
+from typing import List
+
 from util.util import (
     get_magic_weapon,
-    roll_dice,
     do_roll,
 )
 from sim.character import Character
-from feats import ASI, AttackAction, Feat, BoomingBlade, WeaponMasteries
+from sim.feat import Feat
+from feats import ASI, AttackAction, BoomingBlade, WeaponMasteries
 from sim.weapons import Shortsword, Scimitar, Rapier
 from util.log import log
-from typing import List
 
 
 class SneakAttack(Feat):

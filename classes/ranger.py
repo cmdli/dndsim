@@ -2,21 +2,18 @@ from typing import List, override, Optional
 
 from sim.events import AttackArgs, AttackResultArgs, AttackRollArgs
 from sim.target import Target
-from util.util import (
-    roll_dice,
-    get_magic_weapon,
-)
+from util.util import get_magic_weapon
 from sim.character import Character
 from feats import (
     ASI,
     Archery,
     CrossbowExpert,
-    Feat,
     DualWielder,
     TwoWeaponFighting,
     WeaponMasteries,
     IrresistibleOffense,
 )
+from sim.feat import Feat
 from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells.ranger import HuntersMark
 from sim.spellcasting import Spellcaster
