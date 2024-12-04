@@ -79,6 +79,9 @@ class Wizard:
             self.finger_of_death(target)
         elif slot >= 6:
             self.chain_lightning(target)
+        elif slot >= 5 and not self.used_overchannel:
+            self.blight(target, slot, overchannel=True)
+            self.used_overchannel = True
         elif slot >= 4:
             self.blight(target, slot)
         elif slot >= 3:
@@ -308,8 +311,8 @@ class Wizard2(sim.character.Character):
             feats.append(ASI(["int", "wis"]))
         if level >= 10:
             feats.append(EmpoweredEvocation())
-        # if level >= 14:
-        #     feats.append(Overchannel())
+        if level >= 14:
+            feats.append(Overchannel())
         super().init(
             level=level,
             stats=[10, 10, 10, 17, 10, 10],
