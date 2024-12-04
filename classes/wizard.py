@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sim.events import AttackResultArgs, AttackRollArgs, CastSpellArgs, DamageRollArgs
+from sim.events import AttackRollArgs, DamageRollArgs
 from util.util import (
     prof_bonus,
     get_magic_weapon,
@@ -25,7 +25,7 @@ from spells.wizard import (
 )
 from sim.summons import SummonFey
 from feats import ASI
-from sim.spells import Spell
+from sim.spells import Spell, School
 
 import sim.attack
 import sim.feat
@@ -73,9 +73,15 @@ class Wizard:
         #     elif slot >= 5 and not self.used_overchannel:
         #         self.blight(target, slot, overchannel=True)
         #         self.used_overchannel = True
-        # if slot >= 4:
-        #     self.blight(target, slot)
-        if slot >= 3:
+        if slot >= 9:
+            self.meteor_swarm(target)
+        elif slot >= 7:
+            self.finger_of_death(target)
+        elif slot >= 6:
+            self.chain_lightning(target)
+        elif slot >= 4:
+            self.blight(target, slot)
+        elif slot >= 3:
             self.fireball(target, slot)
         elif slot >= 2 and self.level < 11:
             self.scorching_ray(target, slot)
@@ -92,27 +98,28 @@ class Wizard:
         pass
 
     def meteor_swarm(self, target):
+        log.record("Cast (MeteorSwarm)", 1)
         dmg = roll_dice(40, 6) + self.int
         if target.save(self.dc):
-            target.damage(dmg // 2)
-        else:
-            target.damage(dmg)
+            dmg = dmg // 2
+        target.damage_source("MeteorSwarm", dmg)
 
     def finger_of_death(self, target):
+        log.record("Cast (FingerOfDeath)", 1)
         dmg = roll_dice(7, 8) + 30
         if target.save(self.dc):
-            target.damage(dmg // 2)
-        else:
-            target.damage(dmg)
+            dmg = dmg // 2
+        target.damage_source("FingerOfDeath", dmg)
 
     def chain_lightning(self, target):
+        log.record("Cast (ChainLightning)", 1)
         dmg = roll_dice(10, 8) + self.int
         if target.save(self.dc):
-            target.damage(dmg // 2)
-        else:
-            target.damage(dmg)
+            dmg = dmg // 2
+        target.damage_source("ChainLightning", dmg)
 
     def disintegrate(self, target, slot):
+        log.record("Cast (Disintegrate)", 1)
         if not target.save(self.dc):
             target.damage(40 + roll_dice(10 + (slot - 6), 6))
 
@@ -124,17 +131,15 @@ class Wizard:
             target.damage(roll_dice(6, 10))
 
     def blight(self, target, slot, overchannel=False):
+        log.record("Cast (Blight)", 1)
         num_dice = 8 + (slot - 4)
         if overchannel:
             dmg = num_dice * 8
         else:
             dmg = roll_dice(num_dice, 8)
-        if self.level >= 10:
-            dmg += self.int
         if target.save(self.dc):
-            target.damage_source("Blight", dmg // 2)
-        else:
-            target.damage_source("Blight", dmg)
+            dmg = dmg // 2
+        target.damage_source("Blight", dmg)
 
     def scorching_ray(self, target, slot):
         log.record("Cast (ScorchingRay)", 1)
@@ -176,6 +181,7 @@ class Wizard:
             target.damage_source("MagicMissile", self.int)
 
     def firebolt(self, target, adv=False):
+        log.record("Cast (Firebolt)", 1)
         roll = do_roll(adv=adv)
         num_dice = self.cantrip_dice
         if roll == 20:
@@ -233,9 +239,33 @@ class PotentCantrip(sim.feat.Feat):
 
 class EmpoweredEvocation(sim.feat.Feat):
     def damage_roll(self, args: DamageRollArgs):
-        if args.spell and not args.spell.has_tag("EmpoweredEvocationUsed"):
+        if (
+            args.spell
+            and not args.spell.has_tag("EmpoweredEvocationUsed")
+            and args.spell.school is School.Evocation
+        ):
             args.spell.add_tag("EmpoweredEvocationUsed")
             args.damage.flat_dmg += self.character.mod("int")
+
+
+class Overchannel(sim.feat.Feat):
+    def __init__(self) -> None:
+        self.used = False
+
+    def long_rest(self):
+        # Only use once per long rest
+        self.used = False
+
+    def damage_roll(self, args: DamageRollArgs):
+        if (
+            args.spell
+            and args.spell.slot >= 3
+            and args.spell.slot <= 5
+            and not self.used
+        ):
+            self.used = True
+            for i in range(len(args.damage.rolls)):
+                args.damage.rolls[i] = args.damage.dice[i]
 
 
 class WizardAction(sim.feat.Feat):
@@ -244,15 +274,15 @@ class WizardAction(sim.feat.Feat):
         spell: Optional[Spell] = None
         # if slot >= 3 and not self.character.spells.is_concentrating():
         #     spell = SummonFey(slot)
-        # elif slot >= 9:
-        #     spell = MeteorSwarm(slot)
-        # elif slot >= 7:
-        #     spell = FingerOfDeath(slot)
-        # elif slot >= 6:
-        #     spell = ChainLightning(slot)
-        # if slot >= 4:
-        #     spell = Blight(slot)
-        if slot >= 3:
+        if slot >= 9:
+            spell = MeteorSwarm(slot)
+        elif slot >= 7:
+            spell = FingerOfDeath(slot)
+        elif slot >= 6:
+            spell = ChainLightning(slot)
+        elif slot >= 4:
+            spell = Blight(slot)
+        elif slot >= 3:
             spell = Fireball(slot)
         elif slot >= 2 and self.character.level < 11:
             spell = ScorchingRay(slot)
@@ -278,6 +308,8 @@ class Wizard2(sim.character.Character):
             feats.append(ASI(["int", "wis"]))
         if level >= 10:
             feats.append(EmpoweredEvocation())
+        # if level >= 14:
+        #     feats.append(Overchannel())
         super().init(
             level=level,
             stats=[10, 10, 10, 17, 10, 10],

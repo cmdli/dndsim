@@ -5,6 +5,8 @@ import sim.spells
 import sim.character
 import sim.target
 
+from sim.spells import School
+
 
 class EldritchBlastBolt(sim.weapons.Weapon):
     def __init__(self, character: "sim.character.Character", **kwargs):
@@ -15,7 +17,7 @@ class EldritchBlastBolt(sim.weapons.Weapon):
 
 class EldritchBlast(sim.spells.Spell):
     def __init__(self, character_level: int, **kwargs):
-        super().__init__("EldritchBlast", 0, **kwargs)
+        super().__init__("EldritchBlast", 0, school=School.Evocation, **kwargs)
         self.character_level = character_level
 
     def cast(

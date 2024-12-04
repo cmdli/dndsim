@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sim.spells import Spell, BasicSaveSpell
+from sim.spells import Spell, BasicSaveSpell, School
 
 import sim.attack
 import sim.target
@@ -12,35 +12,41 @@ import sim.weapons
 
 class MeteorSwarm(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("MeteorSwarm", slot, dice=40 * [6])
+        super().__init__("MeteorSwarm", slot, dice=40 * [6], school=School.Evocation)
         assert slot == 9
 
 
 class FingerOfDeath(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("FingerOfDeath", slot, dice=7 * [8], flat_dmg=30)
+        super().__init__(
+            "FingerOfDeath", slot, dice=7 * [8], flat_dmg=30, school=School.Necromancy
+        )
         assert slot >= 7
 
 
 class ChainLightning(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("ChainLightning", slot, dice=10 * [8])
+        super().__init__("ChainLightning", slot, dice=10 * [8], school=School.Evocation)
         assert slot >= 6
 
 
 class Blight(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("Blight", slot, dice=(4 + slot) * [8])
+        super().__init__(
+            "Blight", slot, dice=(4 + slot) * [8], school=School.Necromancy
+        )
 
 
 class Fireball(BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("Fireball", slot, dice=(5 + slot) * [6])
+        super().__init__(
+            "Fireball", slot, dice=(5 + slot) * [6], school=School.Evocation
+        )
 
 
 class ScorchingRay(sim.spells.TargetedSpell):
     def __init__(self, slot: int):
-        super().__init__("ScorchingRay", slot)
+        super().__init__("ScorchingRay", slot, school=School.Evocation)
 
     def cast_target(
         self, character: "sim.character.Character", target: "sim.target.Target"
@@ -56,7 +62,7 @@ class ScorchingRay(sim.spells.TargetedSpell):
 
 class MagicMissile(sim.spells.TargetedSpell):
     def __init__(self, slot: int):
-        super().__init__("MagicMissile", slot)
+        super().__init__("MagicMissile", slot, school=School.Evocation)
 
     def cast_target(
         self, character: "sim.character.Character", target: "sim.target.Target"
@@ -76,7 +82,7 @@ class MagicMissile(sim.spells.TargetedSpell):
 
 class Firebolt(sim.spells.TargetedSpell):
     def __init__(self):
-        super().__init__("Firebolt", slot=0)
+        super().__init__("Firebolt", slot=0, school=School.Evocation)
 
     def cast_target(
         self, character: "sim.character.Character", target: "sim.target.Target"
@@ -94,7 +100,7 @@ class Firebolt(sim.spells.TargetedSpell):
 
 class TrueStrike(Spell):
     def __init__(self, weapon: "sim.weapons.Weapon", **kwargs):
-        super().__init__("TrueStrike", 0)
+        super().__init__("TrueStrike", 0, school=School.Divination)
         self.weapon = weapon
 
     def cast(

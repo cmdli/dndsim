@@ -1,6 +1,7 @@
 from typing import List, override, Optional
 
 from util.util import roll_dice, cantrip_dice
+from sim.spells import School
 import sim.target
 import sim.event_loop
 import sim.spells
@@ -10,7 +11,9 @@ import sim.character
 
 class SpiritGuardians(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
     def __init__(self, slot: int, **kwargs):
-        super().__init__("SpiritGuardians", slot=slot, **kwargs)
+        super().__init__(
+            "SpiritGuardians", slot=slot, school=School.Conjuration, **kwargs
+        )
 
     def cast(
         self,
@@ -32,7 +35,9 @@ class SpiritGuardians(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
 
 class TollTheDead(sim.spells.TargetedSpell):
     def __init__(self):
-        super().__init__("TollTheDead", slot=0, concentration=False)
+        super().__init__(
+            "TollTheDead", slot=0, concentration=False, school=School.Necromancy
+        )
 
     def cast_target(
         self, character: "sim.character.Character", target: "sim.target.Target"
@@ -48,13 +53,15 @@ class TollTheDead(sim.spells.TargetedSpell):
 
 class Harm(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("Harm", slot=slot, dice=14 * [6])
+        super().__init__("Harm", slot=slot, dice=14 * [6], school=School.Necromancy)
         assert slot >= 6
 
 
 class InflictWounds(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
-        super().__init__("InflictWounds", slot, dice=(1 + self.slot) * [10])
+        super().__init__(
+            "InflictWounds", slot, dice=(1 + self.slot) * [10], school=School.Necromancy
+        )
 
 
 class SpiritualWeaponWeapon(sim.weapons.Weapon):
@@ -73,7 +80,12 @@ class SpiritualWeaponWeapon(sim.weapons.Weapon):
 
 class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
     def __init__(self, slot: int, concentration: bool = True):
-        super().__init__("SpiritualWeapon", slot=slot, concentration=concentration)
+        super().__init__(
+            "SpiritualWeapon",
+            slot=slot,
+            concentration=concentration,
+            school=School.Evocation,
+        )
         self.weapon = SpiritualWeaponWeapon(slot=self.slot)
 
     def cast(
@@ -95,7 +107,9 @@ class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
 
 class GuardianOfFaith(sim.spells.Spell, sim.event_loop.Listener):
     def __init__(self, slot: int):
-        super().__init__("GuardianOfFaith", slot, duration=10)
+        super().__init__(
+            "GuardianOfFaith", slot, duration=10, school=School.Conjuration
+        )
         self.dmg = 60
 
     def cast(
