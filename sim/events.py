@@ -45,15 +45,17 @@ class AttackRollArgs:
         self.roll2 = random.randint(1, 20)
 
     def roll(self):
-        if self.adv == self.disadv:
+        if self.adv and self.disadv:
             log.output(lambda: f"Roll: {self.roll1}")
             return self.roll1
         elif self.adv:
             log.output(lambda: f"Roll ADV: {self.roll1}, {self.roll2}")
             return max(self.roll1, self.roll2)
-        else:
+        elif self.disadv:
             log.output(lambda: f"Roll DIS: {self.roll1}, {self.roll2}")
             return min(self.roll1, self.roll2)
+        else:
+            return self.roll1
 
     def hits(self):
         return (

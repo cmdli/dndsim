@@ -1,6 +1,8 @@
 from typing import override, Optional, List
+
 from sim.events import AttackResultArgs, AttackRollArgs
 from sim.spells import Spell
+from util.log import log
 
 import sim.feat
 import sim.target
@@ -26,11 +28,13 @@ class SummonWeapon(sim.weapons.Weapon):
 
     @override
     def to_hit(self, character):
-        return self.caster.prof + self.caster.mod(self.caster.spells.mod)
+        return self.caster.spells.to_hit()
 
     def attack_result(
         self, args: AttackResultArgs, character: "sim.character.Character"
     ):
+        if args.misses():
+            return
         num_dice = self.num_dice
         if args.crit:
             num_dice *= 2
@@ -85,11 +89,16 @@ class FeyWeapon(SummonWeapon):
 
 
 class Mirthful(sim.feat.Feat):
+    def __init__(self) -> None:
+        super().__init__()
+        self.used = False
+
     def begin_turn(self, target: "sim.target.Target"):
         self.used = False
 
     def attack_roll(self, args: AttackRollArgs):
         if not self.used:
+            log.record("Mirthful", 1)
             args.adv = True
             self.used = True
 

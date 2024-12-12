@@ -12,6 +12,7 @@ import sim.character
 import sim.target
 import sim.attack
 import sim.events
+import sim.event_loop
 
 
 class Spellcaster(Enum):
@@ -33,7 +34,7 @@ def spellcaster_level(levels: List[Tuple[Spellcaster, int]]):
     return total
 
 
-class Spellcasting:
+class Spellcasting(sim.event_loop.Listener):
     def __init__(
         self,
         character: "sim.character.Character",
@@ -46,9 +47,14 @@ class Spellcasting:
         self.concentration: Optional["sim.spells.Spell"] = None
         self.spells: List["sim.spells.Spell"] = []
         self.slots = spell_slots(self.spellcaster_level)
+        self.to_hit_bonus = 0
+        self.character.events.add(self, "short_rest")
 
     def reset(self):
         self.slots = spell_slots(self.spellcaster_level)
+        self.short_rest()
+
+    def short_rest(self):
         self.set_concentration(None)
         for spell in self.spells:
             spell.end(self.character)
@@ -102,4 +108,4 @@ class Spellcasting:
         return 1
 
     def to_hit(self):
-        return self.character.mod(self.mod) + self.character.prof
+        return self.character.mod(self.mod) + self.character.prof + self.to_hit_bonus

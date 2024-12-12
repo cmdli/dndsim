@@ -60,20 +60,12 @@ class Wizard:
 
     def turn(self, target):
         slot = highest_spell_slot(self.slots)
-        # if slot >= 3 and not self.concentration:
-        #     self.fey_summon = slot
-        #     self.concentration = True
-        # else:
-        #     if slot >= 9:
-        #         self.meteor_swarm(target)
-        #     elif slot >= 7:
-        #         self.finger_of_death(target)
-        #     elif slot >= 6:
-        #         self.chain_lightning(target)
-        #     elif slot >= 5 and not self.used_overchannel:
-        #         self.blight(target, slot, overchannel=True)
-        #         self.used_overchannel = True
-        if slot >= 9:
+        if slot >= 3 and not self.concentration:
+            log.record("Cast (SummonFey)", 1)
+            self.fey_summon = slot
+            self.concentration = True
+            self.slots[slot] -= 1
+        elif slot >= 9:
             self.meteor_swarm(target)
         elif slot >= 7:
             self.finger_of_death(target)
@@ -91,11 +83,12 @@ class Wizard:
         elif slot >= 1 and self.level < 5:
             self.magic_missile(target, slot)
         else:
+            slot = 0
             self.firebolt(target)
         if slot >= 1:
             self.slots[slot] -= 1
-        # if self.fey_summon > 0:
-        #     self.summon_fey(target)
+        if self.fey_summon > 0:
+            self.summon_fey(target)
 
     def enemy_turn(self, target):
         pass
@@ -203,12 +196,22 @@ class Wizard:
         adv = True  # Advantage on first attack
         num_attacks = self.fey_summon // 2
         for _ in range(num_attacks):
+            if adv:
+                log.record("Mirthful", 1)
+            log.record("Attack:FeyWeapon", 1)
             roll = do_roll(adv=adv)
             adv = False
+            num_dice = 2
             if roll == 20:
-                target.damage(roll_dice(4, 6) + 3 + self.fey_summon)
-            elif roll + self.to_hit >= target.ac:
-                target.damage(roll_dice(2, 6) + 3 + self.fey_summon)
+                log.record("Crit (FeyWeapon)", 1)
+                num_dice *= 2
+            if roll + self.to_hit >= target.ac:
+                log.record("Hit (FeyWeapon)", 1)
+                target.damage_source(
+                    "FeyWeapon", roll_dice(num_dice, 6) + 3 + self.fey_summon
+                )
+            else:
+                log.record("Miss (FeyWeapon)", 1)
 
 
 class WandOfTheWarMage(sim.feat.Feat):
@@ -216,9 +219,9 @@ class WandOfTheWarMage(sim.feat.Feat):
         super().__init__()
         self.bonus = bonus
 
-    def attack_roll(self, args: AttackRollArgs):
-        if args.attack.spell != None:
-            args.situational_bonus += self.bonus
+    def apply(self, character: sim.character.Character):
+        super().apply(character)
+        character.spells.to_hit_bonus += self.bonus
 
 
 class PotentCantrip(sim.feat.Feat):
@@ -275,9 +278,9 @@ class WizardAction(sim.feat.Feat):
     def action(self, target: "sim.target.Target"):
         slot = self.character.spells.highest_slot()
         spell: Optional[Spell] = None
-        # if slot >= 3 and not self.character.spells.is_concentrating():
-        #     spell = SummonFey(slot)
-        if slot >= 9:
+        if slot >= 3 and not self.character.spells.is_concentrating():
+            spell = SummonFey(slot)
+        elif slot >= 9:
             spell = MeteorSwarm(slot)
         elif slot >= 7:
             spell = FingerOfDeath(slot)
