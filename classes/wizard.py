@@ -120,7 +120,7 @@ class WizardAction(sim.feat.Feat):
             self.character.spells.cast(spell, target)
 
 
-class Wizard2(sim.character.Character):
+class Wizard(sim.character.Character):
     def __init__(self, level: int) -> None:
         magic_weapon = get_magic_weapon(level)
         feats: List["sim.feat.Feat"] = []

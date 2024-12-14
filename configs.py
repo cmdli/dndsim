@@ -25,7 +25,6 @@ CONFIGS = {
     "rogue": CharacterConfig("Assassin", AssassinRogue),
     "arcane_trickster": CharacterConfig("Arcane Trickster", ArcaneTricksterRogue),
     "wizard": CharacterConfig("Wizard", Wizard),
-    "wizard2": CharacterConfig("Wizard2", Wizard2),
     "cleric": CharacterConfig("Cleric", Cleric),
     "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
     "bard": CharacterConfig("Bard", ValorBard),

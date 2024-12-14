@@ -202,8 +202,7 @@ class Topple(sim.feat.Feat):
         if weapon.mastery == "topple" and self.character.has_mastery("topple"):
             mod = weapon.mod(self.character)
             if not target.save(self.character.dc(mod)):
-                log.output(lambda: "Knocked prone")
-                target.prone = True
+                target.knock_prone()
 
 
 class Graze(sim.feat.Feat):

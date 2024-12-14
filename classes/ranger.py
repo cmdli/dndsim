@@ -20,17 +20,14 @@ from util.log import log
 import sim.feat
 import sim.character
 import sim.target
+import sim.weapons
 
 
 def maybe_cast_summon_fey(
     character: "sim.character.Character", summon_fey_threshold: int
 ):
     slot = character.spells.highest_slot()
-    if (
-        summon_fey_threshold
-        and slot >= summon_fey_threshold
-        and not character.spells.is_concentrating()
-    ):
+    if slot >= summon_fey_threshold and not character.spells.is_concentrating():
         spell = SummonFey(slot)
         character.spells.cast(spell)
         return True
@@ -50,7 +47,9 @@ def maybe_cast_hunters_mark(character: "sim.character.Character"):
 
 
 class RangerAction(sim.feat.Feat):
-    def __init__(self, attacks, summon_fey_threshold: int) -> None:
+    def __init__(
+        self, attacks: List["sim.weapons.Weapon"], summon_fey_threshold: int
+    ) -> None:
         self.attacks = attacks
         self.summon_fey_threshold = summon_fey_threshold
 
@@ -59,7 +58,6 @@ class RangerAction(sim.feat.Feat):
             return
         maybe_cast_hunters_mark(self.character)
         for weapon in self.attacks:
-            log.record("main attack", 1)
             self.character.weapon_attack(target, weapon, tags=["main_action"])
 
 
@@ -68,29 +66,24 @@ class HuntersMarkFeat(sim.feat.Feat):
         self,
         die: int,
         caster: Optional["sim.character.Character"] = None,
-        adv: bool = False,
     ) -> None:
         self.die = die
-        self.adv = adv
         self.caster = caster
-        self.filter = filter
 
     def apply(self, character: "sim.character.Character"):
         super().apply(character)
         if self.caster is None:
             self.caster = character
 
-    def attack_roll(self, args: AttackRollArgs):
-        if (
-            self.caster
-            and self.caster.spells.concentrating_on("HuntersMark")
-            and self.adv
-        ):
-            args.adv = True
-
     def attack_result(self, args):
         if args.hits() and self.caster.spells.concentrating_on("HuntersMark"):
             args.add_damage(source="HuntersMark", dice=[self.die])
+
+
+class PreciseHunter(sim.feat.Feat):
+    def attack_roll(self, args: AttackRollArgs):
+        if args.attack.target.has_tag("HuntersMark"):
+            args.adv = True
 
 
 class Gloomstalker(sim.feat.Feat):
@@ -159,8 +152,7 @@ class BeastChargeFeat(sim.feat.Feat):
             if not args.attack.target.prone and not args.attack.target.save(
                 self.character.dc("wis")
             ):
-                args.attack.target.prone = True
-                log.output(lambda: "Knocked prone by Charge")
+                args.attack.target.knock_prone()
 
 
 class StalkersFlurry(sim.feat.Feat):
@@ -184,17 +176,15 @@ class GloomstalkerRanger(sim.character.Character):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         base_feats.append(WeaponMasteries(["vex", "nick"]))
-        if level >= 2:
-            base_feats.append(Archery())
         weapon = HandCrossbow(magic_bonus=magic_weapon)
         if level >= 5:
             attacks = 2 * [weapon]
         else:
             attacks = [weapon]
         base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
-        base_feats.append(
-            HuntersMarkFeat(die=10 if level >= 20 else 6, adv=level >= 17)
-        )
+        base_feats.append(HuntersMarkFeat(die=10 if level >= 20 else 6))
+        if level >= 2:
+            base_feats.append(Archery())
         if level >= 3:
             base_feats.append(DreadAmbusher(level, weapon))
         if level >= 4:
@@ -205,6 +195,8 @@ class GloomstalkerRanger(sim.character.Character):
             base_feats.append(ASI(["wis"]))
         if level >= 16:
             base_feats.append(ASI(["wis"]))
+        if level >= 17:
+            base_feats.append(PreciseHunter())
         if level >= 19:
             base_feats.append(IrresistibleOffense("dex"))
         super().init(
@@ -223,7 +215,9 @@ class PrimalCompanion(sim.character.Character):
         self.weapon = BeastMaul(self)
         base_feats: List[sim.feat.Feat] = [BeastChargeFeat(ranger)]
         if level >= 11:
-            base_feats += [HuntersMarkFeat(die=10 if level >= 20 else 6, caster=ranger)]
+            base_feats.append(
+                HuntersMarkFeat(die=10 if level >= 20 else 6, caster=ranger)
+            )
         super().init(
             level=level,
             stats=[10, 10, 10, 10, 10, 10],
@@ -303,6 +297,7 @@ class BeastMasterRanger(sim.character.Character):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
         base_feats.append(WeaponMasteries(["vex", "nick"]))
+        base_feats.append(HuntersMarkFeat(die=10 if level >= 20 else 6))
         beast = PrimalCompanion(level, ranger=self)
         shortsword = Shortsword(magic_bonus=magic_weapon)
         rapier = Rapier(magic_bonus=magic_weapon)
@@ -321,11 +316,10 @@ class BeastMasterRanger(sim.character.Character):
             base_feats.append(ASI(["wis"]))
         if level >= 16:
             base_feats.append(ASI(["wis"]))
+        if level >= 17:
+            base_feats.append(PreciseHunter())
         if level >= 19:
             base_feats.append(IrresistibleOffense("dex"))
-        base_feats.append(
-            HuntersMarkFeat(die=10 if level >= 20 else 6, adv=level >= 17)
-        )
         base_feats.append(
             BeastMasterAction(
                 beast=beast,

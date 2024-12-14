@@ -116,7 +116,7 @@ class TrippingAttack(sim.feat.Feat):
         if die > 0:
             args.add_damage(source="TrippingAttack", dice=[die])
             if not args.attack.target.save(self.character.dc("str")):
-                args.attack.target.prone = True
+                args.attack.target.knock_prone()
             args.attack.add_tag("used_maneuver")
 
 

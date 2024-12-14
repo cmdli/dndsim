@@ -52,8 +52,7 @@ class OpenHandTechnique(sim.feat.Feat):
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("flurry"):
             if not args.attack.target.save(self.character.dc("wis")):
-                log.record("Knocked prone", 1)
-                args.attack.target.prone = True
+                args.attack.target.knock_prone()
 
 
 class Grappler(sim.feat.Feat):

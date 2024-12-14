@@ -2,6 +2,7 @@ import random
 from util.util import prof_bonus
 from collections import defaultdict
 from util.log import log
+from util.taggable import Taggable
 
 TARGET_AC = [
     13,  # 1
@@ -27,7 +28,7 @@ TARGET_AC = [
 ]
 
 
-class Target:
+class Target(Taggable):
     def __init__(self, level):
         self.ac = TARGET_AC[level - 1]
         self.prof = prof_bonus(level)
@@ -79,3 +80,7 @@ class Target:
 
     def grapple(self):
         self.grappled = True
+
+    def knock_prone(self):
+        log.record("Knocked prone", 1)
+        self.prone = True
