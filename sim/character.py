@@ -187,7 +187,7 @@ class Character:
         args = AttackArgs(
             target=target, attack=attack, weapon=weapon, spell=spell, tags=tags
         )
-        log.record(f"Attack:{args.attack.name}", 1)
+        log.record(f"Attack ({args.attack.name})", 1)
         self.events.emit("before_attack")
         to_hit = args.attack.to_hit(self)
         roll_result = self.attack_roll(attack=args, to_hit=to_hit)

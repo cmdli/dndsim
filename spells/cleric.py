@@ -60,7 +60,7 @@ class Harm(sim.spells.BasicSaveSpell):
 class InflictWounds(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__(
-            "InflictWounds", slot, dice=(1 + self.slot) * [10], school=School.Necromancy
+            "InflictWounds", slot, dice=(1 + slot) * [10], school=School.Necromancy
         )
 
 

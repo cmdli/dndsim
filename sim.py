@@ -1,7 +1,9 @@
 import csv
 import click
+import prettytable
 from typing import Set, List, Dict
 import random
+from collections import defaultdict
 
 from util.log import log
 from sim import CharacterConfig, Simulation
@@ -10,21 +12,23 @@ import sim.character
 import sim.target
 
 
-NUM_FIGHTS = 3
-NUM_TURNS = 5
-NUM_SIMS = 1000
-
 # random.seed(1234)
 
 
-def test_dpr(character: "sim.character.Character", level: int):
-    damage = 0
-    for _ in range(NUM_SIMS):
+def test_dpr(
+    character: "sim.character.Character",
+    level: int,
+    num_fights: int,
+    num_rounds: int,
+    iterations: int,
+):
+    damage = 0.0
+    for _ in range(iterations):
         target = sim.target.Target(level)
-        simulation = Simulation(character, target, NUM_FIGHTS, NUM_TURNS)
+        simulation = Simulation(character, target, num_fights, num_rounds)
         simulation.run()
         damage += simulation.target.dmg
-    return damage / (NUM_SIMS * NUM_FIGHTS * NUM_TURNS)
+    return damage / (num_fights * num_rounds * iterations)
 
 
 def write_data(file: str, data):
@@ -33,37 +37,68 @@ def write_data(file: str, data):
         writer.writerows(data)
 
 
-def test_characters(configs: List[CharacterConfig], start: int, end: int):
+def test_characters(
+    configs: List[CharacterConfig],
+    start_level: int,
+    end_level: int,
+    num_rounds: int,
+    num_fights: int,
+    iterations: int,
+):
     data = [["Level", "Character", "DPR"]]
-    for level in range(start, end + 1):
+    for level in range(start_level, end_level + 1):
         for config in configs:
-            dpr = test_dpr(config.create(level), level)
+            dpr = test_dpr(
+                character=config.create(level),
+                level=level,
+                num_rounds=num_rounds,
+                num_fights=num_fights,
+                iterations=iterations,
+            )
             data.append([level, config.name, dpr])
     return data
 
 
-def parse_unknown_args(args: List[str]) -> Dict[str, bool]:
-    parsed_args = []
-    for arg in args:
-        if not arg.startswith("--"):
-            raise Exception(f"Invalid argument: {arg}")
-        parsed_args.append(arg.strip("-"))
-    return {arg: True for arg in parsed_args}
+def print_data(data):
+    table = prettytable.PrettyTable()
+    levels = set()
+    classes = dict()
+    for [level, name, dpr] in data:
+        if name not in classes:
+            classes[name] = dict()
+        classes[name][level] = "{:.2f}".format(dpr)
+        levels.add(level)
+    levels = sorted(list(levels))
+    table.add_column("Level", levels)
+    for name in classes:
+        table.add_column(name, [classes[name][level] for level in levels])
+    print(table)
 
 
 @click.command()
 @click.option("-s", "--start", default=1, help="Start of the level range")
 @click.option("-e", "--end", default=20, help="End of the level range")
 @click.option("--characters", default="all", help="Characters to test")
-def run(start, end, characters):
+@click.option("-o", "--output", default="data.csv", help="Output file")
+@click.option("--num_rounds", default=5, help="Number of rounds per fight")
+@click.option("--num_fights", default=3, help="Number of fights per long rest")
+@click.option("--iterations", default=500, help="Number of simulations to run")
+@click.option("--debug", default=False, help="Enable debug metrics")
+def run(start, end, characters, output, num_rounds, num_fights, iterations, debug):
+    if debug:
+        log.enable()
     characters = configs.get_configs(characters.split(","))
     data = test_characters(
         characters,
-        start=start,
-        end=end,
+        start_level=start,
+        end_level=end,
+        num_rounds=num_rounds,
+        num_fights=num_fights,
+        iterations=iterations,
     )
-    write_data("data.csv", data)
+    write_data(output, data)
     log.printReport()
+    print_data(data[1:])
 
 
 if __name__ == "__main__":

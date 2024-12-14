@@ -7,7 +7,7 @@ from classes.fighter import (
     ChampionFighter,
 )
 from classes.rogue import AssassinRogue, ArcaneTricksterRogue
-from classes.wizard import Wizard2, Wizard
+from classes.wizard import Wizard
 from classes.paladin import Paladin
 from classes.ranger import GloomstalkerRanger, BeastMasterRanger
 from classes.cleric import Cleric

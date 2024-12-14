@@ -24,7 +24,8 @@ import sim.weapons
 
 
 def maybe_cast_summon_fey(
-    character: "sim.character.Character", summon_fey_threshold: int
+    character: "sim.character.Character",
+    summon_fey_threshold: int,
 ):
     slot = character.spells.highest_slot()
     if slot >= summon_fey_threshold and not character.spells.is_concentrating():
@@ -34,14 +35,17 @@ def maybe_cast_summon_fey(
     return False
 
 
-def maybe_cast_hunters_mark(character: "sim.character.Character"):
+def maybe_cast_hunters_mark(
+    character: "sim.character.Character",
+    target: "sim.target.Target",
+):
     slot = character.spells.lowest_slot()
     if (
         slot > 0
         and not character.spells.is_concentrating()
         and character.use_bonus("HuntersMark")
     ):
-        character.spells.cast(HuntersMark(slot))
+        character.spells.cast(HuntersMark(slot), target)
         return True
     return False
 
@@ -56,7 +60,7 @@ class RangerAction(sim.feat.Feat):
     def action(self, target: "sim.target.Target"):
         if maybe_cast_summon_fey(self.character, self.summon_fey_threshold):
             return
-        maybe_cast_hunters_mark(self.character)
+        maybe_cast_hunters_mark(self.character, target)
         for weapon in self.attacks:
             self.character.weapon_attack(target, weapon, tags=["main_action"])
 
@@ -267,7 +271,7 @@ class BeastMasterAction(sim.feat.Feat):
     def action(self, target: "sim.target.Target"):
         if maybe_cast_summon_fey(self.character, summon_fey_threshold=4):
             return
-        maybe_cast_hunters_mark(self.character)
+        maybe_cast_hunters_mark(self.character, target)
         if self.character.level >= 3:
             commanded_beast = False
             if self.character.use_bonus("beast"):
