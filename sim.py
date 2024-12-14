@@ -12,9 +12,9 @@ import sim.target
 
 NUM_FIGHTS = 3
 NUM_TURNS = 5
-NUM_SIMS = 500
+NUM_SIMS = 1000
 
-random.seed(1234)
+# random.seed(1234)
 
 
 def test_dpr(character: "sim.character.Character", level: int):
