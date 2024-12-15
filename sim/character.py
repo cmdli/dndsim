@@ -17,6 +17,7 @@ import sim.weapons
 import sim.feat
 import sim.target
 import sim.weapons
+import sim.resource
 
 STATS = ["str", "dex", "con", "int", "wis", "cha"]
 DEFAULT_STAT_MAX = 20
@@ -49,6 +50,8 @@ class Character:
         self.spells = Spellcasting(self, spell_mod, [(spellcaster, level)])
         self.masteries: Set["sim.weapons.WeaponMastery"] = set()
         self.used_bonus = False
+        self.ki = sim.resource.Resource(self, short_rest=True)
+
         self.feats: Dict[str, "sim.feat.Feat"] = dict()
         for feat in [Vex(), Topple(), Graze()]:
             self.add_feat(feat)

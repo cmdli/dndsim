@@ -40,8 +40,8 @@ class FlurryOfBlows(sim.feat.Feat):
         self.weapon = weapon
 
     def before_action(self, target: "sim.target.Target"):
-        if self.character.ki > 0 and self.character.use_bonus("FlurryOfBlows"):
-            self.character.ki -= 1
+        if self.character.ki.has() and self.character.use_bonus("FlurryOfBlows"):
+            self.character.ki.use()
             for _ in range(self.num_attacks):
                 self.character.weapon_attack(target, self.weapon, tags=["flurry"])
         elif self.character.use_bonus("BonusAttack"):
@@ -81,14 +81,14 @@ class StunningStrike(sim.feat.Feat):
 
     def attack_result(self, args):
         target = args.attack.target
-        if args.misses() or self.used or self.character.ki == 0:
+        if args.misses() or self.used or not self.character.ki.has():
             return
         if target.grappled and self.avoid_on_grapple:
             return
         if target.stunned:
             return
         self.used = True
-        self.character.ki -= 1
+        self.character.ki.use()
         if not target.save(self.character.dc("wis")):
             target.stunned = True
         else:
@@ -99,8 +99,9 @@ class Ki(sim.feat.Feat):
     def __init__(self, max_ki):
         self.max_ki = max_ki
 
-    def short_rest(self):
-        self.character.ki = self.max_ki
+    def apply(self, character):
+        super().apply(character)
+        character.ki.increase_max(self.max_ki)
 
 
 class Fists(sim.weapons.Weapon):
