@@ -1,9 +1,10 @@
 import csv
+import multiprocessing.pool
 import click
 import prettytable
 from typing import Set, List, Dict
 import random
-from collections import defaultdict
+import multiprocessing
 
 from util.log import log
 from sim import CharacterConfig, Simulation
@@ -13,6 +14,24 @@ import sim.target
 
 
 # random.seed(1234)
+
+
+class Args:
+    def __init__(
+        self,
+        character: str,
+        start_level: int,
+        end_level: int,
+        iterations: int,
+        num_rounds: int,
+        num_fights: int,
+    ) -> None:
+        self.character = character
+        self.start_level = start_level
+        self.end_level = end_level
+        self.iterations = iterations
+        self.num_rounds = num_rounds
+        self.num_fights = num_fights
 
 
 def test_dpr(
@@ -37,8 +56,23 @@ def write_data(file: str, data):
         writer.writerows(data)
 
 
+def test_character(args: Args):
+    config = configs.get_configs([args.character])[0]
+    data = []
+    for level in range(args.start_level, args.end_level + 1):
+        dpr = test_dpr(
+            character=config.create(level),
+            level=level,
+            num_rounds=args.num_rounds,
+            num_fights=args.num_fights,
+            iterations=args.iterations,
+        )
+        data.append([level, config.name, dpr])
+    return data
+
+
 def test_characters(
-    configs: List[CharacterConfig],
+    characters: List[str],
     start_level: int,
     end_level: int,
     num_rounds: int,
@@ -46,16 +80,24 @@ def test_characters(
     iterations: int,
 ):
     data = [["Level", "Character", "DPR"]]
-    for level in range(start_level, end_level + 1):
-        for config in configs:
-            dpr = test_dpr(
-                character=config.create(level),
-                level=level,
+    with multiprocessing.pool.Pool() as p:
+        args = [
+            Args(
+                character=character,
+                start_level=start_level,
+                end_level=end_level,
+                iterations=iterations,
                 num_rounds=num_rounds,
                 num_fights=num_fights,
-                iterations=iterations,
             )
-            data.append([level, config.name, dpr])
+            for character in characters
+        ]
+        outputs = p.map(
+            test_character,
+            args,
+        )
+        for output in outputs:
+            data += output
     return data
 
 
@@ -87,7 +129,7 @@ def print_data(data):
 def run(start, end, characters, output, num_rounds, num_fights, iterations, debug):
     if debug:
         log.enable()
-    characters = configs.get_configs(characters.split(","))
+    characters = configs.break_out_shortcuts(characters.split(","))
     data = test_characters(
         characters,
         start_level=start,

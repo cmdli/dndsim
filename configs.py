@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set, List
 
 from sim import CharacterConfig
 from classes.monk import Monk
@@ -44,7 +44,15 @@ SHORTCUTS = {
 }
 
 
-def get_configs(names: Set[str]):
+def break_out_shortcuts(names: Set[str]) -> Set[str]:
+    for name in names:
+        if name in SHORTCUTS:
+            names = set(SHORTCUTS[name])
+            break
+    return names
+
+
+def get_configs(names: Set[str]) -> List[CharacterConfig]:
     for name in names:
         if name in SHORTCUTS:
             names = set(SHORTCUTS[name])
