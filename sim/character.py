@@ -47,7 +47,7 @@ class Character:
         self.events = EventLoop()
         self.effects: Set[str] = set()
         self.spells = Spellcasting(self, spell_mod, [(spellcaster, level)])
-        self.masteries: List["sim.weapons.WeaponMastery"] = []
+        self.masteries: Set["sim.weapons.WeaponMastery"] = set()
         self.used_bonus = False
         self.feats: Dict[str, "sim.feat.Feat"] = dict()
         for feat in [Vex(), Topple(), Graze()]:
@@ -154,14 +154,8 @@ class Character:
         self.events.emit("enemy_turn", target)
 
     # ============================
-    #      WEAPON ATTACKS
+    #      ATTACKS
     # ============================
-
-    def add_masteries(self, masteries: List["sim.weapons.WeaponMastery"]):
-        self.masteries.extend(masteries)
-
-    def has_mastery(self, mastery: "sim.weapons.WeaponMastery") -> bool:
-        return mastery in self.masteries
 
     def weapon_attack(
         self,

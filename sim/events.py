@@ -1,9 +1,6 @@
 import random
-from enum import Enum
-from typing import Set, List, Optional, TypeAlias, Callable, Any
-from collections import defaultdict
+from typing import List, Optional, TypeAlias, Callable, Any
 
-from util.util import roll_dice
 from util.log import log
 import sim.target
 import sim.weapons
