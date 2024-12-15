@@ -2,7 +2,6 @@ from typing import List
 
 from feats import ASI, DualWielder
 from sim.weapons import Weapon, Shortsword, Scimitar
-from sim.events import AttackRollArgs
 from util.util import get_magic_weapon
 from spells.wizard import TrueStrike
 from spells.paladin import HolyWeapon
@@ -27,7 +26,7 @@ class TrueStrikeFeat(sim.feat.Feat):
         else:
             self.num_dice = 0
 
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         weapon = args.attack.weapon
         if weapon and args.attack.has_tag("truestrike"):
             args.situational_bonus += self.character.mod(

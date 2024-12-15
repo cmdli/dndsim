@@ -1,6 +1,6 @@
 from typing import List
 
-from util.util import get_magic_weapon, roll_dice
+from util.util import get_magic_weapon
 from feats import (
     ASI,
     GreatWeaponMaster,

@@ -7,8 +7,6 @@ from feats import (
     IrresistibleOffense,
     WeaponMaster,
 )
-from sim.events import DamageRollArgs
-from util.log import log
 
 import sim.feat
 import sim.character
@@ -139,7 +137,7 @@ class TavernBrawler(sim.feat.Feat):
     def __init__(self, die: int) -> None:
         self.die = die
 
-    def damage_roll(self, args: DamageRollArgs):
+    def damage_roll(self, args):
         for i in range(len(args.damage.rolls)):
             if args.damage.rolls[i] == 1:
                 args.damage.rolls[i] = roll_dice(1, args.damage.dice[i])

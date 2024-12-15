@@ -1,18 +1,9 @@
 from typing import List, Optional
-import math
 
-from sim.events import AttackRollArgs, DamageRollArgs
 from util.util import (
-    prof_bonus,
     get_magic_weapon,
-    cantrip_dice,
-    highest_spell_slot,
-    spell_slots,
-    roll_dice,
-    do_roll,
     safe_cast,
 )
-from util.log import log
 from sim.spellcasting import Spellcaster
 from spells.wizard import (
     MeteorSwarm,
@@ -52,7 +43,6 @@ class PotentCantrip(sim.feat.Feat):
         attack = safe_cast(sim.attack.SpellAttack, args.attack.attack)
         if attack and attack.spell.slot == 0:
             spell = attack.spell
-            log.record(f"PotentCantrip ({spell.name})", 1)
             self.character.do_damage(
                 target=args.attack.target,
                 damage=sim.attack.DamageRoll(
@@ -64,7 +54,7 @@ class PotentCantrip(sim.feat.Feat):
 
 
 class EmpoweredEvocation(sim.feat.Feat):
-    def damage_roll(self, args: DamageRollArgs):
+    def damage_roll(self, args):
         if (
             args.spell
             and not args.spell.has_tag("EmpoweredEvocationUsed")
@@ -82,7 +72,7 @@ class Overchannel(sim.feat.Feat):
         # Only use once per long rest
         self.used = False
 
-    def damage_roll(self, args: DamageRollArgs):
+    def damage_roll(self, args):
         if (
             args.spell
             and args.spell.slot >= 3

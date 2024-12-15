@@ -7,7 +7,6 @@ from util.util import (
 )
 from feats import ASI, AttackAction, BoomingBlade, WeaponMasteries
 from sim.weapons import Shortsword, Scimitar, Rapier
-from util.log import log
 
 import sim.feat
 import sim.character
@@ -59,7 +58,6 @@ class Assassinate(sim.feat.Feat):
         self.adv = False
 
     def short_rest(self):
-        log.record("short_rest", 1)
         self.first_turn = True
         self.used_dmg = False
 

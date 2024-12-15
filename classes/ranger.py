@@ -1,6 +1,5 @@
 from typing import List, override, Optional
 
-from sim.events import AttackArgs, AttackResultArgs, AttackRollArgs
 from util.util import get_magic_weapon
 from feats import (
     ASI,
@@ -15,7 +14,6 @@ from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
 from spells.ranger import HuntersMark
 from sim.spellcasting import Spellcaster
 from sim.summons import SummonFey
-from util.log import log
 
 import sim.feat
 import sim.character
@@ -85,7 +83,7 @@ class HuntersMarkFeat(sim.feat.Feat):
 
 
 class PreciseHunter(sim.feat.Feat):
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         if args.attack.target.has_tag("HuntersMark"):
             args.adv = True
 
@@ -104,7 +102,7 @@ class Gloomstalker(sim.feat.Feat):
     def begin_turn(self, target: "sim.target.Target"):
         self.used_attack = False
 
-    def attack(self, args: AttackArgs):
+    def attack(self, args):
         self.used_attack = True
 
     def attack_result(self, args):
@@ -114,7 +112,6 @@ class Gloomstalker(sim.feat.Feat):
     def end_turn(self, target):
         if self.first_turn and self.used_attack:
             self.using = True
-            log.record("gloom attack", 1)
             self.character.weapon_attack(target, self.weapon)
             self.using = False
         self.first_turn = False
@@ -246,9 +243,7 @@ class BeastMaul(Weapon):
         return self.ranger.prof + self.ranger.mod("wis")
 
     @override
-    def attack_result(
-        self, args: AttackResultArgs, character: "sim.character.Character"
-    ):
+    def attack_result(self, args, character):
         if not args.hits():
             return
         num_dice = 2 if args.crit else 1
@@ -275,7 +270,6 @@ class BeastMasterAction(sim.feat.Feat):
         if self.character.level >= 3:
             commanded_beast = False
             if self.character.use_bonus("beast"):
-                log.output(lambda: "Use bonus action for beast attack")
                 self.beast.do_attack(target)
                 commanded_beast = True
             num_attacks = 2 if self.character.level >= 5 else 1

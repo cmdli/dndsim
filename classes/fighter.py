@@ -1,7 +1,6 @@
 import random
 from typing import List
 
-from sim.events import AttackRollArgs
 from util.util import get_magic_weapon, roll_dice
 from feats import (
     GreatWeaponMaster,
@@ -93,7 +92,7 @@ class PrecisionAttack(sim.feat.Feat):
     def __init__(self, low=5) -> None:
         self.low = low
 
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         if args.attack.has_tag("used_maneuver"):
             return
         maneuvers = self.character.feat("Maneuvers")

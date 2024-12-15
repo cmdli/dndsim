@@ -1,6 +1,5 @@
 from typing import List
 
-from sim.events import AttackRollArgs
 from util.util import get_magic_weapon
 from feats import (
     ASI,
@@ -50,7 +49,7 @@ class SacredWeapon(sim.feat.Feat):
         if not self.enabled and self.character.use_bonus("SacredWeapon"):
             self.enabled = True
 
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         if self.enabled:
             args.situational_bonus += self.character.mod("cha")
 

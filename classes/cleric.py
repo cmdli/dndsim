@@ -5,11 +5,11 @@ from util.util import (
 )
 from sim.spellcasting import Spellcaster
 from feats import ASI
-from sim.spells import Spell
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
 from sim.summons import SummonCelestial
 from sim.weapons import Weapon, Warhammer
 
+import sim.spells
 import sim.character
 import sim.target
 import sim.feat
@@ -18,7 +18,7 @@ import sim.feat
 class ClericAction(sim.feat.Feat):
     def action(self, target: "sim.target.Target"):
         slot = self.character.spells.highest_slot()
-        spell: Optional[Spell] = None
+        spell: Optional["sim.spells.Spell"] = None
         if not self.character.spells.is_concentrating() and slot >= 3:
             if slot >= 5:
                 spell = SummonCelestial(slot)
@@ -52,7 +52,7 @@ class BlessedStrikes(sim.feat.Feat):
     def __init__(self, num_dice: int) -> None:
         self.num_dice = num_dice
 
-    def begin_turn(self, target: sim.target.Target):
+    def begin_turn(self, target):
         self.used = False
 
     def attack_result(self, args):

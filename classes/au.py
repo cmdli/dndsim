@@ -4,7 +4,6 @@
 #
 import random
 
-from sim.events import AttackRollArgs
 from feats import ASI, AttackAction
 from util.util import get_magic_weapon
 from classes.fighter import ActionSurge
@@ -34,7 +33,7 @@ class OldSharpshooter(sim.feat.Feat):
         super().apply(character)
         character.dex += 1
 
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         args.situational_bonus -= 5
         args.attack.add_tag("Sharpshooter")
 
@@ -61,7 +60,7 @@ class FightingSpirit(sim.feat.Feat):
             self.fighting_spirit -= 1
             self.enabled = True
 
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         if self.enabled:
             args.adv = True
 
@@ -76,7 +75,7 @@ class RapidStrike(sim.feat.Feat):
     def begin_turn(self, target: "sim.target.Target"):
         self.used = False
 
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         weapon = args.attack.weapon
         if weapon and not self.used and args.adv and args.attack.has_tag("main_action"):
             self.used = True
@@ -89,7 +88,7 @@ class OldHandCrossbow(sim.weapons.Weapon):
 
 
 class Blessed(sim.feat.Feat):
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         args.situational_bonus += random.randint(1, 4)
 
 
