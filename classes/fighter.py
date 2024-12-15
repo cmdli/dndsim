@@ -95,9 +95,8 @@ class PrecisionAttack(sim.feat.Feat):
     def attack_roll(self, args):
         if args.attack.has_tag("used_maneuver"):
             return
-        maneuvers = self.character.feat("Maneuvers")
         if not args.hits() and args.roll() >= self.low:
-            roll = maneuvers.roll()
+            roll = self.character.maneuvers.roll()
             args.situational_bonus += roll
             args.attack.add_tag("used_maneuver")
 
@@ -110,8 +109,7 @@ class TrippingAttack(sim.feat.Feat):
             return
         if args.attack.target.prone:
             return
-        maneuvers = self.character.feat("Maneuvers")
-        die = maneuvers.use()
+        die = self.character.maneuvers.use()
         if die > 0:
             args.add_damage(source="TrippingAttack", dice=[die])
             if not args.attack.target.save(self.character.dc("str")):
@@ -121,41 +119,24 @@ class TrippingAttack(sim.feat.Feat):
 
 class Maneuvers(sim.feat.Feat):
     def __init__(self, level) -> None:
-        if level >= 15:
-            self.max_dice = 6
-        elif level >= 7:
-            self.max_dice = 5
+        super().__init__()
+        self.level = level
+
+    def apply(self, character):
+        if self.level >= 15:
+            character.maneuvers.max_dice = 6
+        elif self.level >= 7:
+            character.maneuvers.max_dice = 5
         else:
-            self.max_dice = 4
-        if level >= 18:
-            self.superiority_size = 12
-        elif level >= 10:
-            self.superiority_size = 10
+            character.maneuvers.max_dice = 4
+        if self.level >= 18:
+            character.maneuvers.die = 12
+        elif self.level >= 10:
+            character.maneuvers.die = 10
         else:
-            self.superiority_size = 8
-        self.enabled_relentless = level >= 15
-        self.superiority_dice = 0
-
-    def short_rest(self):
-        self.superiority_dice = self.max_dice
-
-    def begin_turn(self, target: "sim.target.Target"):
-        self.used_relentless = False
-
-    def use(self):
-        if self.superiority_dice > 0:
-            self.superiority_dice -= 1
-            return self.superiority_size
-        elif self.enabled_relentless and self.used_relentless:
-            self.used_relentless = True
-            return 8
-        return 0
-
-    def roll(self):
-        die = self.use()
-        if die > 0:
-            return roll_dice(1, die)
-        return 0
+            character.maneuvers.die = 8
+        if self.level >= 15:
+            character.maneuvers.relentless = True
 
 
 class ToppleIfNecessaryAttackAction(sim.feat.Feat):

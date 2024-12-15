@@ -10,6 +10,7 @@ from sim.spellcasting import Spellcasting, Spellcaster
 from sim.attack import WeaponAttack, SpellAttack
 
 import sim
+import sim.maneuvers
 import sim.events
 import sim.attack
 import sim.spells
@@ -51,6 +52,7 @@ class Character:
         self.masteries: Set["sim.weapons.WeaponMastery"] = set()
         self.used_bonus = False
         self.ki = sim.resource.Resource(self, short_rest=True)
+        self.maneuvers = sim.maneuvers.Maneuvers()
 
         self.feats: Dict[str, "sim.feat.Feat"] = dict()
         for feat in [Vex(), Topple(), Graze()]:
