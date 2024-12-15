@@ -1,13 +1,14 @@
 from typing import List
 
 from feats import ASI, DualWielder
-from sim.weapons import Weapon, Shortsword, Scimitar
+from weapons import Shortsword, Scimitar
 from util.util import get_magic_weapon
 from spells.wizard import TrueStrike
 from spells.paladin import HolyWeapon
 from spells.warlock import EldritchBlast
 from sim.spellcasting import Spellcaster
 
+import sim.weapons
 import sim.feat
 import sim.character
 import sim.target
@@ -41,9 +42,9 @@ class TrueStrikeFeat(sim.feat.Feat):
 class TrueStrikeAction(sim.feat.Feat):
     def __init__(
         self,
-        truestrike_weapon: Weapon,
-        attacks: List[Weapon],
-        nick_attacks: List[Weapon],
+        truestrike_weapon: "sim.weapons.Weapon",
+        attacks: List["sim.weapons.Weapon"],
+        nick_attacks: List["sim.weapons.Weapon"],
     ) -> None:
         self.truestrike_weapon = truestrike_weapon
         self.attacks = attacks
@@ -58,7 +59,7 @@ class TrueStrikeAction(sim.feat.Feat):
 
 
 class HolyWeaponFeat(sim.feat.Feat):
-    def __init__(self, weapon: Weapon) -> None:
+    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
 
     def before_action(self, target: "sim.target.Target"):
@@ -73,7 +74,7 @@ class HolyWeaponFeat(sim.feat.Feat):
 
 
 class ValorBardBonusAttack(sim.feat.Feat):
-    def __init__(self, weapon: Weapon) -> None:
+    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
 
     def after_action(self, target: "sim.target.Target"):
@@ -88,7 +89,7 @@ class ValorBard(sim.character.Character):
         weapon = Shortsword(magic_bonus=magic_weapon)
         scimitar = Scimitar(magic_bonus=magic_weapon)
         base_feats.append(TrueStrikeFeat(level, "cha"))
-        attacks: List[Weapon] = []
+        attacks: List["sim.weapons.Weapon"] = []
         if level >= 6:
             attacks = [weapon]
         base_feats.append(
@@ -116,7 +117,7 @@ class ValorBard(sim.character.Character):
 
 
 class CMEMulticlassAction(sim.feat.Feat):
-    def __init__(self, level: int, weapon: Weapon) -> None:
+    def __init__(self, level: int, weapon: "sim.weapons.Weapon") -> None:
         self.level = level
         self.weapon = weapon
 

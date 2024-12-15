@@ -7,8 +7,9 @@ from sim.spellcasting import Spellcaster
 from feats import ASI
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
 from spells.summons import SummonCelestial
-from sim.weapons import Weapon, Warhammer
+from weapons import Warhammer
 
+import sim.weapons
 import sim.spells
 import sim.character
 import sim.target
@@ -37,7 +38,7 @@ class ClericAction(sim.feat.Feat):
 
 
 class WarPriest(sim.feat.Feat):
-    def __init__(self, weapon: Weapon) -> None:
+    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
 
     def short_rest(self):

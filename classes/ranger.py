@@ -10,10 +10,11 @@ from feats import (
     WeaponMasteries,
     IrresistibleOffense,
 )
-from sim.weapons import HandCrossbow, Weapon, Shortsword, Scimitar, Rapier
+from weapons import HandCrossbow, Shortsword, Scimitar, Rapier
 from spells.ranger import HuntersMark
 from spells.summons import SummonFey
 from sim.spellcasting import Spellcaster
+
 
 import sim.feat
 import sim.character
@@ -89,7 +90,7 @@ class PreciseHunter(sim.feat.Feat):
 
 
 class Gloomstalker(sim.feat.Feat):
-    def __init__(self, weapon: Weapon) -> None:
+    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
         self.using = False
         self.first_turn = False
@@ -119,7 +120,7 @@ class Gloomstalker(sim.feat.Feat):
 
 
 class DreadAmbusher(sim.feat.Feat):
-    def __init__(self, level: int, weapon: Weapon) -> None:
+    def __init__(self, level: int, weapon: "sim.weapons.Weapon") -> None:
         self.die = 8 if level >= 11 else 6
         self.weapon = weapon if level >= 11 else None
 
@@ -157,7 +158,7 @@ class BeastChargeFeat(sim.feat.Feat):
 
 
 class StalkersFlurry(sim.feat.Feat):
-    def __init__(self, weapon: Weapon) -> None:
+    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
 
     def begin_turn(self, target: "sim.target.Target"):
@@ -233,7 +234,7 @@ class PrimalCompanion(sim.character.Character):
         return self.ranger.prof + self.ranger.mod("wis")
 
 
-class BeastMaul(Weapon):
+class BeastMaul(sim.weapons.Weapon):
     def __init__(self, ranger: "sim.character.Character", **kwargs):
         super().__init__(name="Beast Maul", num_dice=1, die=8, **kwargs)
         self.ranger = ranger
@@ -254,9 +255,9 @@ class BeastMasterAction(sim.feat.Feat):
     def __init__(
         self,
         beast: PrimalCompanion,
-        main_hand: Weapon,
-        off_hand_nick: Weapon,
-        off_hand_other: Weapon,
+        main_hand: "sim.weapons.Weapon",
+        off_hand_nick: "sim.weapons.Weapon",
+        off_hand_other: "sim.weapons.Weapon",
     ) -> None:
         self.beast = beast
         self.off_hand_other = off_hand_other

@@ -10,7 +10,7 @@ from feats import (
     SavageAttacker,
     WeaponMasteries,
 )
-from sim.weapons import Glaive, Greatsword, GlaiveButt
+from weapons import Glaive, Greatsword, GlaiveButt
 
 import sim.feat
 import sim.character

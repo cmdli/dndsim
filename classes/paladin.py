@@ -10,7 +10,7 @@ from feats import (
     WeaponMasteries,
     IrresistibleOffense,
 )
-from sim.weapons import Greatsword, Shortsword, Scimitar
+from weapons import Greatsword, Shortsword, Scimitar
 from spells.paladin import DivineFavor, DivineSmite
 from sim.spellcasting import Spellcaster
 

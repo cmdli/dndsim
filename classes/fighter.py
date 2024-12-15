@@ -14,7 +14,7 @@ from feats import (
     SavageAttacker,
     GreatWeaponFighting,
 )
-from sim.weapons import (
+from weapons import (
     Glaive,
     Greatsword,
     GlaiveButt,
