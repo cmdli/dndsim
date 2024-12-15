@@ -38,7 +38,7 @@ class SummonWeapon(sim.weapons.Weapon):
         num_dice = self.num_dice
         if args.crit:
             num_dice *= 2
-        args.add_damage(self.name(), num_dice * [self.die], self.dmg_bonus)
+        args.add_damage(self.name, num_dice * [self.die], self.dmg_bonus)
 
 
 class Summon(sim.character.Character):
@@ -79,67 +79,3 @@ class SummonSpell(Spell):
     @override
     def end(self, character: "sim.character.Character"):
         character.remove_minion(self.minion)
-
-
-class FeyWeapon(SummonWeapon):
-    def __init__(self, slot: int, **kwargs):
-        super().__init__(
-            name="FeyWeapon", num_dice=2, die=6, dmg_bonus=3 + slot, **kwargs
-        )
-
-
-class Mirthful(sim.feat.Feat):
-    def __init__(self) -> None:
-        super().__init__()
-        self.used = False
-
-    def begin_turn(self, target: "sim.target.Target"):
-        self.used = False
-
-    def attack_roll(self, args: AttackRollArgs):
-        if not self.used:
-            log.record("Mirthful", 1)
-            args.adv = True
-            self.used = True
-
-
-class FeySummon(Summon):
-    def __init__(self, slot: int, caster: "sim.character.Character"):
-        super().__init__(
-            slot=slot,
-            weapon=FeyWeapon(slot, caster=caster),
-            feats=[Mirthful()],
-        )
-
-
-class SummonFey(SummonSpell):
-    def __init__(self, slot: int):
-        super().__init__(
-            "SummonFey",
-            slot,
-        )
-
-    def summon(self, caster: "sim.character.Character"):
-        return FeySummon(self.slot, caster)
-
-
-class CelestialWeapon(SummonWeapon):
-    def __init__(self, slot: int, **kwargs):
-        super().__init__(
-            name="CelestialWeapon", num_dice=2, die=6, dmg_bonus=2 + slot, **kwargs
-        )
-
-
-class CelestialSummon(Summon):
-    def __init__(self, slot: int, caster: "sim.character.Character"):
-        super().__init__(
-            slot=slot, weapon=CelestialWeapon(slot=slot, caster=caster), feats=[]
-        )
-
-
-class SummonCelestial(SummonSpell):
-    def __init__(self, slot: int):
-        super().__init__("SummonCelestial", slot)
-
-    def summon(self, caster: "sim.character.Character"):
-        return CelestialSummon(self.slot, caster)

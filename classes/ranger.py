@@ -247,7 +247,7 @@ class BeastMaul(Weapon):
         if not args.hits():
             return
         num_dice = 2 if args.crit else 1
-        args.add_damage(self.name(), num_dice * [8], 2 + self.ranger.mod("wis"))
+        args.add_damage(self.name, num_dice * [8], 2 + self.ranger.mod("wis"))
 
 
 class BeastMasterAction(sim.feat.Feat):

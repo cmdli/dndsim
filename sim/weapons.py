@@ -48,9 +48,8 @@ class Weapon(Taggable):
         dmg_bonus: int = 0,
         tags: Optional[List[str]] = None,
         override_mod: Optional[str] = None,
-        spell: Optional["sim.spells.Spell"] = None,
     ) -> None:
-        self._name = name
+        self.name = name
         self.num_dice = num_dice
         self.die = die
         self.damage_type = damage_type
@@ -59,7 +58,6 @@ class Weapon(Taggable):
         self.dmg_bonus = magic_bonus + dmg_bonus
         self.override_mod = override_mod
         self.mastery = mastery
-        self.spell = spell
         if tags:
             self.add_tags(tags)
 
@@ -77,9 +75,6 @@ class Weapon(Taggable):
         mod = self.mod(character)
         return character.prof + character.mod(mod) + self.attack_bonus
 
-    def name(self):
-        return self._name
-
     def rolls(self, crit: bool = False):
         num_dice = self.num_dice
         if crit:
@@ -91,12 +86,12 @@ class Weapon(Taggable):
     ):
         if args.hits():
             damage = self.dmg_bonus
-            args.add_damage(source=self.name(), dice=self.num_dice * [self.die])
-            if not args.attack.has_tag("light") and not args.attack.has_tag("spell"):
+            args.add_damage(source=self.name, dice=self.num_dice * [self.die])
+            if not args.attack.has_tag("light"):
                 mod = self.mod(character)
                 damage += character.mod(mod)
             args.add_damage(
-                source=self.name(), dice=self.num_dice * [self.die], damage=damage
+                source=self.name, dice=self.num_dice * [self.die], damage=damage
             )
 
     def min_crit(self) -> int:

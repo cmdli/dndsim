@@ -82,7 +82,7 @@ class SpellAttack(Attack):
 
 class WeaponAttack(Attack):
     def __init__(self, weapon: "sim.weapons.Weapon") -> None:
-        super().__init__(weapon.name())
+        super().__init__(weapon.name)
         self.weapon = weapon
 
     def to_hit(self, character: "sim.character.Character"):
