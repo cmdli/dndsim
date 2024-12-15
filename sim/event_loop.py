@@ -9,7 +9,7 @@ class EventLoop:
     def __init__(self) -> None:
         self.listeners: Dict[str, List[Listener]] = dict()
 
-    def add(self, listener: Listener, events: List[str]) -> None:
+    def add(self, listener: Listener, events: List[str] | str) -> None:
         if isinstance(events, str):
             events = [events]
         for event in events:

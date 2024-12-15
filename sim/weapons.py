@@ -48,7 +48,7 @@ class Weapon(Taggable):
         dmg_bonus: int = 0,
         tags: Optional[List[str]] = None,
     ) -> None:
-        self.name = name
+        self.name = name or "UnknownWeapon"
         self.num_dice = num_dice
         self.die = die
         self.damage_type = damage_type

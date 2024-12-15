@@ -29,7 +29,7 @@ class EldritchBlast(sim.spells.Spell):
                 damage=DamageRoll(
                     source=self.name,
                     dice=[10],
-                    flat_dmg=self.character.mod(self.character.mod),
+                    flat_dmg=self.character.mod(self.character.spells.mod),
                 ),
                 is_ranged=True,
             )

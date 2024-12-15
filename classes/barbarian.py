@@ -14,6 +14,7 @@ from weapons import Glaive, Greatsword, GlaiveButt
 
 import sim.feat
 import sim.character
+import sim.weapons
 
 
 class Beserker(sim.feat.Feat):
@@ -103,7 +104,7 @@ def rage_damage(level: int):
 
 
 class Barbarian(sim.character.Character):
-    def __init__(self, level, use_pam=False, **kwargs):
+    def __init__(self, level: int, use_pam: bool = False, **kwargs):
         rage_dmg = rage_damage(level)
         magic_weapon = get_magic_weapon(level)
         base_feats: List["sim.feat.Feat"] = []
@@ -112,7 +113,7 @@ class Barbarian(sim.character.Character):
         base_feats.append(Rage(dmg=rage_dmg))
         base_feats.append(RecklessAttack())
         if use_pam:
-            weapon = Glaive(magic_bonus=magic_weapon)
+            weapon: "sim.weapons.Weapon" = Glaive(magic_bonus=magic_weapon)
         else:
             weapon = Greatsword(magic_bonus=magic_weapon)
         if level >= 5:

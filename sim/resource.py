@@ -7,9 +7,9 @@ class Resource(sim.event_loop.Listener):
         self.num = 0
         self.max = 0
         if short_rest:
-            character.events.add(self, "short_rest")
+            character.events.add(self, ["short_rest"])
         else:
-            character.events.add(self, "long_rest")
+            character.events.add(self, ["long_rest"])
 
     def increase_max(self, amount: int):
         self.max += amount

@@ -68,9 +68,6 @@ class Character:
     def has_feat(self, name: str):
         return name in self.feats
 
-    def feat(self, name: str):
-        return self.feats[name]
-
     def stat(self, stat: "sim.Stat"):
         if stat == "none":
             return 10
