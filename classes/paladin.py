@@ -75,13 +75,13 @@ class Paladin(sim.character.Character):
         base_feats: List["sim.feat.Feat"] = []
         base_feats.append(DivineFavorFeat())
         if use_twf:
-            base_feats.append(WeaponMasteries(["vex", "nick"]))
+            base_feats.append(WeaponMasteries(["Vex", "Nick"]))
             scimitar = Scimitar(magic_bonus=magic_weapon)
             base_feats.append(TwoWeaponFighting())
             weapon: "sim.weapons.Weapon" = Shortsword(magic_bonus=magic_weapon)
             nick_attacks = [scimitar]
         else:
-            base_feats.append(WeaponMasteries(["graze", "topple"]))
+            base_feats.append(WeaponMasteries(["Graze", "Topple"]))
             base_feats.append(GreatWeaponFighting())
             weapon = Greatsword(magic_bonus=magic_weapon)
             nick_attacks = []

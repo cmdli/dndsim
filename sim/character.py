@@ -146,10 +146,10 @@ class Character:
     #      WEAPON ATTACKS
     # ============================
 
-    def add_masteries(self, masteries: List[str]):
+    def add_masteries(self, masteries: List["sim.weapons.WeaponMastery"]):
         self.masteries.extend(masteries)
 
-    def has_mastery(self, mastery: str) -> bool:
+    def has_mastery(self, mastery: "sim.weapons.WeaponMastery") -> bool:
         return mastery in self.masteries
 
     def weapon_attack(

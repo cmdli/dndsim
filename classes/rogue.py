@@ -99,7 +99,7 @@ class AssassinRogue(sim.character.Character):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats: List["sim.feat.Feat"] = []
-        base_feats.append(WeaponMasteries(["vex", "nick"]))
+        base_feats.append(WeaponMasteries(["Vex", "Nick"]))
         if level >= 5 and booming_blade:
             rapier = Rapier(magic_bonus=magic_weapon)
             base_feats.append(BoomingBlade(self, rapier))
@@ -133,7 +133,7 @@ class ArcaneTricksterRogue(sim.character.Character):
         magic_weapon = get_magic_weapon(level)
         sneak_attack = math.ceil(level / 2)
         base_feats = []
-        base_feats.append(WeaponMasteries(["vex", "nick"]))
+        base_feats.append(WeaponMasteries(["Vex", "Nick"]))
         base_feats.append(SneakAttack(sneak_attack))
         if level >= 3:
             base_feats.append(SteadyAim())

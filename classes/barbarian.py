@@ -107,7 +107,7 @@ class Barbarian(sim.character.Character):
         rage_dmg = rage_damage(level)
         magic_weapon = get_magic_weapon(level)
         base_feats: List["sim.feat.Feat"] = []
-        base_feats.append(WeaponMasteries(["graze"]))
+        base_feats.append(WeaponMasteries(["Graze"]))
         base_feats.append(SavageAttacker())
         base_feats.append(Rage(dmg=rage_dmg))
         base_feats.append(RecklessAttack())

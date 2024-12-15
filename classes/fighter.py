@@ -198,7 +198,7 @@ class Fighter(sim.character.Character):
         else:
             num_attacks = 1
         base_feats: List["sim.feat.Feat"] = []
-        base_feats.append(WeaponMasteries(["topple", "graze"]))
+        base_feats.append(WeaponMasteries(["Topple", "Graze"]))
         base_feats.append(SavageAttacker())
         base_feats.append(GreatWeaponFighting())
         if use_topple and level >= 5:
@@ -293,7 +293,7 @@ class TWFFighter(sim.character.Character):
             min_crit = 20
         magic_weapon = get_magic_weapon(level)
         base_feats: List["sim.feat.Feat"] = []
-        base_feats.append(WeaponMasteries(["vex", "nick"]))
+        base_feats.append(WeaponMasteries(["Vex", "Nick"]))
         base_feats.append(TwoWeaponFighting())
         base_feats.append(SavageAttacker())
         if level >= 6:

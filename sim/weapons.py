@@ -1,10 +1,12 @@
+from typing import List, Optional, Literal
+
+from util.taggable import Taggable
 from util.util import roll_dice
-from typing import List, Optional
+
 import sim.events
 import sim.spells
 import sim.character
 import sim.attack
-from util.taggable import Taggable
 
 """
 Overlooked things for weapons:
@@ -20,14 +22,15 @@ A few implementation notes:
 - Finesse weapons choose the higher of strength or dexterity
 """
 
-WEAPON_MASTERIES = [
-    "vex",
-    "topple",
-    "slow",
-    "nick",
-    "cleave",
-    "graze",
-    "sap",
+
+WeaponMastery = Literal[
+    "Vex",
+    "Topple",
+    "Slow",
+    "Nick",
+    "Cleave",
+    "Graze",
+    "Sap",
 ]
 
 
@@ -39,7 +42,7 @@ class Weapon(Taggable):
         die: int = 6,
         damage_type: str = "unknown",
         min_crit: int = 20,
-        mastery: Optional[str] = None,
+        mastery: Optional[WeaponMastery] = None,
         magic_bonus: int = 0,
         attack_bonus: int = 0,
         dmg_bonus: int = 0,
@@ -107,7 +110,7 @@ class Glaive(Weapon):
             num_dice=1,
             die=10,
             damage_type="slashing",
-            mastery="graze",
+            mastery="Graze",
             tags=["heavy", "twohanded"],
             **kwargs,
         )
@@ -120,7 +123,7 @@ class GlaiveButt(Weapon):
             num_dice=1,
             die=4,
             damage_type="bludgeoning",
-            mastery="graze",
+            mastery="Graze",
             tags=["heavy", "twohanded"],
             **kwargs,
         )
@@ -133,7 +136,7 @@ class Greatsword(Weapon):
             num_dice=2,
             die=6,
             damage_type="slashing",
-            mastery="graze",
+            mastery="Graze",
             tags=["heavy", "twohanded"],
             **kwargs,
         )
@@ -146,7 +149,7 @@ class Shortsword(Weapon):
             num_dice=1,
             die=6,
             damage_type="piercing",
-            mastery="vex",
+            mastery="Vex",
             tags=["finesse", "light"],
             **kwargs,
         )
@@ -159,7 +162,7 @@ class Rapier(Weapon):
             num_dice=1,
             die=8,
             damage_type="piercing",
-            mastery="vex",
+            mastery="Vex",
             tags=["finesse"],
             **kwargs,
         )
@@ -172,7 +175,7 @@ class Scimitar(Weapon):
             num_dice=1,
             die=6,
             damage_type="slashing",
-            mastery="nick",
+            mastery="Nick",
             tags=["finesse", "light"],
             **kwargs,
         )
@@ -185,7 +188,7 @@ class Maul(Weapon):
             num_dice=2,
             die=6,
             damage_type="bludgeoning",
-            mastery="topple",
+            mastery="Topple",
             tags=["heavy", "twohanded"],
             **kwargs,
         )
@@ -198,7 +201,7 @@ class Quarterstaff(Weapon):
             num_dice=1,
             die=8,
             damage_type="bludgeoning",
-            mastery="topple",
+            mastery="Topple",
             tags=["twohanded"],
             **kwargs,
         )
@@ -211,7 +214,7 @@ class HandCrossbow(Weapon):
             num_dice=1,
             die=6,
             damage_type="piercing",
-            mastery="vex",
+            mastery="Vex",
             tags=["ranged", "light"],
             **kwargs,
         )
@@ -224,7 +227,7 @@ class Dagger(Weapon):
             num_dice=1,
             die=4,
             damage_type="piercing",
-            mastery="nick",
+            mastery="Nick",
             tags=["finesse", "light"],
             **kwargs,
         )

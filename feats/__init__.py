@@ -185,8 +185,8 @@ class Vex(sim.feat.Feat):
         if (
             args.hits()
             and weapon
-            and weapon.mastery == "vex"
-            and self.character.has_mastery("vex")
+            and weapon.mastery == "Vex"
+            and self.character.has_mastery("Vex")
         ):
             self.vexing = True
 
@@ -197,7 +197,7 @@ class Topple(sim.feat.Feat):
         if not weapon or args.misses():
             return
         target = args.attack.target
-        if weapon.mastery == "topple" and self.character.has_mastery("topple"):
+        if weapon.mastery == "Topple" and self.character.has_mastery("Topple"):
             mod = weapon.mod(self.character)
             if not target.save(self.character.dc(mod)):
                 target.knock_prone()
@@ -208,13 +208,13 @@ class Graze(sim.feat.Feat):
         weapon = args.attack.weapon
         if not weapon or not args.misses():
             return
-        if weapon.mastery == "graze" and self.character.has_mastery("graze"):
+        if weapon.mastery == "Graze" and self.character.has_mastery("Graze"):
             mod = weapon.mod(self.character)
             args.attack.target.damage_source("Graze", self.character.mod(mod))
 
 
 class WeaponMasteries(sim.feat.Feat):
-    def __init__(self, masteries: List[str]) -> None:
+    def __init__(self, masteries: List["sim.weapons.WeaponMastery"]) -> None:
         self.masteries = masteries
 
     def apply(self, character):

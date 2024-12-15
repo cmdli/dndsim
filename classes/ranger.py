@@ -176,7 +176,7 @@ class GloomstalkerRanger(sim.character.Character):
     def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
-        base_feats.append(WeaponMasteries(["vex", "nick"]))
+        base_feats.append(WeaponMasteries(["Vex", "Nick"]))
         weapon = HandCrossbow(magic_bonus=magic_weapon)
         if level >= 5:
             attacks = 2 * [weapon]
@@ -294,7 +294,7 @@ class BeastMasterRanger(sim.character.Character):
     def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
         base_feats = []
-        base_feats.append(WeaponMasteries(["vex", "nick"]))
+        base_feats.append(WeaponMasteries(["Vex", "Nick"]))
         base_feats.append(HuntersMarkFeat(die=10 if level >= 20 else 6))
         beast = PrimalCompanion(level, ranger=self)
         shortsword = Shortsword(magic_bonus=magic_weapon)
