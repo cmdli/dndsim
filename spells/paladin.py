@@ -4,6 +4,8 @@ from sim.spells import School
 import sim.character
 import sim.target
 import sim.spells
+import sim.weapons
+import sim.events
 
 
 class DivineSmite(sim.spells.TargetedSpell):
@@ -28,5 +30,18 @@ class DivineFavor(sim.spells.ConcentrationSpell):
 
 
 class HolyWeapon(sim.spells.ConcentrationSpell):
-    def __init__(self, slot: int, **kwargs):
+    def __init__(self, slot: int, weapon: "sim.weapons.Weapon", **kwargs):
         super().__init__("HolyWeapon", slot=slot, school=School.Evocation, **kwargs)
+        self.weapon = weapon
+
+    def cast(self, character, target=None):
+        super().cast(character, target)
+        character.events.add(self, "attack_result")
+
+    def end(self, character):
+        super().end(character)
+        character.events.remove(self)
+
+    def attack_result(self, args: "sim.events.AttackResultArgs"):
+        if args.hits() and args.attack.weapon is self.weapon:
+            args.add_damage(source=self.name, dice=[8, 8])

@@ -45,32 +45,27 @@ class TrueStrikeAction(sim.feat.Feat):
         truestrike_weapon: "sim.weapons.Weapon",
         attacks: List["sim.weapons.Weapon"],
         nick_attacks: List["sim.weapons.Weapon"],
+        use_holy_weapon: bool = False,
     ) -> None:
         self.truestrike_weapon = truestrike_weapon
         self.attacks = attacks
         self.nick_attacks = nick_attacks
+        self.use_holy_weapon = use_holy_weapon
 
     def action(self, target: "sim.target.Target"):
+        slot = self.character.spells.highest_slot()
+        if (
+            self.use_holy_weapon
+            and slot >= 5
+            and not self.character.has_effect("HolyWeapon")
+            and self.character.use_bonus("HolyWeapon")
+        ):
+            self.character.spells.cast(HolyWeapon(slot, weapon=self.truestrike_weapon))
         self.character.spells.cast(TrueStrike(self.truestrike_weapon), target)
         for attack in self.attacks:
             self.character.weapon_attack(target, attack)
         for attack in self.nick_attacks:
             self.character.weapon_attack(target, attack, tags=["light"])
-
-
-class HolyWeaponFeat(sim.feat.Feat):
-    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
-        self.weapon = weapon
-
-    def before_action(self, target: "sim.target.Target"):
-        if not self.character.has_effect("HolyWeapon") and self.character.use_bonus(
-            "HolyWeapon"
-        ):
-            self.character.spells.cast(HolyWeapon(self.character.spells.highest_slot()))
-
-    def attack_result(self, args):
-        if args.hits() and args.attack.weapon.name == self.weapon.name:
-            args.add_damage(source="HolyWeapon", dice=[8, 8])
 
 
 class ValorBardBonusAttack(sim.feat.Feat):
@@ -93,14 +88,17 @@ class ValorBard(sim.character.Character):
         if level >= 6:
             attacks = [weapon]
         base_feats.append(
-            TrueStrikeAction(weapon, attacks=attacks, nick_attacks=[scimitar])
+            TrueStrikeAction(
+                weapon,
+                attacks=attacks,
+                nick_attacks=[scimitar],
+                use_holy_weapon=level >= 10,
+            )
         )
         if level >= 4:
             base_feats.append(ASI(["cha"]))
         if level >= 8:
             base_feats.append(ASI(["cha", "dex"]))
-        if level >= 10:
-            base_feats.append(HolyWeaponFeat(weapon))
         if level >= 12:
             base_feats.append(ASI(["dex"]))
         if level >= 14:
