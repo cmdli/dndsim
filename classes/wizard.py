@@ -16,7 +16,7 @@ from spells.wizard import (
     ScorchingRay,
 )
 from feats import ASI
-from sim.spells import Spell, School
+from sim.spellcasting import Spell, School
 from spells.summons import SummonFey
 
 import sim.attack

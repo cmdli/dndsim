@@ -1,7 +1,6 @@
 import sim.character
 import sim.spellcasting
 import sim.target
-import sim.spells
 
 
 def sample_character():
@@ -16,12 +15,12 @@ def sample_character():
     return character
 
 
-class ExampleSpell(sim.spells.BasicSaveSpell):
+class ExampleSpell(sim.spellcasting.BasicSaveSpell):
     def dice(self):
         return [10]
 
 
-class ExampleConcentrationSpell(sim.spells.ConcentrationSpell):
+class ExampleConcentrationSpell(sim.spellcasting.ConcentrationSpell):
     pass
 
 

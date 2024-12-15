@@ -10,7 +10,7 @@ from spells.summons import SummonCelestial
 from weapons import Warhammer
 
 import sim.weapons
-import sim.spells
+import sim.spellcasting
 import sim.character
 import sim.target
 import sim.feat
@@ -19,7 +19,7 @@ import sim.feat
 class ClericAction(sim.feat.Feat):
     def action(self, target: "sim.target.Target"):
         slot = self.character.spells.highest_slot()
-        spell: Optional["sim.spells.Spell"] = None
+        spell: Optional["sim.spellcasting.Spell"] = None
         if not self.character.spells.is_concentrating() and slot >= 3:
             if slot >= 5:
                 spell = SummonCelestial(slot)

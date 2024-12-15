@@ -3,7 +3,7 @@ from typing import Optional, List
 import sim.character
 import sim.events
 import sim.weapons
-import sim.spells
+import sim.spellcasting
 
 from util.util import roll_dice
 
@@ -51,7 +51,7 @@ class Attack:
 class SpellAttack(Attack):
     def __init__(
         self,
-        spell: "sim.spells.Spell",
+        spell: "sim.spellcasting.Spell",
         damage: Optional[DamageRoll] = None,
         callback: Optional["sim.events.AttackResultCallback"] = None,
         is_ranged: bool = False,

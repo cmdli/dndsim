@@ -1,12 +1,12 @@
 from typing import List, Optional
 
-from sim.spells import Spell, BasicSaveSpell, School
+from sim.spellcasting import Spell, BasicSaveSpell, School
 
 import sim.attack
 import sim.target
 import sim.character
 import sim.events
-import sim.spells
+import sim.spellcasting
 import sim.weapons
 
 
@@ -30,7 +30,7 @@ class ChainLightning(BasicSaveSpell):
         assert slot >= 6
 
 
-class Blight(sim.spells.BasicSaveSpell):
+class Blight(sim.spellcasting.BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__(
             "Blight", slot, dice=(4 + slot) * [8], school=School.Necromancy
@@ -44,7 +44,7 @@ class Fireball(BasicSaveSpell):
         )
 
 
-class ScorchingRay(sim.spells.TargetedSpell):
+class ScorchingRay(sim.spellcasting.TargetedSpell):
     def __init__(self, slot: int):
         super().__init__("ScorchingRay", slot, school=School.Evocation)
 
@@ -60,7 +60,7 @@ class ScorchingRay(sim.spells.TargetedSpell):
             )
 
 
-class MagicMissile(sim.spells.TargetedSpell):
+class MagicMissile(sim.spellcasting.TargetedSpell):
     def __init__(self, slot: int):
         super().__init__("MagicMissile", slot, school=School.Evocation)
 
@@ -80,7 +80,7 @@ class MagicMissile(sim.spells.TargetedSpell):
         )
 
 
-class Firebolt(sim.spells.TargetedSpell):
+class Firebolt(sim.spellcasting.TargetedSpell):
     def __init__(self):
         super().__init__("Firebolt", slot=0, school=School.Evocation)
 

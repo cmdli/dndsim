@@ -4,7 +4,7 @@ from util.taggable import Taggable
 from util.util import roll_dice
 
 import sim.events
-import sim.spells
+import sim.spellcasting
 import sim.character
 import sim.attack
 

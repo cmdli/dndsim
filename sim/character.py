@@ -13,7 +13,7 @@ import sim
 import sim.maneuvers
 import sim.events
 import sim.attack
-import sim.spells
+import sim.spellcasting
 import sim.weapons
 import sim.feat
 import sim.target
@@ -171,7 +171,7 @@ class Character:
     def spell_attack(
         self,
         target: "sim.target.Target",
-        spell: "sim.spells.Spell",
+        spell: "sim.spellcasting.Spell",
         damage: Optional["sim.attack.DamageRoll"] = None,
         callback: Optional["sim.events.AttackResultCallback"] = None,
         is_ranged: bool = False,
@@ -189,7 +189,7 @@ class Character:
         target: "sim.target.Target",
         attack: "sim.attack.Attack",
         weapon: Optional["sim.weapons.Weapon"] = None,
-        spell: Optional["sim.spells.Spell"] = None,
+        spell: Optional["sim.spellcasting.Spell"] = None,
         tags: Optional[List[str]] = None,
     ):
         args = AttackArgs(
@@ -244,7 +244,7 @@ class Character:
         target: "sim.target.Target",
         damage: "sim.attack.DamageRoll",
         attack: Optional["sim.events.AttackArgs"] = None,
-        spell: Optional["sim.spells.Spell"] = None,
+        spell: Optional["sim.spellcasting.Spell"] = None,
         multiplier: float = 1.0,
     ):
         args = sim.events.DamageRollArgs(

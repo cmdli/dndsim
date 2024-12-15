@@ -1,7 +1,7 @@
 from typing import override, Optional, List
 
 
-import sim.spells
+import sim.spellcasting
 import sim.feat
 import sim.target
 import sim.character
@@ -56,7 +56,7 @@ class Summon(sim.character.Character):
         )
 
 
-class SummonSpell(sim.spells.Spell):
+class SummonSpell(sim.spellcasting.Spell):
     def __init__(self, name: str, slot: int):
         super().__init__(name, slot, concentration=True)
 
