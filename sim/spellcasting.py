@@ -48,7 +48,7 @@ class Spellcasting(sim.event_loop.Listener):
         self.spells: List["sim.spells.Spell"] = []
         self.slots = spell_slots(self.spellcaster_level)
         self.to_hit_bonus = 0
-        self.character.events.add(self, "short_rest")
+        self.character.events.add(self, ["short_rest"])
 
     def reset(self):
         self.slots = spell_slots(self.spellcaster_level)

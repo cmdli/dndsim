@@ -28,8 +28,10 @@ def martial_arts_die(level: int):
 class BodyAndMind(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
-        character.dex += 4
-        character.wis += 4
+        character.increase_stat_max("dex", 4)
+        character.increase_stat_max("wis", 4)
+        character.increase_stat("dex", 4)
+        character.increase_stat("wis", 4)
 
 
 class FlurryOfBlows(sim.feat.Feat):
@@ -56,7 +58,7 @@ class OpenHandTechnique(sim.feat.Feat):
 class Grappler(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
-        character.dex += 1
+        character.increase_stat("dex", 1)
 
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("main_action"):

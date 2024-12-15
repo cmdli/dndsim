@@ -1,18 +1,22 @@
+from typing import Optional
+
 from sim.character import Character
 import sim.spells
 from sim.spells import School
-from sim.target import Target
+
+import sim.target
 
 
 class HuntersMark(sim.spells.ConcentrationSpell):
     def __init__(self, slot: int):
         super().__init__("HuntersMark", slot, school=School.Divination)
-        self.target = None
+        self.target: Optional["sim.target.Target"] = None
 
-    def cast(self, character: Character, target: Target | None = None):
+    def cast(self, character: Character, target: Optional["sim.target.Target"] = None):
         super().cast(character, target)
-        target.add_tag("HuntersMark")
-        self.target = target
+        if target:
+            target.add_tag("HuntersMark")
+            self.target = target
 
     def end(self, character: Character):
         super().end(character)

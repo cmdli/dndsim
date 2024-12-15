@@ -1,6 +1,5 @@
 from typing import List
 
-from sim.events import AttackRollArgs, AttackArgs, DamageRollArgs
 from util.util import roll_dice
 from util.log import log
 
@@ -11,17 +10,17 @@ import sim.target
 
 
 class PolearmMaster(sim.feat.Feat):
-    def __init__(self, weapon):
+    def __init__(self, weapon: "sim.weapons.Weapon"):
         self.weapon = weapon
 
     def apply(self, character):
         super().apply(character)
-        character.str += 1
+        character.increase_stat("str", 1)
 
     def begin_turn(self, target):
         self.used = False
 
-    def end_turn(self, target: "sim.target.Target"):
+    def end_turn(self, target):
         if not self.used and self.character.use_bonus("PAM"):
             self.used = True
             self.character.weapon_attack(target, self.weapon)
@@ -33,9 +32,9 @@ class GreatWeaponMaster(sim.feat.Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.str += 1
+        character.increase_stat("str", 1)
 
-    def begin_turn(self, target: "sim.target.Target"):
+    def begin_turn(self, target):
         self.bonus_attack_enabled = False
 
     def attack_result(self, args):
@@ -46,20 +45,20 @@ class GreatWeaponMaster(sim.feat.Feat):
         if args.crit:
             self.bonus_attack_enabled = True
 
-    def after_action(self, target: "sim.target.Target"):
+    def after_action(self, target):
         if self.bonus_attack_enabled and self.character.use_bonus("GreatWeaponMaster"):
             self.character.weapon_attack(target, self.weapon)
 
 
 class ElvenAccuracy(sim.feat.Feat):
-    def __init__(self, mod: str):
+    def __init__(self, mod: "sim.Stat"):
         self.mod = mod
 
     def apply(self, character):
         super().apply(character)
         character.increase_stat(self.mod, 1)
 
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         if args.adv:
             roll = roll_dice(1, 20)
             if args.roll1 < args.roll2 and args.roll1 < roll:
@@ -69,20 +68,20 @@ class ElvenAccuracy(sim.feat.Feat):
 
 
 class Archery(sim.feat.Feat):
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         weapon = args.attack.weapon
         if weapon and weapon.has_tag("ranged"):
             args.situational_bonus += 2
 
 
 class TwoWeaponFighting(sim.feat.Feat):
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         if args.attack.has_tag("light"):
             args.attack.remove_tag("light")
 
 
 class GreatWeaponFighting(sim.feat.Feat):
-    def damage_roll(self, args: DamageRollArgs):
+    def damage_roll(self, args):
         attack = args.attack
         if attack:
             weapon = attack.weapon
@@ -98,22 +97,21 @@ class CrossbowExpert(sim.feat.Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.dex += 1
+        character.increase_stat("dex", 1)
 
-    def begin_turn(self, target: "sim.target.Target"):
+    def begin_turn(self, target):
         self.used_attack = False
 
-    def attack(self, args: AttackArgs):
+    def attack(self, args):
         self.used_attack = True
 
     def end_turn(self, target):
         if self.used_attack and self.character.use_bonus("CrossbowExpert"):
-            log.record("bonus attack", 1)
             self.character.weapon_attack(target, self.weapon)
 
 
 class ASI(sim.feat.Feat):
-    def __init__(self, stat_increases=[]):
+    def __init__(self, stat_increases: List["sim.Stat"] = []):
         self.stat_increases = stat_increases
 
     def apply(self, character: "sim.character.Character"):
@@ -177,7 +175,7 @@ class Vex(sim.feat.Feat):
     def short_rest(self):
         self.vexing = False
 
-    def attack_roll(self, args: AttackRollArgs):
+    def attack_roll(self, args):
         if self.vexing:
             args.adv = True
             self.vexing = False
@@ -225,7 +223,7 @@ class WeaponMasteries(sim.feat.Feat):
 
 
 class IrresistibleOffense(sim.feat.Feat):
-    def __init__(self, mod: str) -> None:
+    def __init__(self, mod: "sim.Stat") -> None:
         self.mod = mod
 
     def apply(self, character):
@@ -239,7 +237,7 @@ class IrresistibleOffense(sim.feat.Feat):
 
 
 class WeaponMaster(sim.feat.Feat):
-    def __init__(self, mod: str) -> None:
+    def __init__(self, mod: "sim.Stat") -> None:
         self.mod = mod
 
     def apply(self, character):
@@ -248,7 +246,7 @@ class WeaponMaster(sim.feat.Feat):
 
 
 class DualWielder(sim.feat.Feat):
-    def __init__(self, mod: str, weapon: "sim.weapons.Weapon") -> None:
+    def __init__(self, mod: "sim.Stat", weapon: "sim.weapons.Weapon") -> None:
         self.mod = mod
         self.weapon = weapon
 
@@ -256,7 +254,7 @@ class DualWielder(sim.feat.Feat):
         super().apply(character)
         character.increase_stat(self.mod, 1)
 
-    def after_action(self, target: "sim.target.Target"):
+    def after_action(self, target):
         if self.character.use_bonus("DualWielder"):
             self.character.weapon_attack(target, self.weapon, tags=["light"])
 
@@ -265,10 +263,10 @@ class SavageAttacker(sim.feat.Feat):
     def __init__(self) -> None:
         self.used = False
 
-    def begin_turn(self, target: "sim.target.Target"):
+    def begin_turn(self, target):
         self.used = False
 
-    def damage_roll(self, args: DamageRollArgs):
+    def damage_roll(self, args):
         if self.used:
             return
         self.used = True
@@ -278,7 +276,7 @@ class SavageAttacker(sim.feat.Feat):
 
 
 class Piercer(sim.feat.Feat):
-    def __init__(self, mod: str) -> None:
+    def __init__(self, mod: "sim.Stat") -> None:
         self.mod = mod
 
     def apply(self, character):

@@ -59,8 +59,10 @@ class Retaliation(sim.feat.Feat):
 class PrimalChampion(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
-        character.str += 4
-        character.con += 4
+        character.increase_stat_max("str", 4)
+        character.increase_stat_max("con", 4)
+        character.increase_stat("str", 4)
+        character.increase_stat("con", 4)
 
 
 class Rage(sim.feat.Feat):

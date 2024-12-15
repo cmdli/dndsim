@@ -6,7 +6,7 @@ from util.util import (
 from sim.spellcasting import Spellcaster
 from feats import ASI
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
-from sim.summons import SummonCelestial
+from spells.summons import SummonCelestial
 from sim.weapons import Weapon, Warhammer
 
 import sim.spells

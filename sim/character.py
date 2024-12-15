@@ -8,6 +8,7 @@ from sim.event_loop import EventLoop
 from util.log import log
 from sim.spellcasting import Spellcasting, Spellcaster
 from sim.attack import WeaponAttack, SpellAttack
+import sim
 import sim.events
 import sim.attack
 import sim.spells
@@ -62,21 +63,21 @@ class Character:
     def feat(self, name: str):
         return self.feats[name]
 
-    def mod(self, stat: str):
+    def mod(self, stat: "sim.Stat"):
         if stat == "none":
             return 0
         return (self.__getattribute__(stat) - 10) // 2
 
-    def increase_stat_max(self, stat: str, amount: int):
+    def increase_stat_max(self, stat: "sim.Stat", amount: int):
         self.stat_max[stat] += amount
 
-    def increase_stat(self, stat: str, amount: int):
+    def increase_stat(self, stat: "sim.Stat", amount: int):
         new_val = getattr(self, stat) + amount
         if new_val > self.stat_max[stat]:
             new_val = self.stat_max[stat]
         setattr(self, stat, new_val)
 
-    def dc(self, stat: str):
+    def dc(self, stat: "sim.Stat"):
         return self.mod(stat) + self.prof + 8
 
     def add_minion(self, minion):
