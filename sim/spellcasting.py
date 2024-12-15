@@ -38,7 +38,7 @@ class Spellcasting(sim.event_loop.Listener):
     def __init__(
         self,
         character: "sim.character.Character",
-        mod: str,
+        mod: "sim.Stat",
         spellcaster_levels: List[Tuple[Spellcaster, int]],
     ) -> None:
         self.character = character
@@ -73,7 +73,7 @@ class Spellcasting(sim.event_loop.Listener):
     ):
         log.record(f"Cast ({spell.name})", 1)
         args = CastSpellArgs(spell)
-        self.character.events.emit("CastSpell", args)
+        self.character.events.emit("cast_spell", args)
         if spell.slot > 0:
             self.slots[spell.slot] -= 1
         if spell.concentration:

@@ -6,13 +6,7 @@ import sim.character
 import sim.target
 
 from sim.spells import School
-
-
-class EldritchBlastBolt(sim.weapons.Weapon):
-    def __init__(self, character: "sim.character.Character", **kwargs):
-        super().__init__(
-            "EldritchBlastBolt", num_dice=1, die=10, override_mod=character.spells.mod
-        )
+from sim.attack import DamageRoll
 
 
 class EldritchBlast(sim.spells.Spell):
@@ -27,6 +21,15 @@ class EldritchBlast(sim.spells.Spell):
     ):
         if not target:
             return
-        weapon = EldritchBlastBolt(character)
         for _ in range(character.spells.cantrip_dice()):
-            character.weapon_attack(target, weapon)
+            character.spell_attack(
+                target=target,
+                spell=self,
+                # TODO: Refactor out the flat damage into the Agonizing Blast feat
+                damage=DamageRoll(
+                    source=self.name,
+                    dice=[10],
+                    flat_dmg=self.character.mod(self.character.mod),
+                ),
+                is_ranged=True,
+            )

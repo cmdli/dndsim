@@ -47,7 +47,6 @@ class Weapon(Taggable):
         attack_bonus: int = 0,
         dmg_bonus: int = 0,
         tags: Optional[List[str]] = None,
-        override_mod: Optional[str] = None,
     ) -> None:
         self.name = name
         self.num_dice = num_dice
@@ -56,15 +55,12 @@ class Weapon(Taggable):
         self._min_crit = min_crit
         self.attack_bonus = magic_bonus + attack_bonus
         self.dmg_bonus = magic_bonus + dmg_bonus
-        self.override_mod = override_mod
         self.mastery = mastery
         if tags:
             self.add_tags(tags)
 
     def mod(self, character: "sim.character.Character"):
-        if self.override_mod is not None:
-            return self.override_mod
-        elif self.has_tag("ranged"):
+        if self.has_tag("ranged"):
             return "dex"
         elif self.has_tag("finesse") and (
             character.stat("dex") > character.stat("str")

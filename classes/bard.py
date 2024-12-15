@@ -122,7 +122,7 @@ class CMEMulticlassAction(sim.feat.Feat):
 
     def action(self, target):
         if self.level >= 7:
-            self.character.cast(EldritchBlast(self.level))
+            self.character.spells.cast(EldritchBlast(self.level))
         self.character.weapon_attack(target, self.weapon)
         self.character.weapon_attack(target, self.weapon)
 

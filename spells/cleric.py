@@ -2,6 +2,7 @@ from typing import List, override, Optional
 
 from util.util import roll_dice, cantrip_dice
 from sim.spells import School
+from sim.attack import DamageRoll
 import sim.target
 import sim.event_loop
 import sim.spells
@@ -64,20 +65,6 @@ class InflictWounds(sim.spells.BasicSaveSpell):
         )
 
 
-class SpiritualWeaponWeapon(sim.weapons.Weapon):
-    def __init__(self, slot: int, **kwargs):
-        super().__init__(
-            name="SpiritualWeaponWeapon",
-            num_dice=slot - 1,
-            die=8,
-            damage_type="force",
-            override_mod="wis",
-        )
-
-    def to_hit(self, character: "sim.character.Character"):
-        return character.prof + character.mod("wis")
-
-
 class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
     def __init__(self, slot: int, concentration: bool = True):
         super().__init__(
@@ -86,7 +73,6 @@ class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
             concentration=concentration,
             school=School.Evocation,
         )
-        self.weapon = SpiritualWeaponWeapon(slot=self.slot)
 
     def cast(
         self,
@@ -102,7 +88,15 @@ class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
 
     def after_action(self, target: "sim.target.Target"):
         if self.character.use_bonus("SpiritualWeapon"):
-            self.character.weapon_attack(target, self.weapon)
+            self.character.spell_attack(
+                target=target,
+                spell=self,
+                damage=DamageRoll(
+                    source=self.name,
+                    dice=(self.slot - 1) * [8],
+                    flat_dmg=self.character.mod("wis"),
+                ),
+            )
 
 
 class GuardianOfFaith(sim.spells.Spell, sim.event_loop.Listener):
