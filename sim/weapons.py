@@ -66,7 +66,9 @@ class Weapon(Taggable):
             return self.override_mod
         elif self.has_tag("ranged"):
             return "dex"
-        elif self.has_tag("finesse") and (character.dex > character.str):
+        elif self.has_tag("finesse") and (
+            character.stat("dex") > character.stat("str")
+        ):
             return "dex"
         else:
             return "str"

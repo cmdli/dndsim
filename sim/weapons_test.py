@@ -22,8 +22,8 @@ def test_weapon():
 def test_mod():
     shortsword = sim.weapons.Shortsword()
     character = sim.test_helpers.sample_character()
-    character.str = 10
-    character.dex = 14
+    character.stats["str"] = 10
+    character.stats["dex"] = 14
     assert shortsword.mod(character) == "dex"
     glaive = sim.weapons.Glaive()
     assert glaive.mod(character) == "str"

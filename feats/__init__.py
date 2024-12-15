@@ -233,7 +233,9 @@ class IrresistibleOffense(sim.feat.Feat):
 
     def attack_result(self, args):
         if args.hits() and args.roll == 20:
-            args.add_damage(source="IrresistibleOffense", damage=self.character.str)
+            args.add_damage(
+                source="IrresistibleOffense", damage=self.character.stat(self.mod)
+            )
 
 
 class WeaponMaster(sim.feat.Feat):

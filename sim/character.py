@@ -8,6 +8,7 @@ from sim.event_loop import EventLoop
 from util.log import log
 from sim.spellcasting import Spellcasting, Spellcaster
 from sim.attack import WeaponAttack, SpellAttack
+
 import sim
 import sim.events
 import sim.attack
@@ -28,23 +29,25 @@ class Character:
         stats: List[int],
         base_feats: Optional[List["sim.feat.Feat"]] = None,
         spellcaster: Spellcaster = Spellcaster.NONE,
-        spell_mod: str = "none",
+        spell_mod: "sim.Stat" = "none",
     ):
         base_feats = base_feats or []
         self.level = level
         self.prof = prof_bonus(level)
-        self.str = stats[0]
-        self.dex = stats[1]
-        self.con = stats[2]
-        self.int = stats[3]
-        self.wis = stats[4]
-        self.cha = stats[5]
+        self.stats = {
+            "str": stats[0],
+            "dex": stats[1],
+            "con": stats[2],
+            "int": stats[3],
+            "wis": stats[4],
+            "cha": stats[5],
+        }
         self.stat_max = {stat: DEFAULT_STAT_MAX for stat in STATS}
         self.minions: List[Character] = []
         self.events = EventLoop()
         self.effects: Set[str] = set()
         self.spells = Spellcasting(self, spell_mod, [(spellcaster, level)])
-        self.masteries: List[str] = []
+        self.masteries: List["sim.weapons.WeaponMastery"] = []
         self.used_bonus = False
         self.feats: Dict[str, "sim.feat.Feat"] = dict()
         for feat in [Vex(), Topple(), Graze()]:
@@ -63,19 +66,28 @@ class Character:
     def feat(self, name: str):
         return self.feats[name]
 
+    def stat(self, stat: "sim.Stat"):
+        if stat == "none":
+            return 10
+        return self.stats[stat]
+
     def mod(self, stat: "sim.Stat"):
         if stat == "none":
             return 0
-        return (self.__getattribute__(stat) - 10) // 2
+        return (self.stats[stat] - 10) // 2
 
     def increase_stat_max(self, stat: "sim.Stat", amount: int):
+        if stat == "none":
+            return
         self.stat_max[stat] += amount
 
     def increase_stat(self, stat: "sim.Stat", amount: int):
-        new_val = getattr(self, stat) + amount
+        if stat == "none":
+            return
+        new_val = self.stats[stat] + amount
         if new_val > self.stat_max[stat]:
             new_val = self.stat_max[stat]
-        setattr(self, stat, new_val)
+        self.stats[stat] = new_val
 
     def dc(self, stat: "sim.Stat"):
         return self.mod(stat) + self.prof + 8
@@ -117,7 +129,6 @@ class Character:
         self.events.emit("end_turn", target)
         if not self.used_bonus:
             log.record(f"Bonus (None)", 1)
-        log.output(lambda: "")
 
     def turn(self, target: "sim.target.Target"):
         self.begin_turn(target)

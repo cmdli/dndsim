@@ -44,4 +44,4 @@ class Simulation:
         self.target.log_damage_sources()
 
 
-Stat = Literal["str", "dex", "con", "int", "wis", "cha"]
+Stat = Literal["str", "dex", "con", "int", "wis", "cha", "none"]
