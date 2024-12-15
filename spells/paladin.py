@@ -1,3 +1,4 @@
+import sim.event_loop
 from util.util import roll_dice
 
 from sim.spells import School
@@ -24,9 +25,25 @@ class DivineSmite(sim.spells.TargetedSpell):
         target.damage_source("DivineSmite", roll_dice(num_dice, 8))
 
 
-class DivineFavor(sim.spells.ConcentrationSpell):
+class DivineFavor(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
     def __init__(self, slot: int):
-        super().__init__("DivineFavor", slot, school=School.Transmutation)
+        super().__init__(
+            name="DivineFavor",
+            slot=slot,
+            school=School.Transmutation,
+        )
+
+    def cast(self, character, target=None):
+        super().cast(character, target)
+        character.events.add(self, "attack_result")
+
+    def end(self, character):
+        super().end(character)
+        character.events.remove(self)
+
+    def attack_result(self, args: "sim.events.AttackResultArgs"):
+        if args.hits() and args.attack.weapon is not None:
+            args.add_damage(source=self.name, dice=[4])
 
 
 class HolyWeapon(sim.spells.ConcentrationSpell):

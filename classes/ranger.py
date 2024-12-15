@@ -123,14 +123,10 @@ class DreadAmbusher(sim.feat.Feat):
     def __init__(self, level: int, weapon: "sim.weapons.Weapon") -> None:
         self.die = 8 if level >= 11 else 6
         self.weapon = weapon if level >= 11 else None
-
-    def apply(self, character: "sim.character.Character"):
-        super().apply(character)
-        self.max_uses = character.mod("wis")
-        self.uses = self.max_uses
+        self.uses = 0
 
     def long_rest(self):
-        self.uses = self.max_uses
+        self.uses = self.character.mod("wis")
 
     def begin_turn(self, target: "sim.target.Target"):
         self.used = False

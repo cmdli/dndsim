@@ -64,10 +64,6 @@ class DivineFavorFeat(sim.feat.Feat):
         ):
             self.character.spells.cast(DivineFavor(slot))
 
-    def attack_result(self, args):
-        if args.hits() and self.character.spells.concentrating_on("DivineFavor"):
-            args.add_damage(source="DivineFavor", dice=[4])
-
 
 class Paladin(sim.character.Character):
     def __init__(self, level: int, use_twf=False, **kwargs):
@@ -76,10 +72,9 @@ class Paladin(sim.character.Character):
         base_feats.append(DivineFavorFeat())
         if use_twf:
             base_feats.append(WeaponMasteries(["Vex", "Nick"]))
-            scimitar = Scimitar(magic_bonus=magic_weapon)
             base_feats.append(TwoWeaponFighting())
             weapon: "sim.weapons.Weapon" = Shortsword(magic_bonus=magic_weapon)
-            nick_attacks = [scimitar]
+            nick_attacks = [Scimitar(magic_bonus=magic_weapon)]
         else:
             base_feats.append(WeaponMasteries(["Graze", "Topple"]))
             base_feats.append(GreatWeaponFighting())

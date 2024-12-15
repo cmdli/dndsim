@@ -1,9 +1,7 @@
 from typing import override, Optional, List
 
-from sim.events import AttackResultArgs, AttackRollArgs
-from sim.spells import Spell
-from util.log import log
 
+import sim.spells
 import sim.feat
 import sim.target
 import sim.character
@@ -30,9 +28,7 @@ class SummonWeapon(sim.weapons.Weapon):
     def to_hit(self, character):
         return self.caster.spells.to_hit()
 
-    def attack_result(
-        self, args: AttackResultArgs, character: "sim.character.Character"
-    ):
+    def attack_result(self, args, character):
         if args.misses():
             return
         num_dice = self.num_dice
@@ -60,11 +56,13 @@ class Summon(sim.character.Character):
         )
 
 
-class SummonSpell(Spell):
+class SummonSpell(sim.spells.Spell):
     def __init__(self, name: str, slot: int):
         super().__init__(name, slot, concentration=True)
 
-    def summon(self, caster: "sim.character.Character"):
+    def summon(
+        self, caster: "sim.character.Character"
+    ) -> Optional["sim.character.Character"]:
         return None
 
     @override
@@ -74,8 +72,10 @@ class SummonSpell(Spell):
         target: Optional["sim.target.Target"] = None,
     ):
         self.minion = self.summon(character)
-        character.add_minion(self.minion)
+        if self.minion:
+            character.add_minion(self.minion)
 
     @override
     def end(self, character: "sim.character.Character"):
-        character.remove_minion(self.minion)
+        if self.minion:
+            character.remove_minion(self.minion)
