@@ -4,7 +4,7 @@ from util.util import (
     get_magic_weapon,
     safe_cast,
 )
-from sim.spellcasting import Spellcaster
+from sim.spells import Spellcaster
 from spells.wizard import (
     MeteorSwarm,
     Fireball,
@@ -16,7 +16,7 @@ from spells.wizard import (
     ScorchingRay,
 )
 from feats import ASI
-from sim.spellcasting import Spell, School
+from sim.spells import Spell, School
 from spells.summons import SummonFey
 
 import sim.attack

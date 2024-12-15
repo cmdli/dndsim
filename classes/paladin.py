@@ -12,7 +12,7 @@ from feats import (
 )
 from weapons import Greatsword, Shortsword, Scimitar
 from spells.paladin import DivineFavor, DivineSmite
-from sim.spellcasting import Spellcaster
+from sim.spells import Spellcaster
 
 import sim.weapons
 import sim.feat

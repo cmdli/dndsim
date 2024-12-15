@@ -13,7 +13,7 @@ from feats import (
 from weapons import HandCrossbow, Shortsword, Scimitar, Rapier
 from spells.ranger import HuntersMark
 from spells.summons import SummonFey
-from sim.spellcasting import Spellcaster
+from sim.spells import Spellcaster
 
 
 import sim.feat

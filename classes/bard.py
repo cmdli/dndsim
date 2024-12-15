@@ -6,7 +6,7 @@ from util.util import get_magic_weapon
 from spells.wizard import TrueStrike
 from spells.paladin import HolyWeapon
 from spells.warlock import EldritchBlast
-from sim.spellcasting import Spellcaster
+from sim.spells import Spellcaster
 
 import sim.weapons
 import sim.feat

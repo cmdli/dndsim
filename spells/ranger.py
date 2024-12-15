@@ -1,13 +1,13 @@
 from typing import Optional
 
 from sim.character import Character
-import sim.spellcasting
-from sim.spellcasting import School
+import sim.spells
+from sim.spells import School
 
 import sim.target
 
 
-class HuntersMark(sim.spellcasting.ConcentrationSpell):
+class HuntersMark(sim.spells.ConcentrationSpell):
     def __init__(self, slot: int):
         super().__init__("HuntersMark", slot, school=School.Divination)
         self.target: Optional["sim.target.Target"] = None

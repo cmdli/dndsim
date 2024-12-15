@@ -1,5 +1,5 @@
 import sim.character
-import sim.spellcasting
+import sim.spells
 import sim.target
 
 
@@ -9,18 +9,18 @@ def sample_character():
         level=5,
         stats=[10, 10, 10, 10, 10, 10],
         base_feats=[],
-        spellcaster=sim.spellcasting.Spellcaster.FULL,
+        spellcaster=sim.spells.Spellcaster.FULL,
         spell_mod="int",
     )
     return character
 
 
-class ExampleSpell(sim.spellcasting.BasicSaveSpell):
+class ExampleSpell(sim.spells.BasicSaveSpell):
     def dice(self):
         return [10]
 
 
-class ExampleConcentrationSpell(sim.spellcasting.ConcentrationSpell):
+class ExampleConcentrationSpell(sim.spells.ConcentrationSpell):
     pass
 
 

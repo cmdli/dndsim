@@ -4,7 +4,7 @@ from typing import List, Optional, TypeAlias, Callable, Any
 from util.log import log
 import sim.target
 import sim.weapons
-import sim.spellcasting
+import sim.spells
 import sim.character
 import util.taggable
 import sim.attack
@@ -16,7 +16,7 @@ class AttackArgs(util.taggable.Taggable):
         target: "sim.target.Target",
         attack: "sim.attack.Attack",
         weapon: Optional["sim.weapons.Weapon"] = None,
-        spell: Optional["sim.spellcasting.Spell"] = None,
+        spell: Optional["sim.spells.Spell"] = None,
         tags: Optional[List[str]] = None,
     ):
         self.target = target
@@ -104,7 +104,7 @@ class EnemySavingThrowArgs:
 
 
 class CastSpellArgs:
-    def __init__(self, spell: "sim.spellcasting.Spell") -> None:
+    def __init__(self, spell: "sim.spells.Spell") -> None:
         self.spell = spell
 
 
@@ -114,7 +114,7 @@ class DamageRollArgs:
         target: "sim.target.Target",
         damage: sim.attack.DamageRoll,
         attack: Optional[AttackArgs] = None,
-        spell: Optional["sim.spellcasting.Spell"] = None,
+        spell: Optional["sim.spells.Spell"] = None,
     ) -> None:
         self.target = target
         self.damage = damage

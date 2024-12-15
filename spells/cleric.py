@@ -1,16 +1,16 @@
 from typing import List, override, Optional
 
 from util.util import roll_dice, cantrip_dice
-from sim.spellcasting import School
+from sim.spells import School
 from sim.attack import DamageRoll
 import sim.target
 import sim.event_loop
-import sim.spellcasting
+import sim.spells
 import sim.weapons
 import sim.character
 
 
-class SpiritGuardians(sim.spellcasting.ConcentrationSpell, sim.event_loop.Listener):
+class SpiritGuardians(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
     def __init__(self, slot: int, **kwargs):
         super().__init__(
             "SpiritGuardians", slot=slot, school=School.Conjuration, **kwargs
@@ -34,7 +34,7 @@ class SpiritGuardians(sim.spellcasting.ConcentrationSpell, sim.event_loop.Listen
         target.damage_source("SpiritGuardians", dmg)
 
 
-class TollTheDead(sim.spellcasting.TargetedSpell):
+class TollTheDead(sim.spells.TargetedSpell):
     def __init__(self):
         super().__init__(
             "TollTheDead", slot=0, concentration=False, school=School.Necromancy
@@ -52,20 +52,20 @@ class TollTheDead(sim.spellcasting.TargetedSpell):
             target.damage_source("TollTheDead", dmg)
 
 
-class Harm(sim.spellcasting.BasicSaveSpell):
+class Harm(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__("Harm", slot=slot, dice=14 * [6], school=School.Necromancy)
         assert slot >= 6
 
 
-class InflictWounds(sim.spellcasting.BasicSaveSpell):
+class InflictWounds(sim.spells.BasicSaveSpell):
     def __init__(self, slot: int):
         super().__init__(
             "InflictWounds", slot, dice=(1 + slot) * [10], school=School.Necromancy
         )
 
 
-class SpiritualWeapon(sim.spellcasting.Spell, sim.event_loop.Listener):
+class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
     def __init__(self, slot: int, concentration: bool = True):
         super().__init__(
             "SpiritualWeapon",
@@ -99,7 +99,7 @@ class SpiritualWeapon(sim.spellcasting.Spell, sim.event_loop.Listener):
             )
 
 
-class GuardianOfFaith(sim.spellcasting.Spell, sim.event_loop.Listener):
+class GuardianOfFaith(sim.spells.Spell, sim.event_loop.Listener):
     def __init__(self, slot: int):
         super().__init__(
             "GuardianOfFaith", slot, duration=10, school=School.Conjuration

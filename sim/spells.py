@@ -6,7 +6,7 @@ from util.log import log
 from sim.events import CastSpellArgs
 from util.util import spell_slots, highest_spell_slot, lowest_spell_slot
 
-import sim.spellcasting
+import sim.spells
 import sim.target
 import sim.character
 import sim.target
@@ -46,8 +46,8 @@ class Spellcasting(sim.event_loop.Listener):
         self.character = character
         self.mod = mod
         self.spellcaster_level = spellcaster_level(spellcaster_levels)
-        self.concentration: Optional["sim.spellcasting.Spell"] = None
-        self.spells: List["sim.spellcasting.Spell"] = []
+        self.concentration: Optional["sim.spells.Spell"] = None
+        self.spells: List["sim.spells.Spell"] = []
         self.slots = spell_slots(self.spellcaster_level)
         self.to_hit_bonus = 0
         self.character.events.add(self, ["short_rest"])
@@ -72,7 +72,7 @@ class Spellcasting(sim.event_loop.Listener):
 
     def cast(
         self,
-        spell: "sim.spellcasting.Spell",
+        spell: "sim.spells.Spell",
         target: Optional["sim.target.Target"] = None,
     ):
         log.record(f"Cast ({spell.name})", 1)
@@ -86,11 +86,11 @@ class Spellcasting(sim.event_loop.Listener):
         if spell.duration > 0 or spell.concentration:
             self.spells.append(spell)
 
-    def end_spell(self, spell: "sim.spellcasting.Spell"):
+    def end_spell(self, spell: "sim.spells.Spell"):
         self.spells.remove(spell)
         spell.end(self.character)
 
-    def set_concentration(self, spell: "sim.spellcasting.Spell"):
+    def set_concentration(self, spell: "sim.spells.Spell"):
         if self.concentration:
             self.spells.remove(self.concentration)
             self.concentration.end(self.character)

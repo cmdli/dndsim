@@ -1,15 +1,15 @@
 from typing import Optional
 
 import sim.weapons
-import sim.spellcasting
+import sim.spells
 import sim.character
 import sim.target
 
-from sim.spellcasting import School
+from sim.spells import School
 from sim.attack import DamageRoll
 
 
-class EldritchBlast(sim.spellcasting.Spell):
+class EldritchBlast(sim.spells.Spell):
     def __init__(self, character_level: int, **kwargs):
         super().__init__("EldritchBlast", 0, school=School.Evocation, **kwargs)
         self.character_level = character_level

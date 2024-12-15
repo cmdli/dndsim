@@ -6,14 +6,14 @@ from feats import Vex, Topple, Graze
 from sim.events import AttackRollArgs, AttackArgs, AttackResultArgs
 from sim.event_loop import EventLoop
 from util.log import log
-from sim.spellcasting import Spellcasting, Spellcaster
+from sim.spells import Spellcasting, Spellcaster
 from sim.attack import WeaponAttack, SpellAttack
 
 import sim
 import sim.maneuvers
 import sim.events
 import sim.attack
-import sim.spellcasting
+import sim.spells
 import sim.weapons
 import sim.feat
 import sim.target
@@ -171,7 +171,7 @@ class Character:
     def spell_attack(
         self,
         target: "sim.target.Target",
-        spell: "sim.spellcasting.Spell",
+        spell: "sim.spells.Spell",
         damage: Optional["sim.attack.DamageRoll"] = None,
         callback: Optional["sim.events.AttackResultCallback"] = None,
         is_ranged: bool = False,
@@ -189,7 +189,7 @@ class Character:
         target: "sim.target.Target",
         attack: "sim.attack.Attack",
         weapon: Optional["sim.weapons.Weapon"] = None,
-        spell: Optional["sim.spellcasting.Spell"] = None,
+        spell: Optional["sim.spells.Spell"] = None,
         tags: Optional[List[str]] = None,
     ):
         args = AttackArgs(
@@ -244,7 +244,7 @@ class Character:
         target: "sim.target.Target",
         damage: "sim.attack.DamageRoll",
         attack: Optional["sim.events.AttackArgs"] = None,
-        spell: Optional["sim.spellcasting.Spell"] = None,
+        spell: Optional["sim.spells.Spell"] = None,
         multiplier: float = 1.0,
     ):
         args = sim.events.DamageRollArgs(

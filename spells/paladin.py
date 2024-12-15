@@ -1,15 +1,15 @@
 import sim.event_loop
 from util.util import roll_dice
 
-from sim.spellcasting import School
+from sim.spells import School
 import sim.character
 import sim.target
-import sim.spellcasting
+import sim.spells
 import sim.weapons
 import sim.events
 
 
-class DivineSmite(sim.spellcasting.TargetedSpell):
+class DivineSmite(sim.spells.TargetedSpell):
     def __init__(self, slot: int, crit: bool):
         super().__init__("DivineSmite", slot=slot, school=School.Evocation)
         self.crit = crit
@@ -25,7 +25,7 @@ class DivineSmite(sim.spellcasting.TargetedSpell):
         target.damage_source("DivineSmite", roll_dice(num_dice, 8))
 
 
-class DivineFavor(sim.spellcasting.ConcentrationSpell, sim.event_loop.Listener):
+class DivineFavor(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
     def __init__(self, slot: int):
         super().__init__(
             name="DivineFavor",
@@ -46,7 +46,7 @@ class DivineFavor(sim.spellcasting.ConcentrationSpell, sim.event_loop.Listener):
             args.add_damage(source=self.name, dice=[4])
 
 
-class HolyWeapon(sim.spellcasting.ConcentrationSpell):
+class HolyWeapon(sim.spells.ConcentrationSpell):
     def __init__(self, slot: int, weapon: "sim.weapons.Weapon", **kwargs):
         super().__init__("HolyWeapon", slot=slot, school=School.Evocation, **kwargs)
         self.weapon = weapon

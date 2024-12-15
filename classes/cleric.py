@@ -3,14 +3,14 @@ from typing import List, Optional
 from util.util import (
     get_magic_weapon,
 )
-from sim.spellcasting import Spellcaster
+from sim.spells import Spellcaster
 from feats import ASI
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
 from spells.summons import SummonCelestial
 from weapons import Warhammer
 
 import sim.weapons
-import sim.spellcasting
+import sim.spells
 import sim.character
 import sim.target
 import sim.feat
@@ -19,7 +19,7 @@ import sim.feat
 class ClericAction(sim.feat.Feat):
     def action(self, target: "sim.target.Target"):
         slot = self.character.spells.highest_slot()
-        spell: Optional["sim.spellcasting.Spell"] = None
+        spell: Optional["sim.spells.Spell"] = None
         if not self.character.spells.is_concentrating() and slot >= 3:
             if slot >= 5:
                 spell = SummonCelestial(slot)
