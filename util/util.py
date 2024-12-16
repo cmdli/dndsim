@@ -1,4 +1,4 @@
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Tuple
 import random
 import math
 
@@ -105,3 +105,9 @@ def safe_cast[T](cls: type[T], obj: Any) -> Optional[T]:
         return obj
     else:
         return None
+
+
+def apply_feats_at_levels[T](level: int, feats: List[T], schedule: List[Tuple[int, T]]):
+    for target, feat in schedule:
+        if level >= target:
+            feats.append(feat)

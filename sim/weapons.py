@@ -84,7 +84,6 @@ class Weapon(Taggable):
     ):
         if args.hits():
             damage = self.dmg_bonus
-            args.add_damage(source=self.name, dice=self.num_dice * [self.die])
             if not args.attack.has_tag("light"):
                 mod = self.mod(character)
                 damage += character.mod(mod)

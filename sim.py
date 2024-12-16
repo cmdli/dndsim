@@ -25,6 +25,7 @@ class Args:
         iterations: int,
         num_rounds: int,
         num_fights: int,
+        debug: bool,
     ) -> None:
         self.character = character
         self.start_level = start_level
@@ -32,6 +33,7 @@ class Args:
         self.iterations = iterations
         self.num_rounds = num_rounds
         self.num_fights = num_fights
+        self.debug = debug
 
 
 def test_dpr(
@@ -57,6 +59,8 @@ def write_data(file: str, data):
 
 
 def test_character(args: Args):
+    if args.debug:
+        log.enable()
     config = configs.get_configs([args.character])[0]
     data = []
     for level in range(args.start_level, args.end_level + 1):
@@ -68,6 +72,8 @@ def test_character(args: Args):
             iterations=args.iterations,
         )
         data.append([level, config.name, dpr])
+    if args.debug:
+        log.printReport()
     return data
 
 
@@ -78,6 +84,7 @@ def test_characters(
     num_rounds: int,
     num_fights: int,
     iterations: int,
+    debug: bool,
 ):
     data = [["Level", "Character", "DPR"]]
     with multiprocessing.pool.Pool() as p:
@@ -89,6 +96,7 @@ def test_characters(
                 iterations=iterations,
                 num_rounds=num_rounds,
                 num_fights=num_fights,
+                debug=debug,
             )
             for character in characters
         ]
@@ -125,10 +133,8 @@ def print_data(data):
 @click.option("--num_rounds", default=5, help="Number of rounds per fight")
 @click.option("--num_fights", default=3, help="Number of fights per long rest")
 @click.option("--iterations", default=500, help="Number of simulations to run")
-@click.option("--debug", default=False, help="Enable debug metrics")
+@click.option("--debug", is_flag=True, help="Enable debug metrics")
 def run(start, end, characters, output, num_rounds, num_fights, iterations, debug):
-    if debug:
-        log.enable()
     characters = configs.break_out_shortcuts(characters.split(","))
     data = test_characters(
         characters,
@@ -137,9 +143,9 @@ def run(start, end, characters, output, num_rounds, num_fights, iterations, debu
         num_rounds=num_rounds,
         num_fights=num_fights,
         iterations=iterations,
+        debug=debug,
     )
     write_data(output, data)
-    log.printReport()
     print_data(data[1:])
 
 
