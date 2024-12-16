@@ -28,10 +28,15 @@ class SpiritGuardians(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
         character.events.remove(self)
 
     def enemy_turn(self, target: "sim.target.Target"):
-        dmg = roll_dice(self.slot, 8)
+        saved = False
         if target.save(self.character.spells.dc()):
-            dmg = dmg // 2
-        target.damage_source("SpiritGuardians", dmg)
+            saved = True
+        self.character.do_damage(
+            target,
+            spell=self,
+            damage=DamageRoll(source=self.name, dice=self.slot * [8]),
+            multiplier=0.5 if saved else 1.0,
+        )
 
 
 class TollTheDead(sim.spells.TargetedSpell):
@@ -45,11 +50,12 @@ class TollTheDead(sim.spells.TargetedSpell):
     ):
         num_dice = cantrip_dice(character.level)
         if not target.save(character.spells.dc()):
-            if target.dmg > 0:
-                dmg = roll_dice(num_dice, 12)
-            else:
-                dmg = roll_dice(num_dice, 8)
-            target.damage_source("TollTheDead", dmg)
+            die = 12 if target.dmg > 0 else 8
+            self.character.do_damage(
+                target,
+                spell=self,
+                damage=DamageRoll(source=self.name, dice=num_dice * [die]),
+            )
 
 
 class Harm(sim.spells.BasicSaveSpell):
@@ -120,7 +126,12 @@ class GuardianOfFaith(sim.spells.Spell, sim.event_loop.Listener):
 
     def enemy_turn(self, target: "sim.target.Target"):
         if not target.save(self.character.spells.dc()):
-            target.damage_source("GuardianOfFaith", 20)
-            self.dmg -= 20
+            dmg = 20 if self.dmg >= 20 else self.dmg
+            self.character.do_damage(
+                target=target,
+                spell=self,
+                damage=DamageRoll(source=self.name, flat_dmg=dmg),
+            )
+            self.dmg -= dmg
             if self.dmg <= 0:
                 self.character.spells.end_spell(self)

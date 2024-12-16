@@ -1,12 +1,11 @@
-import sim.event_loop
-from util.util import roll_dice
-
 from sim.spells import School
 import sim.character
 import sim.target
 import sim.spells
 import sim.weapons
 import sim.events
+import sim.attack
+import sim.event_loop
 
 
 class DivineSmite(sim.spells.TargetedSpell):
@@ -22,7 +21,11 @@ class DivineSmite(sim.spells.TargetedSpell):
         num_dice = 1 + self.slot
         if self.crit:
             num_dice *= 2
-        target.damage_source("DivineSmite", roll_dice(num_dice, 8))
+        self.character.do_damage(
+            target=target,
+            spell=self,
+            damage=sim.attack.DamageRoll(source=self.name, dice=num_dice * [8]),
+        )
 
 
 class DivineFavor(sim.spells.ConcentrationSpell, sim.event_loop.Listener):
