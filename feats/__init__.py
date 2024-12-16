@@ -11,19 +11,25 @@ import sim.target
 
 class PolearmMaster(sim.feat.Feat):
     def __init__(self, weapon: "sim.weapons.Weapon"):
+        # NOTE: Weapon must be of the 'butt' variety (e.g. uses a d4 for damage)
         self.weapon = weapon
+        self.enabled = False
 
     def apply(self, character):
         super().apply(character)
         character.increase_stat("str", 1)
 
     def begin_turn(self, target):
-        self.used = False
+        self.enabled = False
+
+    def attack(self, args):
+        weapon = args.weapon
+        if weapon and weapon.has_tag("reach") and weapon.has_tag("heavy"):
+            self.enabled = True
 
     def end_turn(self, target):
-        if not self.used and self.character.use_bonus("PAM"):
-            self.used = True
-            self.character.weapon_attack(target, self.weapon)
+        if self.enabled and self.character.use_bonus("PolearmMaster"):
+            self.character.weapon_attack(target, self.weapon, tags="PolearmMaster")
 
 
 class GreatWeaponMaster(sim.feat.Feat):
@@ -34,20 +40,13 @@ class GreatWeaponMaster(sim.feat.Feat):
         super().apply(character)
         character.increase_stat("str", 1)
 
-    def begin_turn(self, target):
-        self.bonus_attack_enabled = False
-
     def attack_result(self, args):
         if args.misses():
             return
         if args.attack.weapon.has_tag("heavy"):
             args.add_damage(source="GreatWeaponMaster", damage=self.character.prof)
-        if args.crit:
-            self.bonus_attack_enabled = True
-
-    def after_action(self, target):
-        if self.bonus_attack_enabled and self.character.use_bonus("GreatWeaponMaster"):
-            self.character.weapon_attack(target, self.weapon)
+        if args.crit and self.character.use_bonus("GreatWeaponMaster"):
+            self.character.weapon_attack(args.attack.target, self.weapon)
 
 
 class ElvenAccuracy(sim.feat.Feat):
