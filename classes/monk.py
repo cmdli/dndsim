@@ -72,7 +72,7 @@ class Grappler(sim.feat.Feat):
 class StunningStrike(sim.feat.Feat):
     def __init__(self, weapon_die, avoid_on_grapple: bool = False):
         self.weapon_die = weapon_die
-        self.stuns = []
+        self.stuns: List[int] = []
         self.avoid_on_grapple = avoid_on_grapple
 
     def begin_turn(self, target: "sim.target.Target"):
@@ -176,7 +176,7 @@ class Monk(sim.character.Character):
             base_feats.append(OpenHandTechnique())
         if level >= 4:
             if use_nick:
-                base_feats.append(WeaponMaster("dex"))
+                base_feats.append(WeaponMaster("dex", "Nick"))
             else:
                 base_feats.append(Grappler() if use_grappler else ASI(["dex", "con"]))
         if level >= 5:

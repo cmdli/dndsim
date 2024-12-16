@@ -98,7 +98,7 @@ class Firebolt(sim.spells.TargetedSpell):
         )
 
 
-class TrueStrikeAttack:
+class TrueStrikeAttack(sim.attack.Attack):
     def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.name = "TrueStrikeAttack"
         self.weapon = weapon

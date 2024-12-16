@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Literal
 
 from util.util import roll_dice
 from util.log import log
@@ -224,7 +224,7 @@ class WeaponMasteries(sim.feat.Feat):
 
 
 class IrresistibleOffense(sim.feat.Feat):
-    def __init__(self, mod: "sim.Stat") -> None:
+    def __init__(self, mod: Literal["str", "dex"]) -> None:
         self.mod = mod
 
     def apply(self, character):
@@ -240,16 +240,22 @@ class IrresistibleOffense(sim.feat.Feat):
 
 
 class WeaponMaster(sim.feat.Feat):
-    def __init__(self, mod: "sim.Stat") -> None:
+    def __init__(
+        self, mod: Literal["str", "dex"], mastery: "sim.weapons.WeaponMastery"
+    ) -> None:
         self.mod = mod
+        self.mastery = mastery
 
     def apply(self, character):
         super().apply(character)
         character.increase_stat(self.mod, 1)
+        character.masteries.add(self.mastery)
 
 
 class DualWielder(sim.feat.Feat):
-    def __init__(self, mod: "sim.Stat", weapon: "sim.weapons.Weapon") -> None:
+    def __init__(
+        self, mod: Literal["str", "dex"], weapon: "sim.weapons.Weapon"
+    ) -> None:
         self.mod = mod
         self.weapon = weapon
 
@@ -270,7 +276,7 @@ class SavageAttacker(sim.feat.Feat):
         self.used = False
 
     def damage_roll(self, args):
-        if self.used:
+        if self.used or not args.attack.weapon:
             return
         self.used = True
         new_rolls = [roll_dice(1, die) for die in args.damage.dice]
@@ -279,12 +285,29 @@ class SavageAttacker(sim.feat.Feat):
 
 
 class Piercer(sim.feat.Feat):
-    def __init__(self, mod: "sim.Stat") -> None:
+    def __init__(self, mod: Literal["str", "dex"]) -> None:
         self.mod = mod
+        self.used = False
 
     def apply(self, character):
         super().apply(character)
         character.increase_stat(self.mod, 1)
+
+    def begin_turn(self, target):
+        self.used = False
+
+    def damage_roll(self, args):
+        if (
+            args.attack.weapon is not None
+            and not self.used
+            and args.attack.weapon.damage_type == "piercing"
+        ):
+            self.used = True
+            lowest = min(args.damage.rolls)
+            for i in range(len(args.damage.rolls)):
+                if args.damage.rolls[i] == lowest:
+                    args.damage.rolls[i] = roll_dice(1, args.damage.dice[i])
+                    break
 
     def attack_result(self, args):
         if args.hits() and args.crit and args.attack.weapon.damage_type == "piercing":
