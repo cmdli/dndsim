@@ -98,6 +98,30 @@ class Firebolt(sim.spells.TargetedSpell):
         )
 
 
+class TrueStrikeAttack:
+    def __init__(self, weapon: "sim.weapons.Weapon") -> None:
+        self.name = "TrueStrikeAttack"
+        self.weapon = weapon
+
+    def to_hit(self, character: "sim.character.Character"):
+        return character.spells.to_hit()
+
+    def attack_result(
+        self, args: "sim.events.AttackResultArgs", character: "sim.character.Character"
+    ):
+        self.weapon.attack_result(args, character)
+        if args.hits():
+            num_dice = character.spells.cantrip_dice() - 1
+            if num_dice > 0:
+                args.add_damage(source=self.name, dice=num_dice * [6])
+
+    def min_crit(self):
+        return 20
+
+    def is_ranged(self):
+        return False
+
+
 class TrueStrike(Spell):
     def __init__(self, weapon: "sim.weapons.Weapon", **kwargs):
         super().__init__("TrueStrike", 0, school=School.Divination)
@@ -110,4 +134,6 @@ class TrueStrike(Spell):
     ):
         if not target:
             return
-        character.weapon_attack(target, self.weapon, tags=["truestrike"])
+        character.attack(
+            target=target, attack=TrueStrikeAttack(self.weapon), weapon=self.weapon
+        )

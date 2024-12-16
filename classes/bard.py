@@ -14,31 +14,6 @@ import sim.character
 import sim.target
 
 
-# TODO: Refactor this into a spell
-class TrueStrikeFeat(sim.feat.Feat):
-    def __init__(self, level: int, spell_mod: str) -> None:
-        self.spell_mod = spell_mod
-        if level >= 17:
-            self.num_dice = 3
-        elif level >= 11:
-            self.num_dice = 2
-        elif level >= 5:
-            self.num_dice = 1
-        else:
-            self.num_dice = 0
-
-    def attack_roll(self, args):
-        weapon = args.attack.weapon
-        if weapon and args.attack.has_tag("truestrike"):
-            args.situational_bonus += self.character.mod(
-                self.spell_mod
-            ) - self.character.mod(weapon.mod(self.character))
-
-    def attack_result(self, args):
-        if args.hits() and args.attack.has_tag("truestrike"):
-            args.add_damage(source="TrueStrike", dice=self.num_dice * [6])
-
-
 class TrueStrikeAction(sim.feat.Feat):
     def __init__(
         self,
@@ -83,7 +58,6 @@ class ValorBard(sim.character.Character):
         base_feats: List["sim.feat.Feat"] = []
         weapon = Shortsword(magic_bonus=magic_weapon)
         scimitar = Scimitar(magic_bonus=magic_weapon)
-        base_feats.append(TrueStrikeFeat(level, "cha"))
         attacks: List["sim.weapons.Weapon"] = []
         if level >= 6:
             attacks = [weapon]
