@@ -9,6 +9,7 @@ from feats import (
     TwoWeaponFighting,
     WeaponMasteries,
     IrresistibleOffense,
+    LightWeaponBonusAttack,
 )
 from weapons import HandCrossbow, Shortsword, Scimitar, Rapier
 from spells.ranger import HuntersMark
@@ -181,6 +182,7 @@ class GloomstalkerRanger(sim.character.Character):
             attacks = [weapon]
         base_feats.append(RangerAction(attacks=attacks, summon_fey_threshold=4))
         base_feats.append(HuntersMarkFeat(die=10 if level >= 20 else 6))
+        base_feats.append(LightWeaponBonusAttack(weapon))
         if level >= 2:
             base_feats.append(Archery())
         if level >= 3:

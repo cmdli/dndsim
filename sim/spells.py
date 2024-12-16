@@ -3,7 +3,6 @@ import math
 from enum import Enum
 
 from util.log import log
-from sim.events import CastSpellArgs
 from util.util import spell_slots, highest_spell_slot, lowest_spell_slot
 
 import sim.spells
@@ -76,8 +75,6 @@ class Spellcasting(sim.event_loop.Listener):
         target: Optional["sim.target.Target"] = None,
     ):
         log.record(f"Cast ({spell.name})", 1)
-        args = CastSpellArgs(spell)
-        self.character.events.emit("cast_spell", args)
         if spell.slot > 0:
             self.slots[spell.slot] -= 1
         if spell.concentration:

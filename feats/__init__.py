@@ -99,15 +99,9 @@ class CrossbowExpert(sim.feat.Feat):
         super().apply(character)
         character.increase_stat("dex", 1)
 
-    def begin_turn(self, target):
-        self.used_attack = False
-
     def attack(self, args):
-        self.used_attack = True
-
-    def end_turn(self, target):
-        if self.used_attack and self.character.use_bonus("CrossbowExpert"):
-            self.character.weapon_attack(target, self.weapon)
+        if args.has_tag("light"):
+            args.remove_tag("light")
 
 
 class ASI(sim.feat.Feat):
@@ -162,9 +156,17 @@ class BoomingBlade(sim.feat.Feat):
 class LightWeaponBonusAttack(sim.feat.Feat):
     def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
+        self.enabled = False
+
+    def begin_turn(self, target):
+        self.enabled = False
+
+    def attack(self, args):
+        if args.weapon is not None and args.weapon.has_tag("light"):
+            self.enabled = True
 
     def end_turn(self, target):
-        if self.character.use_bonus("LightWeaponBonusAttack"):
+        if self.enabled and self.character.use_bonus("LightWeaponBonusAttack"):
             self.character.weapon_attack(target, self.weapon, tags=["light"])
 
 
