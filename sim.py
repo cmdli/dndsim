@@ -120,7 +120,7 @@ def print_data(data):
         levels.add(level)
     levels = sorted(list(levels))
     table.add_column("Level", levels)
-    for name in classes:
+    for name in sorted(classes.keys()):
         table.add_column(name, [classes[name][level] for level in levels])
     print(table)
 
@@ -129,7 +129,7 @@ def print_data(data):
 @click.option("-s", "--start", default=1, help="Start of the level range")
 @click.option("-e", "--end", default=20, help="End of the level range")
 @click.option("--characters", default="all", help="Characters to test")
-@click.option("-o", "--output", default="data.csv", help="Output file")
+@click.option("-o", "--output", default=None, help="Output file")
 @click.option("--num_rounds", default=5, help="Number of rounds per fight")
 @click.option("--num_fights", default=3, help="Number of fights per long rest")
 @click.option("--iterations", default=500, help="Number of simulations to run")
@@ -145,7 +145,8 @@ def run(start, end, characters, output, num_rounds, num_fights, iterations, debu
         iterations=iterations,
         debug=debug,
     )
-    write_data(output, data)
+    if output:
+        write_data(output, data)
     print_data(data[1:])
 
 

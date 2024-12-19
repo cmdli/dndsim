@@ -81,9 +81,7 @@ class TwoWeaponFighting(sim.feat.Feat):
 
 class GreatWeaponFighting(sim.feat.Feat):
     def damage_roll(self, args):
-        attack = args.attack
-        if attack:
-            weapon = attack.weapon
+        weapon = args.attack.weapon if args.attack and args.attack.weapon else None
         if weapon and weapon.has_tag("twohanded"):
             for i in range(len(args.damage.rolls)):
                 if args.damage.rolls[i] == 1 or args.damage.rolls[i] == 2:

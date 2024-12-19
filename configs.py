@@ -22,7 +22,7 @@ CONFIGS = {
     "monk": CharacterConfig("Monk", Monk),
     "paladin": CharacterConfig("Paladin", Paladin),
     "ranger": CharacterConfig("Ranger", GloomstalkerRanger),
-    "rogue": CharacterConfig("Assassin", AssassinRogue),
+    "rogue": CharacterConfig("Rogue", AssassinRogue),
     "wizard": CharacterConfig("Wizard", Wizard),
     "cleric": CharacterConfig("Cleric", Cleric),
     "bard": CharacterConfig("Bard", ValorBard),
