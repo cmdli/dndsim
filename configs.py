@@ -5,6 +5,7 @@ from classes.monk import Monk
 from classes.barbarian import Barbarian
 from classes.fighter import (
     ChampionFighter,
+    PrecisionTrippingFighter,
 )
 from classes.rogue import AssassinRogue, ArcaneTricksterRogue
 from classes.wizard import Wizard
@@ -15,31 +16,38 @@ from classes.au import AssaultUnit
 from classes.bard import ValorBard
 
 CONFIGS = {
-    "monk": CharacterConfig("Monk", Monk),
-    "champion": CharacterConfig("Champion Fighter", ChampionFighter),
-    "battlemaster": CharacterConfig("Battlemaster Fighter", ChampionFighter),
+    # Classes
     "barbarian": CharacterConfig("Barbarian", Barbarian),
+    "fighter": CharacterConfig("Fighter", ChampionFighter),
+    "monk": CharacterConfig("Monk", Monk),
     "paladin": CharacterConfig("Paladin", Paladin),
-    "gloomstalker": CharacterConfig("Gloomstalker Ranger", GloomstalkerRanger),
-    "beastmaster": CharacterConfig("Beastmaster Ranger", BeastMasterRanger),
+    "ranger": CharacterConfig("Ranger", GloomstalkerRanger),
     "rogue": CharacterConfig("Assassin", AssassinRogue),
-    "arcane_trickster": CharacterConfig("Arcane Trickster", ArcaneTricksterRogue),
     "wizard": CharacterConfig("Wizard", Wizard),
     "cleric": CharacterConfig("Cleric", Cleric),
-    "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
     "bard": CharacterConfig("Bard", ValorBard),
+    # TODO: Warlock
+    # TODO: Sorcerer
+    # Subclasses
+    "champion": CharacterConfig("Champion Fighter", ChampionFighter),
+    "battlemaster": CharacterConfig("Battlemaster Fighter", PrecisionTrippingFighter),
+    "gloomstalker": CharacterConfig("Gloomstalker Ranger", GloomstalkerRanger),
+    "beastmaster": CharacterConfig("Beastmaster Ranger", BeastMasterRanger),
+    "arcane_trickster": CharacterConfig("Arcane Trickster", ArcaneTricksterRogue),
+    "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
 }
 
 SHORTCUTS = {
     "all": [
         "monk",
-        "champion",
+        "fighter",
         "barbarian",
         "paladin",
-        "beastmaster",
+        "ranger",
         "rogue",
         "wizard",
         "cleric",
+        "bard",
     ]
 }
 

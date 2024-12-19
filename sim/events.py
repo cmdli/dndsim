@@ -36,6 +36,7 @@ class AttackRollArgs:
         self.roll1 = random.randint(1, 20)
         self.roll2 = random.randint(1, 20)
         self.situational_bonus = 0
+        self.min_crit = None
 
     def reroll(self):
         self.roll1 = random.randint(1, 20)

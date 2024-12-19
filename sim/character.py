@@ -200,7 +200,12 @@ class Character:
         to_hit = args.attack.to_hit(self)
         roll_result = self.attack_roll(attack=args, to_hit=to_hit)
         roll = roll_result.roll()
-        crit = roll >= args.attack.min_crit()
+        min_crit = (
+            args.attack.min_crit()
+            if roll_result.min_crit is None
+            else roll_result.min_crit
+        )
+        crit = roll >= min_crit
         roll_total = roll + to_hit + roll_result.situational_bonus
         hit = roll_total >= args.target.ac
         result = AttackResultArgs(attack=args, hit=hit, crit=crit, roll=roll)
