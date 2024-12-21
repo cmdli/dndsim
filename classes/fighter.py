@@ -2,7 +2,7 @@ import random
 from typing import List, Optional
 
 import sim.core_feats
-from util.util import get_magic_weapon
+from util.util import get_magic_weapon, apply_asi_feats
 from feats import (
     GreatWeaponMaster,
     AttackAction,
@@ -206,10 +206,12 @@ def fighter_feats(
     level: int,
     masteries: List["sim.weapons.WeaponMastery"],
     fighting_style: "sim.feat.Feat",
+    asis: Optional[List["sim.feat.Feat"]] = None,
 ) -> List["sim.feat.Feat"]:
     feats: List["sim.feat.Feat"] = []
     # Level 1 (Second Wind) is irrelevant
     if level >= 1:
+        feats.append(FighterLevel(level))
         feats.append(WeaponMasteries(masteries))
         feats.append(fighting_style)
     if level >= 2:
@@ -223,7 +225,9 @@ def fighter_feats(
     if level >= 13:
         feats.append(StudiedAttacks())
     # Level 20 (Extra Attack 3) is handled in the attack action
-    # TODO: Apply ASI feats
+    apply_asi_feats(
+        level=level, feats=feats, asis=asis, schedule=[4, 6, 8, 12, 14, 16, 19]
+    )
     return feats
 
 
@@ -241,6 +245,7 @@ def champion_feats(level: int) -> List["sim.feat.Feat"]:
 
 def battlemaster_feats(level: int) -> List["sim.feat.Feat"]:
     feats: List["sim.feat.Feat"] = []
+    # TODO: Handle maneuvers here
     if level >= 3:
         feats.append(CombatSuperiority(level))
     if level >= 15:
@@ -265,28 +270,26 @@ class Fighter(sim.character.Character):
         maul = Maul(magic_bonus=magic_weapon)
         feats.append(DefaultFighterAction(level, weapon, maul if use_topple else None))
 
-        # Normal Feats
+        # Origin Feat
         feats.append(SavageAttacker())
-        if level >= 4:
-            feats.append(GreatWeaponMaster(weapon))
-        if level >= 6:
-            if use_pam:
-                butt = GlaiveButt(bonus=magic_weapon)
-                feats.append(PolearmMaster(butt))
-            else:
-                feats.append(ASI(["str"]))
-        if level >= 8:
-            feats.append(ASI(["str"]))
-        if level >= 19:
-            feats.append(IrresistibleOffense("str"))
 
         # Standard feats
+        butt = GlaiveButt(magic_bonus=magic_weapon)
         feats.extend(subclass_feats)
         feats.extend(
             fighter_feats(
                 level,
                 masteries=["Topple", "Graze"],
                 fighting_style=GreatWeaponFighting(),
+                asis=[
+                    GreatWeaponMaster(weapon),
+                    PolearmMaster(butt) if use_pam else ASI(["str"]),
+                    ASI(["str"]),
+                    ASI(),
+                    ASI(),
+                    ASI(),
+                    IrresistibleOffense("str"),
+                ],
             )
         )
         super().init(
@@ -348,19 +351,20 @@ class TWFFighter(sim.character.Character):
         scimitar = Scimitar(magic_bonus=magic_weapon)
         feats.append(DefaultFighterAction(level, weapon, nick_weapon=scimitar))
         feats.append(SavageAttacker())
-        if level >= 4:
-            feats.append(GreatWeaponMaster(weapon))
-        if level >= 6:
-            feats.append(DualWielder("str", weapon))
-        if level >= 8:
-            feats.append(ASI(["str"]))
-        if level >= 19:
-            feats.append(IrresistibleOffense("str"))
         feats.extend(
             fighter_feats(
                 level,
                 masteries=["Vex", "Nick"],
                 fighting_style=TwoWeaponFighting(),
+                asis=[
+                    GreatWeaponMaster(weapon),
+                    DualWielder("str", weapon),
+                    ASI(["str"]),
+                    ASI(),
+                    ASI(),
+                    ASI(),
+                    IrresistibleOffense("str"),
+                ],
             )
         )
         feats.extend(champion_feats(level))
