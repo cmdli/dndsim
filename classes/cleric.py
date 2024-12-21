@@ -1,19 +1,23 @@
 from typing import List, Optional
 
-from util.util import (
-    get_magic_weapon,
-)
+from util.util import get_magic_weapon, apply_asi_feats
 from sim.spells import Spellcaster
 from feats import ASI
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
 from spells.summons import SummonCelestial
 from weapons import Warhammer
 
+import sim.core_feats
 import sim.weapons
 import sim.spells
 import sim.character
 import sim.target
 import sim.feat
+
+
+class ClericLevel(sim.core_feats.ClassLevels):
+    def __init__(self, level: int):
+        super().__init__(name="Cleric", level=level, spellcaster=Spellcaster.FULL)
 
 
 class ClericAction(sim.feat.Feat):
@@ -62,28 +66,52 @@ class BlessedStrikes(sim.feat.Feat):
             args.add_damage("BlessedStrikes", dice=self.num_dice * [8])
 
 
+def cleric_feats(
+    level: int, asis: Optional[List["sim.feat.Feat"]] = None
+) -> List["sim.feat.Feat"]:
+    feats: List["sim.feat.Feat"] = []
+    if level >= 1:
+        feats.append(ClericLevel(level))
+    # Level 1 (Divine Order) is irrelevant
+    # TODO: Level 2 (Channel Divinity)
+    # Level 5 (Sear Undead) is irrelevant
+    if level >= 7:
+        feats.append(BlessedStrikes(2 if level >= 14 else 1))
+    # TODO: Level 7 (Blessed Strikes) for Potent Spellcasting
+    # TODO: Level 10 (Divine Intervention)
+    # TODO: Level 20 (Divine Intervention)
+    apply_asi_feats(level=level, feats=feats, asis=asis)
+    return feats
+
+
+def war_cleric_feats(level: int, weapon: "sim.weapons.Weapon") -> List["sim.feat.Feat"]:
+    feats: List["sim.feat.Feat"] = []
+    # TODO: Level 3 (Guided Strike)
+    if level >= 3:
+        feats.append(WarPriest(weapon))
+    # TODO: Level 6 (War God's Blessing)
+    # Level 17 (Avatar of Battle) is irrelevant
+    return feats
+
+
 class Cleric(sim.character.Character):
     def __init__(self, level: int) -> None:
         magic_weapon = get_magic_weapon(level)
         weapon = Warhammer(magic_bonus=magic_weapon)
-        base_feats: List["sim.feat.Feat"] = []
-        base_feats.append(ClericAction())
-        if level >= 3:
-            base_feats.append(WarPriest(weapon))
-        if level >= 4:
-            base_feats.append(ASI(["wis"]))
-        if level >= 7:
-            base_feats.append(BlessedStrikes(2 if level >= 14 else 1))
-        if level >= 8:
-            base_feats.append(ASI(["wis", "str"]))
-        if level >= 12:
-            base_feats.append(ASI(["str"]))
-        if level >= 16:
-            base_feats.append(ASI(["str"]))
+        feats: List["sim.feat.Feat"] = []
+        # TODO: Add Origin Feat
+        # TODO: Add Epic Boon
+        feats.extend(
+            cleric_feats(
+                level,
+                asis=[ASI(["wis"]), ASI(["wis", "str"]), ASI(["str"]), ASI(["str"])],
+            )
+        )
+        feats.extend(war_cleric_feats(level, weapon))
+        feats.append(ClericAction())
         super().init(
             level=level,
             stats=[15, 10, 10, 10, 17, 10],
-            base_feats=base_feats,
-            spellcaster=Spellcaster.FULL,
+            base_feats=feats,
             spell_mod="wis",
         )
