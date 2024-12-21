@@ -107,7 +107,29 @@ def safe_cast[T](cls: type[T], obj: Any) -> Optional[T]:
         return None
 
 
-def apply_feats_at_levels[T](level: int, feats: List[T], schedule: List[Tuple[int, T]]):
-    for target, feat in schedule:
+def apply_feats_at_levels[
+    T
+](level: int, feats: List[T], schedule: List[Tuple[int, List[T]]]):
+    for target, new_feats in schedule:
         if level >= target:
-            feats.append(feat)
+            feats.extend(new_feats)
+
+
+# Applies the feats for each Ability Score Increase
+# Can accept a truncated list (such as [ASI(), ASI()])
+def apply_asi_feats[
+    Feat
+](
+    level: int,
+    feats: List[Feat],
+    asis: Optional[List[Feat]],
+    schedule: List[int] = [4, 8, 12, 16, 19],
+):
+    if asis is None:
+        return
+    i = 0
+    for target_level in schedule:
+        if level >= target_level and len(asis) > i:
+            if asis[i] is not None:
+                feats.append(asis[i])
+            i += 1

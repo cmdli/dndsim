@@ -1,8 +1,9 @@
 from typing import Dict, List, Optional, Set
 import math
 
+import sim.bardic_inspiration
 from util.util import prof_bonus
-from feats import Vex, Topple, Graze
+from sim.core_feats import Vex, Topple, Graze
 from sim.events import AttackRollArgs, AttackArgs, AttackResultArgs
 from sim.event_loop import EventLoop
 from util.log import log
@@ -54,7 +55,9 @@ class Character:
         self.ki = sim.resource.Resource(self, short_rest=True)
         self.maneuvers = sim.maneuvers.Maneuvers()
         self.sorcery = sim.resource.Resource(self)
+        self.bardic_inspiration = sim.bardic_inspiration.BardicInspiration(self)
         self.metamagics: Set[str] = set()
+        self.class_levels: Dict[str, int] = dict()
 
         self.feats: Dict[str, "sim.feat.Feat"] = dict()
         for feat in [Vex(), Topple(), Graze()]:
@@ -112,6 +115,11 @@ class Character:
     def has_effect(self, effect: str):
         return effect in self.effects
 
+    def has_class_level(self, class_name: str, level: int):
+        return (
+            class_name in self.class_levels and self.class_levels[class_name] >= level
+        )
+
     def use_bonus(self, source: str):
         if not self.used_bonus:
             log.record(f"Bonus ({source})", 1)
@@ -150,7 +158,6 @@ class Character:
         self.events.emit("short_rest")
 
     def long_rest(self):
-        self.spells.reset()
         self.short_rest()
         self.events.emit("long_rest")
 

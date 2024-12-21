@@ -7,6 +7,7 @@ import sim.target
 
 from sim.spells import School
 from sim.attack import DamageRoll
+from util.util import cantrip_dice
 
 
 class EldritchBlast(sim.spells.Spell):
@@ -25,11 +26,9 @@ class EldritchBlast(sim.spells.Spell):
             character.spell_attack(
                 target=target,
                 spell=self,
-                # TODO: Refactor out the flat damage into the Agonizing Blast feat
                 damage=DamageRoll(
                     source=self.name,
                     dice=[10],
-                    flat_dmg=self.character.mod(self.character.spells.mod),
                 ),
                 is_ranged=True,
             )

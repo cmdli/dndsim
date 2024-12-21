@@ -50,7 +50,7 @@ class GreatWeaponMaster(sim.feat.Feat):
 
 
 class ElvenAccuracy(sim.feat.Feat):
-    def __init__(self, mod: "sim.Stat"):
+    def __init__(self, mod: Literal["dex", "int", "wis", "cha"]):
         self.mod = mod
 
     def apply(self, character):
@@ -167,51 +167,6 @@ class LightWeaponBonusAttack(sim.feat.Feat):
             self.character.weapon_attack(target, self.weapon, tags=["light"])
 
 
-class Vex(sim.feat.Feat):
-    def __init__(self) -> None:
-        self.vexing = False
-
-    def short_rest(self):
-        self.vexing = False
-
-    def attack_roll(self, args):
-        if self.vexing:
-            args.adv = True
-            self.vexing = False
-
-    def attack_result(self, args):
-        weapon = args.attack.weapon
-        if (
-            args.hits()
-            and weapon
-            and weapon.mastery == "Vex"
-            and "Vex" in self.character.masteries
-        ):
-            self.vexing = True
-
-
-class Topple(sim.feat.Feat):
-    def attack_result(self, args):
-        weapon = args.attack.weapon
-        if not weapon or args.misses():
-            return
-        target = args.attack.target
-        if weapon.mastery == "Topple" and "Topple" in self.character.masteries:
-            mod = weapon.mod(self.character)
-            if not target.save(self.character.dc(mod)):
-                target.knock_prone()
-
-
-class Graze(sim.feat.Feat):
-    def attack_result(self, args):
-        weapon = args.attack.weapon
-        if not weapon or not args.misses():
-            return
-        if weapon.mastery == "Graze" and "Graze" in self.character.masteries:
-            mod = weapon.mod(self.character)
-            args.attack.target.damage_source("Graze", self.character.mod(mod))
-
-
 class WeaponMasteries(sim.feat.Feat):
     def __init__(self, masteries: List["sim.weapons.WeaponMastery"]) -> None:
         self.masteries = masteries
@@ -310,3 +265,21 @@ class Piercer(sim.feat.Feat):
     def attack_result(self, args):
         if args.hits() and args.crit and args.attack.weapon.damage_type == "piercing":
             args.add_damage(source="PiercerCrit", dice=[args.attack.weapon.die])
+
+
+class WarCaster(sim.feat.Feat):
+    def __init__(self, mod: Literal["int", "wis", "cha"]):
+        self.mod = mod
+
+    def apply(self, character):
+        super().apply(character)
+        character.increase_stat(self.mod, 1)
+
+
+class SpellSniper(sim.feat.Feat):
+    def __init__(self, mod: Literal["int", "wis", "cha"]):
+        self.mod = mod
+
+    def apply(self, character):
+        super().apply(character)
+        character.increase_stat(self.mod, 1)

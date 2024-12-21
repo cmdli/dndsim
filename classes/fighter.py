@@ -1,6 +1,7 @@
 import random
 from typing import List, Optional
 
+import sim.core_feats
 from util.util import get_magic_weapon
 from feats import (
     GreatWeaponMaster,
@@ -39,6 +40,11 @@ def get_num_attacks(level: int):
         return 2
     else:
         return 1
+
+
+class FighterLevel(sim.core_feats.ClassLevels):
+    def __init__(self, level):
+        super().__init__(name="Fighter", level=level)
 
 
 class StudiedAttacks(sim.feat.Feat):
@@ -203,8 +209,9 @@ def fighter_feats(
 ) -> List["sim.feat.Feat"]:
     feats: List["sim.feat.Feat"] = []
     # Level 1 (Second Wind) is irrelevant
-    feats.append(WeaponMasteries(masteries))
-    feats.append(fighting_style)
+    if level >= 1:
+        feats.append(WeaponMasteries(masteries))
+        feats.append(fighting_style)
     if level >= 2:
         feats.append(ActionSurge(2 if level >= 17 else 1))
     # Level 2 (Tactical Mind) is irrelevant
@@ -216,6 +223,7 @@ def fighter_feats(
     if level >= 13:
         feats.append(StudiedAttacks())
     # Level 20 (Extra Attack 3) is handled in the attack action
+    # TODO: Apply ASI feats
     return feats
 
 

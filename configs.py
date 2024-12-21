@@ -2,7 +2,7 @@ from typing import Set, List
 
 from sim import CharacterConfig
 from classes.monk import Monk
-from classes.barbarian import Barbarian
+from classes.barbarian import BerserkerBarbarian
 from classes.fighter import (
     ChampionFighter,
     PrecisionTrippingFighter,
@@ -17,7 +17,7 @@ from classes.bard import ValorBard
 
 CONFIGS = {
     # Classes
-    "barbarian": CharacterConfig("Barbarian", Barbarian),
+    "barbarian": CharacterConfig("Barbarian", BerserkerBarbarian),
     "fighter": CharacterConfig("Fighter", ChampionFighter),
     "monk": CharacterConfig("Monk", Monk),
     "paladin": CharacterConfig("Paladin", Paladin),
@@ -47,7 +47,6 @@ SHORTCUTS = {
         "rogue",
         "wizard",
         "cleric",
-        "bard",
     ]
 }
 

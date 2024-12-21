@@ -121,6 +121,7 @@ def barbarian_feats(level: int) -> List["sim.feat.Feat"]:
     # Level 18 is irrelevant (until Strength checks or saves matter)
     if level >= 20:
         feats.append(PrimalChampion())
+    # TODO: Apply ASI feats
     return feats
 
 
@@ -162,7 +163,7 @@ class PolearmBarbarian(sim.character.Character):
         )
 
 
-class Barbarian(sim.character.Character):
+class BerserkerBarbarian(sim.character.Character):
     def __init__(self, level: int, **kwargs):
         magic_weapon = get_magic_weapon(level)
         feats: List["sim.feat.Feat"] = []
