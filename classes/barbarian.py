@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Optional
 
-from util.util import get_magic_weapon, apply_feats_at_levels
+import sim.core_feats
+from util.util import get_magic_weapon, apply_asi_feats
 from feats import (
     ASI,
     GreatWeaponMaster,
@@ -15,6 +16,11 @@ from weapons import Glaive, Greatsword, GlaiveButt
 import sim.feat
 import sim.character
 import sim.weapons
+
+
+class BarbarianLevel(sim.core_feats.ClassLevels):
+    def __init__(self, level: int):
+        super().__init__(name="Barbarian", level=level)
 
 
 class Frenzy(sim.feat.Feat):
@@ -103,11 +109,15 @@ def rage_damage(level: int):
     return 2
 
 
-def barbarian_feats(level: int) -> List["sim.feat.Feat"]:
+def barbarian_feats(
+    level: int, asis: Optional[List["sim.feat.Feat"]] = None
+) -> List["sim.feat.Feat"]:
     rage_dmg = rage_damage(level)
     feats: List["sim.feat.Feat"] = []
-    feats.append(WeaponMasteries(["Graze", "Topple"]))
-    feats.append(Rage(dmg=rage_dmg))
+    if level >= 1:
+        feats.append(BarbarianLevel(level))
+        feats.append(WeaponMasteries(["Graze", "Topple"]))
+        feats.append(Rage(dmg=rage_dmg))
     # Level 1 (Unarmored Defense) is irrelevant
     if level >= 2:
         feats.append(RecklessAttack())
@@ -121,7 +131,7 @@ def barbarian_feats(level: int) -> List["sim.feat.Feat"]:
     # Level 18 is irrelevant (until Strength checks or saves matter)
     if level >= 20:
         feats.append(PrimalChampion())
-    # TODO: Apply ASI feats
+    apply_asi_feats(level, feats, asis)
     return feats
 
 
@@ -143,19 +153,20 @@ class PolearmBarbarian(sim.character.Character):
         feats: List["sim.feat.Feat"] = []
         weapon = Glaive(magic_bonus=magic_weapon)
         feats.append(AttackAction(attacks=[weapon, weapon] if level >= 5 else [weapon]))
-        feats.extend(barbarian_feats(level))
+        feats.extend(
+            barbarian_feats(
+                level,
+                asis=[
+                    GreatWeaponMaster(weapon),
+                    PolearmMaster(GlaiveButt(magic_bonus=magic_weapon)),
+                    ASI(["dex", "str"]),
+                    ASI(["dex"]),
+                    IrresistibleOffense("str"),
+                ],
+            )
+        )
         feats.extend(berserker_feats(level, weapon))
         feats.append(SavageAttacker())
-        if level >= 4:
-            feats.append(GreatWeaponMaster(weapon))
-        if level >= 8:
-            feats.append(PolearmMaster(GlaiveButt(magic_bonus=magic_weapon)))
-        if level >= 12:
-            feats.append(ASI(["dex", "str"]))
-        if level >= 16:
-            feats.append(ASI(["dex"]))
-        if level >= 19:
-            feats.append(IrresistibleOffense("str"))
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 10],
@@ -169,19 +180,20 @@ class BerserkerBarbarian(sim.character.Character):
         feats: List["sim.feat.Feat"] = []
         weapon = Greatsword(magic_bonus=magic_weapon)
         feats.append(AttackAction(attacks=[weapon, weapon] if level >= 5 else [weapon]))
-        feats.extend(barbarian_feats(level))
+        feats.extend(
+            barbarian_feats(
+                level,
+                asis=[
+                    GreatWeaponMaster(weapon),
+                    ASI(["str"]),
+                    ASI(["dex"]),
+                    ASI(["dex"]),
+                    IrresistibleOffense("str"),
+                ],
+            )
+        )
         feats.extend(berserker_feats(level, weapon))
         feats.append(SavageAttacker())
-        if level >= 4:
-            feats.append(GreatWeaponMaster(weapon))
-        if level >= 8:
-            feats.append(ASI(["str"]))
-        if level >= 12:
-            feats.append(ASI(["dex"]))
-        if level >= 16:
-            feats.append(ASI(["dex"]))
-        if level >= 19:
-            feats.append(IrresistibleOffense("str"))
         super().init(
             level=level,
             stats=[17, 10, 10, 10, 10, 10],
