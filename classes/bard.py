@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from feats import (
     ASI,
@@ -66,13 +66,13 @@ class SuperiorInspiration(sim.feat.Feat):
     pass
 
 
-def bard_feats(level: int, asis: List["sim.feat.Feat"] = None) -> List["sim.feat.Feat"]:
-    ASIs = ASIs or []
+def bard_feats(
+    level: int, asis: Optional[List["sim.feat.Feat"]] = None
+) -> List["sim.feat.Feat"]:
     feats: List["sim.feat.Feat"] = []
     if level >= 1:
         feats.append(BardLevel(level))
         feats.append(BardicInspiration(level))
-    # TODO
     # Level 2 (Expertise) is irrelevant
     # Level 2 (Jack of all Trades) is irrelevant
     if level >= 5:
@@ -82,7 +82,7 @@ def bard_feats(level: int, asis: List["sim.feat.Feat"] = None) -> List["sim.feat
     if level >= 18:
         feats.append(SuperiorInspiration())
     # TODO: Level 20 (Words of Creation)
-    apply_asi_feats(feats, level, asis)
+    apply_asi_feats(level=level, feats=feats, asis=asis)
     return feats
 
 
@@ -136,13 +136,13 @@ class ValorBardBonusAttack(sim.feat.Feat):
 class ValorBard(sim.character.Character):
     def __init__(self, level: int, **kwargs) -> None:
         magic_weapon = get_magic_weapon(level)
-        base_feats: List["sim.feat.Feat"] = []
+        feats: List["sim.feat.Feat"] = []
         weapon = Shortsword(magic_bonus=magic_weapon)
         scimitar = Scimitar(magic_bonus=magic_weapon)
         attacks: List["sim.weapons.Weapon"] = []
         if level >= 6:
             attacks = [weapon]
-        base_feats.append(
+        feats.append(
             TrueStrikeAction(
                 weapon,
                 attacks=attacks,
@@ -150,21 +150,25 @@ class ValorBard(sim.character.Character):
                 use_holy_weapon=level >= 10,
             )
         )
-        if level >= 4:
-            base_feats.append(ASI(["cha"]))
-        if level >= 8:
-            base_feats.append(ASI(["cha", "dex"]))
-        if level >= 12:
-            base_feats.append(ASI(["dex"]))
+        feats.extend(
+            bard_feats(
+                level=level,
+                asis=[
+                    ASI(["cha"]),
+                    ASI(["cha", "dex"]),
+                    ASI(["dex"]),
+                    ASI(["dex", "wis"]),
+                ],
+            )
+        )
+        feats.extend(valor_feats(level))
         if level >= 14:
-            base_feats.append(ValorBardBonusAttack(weapon))
-        if level >= 16:
-            base_feats.append(ASI(["dex", "wis"]))
+            # TODO: Handle this in the Valor Bard feats
+            feats.append(ValorBardBonusAttack(weapon))
         super().init(
             level=level,
             stats=[10, 16, 10, 10, 10, 17],
-            base_feats=base_feats,
-            spellcaster=Spellcaster.FULL,
+            base_feats=feats,
             spell_mod="cha",
         )
 
