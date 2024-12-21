@@ -53,6 +53,8 @@ class Character:
         self.used_bonus = False
         self.ki = sim.resource.Resource(self, short_rest=True)
         self.maneuvers = sim.maneuvers.Maneuvers()
+        self.sorcery = sim.resource.Resource(self)
+        self.metamagics: Set[str] = set()
 
         self.feats: Dict[str, "sim.feat.Feat"] = dict()
         for feat in [Vex(), Topple(), Graze()]:
