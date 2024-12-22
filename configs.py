@@ -1,7 +1,7 @@
 from typing import Set, List
 
 from sim import CharacterConfig
-from classes.monk import Monk
+from classes.monk import OpenHandMonk
 from classes.barbarian import BerserkerBarbarian
 from classes.fighter import (
     ChampionFighter,
@@ -19,7 +19,7 @@ CONFIGS = {
     # Classes
     "barbarian": CharacterConfig("Barbarian", BerserkerBarbarian),
     "fighter": CharacterConfig("Fighter", ChampionFighter),
-    "monk": CharacterConfig("Monk", Monk),
+    "monk": CharacterConfig("Monk", OpenHandMonk),
     "paladin": CharacterConfig("Paladin", Paladin),
     "ranger": CharacterConfig("Ranger", GloomstalkerRanger),
     "rogue": CharacterConfig("Rogue", AssassinRogue),

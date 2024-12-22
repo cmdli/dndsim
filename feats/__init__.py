@@ -283,3 +283,28 @@ class SpellSniper(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
         character.increase_stat(self.mod, 1)
+
+
+class TavernBrawler(sim.feat.Feat):
+    def damage_roll(self, args):
+        for i in range(len(args.damage.rolls)):
+            if args.damage.rolls[i] == 1:
+                args.damage.rolls[i] = roll_dice(1, args.damage.dice[i])
+
+
+class Grappler(sim.feat.Feat):
+    def __init__(self, mod: Literal["str", "dex"]):
+        self.mod = mod
+
+    def apply(self, character):
+        super().apply(character)
+        character.increase_stat(self.mod, 1)
+
+    def attack_result(self, args):
+        # TODO: Check that it is an unarmed strike here
+        if args.hits() and args.attack.has_tag("main_action"):
+            args.attack.target.grapple()
+
+    def attack_roll(self, args):
+        if args.attack.target.grappled:
+            args.adv = True

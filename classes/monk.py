@@ -1,13 +1,16 @@
-from typing import List
+from typing import List, Optional
 
-from util.util import get_magic_weapon, roll_dice
+from util.util import get_magic_weapon, apply_asi_feats
 from feats import (
     ASI,
     AttackAction,
     IrresistibleOffense,
     WeaponMaster,
+    TavernBrawler,
+    Grappler,
 )
 
+import sim.core_feats
 import sim.feat
 import sim.character
 import sim.target
@@ -23,6 +26,11 @@ def martial_arts_die(level: int):
         return 8
     else:
         return 6
+
+
+class MonkLevel(sim.core_feats.ClassLevels):
+    def __init__(self, level: int):
+        super().__init__(name="Monk", level=level)
 
 
 class BodyAndMind(sim.feat.Feat):
@@ -55,23 +63,9 @@ class OpenHandTechnique(sim.feat.Feat):
                 args.attack.target.knock_prone()
 
 
-class Grappler(sim.feat.Feat):
-    def apply(self, character):
-        super().apply(character)
-        character.increase_stat("dex", 1)
-
-    def attack_result(self, args):
-        if args.hits() and args.attack.has_tag("main_action"):
-            args.attack.target.grapple()
-
-    def attack_roll(self, args):
-        if args.attack.target.grappled:
-            args.adv = True
-
-
 class StunningStrike(sim.feat.Feat):
-    def __init__(self, weapon_die, avoid_on_grapple: bool = False):
-        self.weapon_die = weapon_die
+    def __init__(self, level: int, avoid_on_grapple: bool = False):
+        self.weapon_die = martial_arts_die(level)
         self.stuns: List[int] = []
         self.avoid_on_grapple = avoid_on_grapple
 
@@ -105,94 +99,103 @@ class Ki(sim.feat.Feat):
 
 
 class Fists(sim.weapons.Weapon):
-    def __init__(self, weapon_die, bonus=0):
+    def __init__(self, weapon_die, **kwargs):
         super().__init__(
             name="Fists",
             num_dice=1,
             die=weapon_die,
-            magic_bonus=bonus,
             tags=["finesse"],
+            **kwargs,
         )
 
 
-class MagicInitiateHuntersMark(sim.feat.Feat):
-    def __init__(self) -> None:
-        self.enabled = False
-        self.used = False
-
-    def long_rest(self):
-        self.used = False
-
-    def short_rest(self):
-        self.enabled = False
-
-    def before_action(self, target: "sim.target.Target"):
-        if not self.used and self.character.use_bonus("HuntersMark"):
-            self.used = True
-            self.enabled = True
-
-    def attack_result(self, args):
-        if args.hits() and self.enabled:
-            args.add_damage(source="HuntersMark", dice=[6])
-
-
-class TavernBrawler(sim.feat.Feat):
-    def __init__(self, die: int) -> None:
-        self.die = die
-
-    def damage_roll(self, args):
-        for i in range(len(args.damage.rolls)):
-            if args.damage.rolls[i] == 1:
-                args.damage.rolls[i] = roll_dice(1, args.damage.dice[i])
+def monk_feats(
+    level: int, asis: Optional[List["sim.feat.Feat"]]
+) -> List["sim.feat.Feat"]:
+    feats: List["sim.feat.Feat"] = []
+    if level >= 1:
+        feats.append(MonkLevel(level))
+    # Level 1 (Unarmored Defense) is irrelevant
+    if level >= 2:
+        feats.append(Ki(level))
+    # TODO: Level 2 (Uncanny Metabolism)
+    # Level 3 (Deflect Attacks) is irrelevant/ignored
+    # Level 4 (Slow Fall) is irrelevant
+    if level >= 5:
+        feats.append(StunningStrike(level, avoid_on_grapple=True))
+    # Level 6 (Empowered Strikes) is irrelevant
+    # Level 7 (Evasion) is irrelevant
+    # Level 9 (Acrobatic Movement) is irrelevant
+    # Level 10 (Self-Restoration) is irrelevant
+    # Level 13 (Deflect Energy) is irrelevant
+    # Level 14 (Disciplined Survivor) is irrelevant
+    # TODO: Level 15 (Perfect Focus)
+    # Level 18 (Superior Defense) is irrelevant
+    if level >= 20:
+        feats.append(BodyAndMind())
+    apply_asi_feats(level=level, feats=feats, asis=asis)
+    return feats
 
 
-class Monk(sim.character.Character):
-    def __init__(
-        self, level, use_nick: bool = False, use_grappler: bool = True, **kwargs
-    ):
+def open_hand_monk_feats(level: int) -> List["sim.feat.Feat"]:
+    feats: List["sim.feat.Feat"] = []
+    if level >= 3:
+        feats.append(OpenHandTechnique())
+    # Level 6 (Wholeness of Body) is irrelevant
+    # Level 11 (Fleet Step) is irrelevant
+    # TODO: Level 17 (Quivering Palm)
+    return feats
+
+
+class DefaultMonkAction(sim.feat.Feat):
+    def __init__(self, level: int, weapon: "sim.weapons.Weapon"):
+        self.level = level
+        self.weapon = weapon
+
+    def action(self, target):
+        num_attacks = 1
+        if self.character.has_class_level("Monk", 5):
+            num_attacks = 2
+        for i in range(num_attacks):
+            self.character.weapon_attack(target, self.weapon, tags=["main_action"])
+        if (
+            self.character.has_class_level("Monk", 2)
+            and self.character.ki.has()
+            and self.character.use_bonus("FlurryOfBlows")
+        ):
+            self.character.ki.use()
+            num_attacks = 2
+            if self.character.has_class_level("Monk", 10):
+                num_attacks = 3
+            for _ in range(num_attacks):
+                self.character.weapon_attack(target, self.weapon, tags=["flurry"])
+        if self.character.use_bonus("BonusAttack"):
+            self.character.weapon_attack(target, self.weapon)
+
+
+class OpenHandMonk(sim.character.Character):
+    def __init__(self, level: int, **kwargs):
         magic_weapon = get_magic_weapon(level)
-        base_feats: List[sim.feat.Feat] = []
+        feats: List[sim.feat.Feat] = []
         weapon_die = martial_arts_die(level)
-        base_feats.append(TavernBrawler(weapon_die))
-        fists = Fists(weapon_die, bonus=magic_weapon)
-        weapon = fists
-        nick_attacks = []
-        if use_nick and level >= 8:
-            # Using fists here to simulate a monk weapon
-            nick_attacks = [fists]
-        num_attacks = 2 if level >= 5 else 1
-        base_feats.append(
-            AttackAction(attacks=(num_attacks * [weapon]), nick_attacks=nick_attacks)
+        fists = Fists(weapon_die, magic_bonus=magic_weapon)
+        feats.append(TavernBrawler())
+        feats.extend(
+            monk_feats(
+                level=level,
+                asis=[
+                    Grappler("dex"),
+                    ASI(["dex"]),
+                    ASI(["wis"]),
+                    ASI(["wis"]),
+                    IrresistibleOffense("dex"),
+                ],
+            )
         )
-        base_feats.append(Ki(level if level >= 2 else 0))
-        if level >= 10:
-            bonus_attacks = 3
-        elif level >= 2:
-            bonus_attacks = 2
-        else:
-            bonus_attacks = 0
-        base_feats.append(FlurryOfBlows(num_attacks=bonus_attacks, weapon=fists))
-        if level >= 3:
-            base_feats.append(OpenHandTechnique())
-        if level >= 4:
-            if use_nick:
-                base_feats.append(WeaponMaster("dex", "Nick"))
-            else:
-                base_feats.append(Grappler() if use_grappler else ASI(["dex", "con"]))
-        if level >= 5:
-            base_feats.append(StunningStrike(weapon_die, avoid_on_grapple=not use_nick))
-        if level >= 8:
-            base_feats.append(ASI(["dex"]))
-        if level >= 12:
-            base_feats.append(ASI(["wis"]))
-        if level >= 16:
-            base_feats.append(ASI(["wis"]))
-        if level >= 19:
-            base_feats.append(IrresistibleOffense("dex"))
-        if level >= 20:
-            base_feats.append(BodyAndMind())
+        feats.extend(open_hand_monk_feats(level))
+        feats.append(DefaultMonkAction(level, fists))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
-            base_feats=base_feats,
+            base_feats=feats,
         )

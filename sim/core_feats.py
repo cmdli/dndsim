@@ -17,6 +17,7 @@ class ClassLevels(sim.feat.Feat):
 
     def apply(self, character):
         super().apply(character)
+        character.add_class_level(self.class_name, self.level)
         if self.spellcaster is not None:
             character.spells.add_spellcaster_level(self.spellcaster, self.level)
 

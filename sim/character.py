@@ -120,6 +120,9 @@ class Character:
             class_name in self.class_levels and self.class_levels[class_name] >= level
         )
 
+    def add_class_level(self, class_name: str, level: int):
+        self.class_levels[class_name] = level
+
     def use_bonus(self, source: str):
         if not self.used_bonus:
             log.record(f"Bonus ({source})", 1)
