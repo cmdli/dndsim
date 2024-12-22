@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from util.util import get_magic_weapon, apply_asi_feats
 from sim.spells import Spellcaster
-from feats import ASI
+from feats import ASI, ChannelDivinity
 from spells.cleric import SpiritGuardians, TollTheDead, InflictWounds, GuardianOfFaith
 from spells.summons import SummonCelestial
 from weapons import Warhammer
@@ -73,12 +73,17 @@ def cleric_feats(
     if level >= 1:
         feats.append(ClericLevel(level))
     # Level 1 (Divine Order) is irrelevant
-    # TODO: Level 2 (Channel Divinity)
+    if level >= 2:
+        feats.append(ChannelDivinity(uses=2))
     # Level 5 (Sear Undead) is irrelevant
+    if level >= 6:
+        feats.append(ChannelDivinity(uses=1))
     if level >= 7:
         feats.append(BlessedStrikes(2 if level >= 14 else 1))
     # TODO: Level 7 (Blessed Strikes) for Potent Spellcasting
     # TODO: Level 10 (Divine Intervention)
+    if level >= 18:
+        feats.append(ChannelDivinity(uses=1))
     # TODO: Level 20 (Divine Intervention)
     apply_asi_feats(level=level, feats=feats, asis=asis)
     return feats

@@ -9,7 +9,7 @@ from classes.fighter import (
 )
 from classes.rogue import AssassinRogue, ArcaneTricksterRogue
 from classes.wizard import Wizard
-from classes.paladin import Paladin
+from classes.paladin import DevotionPaladin
 from classes.ranger import GloomstalkerRanger, BeastMasterRanger
 from classes.cleric import Cleric
 from classes.au import AssaultUnit
@@ -20,7 +20,7 @@ CONFIGS = {
     "barbarian": CharacterConfig("Barbarian", BerserkerBarbarian),
     "fighter": CharacterConfig("Fighter", ChampionFighter),
     "monk": CharacterConfig("Monk", OpenHandMonk),
-    "paladin": CharacterConfig("Paladin", Paladin),
+    "paladin": CharacterConfig("Paladin", DevotionPaladin),
     "ranger": CharacterConfig("Ranger", GloomstalkerRanger),
     "rogue": CharacterConfig("Rogue", AssassinRogue),
     "wizard": CharacterConfig("Wizard", Wizard),

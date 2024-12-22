@@ -56,6 +56,7 @@ class Character:
         self.maneuvers = sim.maneuvers.Maneuvers()
         self.sorcery = sim.resource.Resource(self)
         self.bardic_inspiration = sim.bardic_inspiration.BardicInspiration(self)
+        self.channel_divinity = sim.resource.Resource(self, short_rest=True)
         self.metamagics: Set[str] = set()
         self.class_levels: Dict[str, int] = dict()
 

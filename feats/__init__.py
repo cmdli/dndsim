@@ -308,3 +308,12 @@ class Grappler(sim.feat.Feat):
     def attack_roll(self, args):
         if args.attack.target.grappled:
             args.adv = True
+
+
+class ChannelDivinity(sim.feat.Feat):
+    def __init__(self, uses: int):
+        self.uses = uses
+
+    def apply(self, character):
+        super().apply(character)
+        character.channel_divinity.increase_max(self.uses)
