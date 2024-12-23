@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from util.util import (
+    apply_asi_feats,
     get_magic_weapon,
     safe_cast,
 )
@@ -23,6 +24,11 @@ import sim.attack
 import sim.feat
 import sim.character
 import sim.target
+
+
+class WizardLevel(sim.core_feats.ClassLevels):
+    def __init__(self, level: int):
+        super().__init__(name="Wizard", level=level, spellcaster=Spellcaster.FULL)
 
 
 class WandOfTheWarMage(sim.feat.Feat):
@@ -84,6 +90,33 @@ class Overchannel(sim.feat.Feat):
                 args.damage.rolls[i] = args.damage.dice[i]
 
 
+def wizard_feats(
+    level: int, asis: Optional[List["sim.feat.Feat"]] = None
+) -> List["sim.feat.Feat"]:
+    feats: List["sim.feat.Feat"] = []
+    if level >= 1:
+        feats.append(WizardLevel(level))
+    # Level 1 (Ritual Adept) is irrelevant
+    # TODO: Level 1 (Arcane Recovery)
+    # Level 5 (Memorize Spell) is irrelevant
+    # TODO: Level 18 (Spell Mastery)
+    # TODO: Level 20 (Signature Spells)
+    apply_asi_feats(level, feats, asis)
+    return feats
+
+
+def evocation_wizard_feats(level: int) -> List["sim.feat.Feat"]:
+    feats: List["sim.feat.Feat"] = []
+    if level >= 3:
+        feats.append(PotentCantrip())
+    # Level 6 (Sculpt Spells) is irrelevant
+    if level >= 10:
+        feats.append(EmpoweredEvocation())
+    if level >= 14:
+        feats.append(Overchannel())
+    return feats
+
+
 class WizardAction(sim.feat.Feat):
     def action(self, target: "sim.target.Target"):
         slot = self.character.spells.highest_slot()
@@ -110,26 +143,28 @@ class WizardAction(sim.feat.Feat):
             self.character.spells.cast(spell, target)
 
 
-class Wizard(sim.character.Character):
+class EvocationWizard(sim.character.Character):
     def __init__(self, level: int) -> None:
         magic_weapon = get_magic_weapon(level)
         feats: List["sim.feat.Feat"] = []
         feats.append(WizardAction())
         feats.append(WandOfTheWarMage(magic_weapon))
-        if level >= 3:
-            feats.append(PotentCantrip())
-        if level >= 4:
-            feats.append(ASI(["int"]))
-        if level >= 8:
-            feats.append(ASI(["int", "wis"]))
-        if level >= 10:
-            feats.append(EmpoweredEvocation())
-        if level >= 14:
-            feats.append(Overchannel())
+        feats.extend(
+            wizard_feats(
+                level,
+                asis=[
+                    ASI(["int"]),
+                    ASI(["int", "wis"]),
+                    ASI(),
+                    ASI(),
+                    ASI(),
+                ],
+            )
+        )
+        feats.extend(evocation_wizard_feats(level))
         super().init(
             level=level,
             stats=[10, 10, 10, 17, 10, 10],
             base_feats=feats,
-            spellcaster=Spellcaster.FULL,
             spell_mod="int",
         )

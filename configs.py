@@ -8,7 +8,8 @@ from classes.fighter import (
     PrecisionTrippingFighter,
 )
 from classes.rogue import AssassinRogue, ArcaneTricksterRogue
-from classes.wizard import Wizard
+from classes.sorcerer import DraconicSorcerer
+from classes.wizard import EvocationWizard
 from classes.paladin import DevotionPaladin
 from classes.ranger import GloomstalkerRanger, BeastMasterRanger
 from classes.cleric import Cleric
@@ -23,7 +24,7 @@ CONFIGS = {
     "paladin": CharacterConfig("Paladin", DevotionPaladin),
     "ranger": CharacterConfig("Ranger", GloomstalkerRanger),
     "rogue": CharacterConfig("Rogue", AssassinRogue),
-    "wizard": CharacterConfig("Wizard", Wizard),
+    "wizard": CharacterConfig("Wizard", EvocationWizard),
     "cleric": CharacterConfig("Cleric", Cleric),
     "bard": CharacterConfig("Bard", ValorBard),
     # TODO: Warlock
@@ -35,6 +36,7 @@ CONFIGS = {
     "beastmaster": CharacterConfig("Beastmaster Ranger", BeastMasterRanger),
     # WIP
     "arcane_trickster": CharacterConfig("Arcane Trickster", ArcaneTricksterRogue),
+    "sorcerer": CharacterConfig("Sorcerer", DraconicSorcerer),
     # Misc
     "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
 }
