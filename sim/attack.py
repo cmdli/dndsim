@@ -28,6 +28,9 @@ class DamageRoll:
     def total(self):
         return self.flat_dmg + sum(self.rolls)
 
+    def reroll(self):
+        self.rolls = [roll_dice(1, die) for die in self.dice]
+
 
 class Attack:
     def __init__(self, name: str) -> None:
