@@ -1,15 +1,22 @@
 import math
-from typing import List
+from typing import List, Optional
 
 from util.util import (
+    apply_asi_feats,
     get_magic_weapon,
     do_roll,
 )
-from feats import ASI, AttackAction, BoomingBlade, WeaponMasteries
+from feats import ASI, AttackAction, IrresistibleOffense, WeaponMasteries
 from weapons import Shortsword, Scimitar, Rapier
 
+import sim.core_feats
 import sim.feat
 import sim.character
+
+
+class RogueLevel(sim.core_feats.ClassLevels):
+    def __init__(self, level: int):
+        super().__init__(name="Rogue", level=level)
 
 
 class SneakAttack(sim.feat.Feat):
@@ -94,66 +101,129 @@ class DeathStrike(sim.feat.Feat):
         self.enabled = False
 
 
+class BoomingBladeAction(sim.feat.Feat):
+    def __init__(
+        self, character: "sim.character.Character", weapon: "sim.weapons.Weapon"
+    ):
+        self.weapon = weapon
+        self.character = character
+
+    def action(self, target):
+        self.character.weapon_attack(
+            target, self.weapon, tags=["main_action", "booming_blade"]
+        )
+
+    def attack_result(self, args):
+        if args.misses() or not args.attack.has_tag("booming_blade"):
+            return
+        if self.character.level >= 17:
+            extra_dice = 3
+        elif self.character.level >= 11:
+            extra_dice = 2
+        elif self.character.level >= 5:
+            extra_dice = 1
+        else:
+            return
+        args.add_damage(source="BoomingBlade", dice=extra_dice * [8])
+
+
+def rogue_feats(
+    level: int,
+    masteries: List["sim.weapons.WeaponMastery"],
+    asis: Optional[List["sim.feat.Feat"]] = None,
+):
+    feats: List["sim.feat.Feat"] = []
+    if level >= 1:
+        feats.append(RogueLevel(level))
+        feats.append(SneakAttack(math.ceil(level / 2)))
+        feats.append(WeaponMasteries(masteries))
+    # Level 2 (Cunning Action) is irrelevant for now
+    if level >= 3:
+        feats.append(SteadyAim())
+    # Level 5 (Cunning Strike) is mostly useless for DPR
+    # Level 7 (Evasion) is irrelevant
+    # Level 7 (Reliable Talent) is irrelevant
+    # Level 11 (Improved Cunning Strike) is unused
+    # Level 14 (Devious Strikes) is unused (maybe Knock Out is useful?)
+    # Level 15 (Slippery Mind) is irrelevant
+    # Level 18 (Elusive) is irrelevant
+    if level >= 20:
+        feats.append(StrokeOfLuck())
+    apply_asi_feats(level=level, feats=feats, asis=asis)
+    return feats
+
+
+def assassin_rogue_feats(level: int) -> List["sim.feat.Feat"]:
+    feats: List["sim.feat.Feat"] = []
+    if level >= 3:
+        feats.append(Assassinate(level))
+    # Level 3 (Assassin's Tools) is irrelevant
+    # Level 9 (Infiltration Expertise) is irrelevant
+    # TODO: Level 13 (Envenom Weapons)
+    if level >= 17:
+        feats.append(DeathStrike())
+    return feats
+
+
 class AssassinRogue(sim.character.Character):
     def __init__(self, level: int, booming_blade: bool = False):
         magic_weapon = get_magic_weapon(level)
-        sneak_attack = math.ceil(level / 2)
-        base_feats: List["sim.feat.Feat"] = []
-        base_feats.append(WeaponMasteries(["Vex", "Nick"]))
+        feats: List["sim.feat.Feat"] = []
         if level >= 5 and booming_blade:
             rapier = Rapier(magic_bonus=magic_weapon)
-            base_feats.append(BoomingBlade(self, rapier))
+            feats.append(BoomingBladeAction(self, rapier))
         else:
             shortsword = Shortsword(magic_bonus=magic_weapon)
             scimitar = Scimitar(magic_bonus=magic_weapon)
-            base_feats.append(
-                AttackAction(attacks=[shortsword], nick_attacks=[scimitar])
+            feats.append(AttackAction(attacks=[shortsword], nick_attacks=[scimitar]))
+        feats.extend(
+            rogue_feats(
+                level=level,
+                masteries=["Vex", "Nick"],
+                asis=[
+                    ASI(["dex"]),
+                    ASI(["dex", "wis"]),
+                    ASI(),
+                    ASI(),
+                    IrresistibleOffense("dex"),
+                ],
             )
-        base_feats.append(SneakAttack(sneak_attack))
-        if level >= 3:
-            base_feats.append(SteadyAim())
-            base_feats.append(Assassinate(level))
-        if level >= 4:
-            base_feats.append(ASI(["dex"]))
-        if level >= 8:
-            base_feats.append(ASI(["dex", "wis"]))
-        if level >= 17:
-            base_feats.append(DeathStrike())
-        if level >= 20:
-            base_feats.append(StrokeOfLuck())
+        )
+        feats.extend(assassin_rogue_feats(level))
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 10, 10],
-            base_feats=base_feats,
+            base_feats=feats,
         )
 
 
 class ArcaneTricksterRogue(sim.character.Character):
     def __init__(self, level, **kwargs):
         magic_weapon = get_magic_weapon(level)
-        sneak_attack = math.ceil(level / 2)
-        base_feats = []
-        base_feats.append(WeaponMasteries(["Vex", "Nick"]))
-        base_feats.append(SneakAttack(sneak_attack))
-        if level >= 3:
-            base_feats.append(SteadyAim())
-        if level >= 4:
-            base_feats.append(ASI(["dex"]))
+        feats = []
         if level >= 5:
             rapier = Rapier(magic_bonus=magic_weapon)
-            base_feats.append(BoomingBlade(self, rapier))
+            feats.append(BoomingBladeAction(self, rapier))
         else:
             shortsword = Shortsword(magic_bonus=magic_weapon)
             scimitar = Scimitar(magic_bonus=magic_weapon)
-            base_feats.append(
-                AttackAction(attacks=[shortsword], nick_attacks=[scimitar])
+            feats.append(AttackAction(attacks=[shortsword], nick_attacks=[scimitar]))
+        feats.extend(
+            rogue_feats(
+                level=level,
+                masteries=["Vex", "Nick"],
+                asis=[
+                    ASI(["dex"]),
+                    ASI(["dex", "wis"]),
+                    ASI(),
+                    ASI(),
+                    IrresistibleOffense("dex"),
+                ],
             )
-        if level >= 8:
-            base_feats.append(ASI(["dex", "wis"]))
-        if level >= 20:
-            base_feats.append(StrokeOfLuck())
+        )
+        # TODO: Arcane Trickster feats
         super().init(
             level=level,
             stats=[10, 17, 10, 10, 10, 10],
-            base_feats=base_feats,
+            base_feats=feats,
         )

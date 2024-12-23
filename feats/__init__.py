@@ -124,32 +124,6 @@ class AttackAction(sim.feat.Feat):
             self.character.weapon_attack(target, weapon, tags=["main_action", "light"])
 
 
-class BoomingBlade(sim.feat.Feat):
-    def __init__(
-        self, character: "sim.character.Character", weapon: "sim.weapons.Weapon"
-    ):
-        self.weapon = weapon
-        self.character = character
-
-    def action(self, target):
-        self.character.weapon_attack(
-            target, self.weapon, tags=["main_action", "booming_blade"]
-        )
-
-    def attack_result(self, args):
-        if args.misses() or not args.attack.has_tag("booming_blade"):
-            return
-        if self.character.level >= 17:
-            extra_dice = 3
-        elif self.character.level >= 11:
-            extra_dice = 2
-        elif self.character.level >= 5:
-            extra_dice = 1
-        else:
-            return
-        args.add_damage(source="BoomingBlade", dice=extra_dice * [8])
-
-
 class LightWeaponBonusAttack(sim.feat.Feat):
     def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon

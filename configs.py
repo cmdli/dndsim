@@ -33,7 +33,9 @@ CONFIGS = {
     "battlemaster": CharacterConfig("Battlemaster Fighter", PrecisionTrippingFighter),
     "gloomstalker": CharacterConfig("Gloomstalker Ranger", GloomstalkerRanger),
     "beastmaster": CharacterConfig("Beastmaster Ranger", BeastMasterRanger),
+    # WIP
     "arcane_trickster": CharacterConfig("Arcane Trickster", ArcaneTricksterRogue),
+    # Misc
     "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
 }
 
