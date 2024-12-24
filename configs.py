@@ -14,7 +14,7 @@ from classes.paladin import DevotionPaladin
 from classes.ranger import GloomstalkerRanger, BeastMasterRanger
 from classes.cleric import Cleric
 from classes.au import AssaultUnit
-from classes.bard import ValorBard
+from classes.bard import CMEMulticlass, ValorBard, CMEMulticlass2
 
 CONFIGS = {
     # Classes
@@ -39,6 +39,8 @@ CONFIGS = {
     "sorcerer": CharacterConfig("Sorcerer", DraconicSorcerer),
     # Misc
     "au": CharacterConfig("Assault Unit 2 1", AssaultUnit),
+    "cme_multiclass": CharacterConfig("CME Multiclass", CMEMulticlass),
+    "cme_multiclass2": CharacterConfig("CME Multiclass 2", CMEMulticlass2),
 }
 
 SHORTCUTS = {

@@ -14,6 +14,7 @@ from util.util import get_magic_weapon, apply_asi_feats
 from spells.wizard import TrueStrike
 from spells.paladin import HolyWeapon
 from spells.warlock import EldritchBlast
+from spells.druid import ConjureMinorElementals
 from sim.spells import Spellcaster
 
 import sim.weapons
@@ -41,7 +42,7 @@ class PactHandCrossbow(HandCrossbow):
 
 class BardLevel(sim.core_feats.ClassLevels):
     def __init__(self, level: int):
-        super().__init__(name="bard", level=level, spellcaster=Spellcaster.FULL)
+        super().__init__(name="Bard", level=level, spellcaster=Spellcaster.FULL)
 
 
 class BardicInspiration(sim.feat.Feat):
@@ -178,29 +179,49 @@ class CMEMulticlassAction(sim.feat.Feat):
         self,
         level: int,
         weapon: "sim.weapons.Weapon",
-        nick_weapon: "sim.weapons.Weapon",
+        nick_weapon: Optional["sim.weapons.Weapon"] = None,
     ) -> None:
         self.level = level
         self.weapon = weapon
         self.nick_weapon = nick_weapon
+        self.used_nick = False
+
+    def begin_turn(self, target: "sim.target.Target"):
+        self.used_nick = False
 
     def action(self, target):
+        if (
+            self.character.has_class_level("Bard", 10)
+            and not self.character.spells.is_concentrating()
+        ):
+            slot = self.character.spells.highest_slot()
+            if slot >= 4:
+                self.character.spells.cast(ConjureMinorElementals(slot))
+                return
         if self.character.has_class_level("Bard", 6):
             # Two attacks
             if self.character.has_class_level("Warlock", 1):
-                self.character.spells.cast(EldritchBlast(self.level))
+                self.character.spells.cast(EldritchBlast(self.level), target)
                 self.character.weapon_attack(target, self.weapon)
             else:
-                self.character.weapon_attack(target, self.weapon)
+                self.character.spells.cast(TrueStrike(self.weapon), target)
                 self.character.weapon_attack(target, self.weapon)
         else:
             # One attack
+            if self.character.has_class_level("Warlock", 1):
+                self.character.spells.cast(EldritchBlast(self.level), target)
+            else:
+                self.character.spells.cast(TrueStrike(self.weapon), target)
+        if not self.used_nick and self.nick_weapon is not None:
+            self.used_nick = True
+            self.character.weapon_attack(target, self.nick_weapon)
+        if self.character.has_class_level("Bard", 14):
             self.character.weapon_attack(target, self.weapon)
-        self.character.weapon_attack(target, self.nick_weapon)
 
 
 class CMEMulticlass(sim.character.Character):
     def __init__(self, level: int) -> None:
+        magic_weapon = get_magic_weapon(level)
         feats: List["sim.feat.Feat"] = []
         class_levels = {
             "fighter": 0,
@@ -229,8 +250,8 @@ class CMEMulticlass(sim.character.Character):
             "bard",
             "bard",
         ]
-        for levelup in levelups:
-            class_levels[levelup] += 1
+        for i in range(level):
+            class_levels[levelups[i]] += 1
         feats.extend(
             classes.fighter.fighter_feats(
                 class_levels["fighter"],
@@ -241,15 +262,25 @@ class CMEMulticlass(sim.character.Character):
         feats.extend(
             bard_feats(
                 class_levels["bard"],
-                asis=[WarCaster("cha"), SpellSniper("cha"), ElvenAccuracy("cha")],
+                asis=[
+                    WarCaster("cha"),
+                    SpellSniper("cha"),
+                    ElvenAccuracy("cha"),
+                    ASI(["dex"]),
+                ],
             )
         )
         feats.extend(classes.warlock.warlock_feats(class_levels["warlock"]))
+        feats.append(classes.warlock.AgonizingBlast())
 
-        crossbow = PactHandCrossbow() if class_levels["warlock"] > 0 else HandCrossbow()
-        dagger = Dagger()
+        crossbow = (
+            PactHandCrossbow(magic_bonus=magic_weapon)
+            if class_levels["warlock"] > 0
+            else HandCrossbow(magic_bonus=magic_weapon)
+        )
+        scimitar = Scimitar(magic_bonus=magic_weapon)
         feats.append(
-            CMEMulticlassAction(level=level, weapon=crossbow, nick_weapon=dagger)
+            CMEMulticlassAction(level=level, weapon=crossbow, nick_weapon=scimitar)
         )
         super().init(
             level=level,
