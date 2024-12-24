@@ -6,7 +6,8 @@ from util.util import (
     get_magic_weapon,
     do_roll,
 )
-from feats import ASI, AttackAction, IrresistibleOffense, WeaponMasteries
+from feats.epic_boons import IrresistibleOffense
+from feats import ASI, AttackAction, WeaponMasteries
 from weapons import Shortsword, Scimitar, Rapier
 
 import sim.core_feats

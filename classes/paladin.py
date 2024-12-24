@@ -2,14 +2,13 @@ from typing import List, Optional
 
 import sim.core_feats
 from util.util import get_magic_weapon, apply_asi_feats
+from feats.fighting_style import TwoWeaponFighting, GreatWeaponFighting
+from feats.epic_boons import IrresistibleOffense
 from feats import (
     ASI,
     AttackAction,
     GreatWeaponMaster,
-    TwoWeaponFighting,
-    GreatWeaponFighting,
     WeaponMasteries,
-    IrresistibleOffense,
     ChannelDivinity,
 )
 from weapons import Greatsword, Shortsword, Scimitar
@@ -112,8 +111,8 @@ class DevotionPaladin(sim.character.Character):
         feats: List["sim.feat.Feat"] = []
         feats.append(DivineFavorFeat())
         if use_twf:
-            masteries = ["Vex", "Nick"]
-            fighting_style = TwoWeaponFighting()
+            masteries: List["sim.weapons.WeaponMastery"] = ["Vex", "Nick"]
+            fighting_style: "sim.feat.Feat" = TwoWeaponFighting()
             weapon: "sim.weapons.Weapon" = Shortsword(magic_bonus=magic_weapon)
             nick_attacks = [Scimitar(magic_bonus=magic_weapon)]
         else:

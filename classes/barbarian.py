@@ -2,13 +2,13 @@ from typing import List, Optional
 
 import sim.core_feats
 from util.util import get_magic_weapon, apply_asi_feats
+from feats.epic_boons import IrresistibleOffense
+from feats.origin import SavageAttacker
 from feats import (
     ASI,
     GreatWeaponMaster,
     PolearmMaster,
     AttackAction,
-    IrresistibleOffense,
-    SavageAttacker,
     WeaponMasteries,
 )
 from weapons import Glaive, Greatsword, GlaiveButt

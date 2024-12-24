@@ -1,12 +1,10 @@
 from typing import List, Optional
 
 from util.util import get_magic_weapon, apply_asi_feats
+from feats.epic_boons import IrresistibleOffense
+from feats.origin import TavernBrawler
 from feats import (
     ASI,
-    AttackAction,
-    IrresistibleOffense,
-    WeaponMaster,
-    TavernBrawler,
     Grappler,
 )
 

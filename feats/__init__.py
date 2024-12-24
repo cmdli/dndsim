@@ -1,7 +1,6 @@
 from typing import List, Literal
 
 from util.util import roll_dice
-from util.log import log
 
 import sim.character
 import sim.feat
@@ -66,28 +65,6 @@ class ElvenAccuracy(sim.feat.Feat):
                 args.roll2 = roll
 
 
-class Archery(sim.feat.Feat):
-    def attack_roll(self, args):
-        weapon = args.attack.weapon
-        if weapon and weapon.has_tag("ranged"):
-            args.situational_bonus += 2
-
-
-class TwoWeaponFighting(sim.feat.Feat):
-    def attack_roll(self, args):
-        if args.attack.has_tag("light"):
-            args.attack.remove_tag("light")
-
-
-class GreatWeaponFighting(sim.feat.Feat):
-    def damage_roll(self, args):
-        weapon = args.attack.weapon if args.attack and args.attack.weapon else None
-        if weapon and weapon.has_tag("twohanded"):
-            for i in range(len(args.damage.rolls)):
-                if args.damage.rolls[i] == 1 or args.damage.rolls[i] == 2:
-                    args.damage.rolls[i] = 3
-
-
 class CrossbowExpert(sim.feat.Feat):
     def __init__(self, weapon: "sim.weapons.Weapon") -> None:
         self.weapon = weapon
@@ -150,22 +127,6 @@ class WeaponMasteries(sim.feat.Feat):
         character.masteries.update(self.masteries)
 
 
-class IrresistibleOffense(sim.feat.Feat):
-    def __init__(self, mod: Literal["str", "dex"]) -> None:
-        self.mod = mod
-
-    def apply(self, character):
-        super().apply(character)
-        character.increase_stat_max(self.mod, 1)
-        character.increase_stat(self.mod, 1)
-
-    def attack_result(self, args):
-        if args.hits() and args.roll == 20:
-            args.add_damage(
-                source="IrresistibleOffense", damage=self.character.stat(self.mod)
-            )
-
-
 class WeaponMaster(sim.feat.Feat):
     def __init__(
         self, mod: Literal["str", "dex"], mastery: "sim.weapons.WeaponMastery"
@@ -193,22 +154,6 @@ class DualWielder(sim.feat.Feat):
     def after_action(self, target):
         if self.character.use_bonus("DualWielder"):
             self.character.weapon_attack(target, self.weapon, tags=["light"])
-
-
-class SavageAttacker(sim.feat.Feat):
-    def __init__(self) -> None:
-        self.used = False
-
-    def begin_turn(self, target):
-        self.used = False
-
-    def damage_roll(self, args):
-        if self.used or not args.attack.weapon:
-            return
-        self.used = True
-        new_rolls = [roll_dice(1, die) for die in args.damage.dice]
-        if sum(new_rolls) > sum(args.damage.rolls):
-            args.damage.rolls = new_rolls
 
 
 class Piercer(sim.feat.Feat):
@@ -257,13 +202,6 @@ class SpellSniper(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
         character.increase_stat(self.mod, 1)
-
-
-class TavernBrawler(sim.feat.Feat):
-    def damage_roll(self, args):
-        for i in range(len(args.damage.rolls)):
-            if args.damage.rolls[i] == 1:
-                args.damage.rolls[i] = roll_dice(1, args.damage.dice[i])
 
 
 class Grappler(sim.feat.Feat):

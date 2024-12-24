@@ -6,9 +6,8 @@ from feats import (
     WarCaster,
     SpellSniper,
     ElvenAccuracy,
-    Archery,
 )
-import sim.core_feats
+from feats.fighting_style import Archery
 from weapons import Shortsword, Scimitar, HandCrossbow, Dagger
 from util.util import get_magic_weapon, apply_asi_feats
 from spells.wizard import TrueStrike
@@ -17,6 +16,7 @@ from spells.warlock import EldritchBlast
 from spells.druid import ConjureMinorElementals
 from sim.spells import Spellcaster
 
+import sim.core_feats
 import sim.weapons
 import sim.feat
 import sim.character

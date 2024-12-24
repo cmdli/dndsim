@@ -3,14 +3,13 @@ from typing import List, override, Optional
 import sim.core_feats
 from sim.events import DamageRollArgs
 from util.util import get_magic_weapon, apply_asi_feats
+from feats.epic_boons import IrresistibleOffense
+from feats.fighting_style import TwoWeaponFighting, Archery
 from feats import (
     ASI,
-    Archery,
     CrossbowExpert,
     DualWielder,
-    TwoWeaponFighting,
     WeaponMasteries,
-    IrresistibleOffense,
     LightWeaponBonusAttack,
 )
 from weapons import HandCrossbow, Shortsword, Scimitar, Rapier
@@ -179,14 +178,13 @@ class GloomstalkerAction(sim.feat.Feat):
 
 
 class GloomstalkerRanger(sim.character.Character):
-    def __init__(self, level, **kwargs):
+    def __init__(self, level: int):
         magic_weapon = get_magic_weapon(level)
         feats: List["sim.feat.Feat"] = []
-        weapon = HandCrossbow(magic_bonus=magic_weapon)
+        weapon: "sim.weapons.Weapon" = HandCrossbow(magic_bonus=magic_weapon)
+        attacks: List["sim.weapons.Weapon"] = [weapon]
         if level >= 5:
             attacks = 2 * [weapon]
-        else:
-            attacks = [weapon]
         feats.append(GloomstalkerAction(attacks=attacks, summon_fey_threshold=4))
         feats.extend(
             ranger_feats(
@@ -265,7 +263,7 @@ class BeastMasterAction(sim.feat.Feat):
         self.shortsword = Shortsword(magic_bonus=magic_bonus)
         self.scimitar = Scimitar(magic_bonus=magic_bonus)
         if level >= 4:
-            self.main_hand = Rapier(magic_bonus=magic_bonus)
+            self.main_hand: "sim.weapons.Weapon" = Rapier(magic_bonus=magic_bonus)
         else:
             self.main_hand = Shortsword(magic_bonus=magic_bonus)
 
@@ -305,7 +303,7 @@ def beast_master_ranger_feats(level: int) -> List["sim.feat.Feat"]:
 
 
 class BeastMasterRanger(sim.character.Character):
-    def __init__(self, level, **kwargs):
+    def __init__(self, level: int):
         magic_weapon = get_magic_weapon(level)
         feats: List["sim.feat.Feat"] = []
         beast = PrimalCompanion(level, ranger=self)

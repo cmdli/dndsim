@@ -1,11 +1,12 @@
 from sim.character import Character
 
+import sim.event_loop
 import sim.spells
 import sim.target
 import sim.events
 
 
-class ConjureMinorElementals(sim.spells.Spell):
+class ConjureMinorElementals(sim.event_loop.Listener, sim.spells.Spell):
     def __init__(self, slot: int):
         super().__init__(name="ConjureMinorElementals", slot=slot, concentration=True)
         self.dice = (2 * (slot - 3)) * [8]
