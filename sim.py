@@ -2,7 +2,7 @@ import csv
 import multiprocessing.pool
 import click
 import prettytable
-from typing import Set, List, Dict
+from typing import Set, List, Dict, Tuple
 import random
 import multiprocessing
 
@@ -125,16 +125,31 @@ def print_data(data):
     print(table)
 
 
+def parse_levels(levels: str) -> Tuple[int, int]:
+    if "-" in levels:
+        start, end = levels.split("-")
+        return int(start), int(end)
+    return int(levels), int(levels)
+
+
 @click.command()
-@click.option("-s", "--start", default=1, help="Start of the level range")
-@click.option("-e", "--end", default=20, help="End of the level range")
 @click.option("--characters", default="all", help="Characters to test")
 @click.option("-o", "--output", default=None, help="Output file")
 @click.option("--num_rounds", default=5, help="Number of rounds per fight")
 @click.option("--num_fights", default=3, help="Number of fights per long rest")
 @click.option("--iterations", default=500, help="Number of simulations to run")
 @click.option("--debug", is_flag=True, help="Enable debug metrics")
-def run(start, end, characters, output, num_rounds, num_fights, iterations, debug):
+@click.option("--levels", default="1-20", help="Levels to test")
+def run(
+    characters: str,
+    output: str,
+    num_rounds: int,
+    num_fights: int,
+    iterations: int,
+    debug: bool,
+    levels: str,
+):
+    start, end = parse_levels(levels)
     characters = configs.break_out_shortcuts(characters.split(","))
     data = test_characters(
         characters,
