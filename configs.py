@@ -1,5 +1,6 @@
 from typing import Set, List
 
+from classes.warlock import FiendWarlock
 from sim import CharacterConfig
 from classes.monk import OpenHandMonk
 from classes.barbarian import BerserkerBarbarian
@@ -27,7 +28,7 @@ CONFIGS = {
     "wizard": CharacterConfig("Wizard", EvocationWizard),
     "cleric": CharacterConfig("Cleric", Cleric),
     "bard": CharacterConfig("Bard", ValorBard),
-    # TODO: Warlock
+    "warlock": CharacterConfig("Warlock", FiendWarlock),
     # TODO: Sorcerer
     # Subclasses
     "champion": CharacterConfig("Champion Fighter", ChampionFighter),

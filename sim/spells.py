@@ -16,6 +16,28 @@ import sim.event_loop
 import util.taggable
 
 
+def pact_spell_slots(level: int) -> List[int]:
+    if level < 1:
+        return []
+    slot = 1
+    if level >= 9:
+        slot = 5
+    elif level >= 7:
+        slot = 4
+    elif level >= 5:
+        slot = 3
+    elif level >= 3:
+        slot = 2
+    num_slots = 1
+    if level >= 17:
+        num_slots = 4
+    elif level >= 11:
+        num_slots = 3
+    elif level >= 5:
+        num_slots = 2
+    return [slot] * num_slots
+
+
 class Spellcaster(Enum):
     FULL = 0
     HALF = 1
@@ -41,21 +63,28 @@ class Spellcasting(sim.event_loop.Listener):
         character: "sim.character.Character",
         mod: "sim.Stat",
         spellcaster_levels: List[Tuple[Spellcaster, int]],
+        pact_spellcaster_level: Optional[int] = None,
     ) -> None:
         self.character = character
         self.mod = mod
         self.spellcaster_levels = spellcaster_levels
+        self.pact_spellcaster_level = pact_spellcaster_level or 0
         self.concentration: Optional["sim.spells.Spell"] = None
         self.spells: List["sim.spells.Spell"] = []
         self.slots: List[int] = []
+        self.pact_slots: List[int] = []
         self.to_hit_bonus = 0
         self.character.events.add(self, ["short_rest", "long_rest"])
 
     def add_spellcaster_level(self, spellcaster: Spellcaster, level: int):
         self.spellcaster_levels.append((spellcaster, level))
 
+    def add_pact_spellcaster_level(self, level: int):
+        self.pact_spellcaster_level += level
+
     def long_rest(self):
         self.slots = spell_slots(spellcaster_level(self.spellcaster_levels))
+        self.pact_slots = pact_spell_slots(self.pact_spellcaster_level)
         self.short_rest()
 
     def short_rest(self):
@@ -66,20 +95,37 @@ class Spellcasting(sim.event_loop.Listener):
     def dc(self):
         return 8 + self.character.mod(self.mod) + self.character.prof
 
-    def highest_slot(self, max: int = 9) -> int:
-        return highest_spell_slot(self.slots, max=max)
+    def pact_slot(self, max_slot: int = 9, min_slot: int = 1):
+        if len(self.pact_slots) > 0:
+            slot = self.pact_slots[0]
+            if slot <= max_slot and slot >= min_slot:
+                return slot
+        return 0
 
-    def lowest_slot(self, min: int = 1) -> int:
-        return lowest_spell_slot(self.slots, min=min)
+    def highest_slot(self, max_slot: int = 9) -> int:
+        regular_slot = highest_spell_slot(self.slots, max=max_slot)
+        pact_slot = self.pact_slot(max_slot=max_slot)
+        return max(regular_slot, pact_slot)
+
+    def lowest_slot(self, min_slot: int = 1) -> int:
+        regular_slot = lowest_spell_slot(self.slots, min=min_slot)
+        pact_slot = self.pact_slot(min_slot=min_slot)
+        return min(regular_slot, pact_slot)
 
     def cast(
         self,
         spell: "sim.spells.Spell",
         target: Optional["sim.target.Target"] = None,
+        ignore_slot: bool = False,
     ):
         log.record(f"Cast ({spell.name})", 1)
-        if spell.slot > 0:
-            self.slots[spell.slot] -= 1
+        if spell.slot > 0 and not ignore_slot:
+            if self.pact_slot() == spell.slot:
+                self.pact_slots.pop()
+            elif self.slots[spell.slot] > 0:
+                self.slots[spell.slot] -= 1
+            else:
+                assert False, f"Trying to use spell slot {spell.slot}"
         if spell.concentration:
             self.set_concentration(spell)
         spell.cast(self.character, target)

@@ -43,7 +43,6 @@ class Summon(sim.character.Character):
         slot: int,
         weapon: "sim.weapons.Weapon",
         feats: Optional[List["sim.feat.Feat"]] = None,
-        **kwargs
     ):
         feats = feats or []
         base_feats: List["sim.feat.Feat"] = []

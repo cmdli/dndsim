@@ -11,9 +11,8 @@ from util.util import cantrip_dice
 
 
 class EldritchBlast(sim.spells.Spell):
-    def __init__(self, character_level: int, **kwargs):
-        super().__init__("EldritchBlast", 0, school=School.Evocation, **kwargs)
-        self.character_level = character_level
+    def __init__(self):
+        super().__init__("EldritchBlast", 0, school=School.Evocation)
 
     def cast(
         self,

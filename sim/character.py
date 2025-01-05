@@ -59,6 +59,7 @@ class Character:
         self.channel_divinity = sim.resource.Resource(self, short_rest=True)
         self.metamagics: Set[str] = set()
         self.class_levels: Dict[str, int] = dict()
+        self.resources: Dict[str, "sim.resource.Resource"] = dict()
 
         self.feats: Dict[str, "sim.feat.Feat"] = dict()
         for feat in [Vex(), Topple(), Graze()]:
@@ -130,6 +131,12 @@ class Character:
             self.used_bonus = True
             return True
         return False
+
+    def add_resource(self, name: str, short_rest: bool = False):
+        self.resources[name] = sim.resource.Resource(self, short_rest=short_rest)
+
+    def has_resource(self, name: str):
+        return name in self.resources and self.resources[name].num > 0
 
     # =============================
     #       LIFECYCLE EVENTS

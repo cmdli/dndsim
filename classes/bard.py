@@ -201,7 +201,7 @@ class CMEMulticlassAction(sim.feat.Feat):
         if self.character.has_class_level("Bard", 6):
             # Two attacks
             if self.character.has_class_level("Warlock", 1):
-                self.character.spells.cast(EldritchBlast(self.level), target)
+                self.character.spells.cast(EldritchBlast(), target)
                 self.character.weapon_attack(target, self.weapon)
             else:
                 self.character.spells.cast(TrueStrike(self.weapon), target)
@@ -209,7 +209,7 @@ class CMEMulticlassAction(sim.feat.Feat):
         else:
             # One attack
             if self.character.has_class_level("Warlock", 1):
-                self.character.spells.cast(EldritchBlast(self.level), target)
+                self.character.spells.cast(EldritchBlast(), target)
             else:
                 self.character.spells.cast(TrueStrike(self.weapon), target)
         if not self.used_nick and self.nick_weapon is not None:

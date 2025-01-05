@@ -1,5 +1,7 @@
 import sim.summons
 import sim.feat
+import sim.character
+import sim.target
 
 
 class FeyWeapon(sim.summons.SummonWeapon):
@@ -63,3 +65,25 @@ class SummonCelestial(sim.summons.SummonSpell):
 
     def summon(self, caster: "sim.character.Character"):
         return CelestialSummon(self.slot, caster)
+
+
+class FiendWeapon(sim.summons.SummonWeapon):
+    def __init__(self, slot: int, **kwargs):
+        super().__init__(
+            name="FiendWeapon", num_dice=2, die=6, dmg_bonus=3 + slot, **kwargs
+        )
+
+
+class FiendSummon(sim.summons.Summon):
+    def __init__(self, slot: int, caster: "sim.character.Character"):
+        super().__init__(
+            slot=slot, weapon=FiendWeapon(slot=slot, caster=caster), feats=[]
+        )
+
+
+class SummonFiend(sim.summons.SummonSpell):
+    def __init__(self, slot: int):
+        super().__init__("SummonFiend", slot)
+
+    def summon(self, caster: "sim.character.Character"):
+        return FiendSummon(self.slot, caster)
