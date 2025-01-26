@@ -2,7 +2,7 @@
 
 `dndsim` is a simulator for D&D 2024 to calculate the damage per round (DPR) of various builds. It can print out to the terminal or output to a CSV file and display as a chart.
 
-<img width="862" alt="Screenshot 2024-07-03 at 9 12 30 PM" src="https://github.com/cmdli/dndsim/assets/2389398/d13ac373-59f9-4ddd-9d25-d5975410776e">
+<img width="1051" alt="Screenshot 2025-01-25 at 11 23 50 PM" src="https://github.com/user-attachments/assets/413f9e8f-2776-4e65-9d2e-320de976ceb7" />
 
 ## Features
 
