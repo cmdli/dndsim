@@ -31,3 +31,9 @@ To display the data as a chart, first output it into a CSV and then run the char
 python3 sim.py --levels 1-20 --characters fighter,barbarian --output data.csv
 python3 chart.py --input data.csv
 ```
+
+## Adding a new character
+
+To add a new character, you need a new Character class in `classes`. This class adds a list of feats and starting choices. This character class then needs to be added to the configs in `configs.py`.
+
+See `How_it_works.md` for more internal details about the simulation framework. Understanding the feat framework is necessary if you want to add new feats or modify classes.

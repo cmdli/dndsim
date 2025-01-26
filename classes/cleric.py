@@ -30,7 +30,7 @@ class ClericAction(sim.feat.Feat):
             elif slot >= 3:
                 spell = SpiritGuardians(slot)
         else:
-            slot = self.character.spells.highest_slot(max=4)
+            slot = self.character.spells.highest_slot(max_slot=4)
             if slot >= 4:
                 spell = GuardianOfFaith(slot)
             elif slot >= 1:

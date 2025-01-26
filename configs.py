@@ -53,6 +53,8 @@ SHORTCUTS = {
         "rogue",
         "wizard",
         "cleric",
+        "warlock",
+        "bard",
     ]
 }
 
