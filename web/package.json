@@ -1,0 +1,17 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild src/ts/app/main.ts --bundle --outfile=build/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2"
+  }
+}
