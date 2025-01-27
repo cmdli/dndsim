@@ -61,7 +61,7 @@ class Character:
         self.class_levels: Dict[str, int] = dict()
         self.resources: Dict[str, "sim.resource.Resource"] = dict()
 
-        self.feats: Dict[str, "sim.feat.Feat"] = dict()
+        self.feats: List["sim.feat.Feat"] = []
         for feat in [Vex(), Topple(), Graze()]:
             self.add_feat(feat)
         for feat in base_feats:
@@ -69,8 +69,9 @@ class Character:
 
     def add_feat(self, feat: "sim.feat.Feat"):
         feat.apply(self)
-        self.feats[feat.name()] = feat
+        self.feats.append(feat)
         self.events.add(feat, feat.events())
+        print(self.feats)
 
     def has_feat(self, name: str):
         return name in self.feats
