@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/ts/app/main.ts --bundle --outfile=build/main.js"
+    "build": "esbuild src/ts/app/main.ts --bundle --outfile=build/main.js",
+    "run": "npm run build &&node build/main.js"
   },
   "author": "",
   "license": "ISC",
