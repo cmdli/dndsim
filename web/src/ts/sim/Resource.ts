@@ -1,11 +1,4 @@
-import {
-    CharacterEvent,
-    CharacterEventData,
-    CharacterEventMapping,
-    LongRestData,
-    ShortRestData,
-} from "./CharacterEvent"
-import { EventLoop } from "./EventLoop"
+import { Character } from "./Character"
 
 export class Resource {
     name: string
@@ -14,16 +7,18 @@ export class Resource {
 
     resetOnShortRest: boolean = false
 
-    constructor(
-        name: string,
-        events: EventLoop<CharacterEvent, CharacterEventMapping>,
+    constructor(args: {
+        name: string
+        character: Character
         initialMax: number
-    ) {
-        this.name = name
-        this.count = initialMax
-        this.max = initialMax
-        events.addListener<"short_rest">("short_rest", () => this.onShortRest())
-        events.addListener<"long_rest">("long_rest", () => this.reset())
+    }) {
+        this.name = args.name
+        this.count = args.initialMax
+        this.max = args.initialMax
+        args.character.events.on<"short_rest">("short_rest", () =>
+            this.onShortRest()
+        )
+        args.character.events.on<"long_rest">("long_rest", () => this.reset())
     }
 
     addMax(amount: number): void {

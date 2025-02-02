@@ -13,7 +13,7 @@ export class EventLoop<
 > {
     private listeners: ListenerMap<Event, EventMapping> = {}
 
-    addListener<SpecificEvent extends Event>(
+    on<SpecificEvent extends Event>(
         event: SpecificEvent,
         listener: Listener<EventMapping[SpecificEvent]>
     ) {

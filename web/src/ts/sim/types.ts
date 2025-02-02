@@ -1,4 +1,4 @@
-export type Stat = "str" | "dex" | "con" | "int" | "wis" | "cha"
+export type Stat = "str" | "dex" | "con" | "int" | "wis" | "cha" | "none"
 
 export type WeaponMastery =
     | "Vex"
