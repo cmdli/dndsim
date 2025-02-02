@@ -1,12 +1,25 @@
 import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
-import { Stat, WeaponMastery } from "./types"
+import { DamageType, Stat, WeaponMastery } from "./types"
+
+export type WeaponArgs = {
+    name: string
+    numDice: number
+    die: number
+    damageType?: DamageType
+    minCrit?: number
+    mastery?: WeaponMastery
+    magicBonus?: number
+    attackBonus?: number
+    dmgBonus?: number
+    tags?: Array<string>
+}
 
 export class Weapon {
     readonly name: string
     readonly numDice: number
     readonly die: number
-    readonly damageType: string
+    readonly damageType: DamageType
     readonly minCrit: number
     readonly mastery?: WeaponMastery
     readonly magicBonus: number
@@ -14,18 +27,7 @@ export class Weapon {
     readonly dmgBonus: number
     readonly tags: Set<string>
 
-    constructor(args: {
-        name: string
-        numDice: number
-        die: number
-        damageType?: string
-        minCrit?: number
-        mastery?: WeaponMastery
-        magicBonus?: number
-        attackBonus?: number
-        dmgBonus?: number
-        tags?: Array<string>
-    }) {
+    constructor(args: WeaponArgs) {
         this.name = args.name
         this.numDice = args.numDice
         this.die = args.die

@@ -27,6 +27,7 @@ import { BeginTurnEvent } from "./events/BeginTurnEvent"
 import { ShortRestEvent } from "./events/ShortRestEvent"
 import { LongRestEvent } from "./events/LongRestEvent"
 import { EnemyTurnEvent } from "./events/EnemyTurnEvent"
+import { NumAttacksAttribute } from "./actions/AttackAction"
 
 const DEFAULT_STAT_MAX = 20
 
@@ -61,6 +62,7 @@ export class Character {
     minions: Set<Character> = new Set()
 
     spells: Spellcasting = new Spellcasting(this)
+    attributes: Map<string, number> = new Map([[NumAttacksAttribute, 1]])
 
     bonus: Resource = new Resource({
         name: "Bonus",
@@ -122,6 +124,14 @@ export class Character {
 
     removeEffect(effect: string): void {
         this.effects.delete(effect)
+    }
+
+    getAttribute(attribute: string): number {
+        return this.attributes.get(attribute) ?? 0
+    }
+
+    setAttribute(attribute: string, value: number): void {
+        this.attributes.set(attribute, value)
     }
 
     getClassLevel(class_: Class): number {

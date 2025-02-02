@@ -1,11 +1,14 @@
+import { ExtraAttack } from "../feats/ExtraAttack"
 import { GreatWeaponFighting } from "../feats/fightingStyle/GreatWeaponFighting"
 import { WeaponMasteries } from "../feats/WeaponMasteries"
+import { NumAttacksAttribute } from "../sim/actions/AttackAction"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { ActionEvent } from "../sim/events/ActionEvent"
 import { Feat } from "../sim/Feat"
 import { WeaponMastery } from "../sim/types"
 import { Weapon } from "../sim/Weapon"
+import { Longsword } from "../weapons/Longsword"
 
 class ActionSurge extends Feat {
     num: number
@@ -59,29 +62,35 @@ export function fighterFeats(
         feats.push(new WeaponMasteries(masteries))
         feats.push(fightingStyle)
     }
+    if (level >= 5) {
+        feats.push(new ExtraAttack(2))
+    }
     if (level >= 2) {
         feats.push(new ActionSurge(level >= 17 ? 2 : 1))
     }
+    if (level >= 11) {
+        feats.push(new ExtraAttack(3))
+    }
     if (level >= 13) {
         feats.push(new StudiedAttacks())
+    }
+    if (level >= 20) {
+        feats.push(new ExtraAttack(4))
     }
     return feats
 }
 
 class FighterAction extends Feat {
-    numAttacks: number
     weapon: Weapon
     toppleWeapon?: Weapon
     nickWeapon?: Weapon
 
     constructor(args: {
-        numAttacks: number
         weapon: Weapon
         toppleWeapon?: Weapon
         nickWeapon?: Weapon
     }) {
         super()
-        this.numAttacks = args.numAttacks
         this.weapon = args.weapon
         this.toppleWeapon = args.toppleWeapon
         this.nickWeapon = args.nickWeapon
@@ -92,13 +101,11 @@ class FighterAction extends Feat {
     }
 
     action(data: ActionEvent): void {
-        for (let i = 0; i < this.numAttacks; i++) {
+        const numAttacks =
+            this.character?.getAttribute(NumAttacksAttribute) ?? 1
+        for (let i = 0; i < numAttacks; i++) {
             let weapon = this.weapon
-            if (
-                this.toppleWeapon &&
-                !data.target.prone &&
-                i < this.numAttacks - 1
-            ) {
+            if (this.toppleWeapon && !data.target.prone && i < numAttacks - 1) {
                 weapon = this.toppleWeapon
             }
             this.character?.weaponAttack({
@@ -114,5 +121,11 @@ export function createFighter(level: number): Character {
     const character = new Character()
     const feats = fighterFeats(level, [], new GreatWeaponFighting())
     feats.forEach((feat) => character.addFeat(feat))
+
+    character.addFeat(
+        new FighterAction({
+            weapon: new Longsword(),
+        })
+    )
     return character
 }
