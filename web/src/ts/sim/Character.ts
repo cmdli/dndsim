@@ -19,6 +19,14 @@ import { AttackEvent } from "./events/AttackEvent"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { AttackRollEvent } from "./events/AttackRollEvent"
 import { DamageRollEvent } from "./events/DamageRollEvent"
+import { BeforeAttackEvent } from "./events/BeforeAttackEvent"
+import { BeforeActionEvent } from "./events/BeforeActionEvent"
+import { AfterActionEvent } from "./events/AfterActionEvent"
+import { EndTurnEvent } from "./events/EndTurnEvent"
+import { BeginTurnEvent } from "./events/BeginTurnEvent"
+import { ShortRestEvent } from "./events/ShortRestEvent"
+import { LongRestEvent } from "./events/LongRestEvent"
+import { EnemyTurnEvent } from "./events/EnemyTurnEvent"
 
 const DEFAULT_STAT_MAX = 20
 
@@ -52,9 +60,7 @@ export class Character {
     feats: Array<Feat> = []
     minions: Set<Character> = new Set()
 
-    spells: Spellcasting = new Spellcasting({
-        character: this,
-    })
+    spells: Spellcasting = new Spellcasting(this)
 
     bonus: Resource = new Resource({
         name: "Bonus",
@@ -66,9 +72,9 @@ export class Character {
     // TODO: Handle actions better
     actions: number = 1
 
-    addFeat<T extends CharacterEvent>(feat: Feat): void {
+    addFeat(feat: Feat): void {
         this.feats.push(feat)
-        feat.coreApply(this)
+        feat.internalApply(this)
     }
 
     stat(stat: Stat): number {
@@ -137,14 +143,14 @@ export class Character {
     turn(target: Target): void {
         this.actions = 1
         this.bonus.reset()
-        this.events.emit("begin_turn", { name: "begin_turn", target })
-        this.events.emit("before_action", { name: "before_action", target })
+        this.events.emit("begin_turn", new BeginTurnEvent({ target }))
+        this.events.emit("before_action", new BeforeActionEvent({ target }))
         while (this.actions > 0) {
             this.events.emit("action", new ActionEvent({ target }))
             this.actions -= 1
         }
-        this.events.emit("after_action", { name: "after_action", target })
-        this.events.emit("end_turn", { name: "end_turn", target })
+        this.events.emit("after_action", new AfterActionEvent({ target }))
+        this.events.emit("end_turn", new EndTurnEvent({ target }))
         this.bonus.reset()
         for (const minion of this.minions) {
             minion.turn(target)
@@ -153,16 +159,16 @@ export class Character {
 
     shortRest(): void {
         this.effects = new Set()
-        this.events.emit("short_rest", { name: "short_rest" })
+        this.events.emit("short_rest", new ShortRestEvent())
     }
 
     longRest(): void {
         this.shortRest()
-        this.events.emit("long_rest", { name: "long_rest" })
+        this.events.emit("long_rest", new LongRestEvent())
     }
 
     enemyTurn(target: Target): void {
-        this.events.emit("enemy_turn", { name: "enemy_turn", target })
+        this.events.emit("enemy_turn", new EnemyTurnEvent({ target }))
     }
 
     // =============================
@@ -184,7 +190,7 @@ export class Character {
     attack(args: { target: Target; attack: Attack }): void {
         const { target, attack } = args
         const attackData = new AttackEvent({ target, attack })
-        this.events.emit("before_attack", { name: "before_attack" })
+        this.events.emit("before_attack", new BeforeAttackEvent())
         const toHit = attack.toHit(this)
         const rollResult = this.attackRoll(attackData, toHit)
         const roll = rollResult.roll()

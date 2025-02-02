@@ -2,7 +2,7 @@ import { GreatWeaponFighting } from "../feats/fightingStyle/GreatWeaponFighting"
 import { WeaponMasteries } from "../feats/WeaponMasteries"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
-import { ActionData } from "../sim/events/ActionEvent"
+import { ActionEvent } from "../sim/events/ActionEvent"
 import { Feat } from "../sim/Feat"
 import { WeaponMastery } from "../sim/types"
 import { Weapon } from "../sim/Weapon"
@@ -91,13 +91,21 @@ class FighterAction extends Feat {
         character.events.on("action", (data) => this.action(data))
     }
 
-    action(data: ActionData): void {
+    action(data: ActionEvent): void {
         for (let i = 0; i < this.numAttacks; i++) {
             let weapon = this.weapon
-            if (this.toppleWeapon && !data.target.prone && i < this.numAttacks - 1) {
+            if (
+                this.toppleWeapon &&
+                !data.target.prone &&
+                i < this.numAttacks - 1
+            ) {
                 weapon = this.toppleWeapon
             }
-            this.character?.weaponAttack(data.target, weapon, tags: ["main_action"])
+            this.character?.weaponAttack({
+                target: data.target,
+                weapon,
+                tags: ["main_action"],
+            })
         }
     }
 }
@@ -105,6 +113,6 @@ class FighterAction extends Feat {
 export function createFighter(level: number): Character {
     const character = new Character()
     const feats = fighterFeats(level, [], new GreatWeaponFighting())
-    feats.forEach((feat) => feat.apply(character))
+    feats.forEach((feat) => character.addFeat(feat))
     return character
 }

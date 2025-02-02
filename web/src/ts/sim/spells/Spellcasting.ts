@@ -1,13 +1,14 @@
+import { Character } from "../Character"
+import { Target } from "../Target"
+import { Stat } from "../types"
 import {
+    Spellcaster,
+    spellcasterLevel,
     highestSpellSlot,
     lowestSpellSlot,
     pactSpellSlots,
     spellSlots,
-} from "../../util/helpers"
-import { Character } from "../Character"
-import { Target } from "../Target"
-import { Stat } from "../types"
-import { Spellcaster, spellcasterLevel } from "./shared"
+} from "./shared"
 import { Spell } from "./Spell"
 
 export class Spellcasting {
@@ -21,8 +22,8 @@ export class Spellcasting {
     pactSlots: Array<number>
     toHitBonus: number
 
-    constructor(args: { character: Character }) {
-        this.character = args.character
+    constructor(character: Character) {
+        this.character = character
         this.spellcasterLevels = []
         this.pactSpellcasterLevel = 0
         this.spells = []

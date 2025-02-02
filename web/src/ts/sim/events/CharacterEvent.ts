@@ -1,9 +1,19 @@
 import { Target } from "../Target"
 import { ActionEvent } from "./ActionEvent"
+import { AfterActionEvent } from "./AfterActionEvent"
 import { AttackEvent } from "./AttackEvent"
 import { AttackResultEvent } from "./AttackResultEvent"
 import { AttackRollEvent } from "./AttackRollEvent"
+import { BeforeActionEvent } from "./BeforeActionEvent"
+import { BeforeAttackEvent } from "./BeforeAttackEvent"
+import { BeginTurnEvent } from "./BeginTurnEvent"
+import { CastSpellEvent } from "./CastSpellEvent"
 import { DamageRollEvent } from "./DamageRollEvent"
+import { EndTurnEvent } from "./EndTurnEvent"
+import { EnemyTurnEvent } from "./EnemyTurnEvent"
+import { LongRestEvent } from "./LongRestEvent"
+import { ShortRestEvent } from "./ShortRestEvent"
+import { WeaponRollEvent } from "./WeaponRollEvent"
 
 export type CharacterEventName =
     | "begin_turn"
@@ -24,51 +34,6 @@ export type CharacterEventName =
 
 export abstract class CharacterEvent {
     abstract readonly name: CharacterEventName
-}
-
-export type BeginTurnEvent = {
-    name: "begin_turn"
-    target: Target
-}
-
-export type BeforeActionEvent = {
-    name: "before_action"
-    target: Target
-}
-
-export type AfterActionEvent = {
-    name: "after_action"
-    target: Target
-}
-
-export type BeforeAttackEvent = {
-    name: "before_attack"
-}
-
-export type EndTurnEvent = {
-    name: "end_turn"
-    target: Target
-}
-
-export type EnemyTurnEvent = {
-    name: "enemy_turn"
-    target: Target
-}
-
-export type ShortRestEvent = {
-    name: "short_rest"
-}
-
-export type LongRestEvent = {
-    name: "long_rest"
-}
-
-export type WeaponRollEvent = {
-    name: "weapon_roll"
-}
-
-export type CastSpellEvent = {
-    name: "cast_spell"
 }
 
 export type CharacterEventData =
