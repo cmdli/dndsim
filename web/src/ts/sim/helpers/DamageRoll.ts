@@ -1,5 +1,4 @@
 import { diceRolls } from "../../util/helpers"
-import { rollDice } from "../../util/helpers"
 
 export class DamageRoll {
     source: string
@@ -18,7 +17,7 @@ export class DamageRoll {
     }
 
     total(): number {
-        return this.flatDmg + rollDice(this.dice.length, this.dice[0])
+        return this.flatDmg + this.rolls.reduce((a, b) => a + b, 0)
     }
 
     reroll(): void {

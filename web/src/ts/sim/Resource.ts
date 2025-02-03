@@ -1,3 +1,4 @@
+import { log } from "../util/Log"
 import { Character } from "./Character"
 
 export class Resource {
@@ -27,6 +28,7 @@ export class Resource {
 
     use(reason?: string): boolean {
         if (this.count > 0) {
+            log.record(`${this.name} (${reason})`, 1)
             this.count -= 1
             return true
         }

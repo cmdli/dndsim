@@ -1,3 +1,4 @@
+import { log } from "../util/Log"
 import { Character } from "./Character"
 import { Target } from "./Target"
 
@@ -30,6 +31,7 @@ export class Simulation {
             }
             this.character.shortRest()
         }
+        log.record("Damage (Total)", this.target.damage)
     }
 }
 

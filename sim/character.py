@@ -71,7 +71,6 @@ class Character:
         feat.apply(self)
         self.feats.append(feat)
         self.events.add(feat, feat.events())
-        print(self.feats)
 
     def has_feat(self, name: str):
         return name in self.feats

@@ -7,6 +7,7 @@ export class Longsword extends Weapon {
             numDice: 1,
             die: 8,
             damageType: "slashing",
+            mastery: "Sap",
             ...extraArgs,
         })
     }

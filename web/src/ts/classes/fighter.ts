@@ -17,6 +17,8 @@ import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { Longsword } from "../weapons/Longsword"
 import { SavageAttacker } from "../feats/origin/SavageAttacker"
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
+import { Greatsword } from "../weapons/Greatsword"
+import { Maul } from "../weapons/Maul"
 
 class ActionSurge extends Feat {
     num: number
@@ -172,7 +174,8 @@ class FighterAction extends Feat {
 }
 
 export function createChampionFighter(level: number): Character {
-    const weapon = new Longsword({ magicBonus: defaultMagicBonus(level) })
+    const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
+    const toppleWeapon = new Maul({ magicBonus: defaultMagicBonus(level) })
     const feats = []
     feats.push(new SavageAttacker())
     feats.push(
@@ -195,10 +198,10 @@ export function createChampionFighter(level: number): Character {
     feats.push(
         new FighterAction({
             weapon,
+            toppleWeapon,
         })
     )
     return new Character({
-        level,
         stats: {
             str: 17,
             dex: 10,

@@ -3,6 +3,7 @@ import { AttackResultEvent } from "./events/AttackResultEvent"
 import { DamageType, Stat, WeaponMastery } from "./types"
 
 export const HeavyWeapon = "Heavy"
+export const TwoHandedWeapon = "TwoHanded"
 
 export type WeaponArgs = {
     name: string
@@ -37,16 +38,16 @@ export class Weapon {
         this.minCrit = args.minCrit ?? 20
         this.mastery = args.mastery
         this.magicBonus = args.magicBonus ?? 0
-        this.attackBonus = args.attackBonus ?? 0
-        this.dmgBonus = args.dmgBonus ?? 0
+        this.attackBonus = this.magicBonus + (args.attackBonus ?? 0)
+        this.dmgBonus = this.magicBonus + (args.dmgBonus ?? 0)
         this.tags = new Set(args.tags)
     }
 
     mod(character: Character): Stat {
-        if (this.tags?.has("ranged")) {
+        if (this.tags.has("ranged")) {
             return "dex"
         } else if (
-            this.tags?.has("finesse") &&
+            this.tags.has("finesse") &&
             character.stat("dex") > character.stat("str")
         ) {
             return "dex"
@@ -73,10 +74,14 @@ export class Weapon {
 
     attackResult(args: AttackResultEvent, character: Character): void {
         if (args.hit) {
+            let damage = this.dmgBonus
+            if (!args.attack.hasTag("light")) {
+                damage += character.mod(this.mod(character))
+            }
             args.addDamage({
                 source: this.name,
-                dice: this.rolls(args.crit),
-                flatDmg: this.dmgBonus,
+                dice: Array(this.numDice).fill(this.die),
+                flatDmg: damage,
             })
         }
     }

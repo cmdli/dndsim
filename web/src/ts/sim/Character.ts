@@ -31,12 +31,13 @@ import { NumAttacksAttribute } from "./actions/AttackAction"
 import { Graze } from "./coreFeats/Graze"
 import { Topple } from "./coreFeats/Topple"
 import { Vex } from "./coreFeats/Vex"
+import { log } from "../util/Log"
 
 const DEFAULT_STAT_MAX = 20
 
 export class Character {
     // Stats
-    level: number
+    level: number = 0
     stats: Record<Stat, number>
     statMax: Record<Stat, number> = {
         str: DEFAULT_STAT_MAX,
@@ -48,7 +49,7 @@ export class Character {
         none: DEFAULT_STAT_MAX,
     }
 
-    feats: Array<Feat> = [new Vex(), new Topple(), new Graze()]
+    feats: Array<Feat> = []
     events: EventLoop<CharacterEventName, CharacterEventMapping> =
         new EventLoop()
     effects: Set<string> = new Set()
@@ -70,14 +71,15 @@ export class Character {
     actions: number = 1
 
     constructor(args: {
-        level: number
         stats: Omit<Record<Stat, number>, "none">
         feats: Array<Feat>
     }) {
-        const { level, stats, feats } = args
-        this.level = level
+        const { stats, feats } = args
         this.stats = { ...stats, none: 10 }
         feats.forEach((feat) => this.addFeat(feat))
+        for (const feat of [new Graze(), new Topple(), new Vex()]) {
+            this.addFeat(feat)
+        }
     }
 
     addFeat(feat: Feat): void {
@@ -150,6 +152,7 @@ export class Character {
 
     addClassLevel(class_: Class, level: number): void {
         this.classLevels.set(class_, this.getClassLevel(class_) + level)
+        this.level += level
     }
 
     // =============================
@@ -157,6 +160,7 @@ export class Character {
     // =============================
 
     turn(target: Target): void {
+        log.record("Turn", 1)
         this.actions = 1
         this.bonus.reset()
         this.events.emit("begin_turn", new BeginTurnEvent({ target }))
@@ -205,6 +209,7 @@ export class Character {
 
     attack(args: { target: Target; attack: Attack }): void {
         const { target, attack } = args
+        log.record(`Attack (${attack.name()})`, 1)
         const attackData = new AttackEvent({ target, attack })
         this.events.emit("before_attack", new BeforeAttackEvent())
         const toHit = attack.toHit(this)
@@ -216,6 +221,16 @@ export class Character {
         const crit = roll >= minCrit
         const rollTotal = roll + toHit + rollResult.situationalBonus
         const hit = rollTotal >= target.ac
+
+        if (hit) {
+            log.record(`Hit (${attack.name()})`, 1)
+        } else {
+            log.record(`Miss (${attack.name()})`, 1)
+        }
+        if (crit) {
+            log.record(`Crit (${attack.name()})`, 1)
+        }
+
         const attackResult = new AttackResultEvent({
             attack: attackData,
             hit,
