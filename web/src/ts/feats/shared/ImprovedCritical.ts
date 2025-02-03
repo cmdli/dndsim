@@ -1,6 +1,6 @@
-import { Character } from "../sim/Character"
-import { AttackRollEvent } from "../sim/events/AttackRollEvent"
-import { Feat } from "../sim/Feat"
+import { Character } from "../../sim/Character"
+import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
+import { Feat } from "../../sim/Feat"
 
 export class ImprovedCritical extends Feat {
     minCrit: number

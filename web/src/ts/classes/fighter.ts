@@ -1,9 +1,9 @@
-import { AbilityScoreImprovement } from "../feats/AbilityScoreImprovement"
-import { ExtraAttack } from "../feats/ExtraAttack"
+import { AbilityScoreImprovement } from "../feats/shared/AbilityScoreImprovement"
+import { ExtraAttack } from "../feats/shared/ExtraAttack"
 import { GreatWeaponFighting } from "../feats/fightingStyle/GreatWeaponFighting"
 import { GreatWeaponMaster } from "../feats/GreatWeaponMaster"
-import { ImprovedCritical } from "../feats/ImprovedCritical"
-import { WeaponMasteries } from "../feats/WeaponMasteries"
+import { ImprovedCritical } from "../feats/shared/ImprovedCritical"
+import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import { NumAttacksAttribute } from "../sim/actions/AttackAction"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
@@ -15,6 +15,8 @@ import { WeaponMastery } from "../sim/types"
 import { Weapon } from "../sim/Weapon"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { Longsword } from "../weapons/Longsword"
+import { SavageAttacker } from "../feats/origin/SavageAttacker"
+import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 
 class ActionSurge extends Feat {
     num: number
@@ -172,12 +174,18 @@ class FighterAction extends Feat {
 export function createChampionFighter(level: number): Character {
     const weapon = new Longsword({ magicBonus: defaultMagicBonus(level) })
     const feats = []
+    feats.push(new SavageAttacker())
     feats.push(
         ...fighterFeats({
             level,
             asis: [
                 new GreatWeaponMaster(weapon),
                 new AbilityScoreImprovement("str"),
+                new AbilityScoreImprovement("con"),
+                new AbilityScoreImprovement("con"),
+                new AbilityScoreImprovement("con"),
+                new AbilityScoreImprovement("con"),
+                new IrresistibleOffense("str"),
             ],
             masteries: ["Graze", "Topple"],
             fightingStyle: new GreatWeaponFighting(),

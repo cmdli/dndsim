@@ -1,6 +1,6 @@
-import { Character } from "../sim/Character"
-import { Feat } from "../sim/Feat"
-import { WeaponMastery } from "../sim/types"
+import { Character } from "../../sim/Character"
+import { Feat } from "../../sim/Feat"
+import { WeaponMastery } from "../../sim/types"
 
 export class WeaponMasteries extends Feat {
     masteries: WeaponMastery[]

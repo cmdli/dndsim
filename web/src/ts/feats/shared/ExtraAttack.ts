@@ -1,6 +1,6 @@
-import { NumAttacksAttribute } from "../sim/actions/AttackAction"
-import { Character } from "../sim/Character"
-import { Feat } from "../sim/Feat"
+import { NumAttacksAttribute } from "../../sim/actions/AttackAction"
+import { Character } from "../../sim/Character"
+import { Feat } from "../../sim/Feat"
 
 export class ExtraAttack extends Feat {
     numAttacks: number

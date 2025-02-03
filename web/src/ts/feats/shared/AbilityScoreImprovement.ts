@@ -1,6 +1,6 @@
-import { Character } from "../sim/Character"
-import { Feat } from "../sim/Feat"
-import { Stat } from "../sim/types"
+import { Character } from "../../sim/Character"
+import { Feat } from "../../sim/Feat"
+import { Stat } from "../../sim/types"
 
 export class AbilityScoreImprovement extends Feat {
     private mod1: Stat
