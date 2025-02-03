@@ -2,6 +2,8 @@ import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { DamageType, Stat, WeaponMastery } from "./types"
 
+export const HeavyWeapon = "Heavy"
+
 export type WeaponArgs = {
     name: string
     numDice: number
@@ -71,7 +73,15 @@ export class Weapon {
 
     attackResult(args: AttackResultEvent, character: Character): void {
         if (args.hit) {
-            args.addDamage(this.name, this.rolls(args.crit), this.dmgBonus)
+            args.addDamage({
+                source: this.name,
+                dice: this.rolls(args.crit),
+                flatDmg: this.dmgBonus,
+            })
         }
+    }
+
+    hasTag(tag: string): boolean {
+        return this.tags.has(tag)
     }
 }

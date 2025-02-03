@@ -7,8 +7,8 @@ export class DamageRollEvent {
     name: "damage_roll" = "damage_roll"
     target: Target
     damage: DamageRoll
-    attack?: AttackEvent
-    spell?: Spell
+    attack?: AttackEvent // TODO: Convert to Attack object
+    spell?: Spell // TODO: Merge with attack spell?
 
     constructor(args: {
         target: Target

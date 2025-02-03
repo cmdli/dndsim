@@ -1,9 +1,8 @@
-import { createFighter } from "../classes/fighter"
-import * as sim from "../sim/index"
+import { createChampionFighter } from "../classes/fighter"
 import { testDPR } from "../sim/Simulation"
 
 function createCharacter(level: number) {
-    return createFighter(level)
+    return createChampionFighter(level)
 }
 
 console.log(

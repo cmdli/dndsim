@@ -22,7 +22,11 @@ export class AttackResultEvent {
         this.damageRolls = []
     }
 
-    addDamage(source: string, dice: Array<number>, flatDmg?: number): void {
-        this.damageRolls.push(new DamageRoll({ source, dice, flatDmg }))
+    addDamage(args: {
+        source: string
+        dice?: Array<number>
+        flatDmg?: number
+    }): void {
+        this.damageRolls.push(new DamageRoll(args))
     }
 }

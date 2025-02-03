@@ -28,21 +28,16 @@ import { ShortRestEvent } from "./events/ShortRestEvent"
 import { LongRestEvent } from "./events/LongRestEvent"
 import { EnemyTurnEvent } from "./events/EnemyTurnEvent"
 import { NumAttacksAttribute } from "./actions/AttackAction"
+import { Graze } from "./coreFeats/Graze"
+import { Topple } from "./coreFeats/Topple"
+import { Vex } from "./coreFeats/Vex"
 
 const DEFAULT_STAT_MAX = 20
 
 export class Character {
     // Stats
-    level: number = 0
-    stats: Record<Stat, number> = {
-        str: 10,
-        dex: 10,
-        con: 10,
-        int: 10,
-        wis: 10,
-        cha: 10,
-        none: 10,
-    }
+    level: number
+    stats: Record<Stat, number>
     statMax: Record<Stat, number> = {
         str: DEFAULT_STAT_MAX,
         dex: DEFAULT_STAT_MAX,
@@ -53,26 +48,37 @@ export class Character {
         none: DEFAULT_STAT_MAX,
     }
 
+    feats: Array<Feat> = [new Vex(), new Topple(), new Graze()]
     events: EventLoop<CharacterEventName, CharacterEventMapping> =
         new EventLoop()
     effects: Set<string> = new Set()
-    masteries: Set<WeaponMastery> = new Set()
-    classLevels: Map<Class, number> = new Map()
-    feats: Array<Feat> = []
     minions: Set<Character> = new Set()
 
     spells: Spellcasting = new Spellcasting(this)
+    masteries: Set<WeaponMastery> = new Set()
+    classLevels: Map<Class, number> = new Map()
     attributes: Map<string, number> = new Map([[NumAttacksAttribute, 1]])
 
+    // Resources
     bonus: Resource = new Resource({
         name: "Bonus",
         character: this,
         initialMax: 1,
     })
     // TODO: Add other class resources
-
     // TODO: Handle actions better
     actions: number = 1
+
+    constructor(args: {
+        level: number
+        stats: Omit<Record<Stat, number>, "none">
+        feats: Array<Feat>
+    }) {
+        const { level, stats, feats } = args
+        this.level = level
+        this.stats = { ...stats, none: 10 }
+        feats.forEach((feat) => this.addFeat(feat))
+    }
 
     addFeat(feat: Feat): void {
         this.feats.push(feat)
@@ -257,6 +263,6 @@ export class Character {
             spell,
         })
         this.events.emit("damage_roll", damageData)
-        target.addDamage(Math.floor(damage.total() * multiplier))
+        target.addDamage(damage.source, Math.floor(damage.total() * multiplier))
     }
 }

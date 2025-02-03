@@ -1,13 +1,19 @@
+import { AbilityScoreImprovement } from "../feats/AbilityScoreImprovement"
 import { ExtraAttack } from "../feats/ExtraAttack"
 import { GreatWeaponFighting } from "../feats/fightingStyle/GreatWeaponFighting"
+import { GreatWeaponMaster } from "../feats/GreatWeaponMaster"
+import { ImprovedCritical } from "../feats/ImprovedCritical"
 import { WeaponMasteries } from "../feats/WeaponMasteries"
 import { NumAttacksAttribute } from "../sim/actions/AttackAction"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { ActionEvent } from "../sim/events/ActionEvent"
+import { AttackRollEvent } from "../sim/events/AttackRollEvent"
+import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { Feat } from "../sim/Feat"
 import { WeaponMastery } from "../sim/types"
 import { Weapon } from "../sim/Weapon"
+import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { Longsword } from "../weapons/Longsword"
 
 class ActionSurge extends Feat {
@@ -51,22 +57,48 @@ class StudiedAttacks extends Feat {
     }
 }
 
-export function fighterFeats(
-    level: number,
-    masteries: WeaponMastery[],
+class HeroicAdvantage extends Feat {
+    used: boolean = false
+
+    apply(character: Character): void {
+        character.events.on("begin_turn", (data) => this.beginTurn(data))
+        character.events.on("attack_roll", (data) => this.attackRoll(data))
+    }
+
+    beginTurn(data: BeginTurnEvent): void {
+        this.used = false
+    }
+
+    attackRoll(data: AttackRollEvent): void {
+        if (this.used || data.adv) {
+            return
+        }
+        const roll = data.roll1
+        if (roll < 8) {
+            this.used = true
+            data.adv = true
+        }
+    }
+}
+
+export function fighterFeats(args: {
+    level: number
+    asis: Array<Feat>
+    masteries: WeaponMastery[]
     fightingStyle: Feat
-): Feat[] {
+}): Feat[] {
+    const { level, asis, masteries, fightingStyle } = args
     const feats: Feat[] = []
     if (level >= 1) {
         feats.push(new ClassLevel("Fighter", level))
         feats.push(new WeaponMasteries(masteries))
         feats.push(fightingStyle)
     }
-    if (level >= 5) {
-        feats.push(new ExtraAttack(2))
-    }
     if (level >= 2) {
         feats.push(new ActionSurge(level >= 17 ? 2 : 1))
+    }
+    if (level >= 5) {
+        feats.push(new ExtraAttack(2))
     }
     if (level >= 11) {
         feats.push(new ExtraAttack(3))
@@ -76,6 +108,26 @@ export function fighterFeats(
     }
     if (level >= 20) {
         feats.push(new ExtraAttack(4))
+    }
+    applyFeatSchedule({
+        feats,
+        newFeats: asis,
+        schedule: [4, 6, 8, 12, 14, 16, 19],
+        level,
+    })
+    return feats
+}
+
+export function championFeats(level: number): Feat[] {
+    const feats: Feat[] = []
+    if (level >= 3) {
+        feats.push(new ImprovedCritical(19))
+    }
+    if (level >= 10) {
+        feats.push(new HeroicAdvantage())
+    }
+    if (level >= 15) {
+        feats.push(new ImprovedCritical(18))
     }
     return feats
 }
@@ -117,15 +169,36 @@ class FighterAction extends Feat {
     }
 }
 
-export function createFighter(level: number): Character {
-    const character = new Character()
-    const feats = fighterFeats(level, [], new GreatWeaponFighting())
-    feats.forEach((feat) => character.addFeat(feat))
-
-    character.addFeat(
-        new FighterAction({
-            weapon: new Longsword(),
+export function createChampionFighter(level: number): Character {
+    const weapon = new Longsword({ magicBonus: defaultMagicBonus(level) })
+    const feats = []
+    feats.push(
+        ...fighterFeats({
+            level,
+            asis: [
+                new GreatWeaponMaster(weapon),
+                new AbilityScoreImprovement("str"),
+            ],
+            masteries: ["Graze", "Topple"],
+            fightingStyle: new GreatWeaponFighting(),
         })
     )
-    return character
+    feats.push(...championFeats(level))
+    feats.push(
+        new FighterAction({
+            weapon,
+        })
+    )
+    return new Character({
+        level,
+        stats: {
+            str: 17,
+            dex: 10,
+            con: 10,
+            int: 10,
+            wis: 10,
+            cha: 10,
+        },
+        feats,
+    })
 }

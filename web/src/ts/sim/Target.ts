@@ -1,4 +1,5 @@
 import { profBonus, rollDice } from "../util/helpers"
+import { log } from "../util/Log"
 
 const TARGET_AC = [
     13, // 1
@@ -66,7 +67,8 @@ export class Target {
         this.prone = true
     }
 
-    addDamage(amount: number): void {
+    addDamage(source: string, amount: number): void {
+        log.record(`Damage (${source})`, amount)
         this.damage += amount
     }
 
