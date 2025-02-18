@@ -1,5 +1,5 @@
-import { log } from "../util/Log"
-import { Character } from "./Character"
+import { log } from "../../util/Log"
+import { Character } from "../Character"
 
 export class Resource {
     name: string

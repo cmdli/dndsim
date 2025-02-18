@@ -19,27 +19,34 @@ import { SavageAttacker } from "../feats/origin/SavageAttacker"
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { Greatsword } from "../weapons/Greatsword"
 import { Maul } from "../weapons/Maul"
+import { AttackResultEvent } from "../sim/events/AttackResultEvent"
+import { ClassSchedule, FeatConfig, Schedule } from "../config/config"
 
 class ActionSurge extends Feat {
-    num: number
-    max: number
-
-    constructor(max: number) {
-        super()
-        this.num = max
-        this.max = max
-    }
+    num: number = 0
 
     apply(character: Character): void {
-        character.events.on("short_rest", () => {
-            this.num = this.max
-        })
-        character.events.on("before_action", () => {
-            if (this.num > 0) {
-                character.actions += 1
-                this.num -= 1
-            }
-        })
+        character.events.on("short_rest", () => this.onShortRest())
+        character.events.on("before_action", () => this.onBeforeAction())
+    }
+
+    onShortRest() {
+        this.num = this.character!.getAttribute("ActionSurgeMax")
+    }
+
+    onBeforeAction() {
+        if (this.num > 0) {
+            this.num -= 1
+        }
+    }
+}
+
+class ExtraActionSurge extends Feat {
+    apply(character: Character): void {
+        character.setAttribute(
+            "ActionSurgeMax",
+            character.getAttribute("ActionSurgeMax") + 1
+        )
     }
 }
 
@@ -85,6 +92,89 @@ class HeroicAdvantage extends Feat {
     }
 }
 
+class PrecisionAttack extends Feat {
+    low: number
+
+    constructor(low: number) {
+        super()
+        this.low = low
+    }
+
+    apply(character: Character): void {
+        character.events.on("attack_roll", (data) => this.attackRoll(data))
+    }
+
+    attackRoll(data: AttackRollEvent): void {
+        if (
+            data.attack.hasTag("used_maneuver") ||
+            !this.character!.combatSuperiority.has() ||
+            data.hits()
+        ) {
+            return
+        }
+        if (data.roll() >= this.low) {
+            const roll = this.character!.combatSuperiority.roll()
+            data.situationalBonus += roll
+            data.attack.addTag("used_maneuver")
+        }
+    }
+}
+
+class TrippingAttack extends Feat {
+    apply(character: Character): void {
+        character.events.on("attack_result", (data) => this.attackResult(data))
+    }
+
+    attackResult(data: AttackResultEvent): void {
+        if (
+            !data.hit ||
+            data.attack.target.prone ||
+            data.attack.hasTag("used_maneuver") ||
+            !this.character!.combatSuperiority.has()
+        ) {
+            return
+        }
+        const roll = this.character!.combatSuperiority.roll()
+        data.addDamage({ source: "TrippingAttack", dice: [roll] })
+        if (!data.attack.target.save(this.character!.dc("str"))) {
+            data.attack.target.knockProne()
+        }
+    }
+}
+
+class CombatSuperiority extends Feat {
+    level: number
+
+    constructor(level: number) {
+        super()
+        this.level = level
+    }
+
+    apply(character: Character): void {
+        let maxDice = 4
+        if (this.level >= 15) {
+            maxDice = 6
+        } else if (this.level >= 7) {
+            maxDice = 5
+        }
+        let die = 8
+        if (this.level >= 18) {
+            die = 12
+        } else if (this.level >= 10) {
+            die = 10
+        }
+        for (let i = 0; i < maxDice; i++) {
+            character.combatSuperiority.addDie(die)
+        }
+    }
+}
+
+class Relentless extends Feat {
+    apply(character: Character): void {
+        character.combatSuperiority.enableRelentless()
+    }
+}
+
 export function fighterFeats(args: {
     level: number
     asis: Array<Feat>
@@ -99,7 +189,7 @@ export function fighterFeats(args: {
         feats.push(fightingStyle)
     }
     if (level >= 2) {
-        feats.push(new ActionSurge(level >= 17 ? 2 : 1))
+        feats.push(new ActionSurge())
     }
     if (level >= 5) {
         feats.push(new ExtraAttack(2))
@@ -109,6 +199,9 @@ export function fighterFeats(args: {
     }
     if (level >= 13) {
         feats.push(new StudiedAttacks())
+    }
+    if (level >= 17) {
+        feats.push(new ExtraActionSurge())
     }
     if (level >= 20) {
         feats.push(new ExtraAttack(4))
@@ -132,6 +225,17 @@ export function championFeats(level: number): Feat[] {
     }
     if (level >= 15) {
         feats.push(new ImprovedCritical(18))
+    }
+    return feats
+}
+
+export function battlemasterFeats(level: number): Feat[] {
+    const feats: Feat[] = []
+    if (level >= 3) {
+        feats.push(new CombatSuperiority(level))
+    }
+    if (level >= 15) {
+        feats.push(new Relentless())
     }
     return feats
 }
@@ -211,5 +315,46 @@ export function createChampionFighter(level: number): Character {
             cha: 10,
         },
         feats,
+    })
+}
+
+export function createBattlemasterFighter(level: number): Character {
+    const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
+    const feats = []
+    feats.push(new SavageAttacker())
+    feats.push(
+        ...fighterFeats({
+            level,
+            asis: [
+                new GreatWeaponMaster(weapon),
+                new AbilityScoreImprovement("str"),
+                new AbilityScoreImprovement("con"),
+                new AbilityScoreImprovement("con"),
+                new AbilityScoreImprovement("con"),
+                new AbilityScoreImprovement("con"),
+                new IrresistibleOffense("str"),
+            ],
+            masteries: ["Topple", "Graze"],
+            fightingStyle: new GreatWeaponFighting(),
+        })
+    )
+    feats.push(...battlemasterFeats(level))
+    feats.push(new PrecisionAttack(8))
+    feats.push(new FighterAction({ weapon }))
+    return new Character({
+        stats: { str: 17, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+        feats,
+    })
+}
+
+function fighterSchedule(masteries: WeaponMastery[], fightingStyle: Feat) {
+    return new ClassSchedule("Fighter", {
+        1: new FeatConfig([new WeaponMasteries(masteries), fightingStyle]),
+        2: new FeatConfig([new ActionSurge()]),
+        5: new FeatConfig([new ExtraAttack(2)]),
+        11: new FeatConfig([new ExtraAttack(3)]),
+        13: new FeatConfig([new StudiedAttacks()]),
+        17: new FeatConfig([new ExtraActionSurge()]),
+        20: new FeatConfig([new ExtraAttack(4)]),
     })
 }

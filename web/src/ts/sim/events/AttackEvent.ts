@@ -15,4 +15,12 @@ export class AttackEvent {
     hasTag(tag: string): boolean {
         return this.tags.has(tag)
     }
+
+    addTag(tag: string): void {
+        this.tags.add(tag)
+    }
+
+    removeTag(tag: string): void {
+        this.tags.delete(tag)
+    }
 }

@@ -7,7 +7,7 @@ import {
 import { Feat } from "./Feat"
 import { EventLoop } from "../util/EventLoop"
 import { Class, Stat, WeaponMastery } from "./types"
-import { Resource } from "./Resource"
+import { Resource } from "./resources/Resource"
 import { Target } from "./Target"
 import { Weapon } from "./Weapon"
 import { Attack, WeaponAttack } from "./Attack"
@@ -32,6 +32,7 @@ import { Graze } from "./coreFeats/Graze"
 import { Topple } from "./coreFeats/Topple"
 import { Vex } from "./coreFeats/Vex"
 import { log } from "../util/Log"
+import { CombatSuperiority } from "./resources/CombatSuperiority"
 
 const DEFAULT_STAT_MAX = 20
 
@@ -66,6 +67,7 @@ export class Character {
         character: this,
         initialMax: 1,
     })
+    combatSuperiority: CombatSuperiority = new CombatSuperiority(this)
     // TODO: Add other class resources
     // TODO: Handle actions better
     actions: number = 1
