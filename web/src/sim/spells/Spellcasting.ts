@@ -46,6 +46,11 @@ export class Spellcasting {
         this.pactSpellcasterLevel += level
     }
 
+    addSlot(slot: number): void {
+        // TODO: Check spell slot maximum here
+        this.slots[slot] += 1
+    }
+
     longRest(): void {
         this.slots = spellSlots(spellcasterLevel(this.spellcasterLevels))
         this.pactSlots = pactSpellSlots(this.pactSpellcasterLevel)
