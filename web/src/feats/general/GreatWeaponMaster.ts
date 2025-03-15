@@ -1,7 +1,7 @@
-import { Character } from "../sim/Character"
-import { Feat } from "../sim/Feat"
-import { HeavyWeapon, Weapon } from "../sim/Weapon"
-import { AttackResultEvent } from "../sim/events/AttackResultEvent"
+import { Character } from "../../sim/Character"
+import { Feat } from "../../sim/Feat"
+import { HeavyWeapon, Weapon } from "../../sim/Weapon"
+import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 
 export class GreatWeaponMaster extends Feat {
     private weapon: Weapon

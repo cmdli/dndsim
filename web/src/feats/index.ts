@@ -9,7 +9,7 @@ import { Protection } from "./fightingStyle/Protection"
 import { ThrownWeaponFighting } from "./fightingStyle/ThrownWeaponFighting"
 import { TwoWeaponFighting } from "./fightingStyle/TwoWeaponFighting"
 import { UnarmedFighting } from "./fightingStyle/UnarmedFighting"
-import { GreatWeaponMaster } from "./GreatWeaponMaster"
+import { GreatWeaponMaster } from "./general/GreatWeaponMaster"
 import { Alert } from "./origin/Alert"
 import { Crafter } from "./origin/Crafter"
 import { Healer } from "./origin/Healer"
@@ -20,14 +20,14 @@ import { SavageAttacker } from "./origin/SavageAttacker"
 import { Skilled } from "./origin/Skilled"
 import { TavernBrawler } from "./origin/TavernBrawler"
 import { Tough } from "./origin/Tough"
-import { AbilityScoreImprovement } from "./shared/AbilityScoreImprovement"
+import { AbilityScoreImprovement } from "./general/AbilityScoreImprovement"
 
 const epicBoons = {
     IrresistibleOffense,
     GreatWeaponFighting,
 }
 
-const fightingStyles = {
+const fightingStyle = {
     Archery,
     BlindFighting,
     Defense,
@@ -40,7 +40,7 @@ const fightingStyles = {
     UnarmedFighting,
 }
 
-const originFeats = {
+const origin = {
     Alert,
     Crafter,
     Healer,
@@ -53,10 +53,9 @@ const originFeats = {
     Tough,
 }
 
-export {
-    GreatWeaponMaster,
+const general = {
     AbilityScoreImprovement,
-    epicBoons,
-    fightingStyles,
-    originFeats,
+    GreatWeaponMaster,
 }
+
+export { general, epicBoons, fightingStyle, origin }
