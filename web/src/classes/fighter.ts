@@ -76,18 +76,20 @@ class HeroicAdvantage extends Feat {
         character.events.on("attack_roll", (data) => this.attackRoll(data))
     }
 
-    beginTurn(data: BeginTurnEvent): void {
-        this.used = false
+    beginTurn(event: BeginTurnEvent): void {
+        this.character!.heroicInspiration.add(1)
     }
 
     attackRoll(data: AttackRollEvent): void {
-        if (this.used || data.adv) {
+        if (data.adv) {
             return
         }
-        const roll = data.roll1
-        if (roll < 8) {
-            this.used = true
-            data.adv = true
+        if (this.character!.heroicInspiration.has()) {
+            const roll = data.roll1
+            if (roll < 8) {
+                this.character!.heroicInspiration.use()
+                data.adv = true
+            }
         }
     }
 }

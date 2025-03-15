@@ -11,8 +11,15 @@ import { TwoWeaponFighting } from "./fightingStyle/TwoWeaponFighting"
 import { UnarmedFighting } from "./fightingStyle/UnarmedFighting"
 import { GreatWeaponMaster } from "./GreatWeaponMaster"
 import { Alert } from "./origin/Alert"
+import { Crafter } from "./origin/Crafter"
+import { Healer } from "./origin/Healer"
+import { Lucky } from "./origin/Lucky"
+import { MagicInitiate } from "./origin/MagicInitiate"
+import { Musician } from "./origin/Musician"
 import { SavageAttacker } from "./origin/SavageAttacker"
+import { Skilled } from "./origin/Skilled"
 import { TavernBrawler } from "./origin/TavernBrawler"
+import { Tough } from "./origin/Tough"
 import { AbilityScoreImprovement } from "./shared/AbilityScoreImprovement"
 
 const epicBoons = {
@@ -35,8 +42,15 @@ const fightingStyles = {
 
 const originFeats = {
     Alert,
+    Crafter,
+    Healer,
+    Lucky,
+    MagicInitiate,
+    Musician,
     SavageAttacker,
+    Skilled,
     TavernBrawler,
+    Tough,
 }
 
 export {

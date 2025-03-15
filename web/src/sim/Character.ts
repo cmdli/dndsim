@@ -68,6 +68,11 @@ export class Character {
         initialMax: 1,
     })
     combatSuperiority: CombatSuperiority = new CombatSuperiority(this)
+    heroicInspiration: Resource = new Resource({
+        name: "HeroicInspiration",
+        character: this,
+        initialMax: 1,
+    })
     // TODO: Add other class resources
     // TODO: Handle actions better
     actions: number = 1
