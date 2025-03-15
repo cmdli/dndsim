@@ -72,13 +72,9 @@ export class Character {
     // TODO: Handle actions better
     actions: number = 1
 
-    constructor(args: {
-        stats: Omit<Record<Stat, number>, "none">
-        feats: Array<Feat>
-    }) {
-        const { stats, feats } = args
+    constructor(args: { stats: Omit<Record<Stat, number>, "none"> }) {
+        const { stats } = args
         this.stats = { ...stats, none: 10 }
-        feats.forEach((feat) => this.addFeat(feat))
         for (const feat of [new Graze(), new Topple(), new Vex()]) {
             this.addFeat(feat)
         }

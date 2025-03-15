@@ -175,71 +175,6 @@ class Relentless extends Feat {
     }
 }
 
-export function fighterFeats(args: {
-    level: number
-    asis: Array<Feat>
-    masteries: WeaponMastery[]
-    fightingStyle: Feat
-}): Feat[] {
-    const { level, asis, masteries, fightingStyle } = args
-    const feats: Feat[] = []
-    if (level >= 1) {
-        feats.push(new ClassLevel("Fighter", level))
-        feats.push(new WeaponMasteries(masteries))
-        feats.push(fightingStyle)
-    }
-    if (level >= 2) {
-        feats.push(new ActionSurge())
-    }
-    if (level >= 5) {
-        feats.push(new ExtraAttack(2))
-    }
-    if (level >= 11) {
-        feats.push(new ExtraAttack(3))
-    }
-    if (level >= 13) {
-        feats.push(new StudiedAttacks())
-    }
-    if (level >= 17) {
-        feats.push(new ExtraActionSurge())
-    }
-    if (level >= 20) {
-        feats.push(new ExtraAttack(4))
-    }
-    applyFeatSchedule({
-        feats,
-        newFeats: asis,
-        schedule: [4, 6, 8, 12, 14, 16, 19],
-        level,
-    })
-    return feats
-}
-
-export function championFeats(level: number): Feat[] {
-    const feats: Feat[] = []
-    if (level >= 3) {
-        feats.push(new ImprovedCritical(19))
-    }
-    if (level >= 10) {
-        feats.push(new HeroicAdvantage())
-    }
-    if (level >= 15) {
-        feats.push(new ImprovedCritical(18))
-    }
-    return feats
-}
-
-export function battlemasterFeats(level: number): Feat[] {
-    const feats: Feat[] = []
-    if (level >= 3) {
-        feats.push(new CombatSuperiority(level))
-    }
-    if (level >= 15) {
-        feats.push(new Relentless())
-    }
-    return feats
-}
-
 class FighterAction extends Feat {
     weapon: Weapon
     toppleWeapon?: Weapon
@@ -277,84 +212,144 @@ class FighterAction extends Feat {
     }
 }
 
-export function createChampionFighter(level: number): Character {
-    const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
-    const toppleWeapon = new Maul({ magicBonus: defaultMagicBonus(level) })
-    const feats = []
-    feats.push(new SavageAttacker())
-    feats.push(
-        ...fighterFeats({
+export class Fighter {
+    static baseFeats(args: {
+        level: number
+        asis: Array<Feat>
+        masteries: WeaponMastery[]
+        fightingStyle: Feat
+    }): Feat[] {
+        const { level, asis, masteries, fightingStyle } = args
+        const feats: Feat[] = []
+        if (level >= 1) {
+            feats.push(new ClassLevel("Fighter", level))
+            feats.push(new WeaponMasteries(masteries))
+            feats.push(fightingStyle)
+        }
+        if (level >= 2) {
+            feats.push(new ActionSurge())
+        }
+        if (level >= 5) {
+            feats.push(new ExtraAttack(2))
+        }
+        if (level >= 11) {
+            feats.push(new ExtraAttack(3))
+        }
+        if (level >= 13) {
+            feats.push(new StudiedAttacks())
+        }
+        if (level >= 17) {
+            feats.push(new ExtraActionSurge())
+        }
+        if (level >= 20) {
+            feats.push(new ExtraAttack(4))
+        }
+        applyFeatSchedule({
+            feats,
+            newFeats: asis,
+            schedule: [4, 6, 8, 12, 14, 16, 19],
             level,
-            asis: [
-                new GreatWeaponMaster(weapon),
-                new AbilityScoreImprovement("str"),
-                new AbilityScoreImprovement("con"),
-                new AbilityScoreImprovement("con"),
-                new AbilityScoreImprovement("con"),
-                new AbilityScoreImprovement("con"),
-                new IrresistibleOffense("str"),
-            ],
-            masteries: ["Graze", "Topple"],
-            fightingStyle: new GreatWeaponFighting(),
         })
-    )
-    feats.push(...championFeats(level))
-    feats.push(
-        new FighterAction({
+        return feats
+    }
+
+    static championFeats(level: number): Feat[] {
+        const feats: Feat[] = []
+        if (level >= 3) {
+            feats.push(new ImprovedCritical(19))
+        }
+        if (level >= 10) {
+            feats.push(new HeroicAdvantage())
+        }
+        if (level >= 15) {
+            feats.push(new ImprovedCritical(18))
+        }
+        return feats
+    }
+
+    static battlemasterFeats(level: number): Feat[] {
+        const feats: Feat[] = []
+        if (level >= 3) {
+            feats.push(new CombatSuperiority(level))
+        }
+        if (level >= 15) {
+            feats.push(new Relentless())
+        }
+        return feats
+    }
+
+    static createBattlemasterFighter(level: number): Character {
+        const character = new Character({
+            stats: { str: 17, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+        })
+        const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
+        const feats = []
+        feats.push(new SavageAttacker())
+        feats.push(
+            ...Fighter.baseFeats({
+                level,
+                asis: [
+                    new GreatWeaponMaster(weapon),
+                    new AbilityScoreImprovement("str"),
+                    new AbilityScoreImprovement("con"),
+                    new AbilityScoreImprovement("con"),
+                    new AbilityScoreImprovement("con"),
+                    new AbilityScoreImprovement("con"),
+                    new IrresistibleOffense("str"),
+                ],
+                masteries: ["Topple", "Graze"],
+                fightingStyle: new GreatWeaponFighting(),
+            })
+        )
+        feats.push(...Fighter.battlemasterFeats(level))
+        feats.push(new PrecisionAttack(8))
+        feats.push(Fighter.defaultAction(weapon))
+        feats.forEach((feat) => character.addFeat(feat))
+        return character
+    }
+
+    static createChampionFighter(level: number): Character {
+        const character = new Character({
+            stats: { str: 17, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+        })
+        const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
+        const toppleWeapon = new Maul({ magicBonus: defaultMagicBonus(level) })
+        const feats = []
+        feats.push(new SavageAttacker())
+        feats.push(
+            ...Fighter.baseFeats({
+                level,
+                asis: [
+                    new GreatWeaponMaster(weapon),
+                    new AbilityScoreImprovement("str"),
+                    new AbilityScoreImprovement("con"),
+                    new AbilityScoreImprovement("con"),
+                    new AbilityScoreImprovement("con"),
+                    new AbilityScoreImprovement("con"),
+                    new IrresistibleOffense("str"),
+                ],
+                masteries: ["Graze", "Topple"],
+                fightingStyle: new GreatWeaponFighting(),
+            })
+        )
+        feats.push(...Fighter.championFeats(level))
+        feats.push(
+            new FighterAction({
+                weapon,
+                toppleWeapon,
+            })
+        )
+        feats.forEach((feat) => character.addFeat(feat))
+        return character
+    }
+
+    static defaultAction(weapon: Weapon, toppleWeapon?: Weapon): Feat {
+        if (toppleWeapon && toppleWeapon.mastery !== "Topple") {
+            throw new Error("Topple weapon must have Topple mastery")
+        }
+        return new FighterAction({
             weapon,
             toppleWeapon,
         })
-    )
-    return new Character({
-        stats: {
-            str: 17,
-            dex: 10,
-            con: 10,
-            int: 10,
-            wis: 10,
-            cha: 10,
-        },
-        feats,
-    })
-}
-
-export function createBattlemasterFighter(level: number): Character {
-    const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
-    const feats = []
-    feats.push(new SavageAttacker())
-    feats.push(
-        ...fighterFeats({
-            level,
-            asis: [
-                new GreatWeaponMaster(weapon),
-                new AbilityScoreImprovement("str"),
-                new AbilityScoreImprovement("con"),
-                new AbilityScoreImprovement("con"),
-                new AbilityScoreImprovement("con"),
-                new AbilityScoreImprovement("con"),
-                new IrresistibleOffense("str"),
-            ],
-            masteries: ["Topple", "Graze"],
-            fightingStyle: new GreatWeaponFighting(),
-        })
-    )
-    feats.push(...battlemasterFeats(level))
-    feats.push(new PrecisionAttack(8))
-    feats.push(new FighterAction({ weapon }))
-    return new Character({
-        stats: { str: 17, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-        feats,
-    })
-}
-
-function fighterSchedule(masteries: WeaponMastery[], fightingStyle: Feat) {
-    return new ClassSchedule("Fighter", {
-        1: new FeatConfig([new WeaponMasteries(masteries), fightingStyle]),
-        2: new FeatConfig([new ActionSurge()]),
-        5: new FeatConfig([new ExtraAttack(2)]),
-        11: new FeatConfig([new ExtraAttack(3)]),
-        13: new FeatConfig([new StudiedAttacks()]),
-        17: new FeatConfig([new ExtraActionSurge()]),
-        20: new FeatConfig([new ExtraAttack(4)]),
-    })
+    }
 }
