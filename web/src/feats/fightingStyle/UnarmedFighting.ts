@@ -1,6 +1,7 @@
 import { Character } from "../../main"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { Feat } from "../../sim/Feat"
+import { UnarmedWeapon } from "../../sim/Weapon"
 
 export class UnarmedFighting extends Feat {
     apply(character: Character): void {
@@ -8,8 +9,8 @@ export class UnarmedFighting extends Feat {
     }
 
     damageRoll(event: DamageRollEvent) {
-        if (event.attack?.attack.weapon()?.hasTag("unarmed")) {
-            event.damage.dice.push(8)
+        if (event.attack?.attack.weapon()?.hasTag(UnarmedWeapon)) {
+            event.damage.addDice([8])
             // Subtract 1 since unarmed strikes are normally 1 + Str
             event.damage.flatDmg -= 1
         }

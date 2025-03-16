@@ -23,4 +23,10 @@ export class DamageRoll {
     reroll(): void {
         this.rolls = diceRolls(this.dice)
     }
+
+    addDice(dice: Array<number>): void {
+        this.dice.push(...dice)
+        const rolls = diceRolls(dice)
+        this.rolls.push(...rolls)
+    }
 }

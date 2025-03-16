@@ -4,6 +4,7 @@ import { DamageType, Stat, WeaponMastery } from "./types"
 
 export const HeavyWeapon = "Heavy"
 export const TwoHandedWeapon = "TwoHanded"
+export const UnarmedWeapon = "Unarmed"
 
 export type WeaponArgs = {
     name: string

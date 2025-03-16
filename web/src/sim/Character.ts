@@ -73,6 +73,7 @@ export class Character {
         character: this,
         initialMax: 1,
     })
+    grappleStat: Stat = "str"
     // TODO: Add other class resources
     // TODO: Handle actions better
     actions: number = 1
@@ -156,6 +157,16 @@ export class Character {
     addClassLevel(class_: Class, level: number): void {
         this.classLevels.set(class_, this.getClassLevel(class_) + level)
         this.level += level
+    }
+
+    // =============================
+    //       COMMON ACTIONS
+    // =============================
+
+    grapple(target: Target): void {
+        if (target.save(this.dc(this.grappleStat))) {
+            target.grapple()
+        }
     }
 
     // =============================
@@ -246,7 +257,12 @@ export class Character {
             if (crit) {
                 damage.dice = damage.dice.concat(damage.dice)
             }
-            this.doDamage({ target, damage, attack: attackData, multiplier: 1 })
+            this.doDamage({
+                target,
+                damage,
+                attack: attackData,
+                multiplier: 1,
+            })
         }
     }
 
