@@ -1,7 +1,7 @@
-import { LightWeapon, Weapon, WeaponArgs } from "../sim/Weapon"
+import { LightWeapon, Weapon, WeaponArgs } from "../../sim/Weapon"
 
 export class Club extends Weapon {
-    constructor(args?: WeaponArgs) {
+    constructor(args?: Partial<WeaponArgs>) {
         super({
             name: "Club",
             numDice: 1,

@@ -8,7 +8,7 @@ import {
 } from "../../sim/Weapon"
 
 export class LightCrossbow extends Weapon {
-    constructor(args?: WeaponArgs) {
+    constructor(args?: Partial<WeaponArgs>) {
         super({
             name: "LightCrossbow",
             numDice: 1,

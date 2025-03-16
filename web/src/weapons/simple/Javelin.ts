@@ -1,7 +1,7 @@
 import { ThrownWeapon, Weapon, WeaponArgs } from "../../sim/Weapon"
 
 export class Javelin extends Weapon {
-    constructor(args?: WeaponArgs) {
+    constructor(args?: Partial<WeaponArgs>) {
         super({
             name: "Javelin",
             numDice: 1,

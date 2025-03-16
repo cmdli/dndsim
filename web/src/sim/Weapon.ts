@@ -11,6 +11,8 @@ export const ThrownWeapon = "Thrown"
 export const RangedWeapon = "Ranged"
 export const LoadingWeapon = "Loading"
 export const AmmunitionWeapon = "Ammunition"
+export const VersatileWeapon = "Versatile"
+export const ReachWeapon = "Reach"
 
 export type WeaponArgs = {
     name: string

@@ -14,13 +14,11 @@ import { Feat } from "../sim/Feat"
 import { WeaponMastery } from "../sim/types"
 import { Weapon } from "../sim/Weapon"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
-import { Longsword } from "../weapons/Longsword"
 import { SavageAttacker } from "../feats/origin/SavageAttacker"
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
-import { Greatsword } from "../weapons/Greatsword"
-import { Maul } from "../weapons/Maul"
+import { Greatsword } from "../weapons/index"
+import { Maul } from "../weapons/index"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
-import { ClassSchedule, FeatConfig, Schedule } from "../config/config"
 
 class ActionSurge extends Feat {
     num: number = 0

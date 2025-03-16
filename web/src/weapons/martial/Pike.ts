@@ -1,20 +1,20 @@
 import {
-    AmmunitionWeapon,
-    RangedWeapon,
+    HeavyWeapon,
+    ReachWeapon,
     TwoHandedWeapon,
     Weapon,
     WeaponArgs,
 } from "../../sim/Weapon"
 
-export class Shortbow extends Weapon {
+export class Pike extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
         super({
-            name: "Shortbow",
+            name: "Pike",
             numDice: 1,
-            die: 6,
+            die: 10,
             damageType: "piercing",
-            mastery: "Vex",
-            tags: [TwoHandedWeapon, AmmunitionWeapon, RangedWeapon],
+            mastery: "Push",
+            tags: [HeavyWeapon, ReachWeapon, TwoHandedWeapon],
             ...args,
         })
     }

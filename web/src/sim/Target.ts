@@ -67,6 +67,10 @@ export class Target {
         this.prone = true
     }
 
+    grapple(): void {
+        this.grappled = true
+    }
+
     addDamage(source: string, amount: number): void {
         log.record(`Damage (${source})`, amount)
         this.damage += amount

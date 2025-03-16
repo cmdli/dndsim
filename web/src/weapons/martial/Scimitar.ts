@@ -1,20 +1,19 @@
 import {
     FinesseWeapon,
     LightWeapon,
-    ThrownWeapon,
     Weapon,
     WeaponArgs,
 } from "../../sim/Weapon"
 
-export class Dagger extends Weapon {
+export class Scimitar extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
         super({
-            name: "Dagger",
+            name: "Scimitar",
             numDice: 1,
-            die: 4,
-            damageType: "piercing",
+            die: 6,
+            damageType: "slashing",
             mastery: "Nick",
-            tags: [LightWeapon, FinesseWeapon, ThrownWeapon],
+            tags: [FinesseWeapon, LightWeapon],
             ...args,
         })
     }

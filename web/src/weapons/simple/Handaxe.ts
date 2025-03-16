@@ -1,7 +1,7 @@
-import { LightWeapon, ThrownWeapon, Weapon, WeaponArgs } from "../sim/Weapon"
+import { LightWeapon, ThrownWeapon, Weapon, WeaponArgs } from "../../sim/Weapon"
 
 export class Handaxe extends Weapon {
-    constructor(args?: WeaponArgs) {
+    constructor(args?: Partial<WeaponArgs>) {
         super({
             name: "Handaxe",
             numDice: 1,

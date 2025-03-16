@@ -11,7 +11,7 @@ export class Telepathic extends Feat {
     }
 
     apply(character: Character): void {
-        // Detect thoughts is useless here
+        // Detect thoughts is useless
         character.increaseStat(this.stat, 1)
     }
 }
