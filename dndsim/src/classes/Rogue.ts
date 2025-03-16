@@ -328,7 +328,6 @@ export class Rogue {
                 })
             )
         }
-        // Add base and subclass feats
         feats.push(
             ...Rogue.baseFeats({
                 level,
