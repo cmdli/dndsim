@@ -8,6 +8,7 @@ export class AttackResultEvent {
     crit: boolean
     roll: number
     damageRolls: Array<DamageRoll>
+    dmgMultiplier: number = 1
 
     constructor(args: {
         attack: AttackEvent

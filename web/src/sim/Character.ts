@@ -1,6 +1,4 @@
 import {
-    CharacterEvent,
-    CharacterEventData,
     CharacterEventMapping,
     CharacterEventName,
 } from "./events/CharacterEvent"
@@ -261,7 +259,7 @@ export class Character {
                 target,
                 damage,
                 attack: attackData,
-                multiplier: 1,
+                multiplier: attackResult.dmgMultiplier,
             })
         }
     }
