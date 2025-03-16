@@ -2,7 +2,7 @@ import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { DamageRoll } from "./helpers/DamageRoll"
 import { Spell } from "./spells/Spell"
-import { Weapon } from "./Weapon"
+import { RangedWeapon, Weapon } from "./Weapon"
 
 export abstract class Attack {
     tags: Set<string> = new Set()
@@ -59,7 +59,7 @@ export class WeaponAttack extends Attack {
     }
 
     isRanged(): boolean {
-        return this.weapon_.tags.has("ranged")
+        return this.weapon_.tags.has(RangedWeapon)
     }
 
     weapon(): Weapon {

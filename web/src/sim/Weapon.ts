@@ -5,6 +5,12 @@ import { DamageType, Stat, WeaponMastery } from "./types"
 export const HeavyWeapon = "Heavy"
 export const TwoHandedWeapon = "TwoHanded"
 export const UnarmedWeapon = "Unarmed"
+export const LightWeapon = "Light"
+export const FinesseWeapon = "Finesse"
+export const ThrownWeapon = "Thrown"
+export const RangedWeapon = "Ranged"
+export const LoadingWeapon = "Loading"
+export const AmmunitionWeapon = "Ammunition"
 
 export type WeaponArgs = {
     name: string
@@ -45,10 +51,10 @@ export class Weapon {
     }
 
     mod(character: Character): Stat {
-        if (this.tags.has("ranged")) {
+        if (this.tags.has(RangedWeapon)) {
             return "dex"
         } else if (
-            this.tags.has("finesse") &&
+            this.tags.has(FinesseWeapon) &&
             character.stat("dex") > character.stat("str")
         ) {
             return "dex"

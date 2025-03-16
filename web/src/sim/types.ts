@@ -8,6 +8,7 @@ export type WeaponMastery =
     | "Cleave"
     | "Graze"
     | "Sap"
+    | "Push"
 
 export type Class =
     | "Artificer"

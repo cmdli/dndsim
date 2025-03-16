@@ -1,0 +1,15 @@
+import { LightWeapon, Weapon, WeaponArgs } from "../../sim/Weapon"
+
+export class Quarterstaff extends Weapon {
+    constructor(args?: WeaponArgs) {
+        super({
+            name: "Quarterstaff",
+            numDice: 1,
+            die: 6,
+            damageType: "bludgeoning",
+            mastery: "Topple",
+            tags: [], // Versatile is not used
+            ...args,
+        })
+    }
+}
