@@ -11,14 +11,14 @@ export class Resource {
     constructor(args: {
         name: string
         character: Character
-        initialMax: number
+        initialMax?: number
         initialCount?: number
         resetOnShortRest?: boolean
         resetOnLongRest?: boolean
     }) {
         this.name = args.name
-        this.count = args.initialCount ?? args.initialMax
-        this.max = args.initialMax
+        this.count = args.initialCount ?? args.initialMax ?? 0
+        this.max = args.initialMax ?? 0
         args.character.events.on<"short_rest">("short_rest", () =>
             this.shortRest()
         )

@@ -60,20 +60,25 @@ export class Character {
     attributes: Map<string, number> = new Map([[NumAttacksAttribute, 1]])
 
     // Resources
-    bonus: Resource = new Resource({
+    bonus = new Resource({
         name: "Bonus",
         character: this,
         initialMax: 1,
     })
     combatSuperiority: CombatSuperiority = new CombatSuperiority(this)
-    heroicInspiration: Resource = new Resource({
+    heroicInspiration = new Resource({
         name: "HeroicInspiration",
         character: this,
         initialMax: 1,
     })
-    grappleStat: Stat = "str"
+    ki = new Resource({
+        name: "Ki",
+        character: this,
+        resetOnLongRest: true,
+    })
     // TODO: Add other class resources
     // TODO: Handle actions better
+    grappleStat: Stat = "str"
     actions: number = 1
 
     constructor(args: { stats: Omit<Record<Stat, number>, "none"> }) {
