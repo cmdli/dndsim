@@ -31,6 +31,8 @@ import { Topple } from "./coreFeats/Topple"
 import { Vex } from "./coreFeats/Vex"
 import { log } from "../util/Log"
 import { CombatSuperiority } from "./resources/CombatSuperiority"
+import { CustomTurn } from "./steps/CustomTurn"
+import { Environment } from "./Environment"
 
 const DEFAULT_STAT_MAX = 20
 
@@ -65,6 +67,11 @@ export class Character {
         character: this,
         initialMax: 1,
     })
+    actions = new Resource({
+        name: "Action",
+        character: this,
+        initialMax: 1,
+    })
     combatSuperiority: CombatSuperiority = new CombatSuperiority(this)
     heroicInspiration = new Resource({
         name: "HeroicInspiration",
@@ -76,10 +83,11 @@ export class Character {
         character: this,
         resetOnLongRest: true,
     })
+    resources: Map<string, Resource> = new Map()
     // TODO: Add other class resources
     // TODO: Handle actions better
     grappleStat: Stat = "str"
-    actions: number = 1
+    customTurn?: CustomTurn
 
     constructor(args: { stats: Omit<Record<Stat, number>, "none"> }) {
         const { stats } = args
@@ -178,17 +186,22 @@ export class Character {
 
     turn(target: Target): void {
         log.record("Turn", 1)
-        this.actions = 1
+        this.actions.reset()
         this.bonus.reset()
-        this.events.emit("begin_turn", new BeginTurnEvent({ target }))
-        this.events.emit("before_action", new BeforeActionEvent({ target }))
-        while (this.actions > 0) {
-            this.events.emit("action", new ActionEvent({ target }))
-            this.actions -= 1
+        if (this.customTurn) {
+            this.customTurn.doTurn(
+                new Environment({ character: this, target }),
+                this
+            )
+        } else {
+            this.events.emit("begin_turn", new BeginTurnEvent({ target }))
+            this.events.emit("before_action", new BeforeActionEvent({ target }))
+            while (this.actions.use()) {
+                this.events.emit("action", new ActionEvent({ target }))
+            }
+            this.events.emit("after_action", new AfterActionEvent({ target }))
+            this.events.emit("end_turn", new EndTurnEvent({ target }))
         }
-        this.events.emit("after_action", new AfterActionEvent({ target }))
-        this.events.emit("end_turn", new EndTurnEvent({ target }))
-        this.bonus.reset()
         for (const minion of this.minions) {
             minion.turn(target)
         }

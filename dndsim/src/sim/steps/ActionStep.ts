@@ -1,20 +1,21 @@
+import { Character } from "../Character"
 import { Environment } from "../Environment"
-import { Step, StepStage } from "./Step"
+import { Step, TurnStage } from "./Step"
 
 export abstract class ActionStep implements Step {
-    stage(): StepStage {
+    stage(): TurnStage {
         return "action"
     }
 
-    eligible(environment: Environment): boolean {
-        return environment.character.actions > 0
+    eligible(environment: Environment, character: Character): boolean {
+        return environment.character.actions.has()
     }
 
-    do(environment: Environment): void {
-        environment.character.actions--
-        this.action(environment)
+    do(environment: Environment, character: Character): void {
+        environment.character.actions.use()
+        this.action(environment, character)
     }
 
-    abstract action(environment: Environment): void
+    abstract action(environment: Environment, character: Character): void
     abstract repeatable(): boolean
 }

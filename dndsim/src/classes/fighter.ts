@@ -4,10 +4,8 @@ import { GreatWeaponFighting } from "../feats/fightingStyle/GreatWeaponFighting"
 import { GreatWeaponMaster } from "../feats/general/GreatWeaponMaster"
 import { ImprovedCritical } from "../feats/shared/ImprovedCritical"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
-import { NumAttacksAttribute } from "../sim/actions/AttackAction"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
-import { ActionEvent } from "../sim/events/ActionEvent"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { Feat } from "../sim/Feat"
@@ -19,32 +17,49 @@ import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { Greatsword } from "../weapons/index"
 import { Maul } from "../weapons/index"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
+import { Environment } from "../sim/Environment"
+import { CustomTurn } from "../sim/steps/CustomTurn"
+import {
+    AttackActionStep,
+    WeaponAttack,
+} from "../sim/steps/core/AttackActionStep"
+import { Resource } from "../sim/resources/Resource"
+import { Step, TurnStage } from "../sim/steps/Step"
 
-class ActionSurge extends Feat {
-    num: number = 0
+const ActionSurgeResource = "ActionSurge"
 
-    apply(character: Character): void {
-        character.events.on("short_rest", () => this.onShortRest())
-        character.events.on("before_action", () => this.onBeforeAction())
+class ActionSurgeStep implements Step {
+    stage(): TurnStage {
+        return "before_action"
     }
 
-    onShortRest() {
-        this.num = this.character!.getAttribute("ActionSurgeMax")
+    eligible(environment: Environment): boolean {
+        return environment.character.resources.get(ActionSurgeResource)!.has()
     }
 
-    onBeforeAction() {
-        if (this.num > 0) {
-            this.num -= 1
-        }
+    do(environment: Environment): void {
+        environment.character.resources.get(ActionSurgeResource)!.use()
+        environment.character.actions.add(1, true)
+    }
+
+    repeatable(): boolean {
+        return false
     }
 }
 
-class ExtraActionSurge extends Feat {
+class AddActionSurge extends Feat {
     apply(character: Character): void {
-        character.setAttribute(
-            "ActionSurgeMax",
-            character.getAttribute("ActionSurgeMax") + 1
-        )
+        let resource = character.resources.get(ActionSurgeResource)
+        if (!resource) {
+            resource = new Resource({
+                name: ActionSurgeResource,
+                character,
+                initialMax: 1,
+                resetOnShortRest: true,
+            })
+            character.resources.set(ActionSurgeResource, resource)
+        }
+        resource.addMax(1)
     }
 }
 
@@ -52,17 +67,23 @@ class StudiedAttacks extends Feat {
     enabled: boolean = false
 
     apply(character: Character): void {
-        character.events.on("attack_roll", (data) => {
-            if (this.enabled) {
-                data.adv = true
-                this.enabled = false
-            }
-        })
-        character.events.on("attack_result", (data) => {
-            if (!data.hit) {
-                this.enabled = true
-            }
-        })
+        character.events.on("attack_roll", (event) => this.attackRoll(event))
+        character.events.on("attack_result", (event) =>
+            this.attackResult(event)
+        )
+    }
+
+    attackRoll(event: AttackRollEvent): void {
+        if (this.enabled) {
+            event.adv = true
+            this.enabled = false
+        }
+    }
+
+    attackResult(event: AttackResultEvent): void {
+        if (!event.hit) {
+            this.enabled = true
+        }
     }
 }
 
@@ -70,23 +91,23 @@ class HeroicAdvantage extends Feat {
     used: boolean = false
 
     apply(character: Character): void {
-        character.events.on("begin_turn", (data) => this.beginTurn(data))
-        character.events.on("attack_roll", (data) => this.attackRoll(data))
+        character.events.on("begin_turn", (event) => this.beginTurn(event))
+        character.events.on("attack_roll", (event) => this.attackRoll(event))
     }
 
     beginTurn(event: BeginTurnEvent): void {
         this.character!.heroicInspiration.add(1)
     }
 
-    attackRoll(data: AttackRollEvent): void {
-        if (data.adv) {
+    attackRoll(event: AttackRollEvent): void {
+        if (event.adv) {
             return
         }
         if (this.character!.heroicInspiration.has()) {
-            const roll = data.roll1
+            const roll = event.roll1
             if (roll < 8) {
                 this.character!.heroicInspiration.use()
-                data.adv = true
+                event.adv = true
             }
         }
     }
@@ -101,43 +122,45 @@ class PrecisionAttack extends Feat {
     }
 
     apply(character: Character): void {
-        character.events.on("attack_roll", (data) => this.attackRoll(data))
+        character.events.on("attack_roll", (event) => this.attackRoll(event))
     }
 
-    attackRoll(data: AttackRollEvent): void {
+    attackRoll(event: AttackRollEvent): void {
         if (
-            data.attack.hasTag("used_maneuver") ||
+            event.attack.hasTag("used_maneuver") ||
             !this.character!.combatSuperiority.has() ||
-            data.hits()
+            event.hits()
         ) {
             return
         }
-        if (data.roll() >= this.low) {
+        if (event.roll() >= this.low) {
             const roll = this.character!.combatSuperiority.roll()
-            data.situationalBonus += roll
-            data.attack.addTag("used_maneuver")
+            event.situationalBonus += roll
+            event.attack.addTag("used_maneuver")
         }
     }
 }
 
 class TrippingAttack extends Feat {
     apply(character: Character): void {
-        character.events.on("attack_result", (data) => this.attackResult(data))
+        character.events.on("attack_result", (event) =>
+            this.attackResult(event)
+        )
     }
 
-    attackResult(data: AttackResultEvent): void {
+    attackResult(event: AttackResultEvent): void {
         if (
-            !data.hit ||
-            data.attack.target.prone ||
-            data.attack.hasTag("used_maneuver") ||
+            !event.hit ||
+            event.attack.target.prone ||
+            event.attack.hasTag("used_maneuver") ||
             !this.character!.combatSuperiority.has()
         ) {
             return
         }
         const roll = this.character!.combatSuperiority.roll()
-        data.addDamage({ source: "TrippingAttack", dice: [roll] })
-        if (!data.attack.target.save(this.character!.dc("str"))) {
-            data.attack.target.knockProne()
+        event.addDamage({ source: "TrippingAttack", dice: [roll] })
+        if (!event.attack.target.save(this.character!.dc("str"))) {
+            event.attack.target.knockProne()
         }
     }
 }
@@ -175,40 +198,26 @@ class Relentless extends Feat {
     }
 }
 
-class FighterAction extends Feat {
+class ToppleWeaponAttack implements WeaponAttack {
     weapon: Weapon
-    toppleWeapon?: Weapon
-    nickWeapon?: Weapon
+    toppleWeapon: Weapon
 
-    constructor(args: {
-        weapon: Weapon
-        toppleWeapon?: Weapon
-        nickWeapon?: Weapon
-    }) {
-        super()
+    constructor(args: { weapon: Weapon; toppleWeapon: Weapon }) {
         this.weapon = args.weapon
         this.toppleWeapon = args.toppleWeapon
-        this.nickWeapon = args.nickWeapon
     }
 
-    apply(character: Character): void {
-        character.events.on("action", (data) => this.action(data))
-    }
-
-    action(data: ActionEvent): void {
-        const numAttacks =
-            this.character?.getAttribute(NumAttacksAttribute) ?? 1
-        for (let i = 0; i < numAttacks; i++) {
-            let weapon = this.weapon
-            if (this.toppleWeapon && !data.target.prone && i < numAttacks - 1) {
-                weapon = this.toppleWeapon
-            }
-            this.character?.weaponAttack({
-                target: data.target,
-                weapon,
-                tags: ["main_action"],
-            })
+    do(environment: Environment, character: Character): void {
+        const target = environment.target
+        let weapon = this.weapon
+        if (!target.prone) {
+            weapon = this.toppleWeapon
         }
+        character.weaponAttack({
+            target,
+            weapon,
+            tags: ["main_action"],
+        })
     }
 }
 
@@ -227,7 +236,7 @@ export class Fighter {
             feats.push(fightingStyle)
         }
         if (level >= 2) {
-            feats.push(new ActionSurge())
+            feats.push(new AddActionSurge())
         }
         if (level >= 5) {
             feats.push(new ExtraAttack(2))
@@ -239,7 +248,7 @@ export class Fighter {
             feats.push(new StudiedAttacks())
         }
         if (level >= 17) {
-            feats.push(new ExtraActionSurge())
+            feats.push(new AddActionSurge())
         }
         if (level >= 20) {
             feats.push(new ExtraAttack(4))
@@ -283,6 +292,7 @@ export class Fighter {
             stats: { str: 17, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
         })
         const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
+        const toppleWeapon = new Maul({ magicBonus: defaultMagicBonus(level) })
         const feats = []
         feats.push(new SavageAttacker())
         feats.push(
@@ -303,7 +313,12 @@ export class Fighter {
         )
         feats.push(...Fighter.battlemasterFeats(level))
         feats.push(new PrecisionAttack(8))
-        feats.push(Fighter.defaultAction(weapon))
+        character.customTurn = new CustomTurn([
+            new ActionSurgeStep(),
+            new AttackActionStep(
+                new ToppleWeaponAttack({ weapon, toppleWeapon })
+            ),
+        ])
         feats.forEach((feat) => character.addFeat(feat))
         return character
     }
@@ -333,23 +348,13 @@ export class Fighter {
             })
         )
         feats.push(...Fighter.championFeats(level))
-        feats.push(
-            new FighterAction({
-                weapon,
-                toppleWeapon,
-            })
-        )
+        character.customTurn = new CustomTurn([
+            new ActionSurgeStep(),
+            new AttackActionStep(
+                new ToppleWeaponAttack({ weapon, toppleWeapon })
+            ),
+        ])
         feats.forEach((feat) => character.addFeat(feat))
         return character
-    }
-
-    static defaultAction(weapon: Weapon, toppleWeapon?: Weapon): Feat {
-        if (toppleWeapon && toppleWeapon.mastery !== "Topple") {
-            throw new Error("Topple weapon must have Topple mastery")
-        }
-        return new FighterAction({
-            weapon,
-            toppleWeapon,
-        })
     }
 }

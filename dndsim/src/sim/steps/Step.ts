@@ -1,6 +1,7 @@
+import { Character } from "../Character"
 import { Environment } from "../Environment"
 
-export const StepStages = [
+export const TurnStages = [
     "turn_start",
     "before_action",
     "action",
@@ -8,11 +9,11 @@ export const StepStages = [
     "turn_end",
 ] as const
 
-export type StepStage = (typeof StepStages)[number]
+export type TurnStage = (typeof TurnStages)[number]
 
 export interface Step {
-    stage(): StepStage
-    eligible(environment: Environment): boolean
-    do(environment: Environment): void
+    stage(): TurnStage
+    eligible(environment: Environment, character: Character): boolean
+    do(environment: Environment, character: Character): void
     repeatable(): boolean
 }

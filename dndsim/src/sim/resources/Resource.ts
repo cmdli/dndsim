@@ -33,8 +33,12 @@ export class Resource {
         this.max += amount
     }
 
-    add(amount: number): void {
-        this.count = Math.min(this.max, this.count + amount)
+    add(amount: number, overcount?: boolean): void {
+        let newCount = this.count + amount
+        if (!overcount) {
+            newCount = Math.min(this.max, newCount)
+        }
+        this.count = newCount
     }
 
     use(reason?: string): boolean {
