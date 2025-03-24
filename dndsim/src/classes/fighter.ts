@@ -18,48 +18,44 @@ import { Greatsword } from "../weapons/index"
 import { Maul } from "../weapons/index"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Environment } from "../sim/Environment"
-import { CustomTurn } from "../sim/steps/CustomTurn"
+import { CustomTurn } from "../sim/actions/CustomTurn"
 import {
-    AttackActionStep,
+    AttackActionOperation,
     WeaponAttack,
-} from "../sim/steps/core/AttackActionStep"
+} from "../sim/actions/AttackAction"
 import { Resource } from "../sim/resources/Resource"
-import { Step, TurnStage } from "../sim/steps/Step"
+import { Operation, TurnStage } from "../sim/actions/Operation"
 
 const ActionSurgeResource = "ActionSurge"
 
-class ActionSurgeStep implements Step {
-    stage(): TurnStage {
-        return "before_action"
-    }
+class ActionSurgeOperation implements Operation {
+    stage: TurnStage = "before_action"
+    repeatable: boolean = false
 
     eligible(environment: Environment): boolean {
-        return environment.character.resources.get(ActionSurgeResource)!.has()
+        return environment.character.getResource(ActionSurgeResource)!.has()
     }
 
     do(environment: Environment): void {
-        environment.character.resources.get(ActionSurgeResource)!.use()
+        environment.character.getResource(ActionSurgeResource)!.use()
         environment.character.actions.add(1, true)
-    }
-
-    repeatable(): boolean {
-        return false
     }
 }
 
 class AddActionSurge extends Feat {
     apply(character: Character): void {
-        let resource = character.resources.get(ActionSurgeResource)
-        if (!resource) {
-            resource = new Resource({
-                name: ActionSurgeResource,
-                character,
-                initialMax: 1,
-                resetOnShortRest: true,
-            })
-            character.resources.set(ActionSurgeResource, resource)
+        if (!character.resources.has(ActionSurgeResource)) {
+            character.resources.set(
+                ActionSurgeResource,
+                new Resource({
+                    name: ActionSurgeResource,
+                    character,
+                    initialMax: 1,
+                    resetOnShortRest: true,
+                })
+            )
         }
-        resource.addMax(1)
+        character.getResource(ActionSurgeResource).addMax(1)
     }
 }
 
@@ -198,20 +194,15 @@ class Relentless extends Feat {
     }
 }
 
-class ToppleWeaponAttack implements WeaponAttack {
+function toppleWeaponAttack(args: {
     weapon: Weapon
     toppleWeapon: Weapon
-
-    constructor(args: { weapon: Weapon; toppleWeapon: Weapon }) {
-        this.weapon = args.weapon
-        this.toppleWeapon = args.toppleWeapon
-    }
-
-    do(environment: Environment, character: Character): void {
+}): WeaponAttack {
+    return (environment, character) => {
         const target = environment.target
-        let weapon = this.weapon
+        let weapon = args.weapon
         if (!target.prone) {
-            weapon = this.toppleWeapon
+            weapon = args.toppleWeapon
         }
         character.weaponAttack({
             target,
@@ -313,12 +304,14 @@ export class Fighter {
         )
         feats.push(...Fighter.battlemasterFeats(level))
         feats.push(new PrecisionAttack(8))
-        character.customTurn = new CustomTurn([
-            new ActionSurgeStep(),
-            new AttackActionStep(
-                new ToppleWeaponAttack({ weapon, toppleWeapon })
-            ),
-        ])
+        character.customTurn = new CustomTurn({
+            priorityList: [
+                new ActionSurgeOperation(),
+                new AttackActionOperation(
+                    toppleWeaponAttack({ weapon, toppleWeapon })
+                ),
+            ],
+        })
         feats.forEach((feat) => character.addFeat(feat))
         return character
     }
@@ -348,12 +341,14 @@ export class Fighter {
             })
         )
         feats.push(...Fighter.championFeats(level))
-        character.customTurn = new CustomTurn([
-            new ActionSurgeStep(),
-            new AttackActionStep(
-                new ToppleWeaponAttack({ weapon, toppleWeapon })
-            ),
-        ])
+        character.customTurn = new CustomTurn({
+            priorityList: [
+                new ActionSurgeOperation(),
+                new AttackActionOperation(
+                    toppleWeaponAttack({ weapon, toppleWeapon })
+                ),
+            ],
+        })
         feats.forEach((feat) => character.addFeat(feat))
         return character
     }

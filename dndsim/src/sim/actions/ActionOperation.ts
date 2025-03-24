@@ -1,11 +1,9 @@
 import { Character } from "../Character"
 import { Environment } from "../Environment"
-import { Step, TurnStage } from "./Step"
+import { Operation, TurnStage } from "./Operation"
 
-export abstract class ActionStep implements Step {
-    stage(): TurnStage {
-        return "action"
-    }
+export abstract class ActionOperation implements Operation {
+    stage: TurnStage = "action"
 
     eligible(environment: Environment, character: Character): boolean {
         return environment.character.actions.has()
@@ -17,5 +15,5 @@ export abstract class ActionStep implements Step {
     }
 
     abstract action(environment: Environment, character: Character): void
-    abstract repeatable(): boolean
+    abstract repeatable: boolean
 }

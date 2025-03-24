@@ -31,7 +31,7 @@ import { Topple } from "./coreFeats/Topple"
 import { Vex } from "./coreFeats/Vex"
 import { log } from "../util/Log"
 import { CombatSuperiority } from "./resources/CombatSuperiority"
-import { CustomTurn } from "./steps/CustomTurn"
+import { CustomTurn } from "./actions/CustomTurn"
 import { Environment } from "./Environment"
 
 const DEFAULT_STAT_MAX = 20
@@ -168,6 +168,20 @@ export class Character {
     addClassLevel(class_: Class, level: number): void {
         this.classLevels.set(class_, this.getClassLevel(class_) + level)
         this.level += level
+    }
+
+    getResource(name: string): Resource {
+        if (!this.resources.has(name)) {
+            this.resources.set(
+                name,
+                new Resource({
+                    name,
+                    character: this,
+                    initialMax: 0,
+                })
+            )
+        }
+        return this.resources.get(name)!
     }
 
     // =============================

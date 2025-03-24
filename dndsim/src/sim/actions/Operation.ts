@@ -11,9 +11,9 @@ export const TurnStages = [
 
 export type TurnStage = (typeof TurnStages)[number]
 
-export interface Step {
-    stage(): TurnStage
+export interface Operation {
+    readonly stage: TurnStage
+    readonly repeatable: boolean
     eligible(environment: Environment, character: Character): boolean
     do(environment: Environment, character: Character): void
-    repeatable(): boolean
 }

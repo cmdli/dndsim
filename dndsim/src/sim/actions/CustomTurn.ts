@@ -4,20 +4,20 @@ import { AfterActionEvent } from "../events/AfterActionEvent"
 import { BeforeActionEvent } from "../events/BeforeActionEvent"
 import { BeginTurnEvent } from "../events/BeginTurnEvent"
 import { EndTurnEvent } from "../events/EndTurnEvent"
-import { Step, TurnStage } from "./Step"
+import { Operation, TurnStage } from "./Operation"
 
 export class CustomTurn {
-    steps: Step[]
+    priorityList: Operation[]
 
-    constructor(steps: Step[]) {
-        this.steps = steps
+    constructor(args: { priorityList: Operation[] }) {
+        this.priorityList = args.priorityList
     }
 
     doTurn(environment: Environment, character: Character) {
         const target = environment.target
-        const byStage: Partial<Record<TurnStage, Step[]>> = {}
-        for (const step of this.steps) {
-            const stage = step.stage()
+        const byStage: Partial<Record<TurnStage, Operation[]>> = {}
+        for (const step of this.priorityList) {
+            const stage = step.stage
             if (!byStage[stage]) {
                 byStage[stage] = []
             }
@@ -42,7 +42,11 @@ export class CustomTurn {
         this.doStage(environment, character, byStage["turn_end"] || [])
     }
 
-    doStage(environment: Environment, character: Character, steps: Step[]) {
+    private doStage(
+        environment: Environment,
+        character: Character,
+        steps: Operation[]
+    ) {
         let didStep = true
         while (didStep) {
             didStep = false
@@ -50,7 +54,7 @@ export class CustomTurn {
                 const step = steps[i]
                 if (step.eligible(environment, character)) {
                     step.do(environment, character)
-                    if (!step.repeatable()) {
+                    if (!step.repeatable) {
                         steps.splice(i, 1)
                     }
                     didStep = true
