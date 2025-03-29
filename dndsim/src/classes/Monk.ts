@@ -2,7 +2,11 @@ import { AbilityScoreImprovement } from "../feats/general/AbilityScoreImprovemen
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { Grappler } from "../feats/general/Grappler"
 import { TavernBrawler } from "../feats/origin/TavernBrawler"
-import { NumAttacksAttribute } from "../sim/actions/AttackAction"
+import {
+    AttackActionOperation,
+    DefaultAttackActionOperation,
+    NumAttacksAttribute,
+} from "../sim/actions/AttackAction"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { ActionEvent } from "../sim/events/ActionEvent"
@@ -15,6 +19,9 @@ import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import { FinesseWeapon, UnarmedWeapon, Weapon } from "../sim/Weapon"
 import { WeaponMastery } from "../sim/types"
 import { BeforeActionEvent } from "../sim/events/BeforeActionEvent"
+import { CustomTurn } from "../sim/actions/CustomTurn"
+import { Operation, TurnStage } from "../sim/actions/Operation"
+import { Environment } from "../sim/Environment"
 
 const FlurryTag = "flurry"
 
@@ -39,6 +46,53 @@ class BodyAndMind extends Feat {
     }
 }
 
+class FlurryOfBlowsOperation implements Operation {
+    repeatable: boolean = false
+
+    numAttacks: number
+    weapon: Weapon
+
+    constructor(numAttacks: number, weapon: Weapon) {
+        this.numAttacks = numAttacks
+        this.weapon = weapon
+    }
+
+    eligible(environment: Environment, character: Character): boolean {
+        return character.ki.has() && character.bonus.has()
+    }
+
+    do(environment: Environment, character: Character): void {
+        character.ki.use()
+        for (let i = 0; i < this.numAttacks; i++) {
+            character.weaponAttack({
+                target: environment.target,
+                weapon: this.weapon,
+                tags: [FlurryTag],
+            })
+        }
+    }
+}
+
+class BonusActionAttackOperation implements Operation {
+    repeatable: boolean = false
+
+    weapon: Weapon
+    constructor(weapon: Weapon) {
+        this.weapon = weapon
+    }
+
+    eligible(environment: Environment, character: Character): boolean {
+        return character.bonus.has()
+    }
+
+    do(environment: Environment, character: Character): void {
+        character.weaponAttack({
+            target: environment.target,
+            weapon: this.weapon,
+        })
+    }
+}
+
 class FlurryOfBlows extends Feat {
     numAttacks: number
     weapon: Weapon
@@ -50,33 +104,14 @@ class FlurryOfBlows extends Feat {
     }
 
     apply(character: Character): void {
-        character.events.on("before_action", (event) =>
-            this.beforeAction(event)
+        character.customTurn.addOperation(
+            "after_action",
+            new FlurryOfBlowsOperation(this.numAttacks, this.weapon)
         )
-    }
-
-    beforeAction(event: BeforeActionEvent): void {
-        const character = this.character!
-        const target = event.target
-        if (!target) {
-            return
-        }
-
-        if (character.ki.has() && character.bonus.use("FlurryOfBlows")) {
-            character.ki.use()
-            for (let i = 0; i < this.numAttacks; i++) {
-                character.weaponAttack({
-                    target,
-                    weapon: this.weapon,
-                    tags: [FlurryTag],
-                })
-            }
-        } else if (character.bonus.use("MonkBonusAttack")) {
-            character.weaponAttack({
-                target,
-                weapon: this.weapon,
-            })
-        }
+        character.customTurn.addOperation(
+            "after_action",
+            new BonusActionAttackOperation(this.weapon)
+        )
     }
 }
 
@@ -312,6 +347,11 @@ export class Monk {
         feats.push(...Monk.openHandFeats(level))
 
         feats.forEach((feat) => character.addFeat(feat))
+
+        character.customTurn.addOperation(
+            "action",
+            new DefaultAttackActionOperation(fists)
+        )
 
         return character
     }

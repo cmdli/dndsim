@@ -29,7 +29,6 @@ import { Operation, TurnStage } from "../sim/actions/Operation"
 const ActionSurgeResource = "ActionSurge"
 
 class ActionSurgeOperation implements Operation {
-    stage: TurnStage = "before_action"
     repeatable: boolean = false
 
     eligible(environment: Environment): boolean {
@@ -304,14 +303,16 @@ export class Fighter {
         )
         feats.push(...Fighter.battlemasterFeats(level))
         feats.push(new PrecisionAttack(8))
-        character.customTurn = new CustomTurn({
-            priorityList: [
-                new ActionSurgeOperation(),
-                new AttackActionOperation(
-                    toppleWeaponAttack({ weapon, toppleWeapon })
-                ),
-            ],
-        })
+        character.customTurn.addOperation(
+            "before_action",
+            new ActionSurgeOperation()
+        )
+        character.customTurn.addOperation(
+            "action",
+            new AttackActionOperation(
+                toppleWeaponAttack({ weapon, toppleWeapon })
+            )
+        )
         feats.forEach((feat) => character.addFeat(feat))
         return character
     }
@@ -341,14 +342,16 @@ export class Fighter {
             })
         )
         feats.push(...Fighter.championFeats(level))
-        character.customTurn = new CustomTurn({
-            priorityList: [
-                new ActionSurgeOperation(),
-                new AttackActionOperation(
-                    toppleWeaponAttack({ weapon, toppleWeapon })
-                ),
-            ],
-        })
+        character.customTurn.addOperation(
+            "before_action",
+            new ActionSurgeOperation()
+        )
+        character.customTurn.addOperation(
+            "action",
+            new AttackActionOperation(
+                toppleWeaponAttack({ weapon, toppleWeapon })
+            )
+        )
         feats.forEach((feat) => character.addFeat(feat))
         return character
     }

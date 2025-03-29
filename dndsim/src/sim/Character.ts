@@ -87,7 +87,7 @@ export class Character {
     // TODO: Add other class resources
     // TODO: Handle actions better
     grappleStat: Stat = "str"
-    customTurn?: CustomTurn
+    customTurn: CustomTurn = new CustomTurn()
 
     constructor(args: { stats: Omit<Record<Stat, number>, "none"> }) {
         const { stats } = args
@@ -202,7 +202,7 @@ export class Character {
         log.record("Turn", 1)
         this.actions.reset()
         this.bonus.reset()
-        if (this.customTurn) {
+        if (this.customTurn.hasOperations()) {
             this.customTurn.doTurn(
                 new Environment({ character: this, target }),
                 this

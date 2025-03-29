@@ -1,3 +1,4 @@
+import { log } from "../../util/Log"
 import { Character } from "../Character"
 import { Environment } from "../Environment"
 import { AfterActionEvent } from "../events/AfterActionEvent"
@@ -7,39 +8,50 @@ import { EndTurnEvent } from "../events/EndTurnEvent"
 import { Operation, TurnStage } from "./Operation"
 
 export class CustomTurn {
-    priorityList: Operation[]
+    priorityList: Record<TurnStage, Operation[]>
 
-    constructor(args: { priorityList: Operation[] }) {
-        this.priorityList = args.priorityList
+    constructor() {
+        this.priorityList = {
+            turn_start: [],
+            before_action: [],
+            action: [],
+            after_action: [],
+            turn_end: [],
+        }
+    }
+
+    addOperation(stage: TurnStage, operation: Operation) {
+        this.priorityList[stage].push(operation)
+    }
+
+    hasOperations(): boolean {
+        for (const stage of Object.values(this.priorityList)) {
+            if (stage.length > 0) {
+                return true
+            }
+        }
+        return false
     }
 
     doTurn(environment: Environment, character: Character) {
         const target = environment.target
-        const byStage: Partial<Record<TurnStage, Operation[]>> = {}
-        for (const step of this.priorityList) {
-            const stage = step.stage
-            if (!byStage[stage]) {
-                byStage[stage] = []
-            }
-            byStage[stage].push(step)
-        }
 
         character.events.emit("begin_turn", new BeginTurnEvent({ target }))
-        this.doStage(environment, character, byStage["turn_start"] || [])
+        this.doStage(environment, character, this.priorityList["turn_start"])
 
         character.events.emit(
             "before_action",
             new BeforeActionEvent({ target })
         )
-        this.doStage(environment, character, byStage["before_action"] || [])
+        this.doStage(environment, character, this.priorityList["before_action"])
 
-        this.doStage(environment, character, byStage["action"] || [])
+        this.doStage(environment, character, this.priorityList["action"])
 
         character.events.emit("after_action", new AfterActionEvent({ target }))
-        this.doStage(environment, character, byStage["after_action"] || [])
+        this.doStage(environment, character, this.priorityList["after_action"])
 
         character.events.emit("end_turn", new EndTurnEvent({ target }))
-        this.doStage(environment, character, byStage["turn_end"] || [])
+        this.doStage(environment, character, this.priorityList["turn_end"])
     }
 
     private doStage(
@@ -53,6 +65,7 @@ export class CustomTurn {
             for (let i = 0; i < steps.length; i++) {
                 const step = steps[i]
                 if (step.eligible(environment, character)) {
+                    log.record(`Operation: ${step.constructor.name}`, 1)
                     step.do(environment, character)
                     if (!step.repeatable) {
                         steps.splice(i, 1)

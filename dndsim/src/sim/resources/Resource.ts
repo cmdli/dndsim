@@ -43,7 +43,10 @@ export class Resource {
 
     use(reason?: string): boolean {
         if (this.count > 0) {
-            log.record(`${this.name} (${reason})`, 1)
+            log.record(
+                `Resource used: ${this.name}${reason ? ` (${reason})` : ""}`,
+                1
+            )
             this.count -= 1
             return true
         }

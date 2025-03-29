@@ -42,6 +42,7 @@ export function testDPR(args: {
     numFights: number
     numRounds: number
     iterations: number
+    debug?: boolean
 }) {
     const { creator, startLevel, endLevel, numFights, numRounds, iterations } =
         args

@@ -1,15 +1,16 @@
 {
   "name": "dndsim",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "build/main.js",
   "scripts": {
     "build": "esbuild src/main.ts --bundle --outfile=build/main.js",
     "run": "npm run build && node build/main.js",
-    "test": "jest"
+    "test": "jest",
+    "test-character": "ts-node scripts/testCharacter.ts"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "Chris de la Iglesia",
+  "license": "MIT",
+  "description": "A library to simulate damage per round for D&D 5e characters",
   "dependencies": {
     "typescript": "^5.7.3"
   },
@@ -17,6 +18,7 @@
     "@types/jest": "^29.5.14",
     "esbuild": "^0.24.2",
     "jest": "^29.7.0",
-    "ts-jest": "^29.3.0"
+    "ts-jest": "^29.3.0",
+    "ts-node": "^10.9.2"
   }
 }
