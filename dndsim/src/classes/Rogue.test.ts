@@ -1,4 +1,5 @@
 import { testDPR } from "../main"
+import { expectMatchesSnapshot } from "../test/classSnapshot"
 import { Rogue } from "./Rogue"
 
 const snapshot = [
@@ -26,18 +27,9 @@ const snapshot = [
 
 describe("Rogue class", () => {
     it("should simulate a rogue", () => {
-        const results = testDPR({
-            creator: (level: number) => Rogue.createAssassinRogue(level),
-            startLevel: 1,
-            endLevel: 20,
-            numFights: 3,
-            numRounds: 5,
-            iterations: 5,
-        })
-        for (const [level, dpr] of snapshot) {
-            const testDPR = results[level - 1][1]
-            expect(testDPR).toBeGreaterThan(dpr * 0.9 - 2.5)
-            expect(testDPR).toBeLessThan(dpr * 1.1 + 2.5)
-        }
+        expectMatchesSnapshot(
+            (level: number) => Rogue.createAssassinRogue(level),
+            snapshot
+        )
     })
 })
