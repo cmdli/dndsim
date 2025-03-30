@@ -4,7 +4,7 @@ import { log } from "../src/util/Log"
 function testCharacter() {
     const results = dndsim.testDPR({
         creator: (level: number) =>
-            dndsim.classes.Fighter.createBattlemasterFighter(level),
+            dndsim.classes.Monk.createOpenHandMonk(level),
         startLevel: 1,
         endLevel: 20,
         numFights: 3,

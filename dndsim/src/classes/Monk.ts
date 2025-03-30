@@ -22,6 +22,7 @@ import { BeforeActionEvent } from "../sim/events/BeforeActionEvent"
 import { CustomTurn } from "../sim/actions/CustomTurn"
 import { Operation, TurnStage } from "../sim/actions/Operation"
 import { Environment } from "../sim/Environment"
+import { ExtraAttack } from "../feats/shared/ExtraAttack"
 
 const FlurryTag = "flurry"
 
@@ -62,6 +63,7 @@ class FlurryOfBlowsOperation implements Operation {
     }
 
     do(environment: Environment, character: Character): void {
+        character.bonus.use()
         character.ki.use()
         for (let i = 0; i < this.numAttacks; i++) {
             character.weaponAttack({
@@ -86,6 +88,7 @@ class BonusActionAttackOperation implements Operation {
     }
 
     do(environment: Environment, character: Character): void {
+        character.bonus.use()
         character.weaponAttack({
             target: environment.target,
             weapon: this.weapon,
@@ -232,31 +235,6 @@ class Fists extends Weapon {
     }
 }
 
-class MonkAction extends Feat {
-    weapon: Weapon
-
-    constructor(weapon: Weapon) {
-        super()
-        this.weapon = weapon
-    }
-
-    apply(character: Character): void {
-        character.events.on("action", (data) => this.action(data))
-    }
-
-    action(data: ActionEvent): void {
-        const numAttacks = this.character!.hasClassLevel("Monk", 5) ? 2 : 1
-
-        for (let i = 0; i < numAttacks; i++) {
-            this.character!.weaponAttack({
-                target: data.target,
-                weapon: this.weapon,
-                tags: ["main_action"],
-            })
-        }
-    }
-}
-
 export class Monk {
     static baseFeats(args: {
         level: number
@@ -279,6 +257,7 @@ export class Monk {
         // Level 4 (Slow Fall) is irrelevant
         if (level >= 5) {
             feats.push(new StunningStrike(level, true))
+            feats.push(new ExtraAttack(2))
         }
         // Level 6 (Empowered Strikes) is irrelevant
         // Level 7 (Evasion) is irrelevant
@@ -324,7 +303,6 @@ export class Monk {
 
         const feats: Feat[] = []
         feats.push(new TavernBrawler())
-        feats.push(new MonkAction(fists))
 
         // Add flurry of blows
         const numFlurryAttacks = level >= 10 ? 3 : 2

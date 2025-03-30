@@ -32,12 +32,12 @@ describe("Rogue class", () => {
             endLevel: 20,
             numFights: 3,
             numRounds: 5,
-            iterations: 1,
+            iterations: 5,
         })
         for (const [level, dpr] of snapshot) {
             const testDPR = results[level - 1][1]
-            expect(testDPR).toBeGreaterThan(dpr * 0.9 - 5.0)
-            expect(testDPR).toBeLessThan(dpr * 1.1 + 5.0)
+            expect(testDPR).toBeGreaterThan(dpr * 0.9 - 2.5)
+            expect(testDPR).toBeLessThan(dpr * 1.1 + 2.5)
         }
     })
 })

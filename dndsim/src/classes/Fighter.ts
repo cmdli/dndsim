@@ -21,10 +21,12 @@ import { Environment } from "../sim/Environment"
 import { CustomTurn } from "../sim/actions/CustomTurn"
 import {
     AttackActionOperation,
+    NumAttacksAttribute,
     WeaponAttack,
 } from "../sim/actions/AttackAction"
 import { Resource } from "../sim/resources/Resource"
 import { Operation, TurnStage } from "../sim/actions/Operation"
+import { ActionOperation } from "../sim/actions/ActionOperation"
 
 const ActionSurgeResource = "ActionSurge"
 
@@ -193,21 +195,32 @@ class Relentless extends Feat {
     }
 }
 
-function toppleWeaponAttack(args: {
+class ToppleIfNecessaryAttackAction extends ActionOperation {
+    repeatable: boolean = true
     weapon: Weapon
     toppleWeapon: Weapon
-}): WeaponAttack {
-    return (environment, character) => {
+
+    constructor(weapon: Weapon, toppleWeapon: Weapon) {
+        super()
+        this.weapon = weapon
+        this.toppleWeapon = toppleWeapon
+    }
+
+    action(environment: Environment): void {
         const target = environment.target
-        let weapon = args.weapon
-        if (!target.prone) {
-            weapon = args.toppleWeapon
+        const character = environment.character
+        const numAttacks = character.getAttribute(NumAttacksAttribute)
+        for (let i = 0; i < numAttacks; i++) {
+            let weapon = this.weapon
+            if (!target.prone && i < numAttacks - 1) {
+                weapon = this.toppleWeapon
+            }
+            character.weaponAttack({
+                target,
+                weapon,
+                tags: ["main_action"],
+            })
         }
-        character.weaponAttack({
-            target,
-            weapon,
-            tags: ["main_action"],
-        })
     }
 }
 
@@ -309,9 +322,7 @@ export class Fighter {
         )
         character.customTurn.addOperation(
             "action",
-            new AttackActionOperation(
-                toppleWeaponAttack({ weapon, toppleWeapon })
-            )
+            new ToppleIfNecessaryAttackAction(weapon, toppleWeapon)
         )
         feats.forEach((feat) => character.addFeat(feat))
         return character
@@ -348,9 +359,7 @@ export class Fighter {
         )
         character.customTurn.addOperation(
             "action",
-            new AttackActionOperation(
-                toppleWeaponAttack({ weapon, toppleWeapon })
-            )
+            new ToppleIfNecessaryAttackAction(weapon, toppleWeapon)
         )
         feats.forEach((feat) => character.addFeat(feat))
         return character

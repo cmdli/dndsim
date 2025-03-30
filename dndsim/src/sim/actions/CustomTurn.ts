@@ -59,16 +59,17 @@ export class CustomTurn {
         character: Character,
         steps: Operation[]
     ) {
+        const stepList = steps.slice()
         let didStep = true
         while (didStep) {
             didStep = false
-            for (let i = 0; i < steps.length; i++) {
-                const step = steps[i]
+            for (let i = 0; i < stepList.length; i++) {
+                const step = stepList[i]
                 if (step.eligible(environment, character)) {
                     log.record(`Operation: ${step.constructor.name}`, 1)
                     step.do(environment, character)
                     if (!step.repeatable) {
-                        steps.splice(i, 1)
+                        stepList.splice(i, 1)
                     }
                     didStep = true
                     break
