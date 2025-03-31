@@ -2,25 +2,17 @@ import { AbilityScoreImprovement } from "../feats/general/AbilityScoreImprovemen
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { Grappler } from "../feats/general/Grappler"
 import { TavernBrawler } from "../feats/origin/TavernBrawler"
-import {
-    AttackActionOperation,
-    DefaultAttackActionOperation,
-    NumAttacksAttribute,
-} from "../sim/actions/AttackAction"
+import { DefaultAttackActionOperation } from "../sim/actions/AttackAction"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
-import { ActionEvent } from "../sim/events/ActionEvent"
-import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { Feat } from "../sim/Feat"
-import { applyFeatSchedule, rollDice } from "../util/helpers"
+import { applyFeatSchedule } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import { FinesseWeapon, UnarmedWeapon, Weapon } from "../sim/Weapon"
 import { WeaponMastery } from "../sim/types"
-import { BeforeActionEvent } from "../sim/events/BeforeActionEvent"
-import { CustomTurn } from "../sim/actions/CustomTurn"
-import { Operation, TurnStage } from "../sim/actions/Operation"
+import { Operation } from "../sim/actions/Operation"
 import { Environment } from "../sim/Environment"
 import { ExtraAttack } from "../feats/shared/ExtraAttack"
 

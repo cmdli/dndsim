@@ -1,6 +1,5 @@
 import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
-import { DamageRoll } from "./helpers/DamageRoll"
 import { Spell } from "./spells/Spell"
 import { RangedWeapon, Weapon } from "./Weapon"
 

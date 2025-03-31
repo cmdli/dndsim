@@ -1,5 +1,4 @@
-import { testDPR } from "../main"
-import { Character } from "../sim/Character"
+import { testDPR, Character } from "../index"
 
 const FLAT_UNCERTAINTY = 2.5
 const PERCENT_UNCERTAINTY = 0.1

@@ -1,7 +1,6 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
-import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { Feat } from "../../sim/Feat"
 import { Stat } from "../../sim/types"
 

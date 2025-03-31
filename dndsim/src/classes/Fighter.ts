@@ -18,14 +18,9 @@ import { Greatsword } from "../weapons/index"
 import { Maul } from "../weapons/index"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Environment } from "../sim/Environment"
-import { CustomTurn } from "../sim/actions/CustomTurn"
-import {
-    AttackActionOperation,
-    NumAttacksAttribute,
-    WeaponAttack,
-} from "../sim/actions/AttackAction"
+import { NumAttacksAttribute } from "../sim/actions/AttackAction"
 import { Resource } from "../sim/resources/Resource"
-import { Operation, TurnStage } from "../sim/actions/Operation"
+import { Operation } from "../sim/actions/Operation"
 import { ActionOperation } from "../sim/actions/ActionOperation"
 
 const ActionSurgeResource = "ActionSurge"
@@ -138,6 +133,7 @@ class PrecisionAttack extends Feat {
     }
 }
 
+// @ts-ignore
 class TrippingAttack extends Feat {
     apply(character: Character): void {
         character.events.on("attack_result", (event) =>

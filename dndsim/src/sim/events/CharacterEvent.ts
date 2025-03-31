@@ -1,4 +1,3 @@
-import { Target } from "../Target"
 import { ActionEvent } from "./ActionEvent"
 import { AfterActionEvent } from "./AfterActionEvent"
 import { AttackEvent } from "./AttackEvent"

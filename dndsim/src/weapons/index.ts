@@ -31,7 +31,7 @@ import { Sickle } from "./simple/Sickle"
 import { Sling } from "./simple/Sling"
 import { Spear } from "./simple/Spear"
 
-const SimpleWeapons = {
+export const SimpleWeapons = {
     Club,
     Dagger,
     Dart,
@@ -48,7 +48,7 @@ const SimpleWeapons = {
     Spear,
 }
 
-const MartialWeapons = {
+export const MartialWeapons = {
     Battleaxe,
     Flail,
     Glaive,

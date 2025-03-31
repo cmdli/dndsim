@@ -1,5 +1,5 @@
 import { Target } from "../Target"
-import { CharacterEvent, CharacterEventName } from "./CharacterEvent"
+import { CharacterEvent } from "./CharacterEvent"
 
 export class BeginTurnEvent extends CharacterEvent {
     name: "begin_turn" = "begin_turn"

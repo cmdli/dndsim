@@ -1,4 +1,4 @@
-import { Character } from "../../main"
+import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
 import { Feat } from "../../sim/Feat"
