@@ -88,17 +88,17 @@ class HeroicAdvantage extends Feat {
     }
 
     beginTurn(event: BeginTurnEvent): void {
-        this.character!.heroicInspiration.add(1)
+        this.character.heroicInspiration.add(1)
     }
 
     attackRoll(event: AttackRollEvent): void {
         if (event.adv) {
             return
         }
-        if (this.character!.heroicInspiration.has()) {
+        if (this.character.heroicInspiration.has()) {
             const roll = event.roll1
             if (roll < 8) {
-                this.character!.heroicInspiration.use()
+                this.character.heroicInspiration.use()
                 event.adv = true
             }
         }
@@ -120,13 +120,13 @@ class PrecisionAttack extends Feat {
     attackRoll(event: AttackRollEvent): void {
         if (
             event.attack.hasTag("used_maneuver") ||
-            !this.character!.combatSuperiority.has() ||
+            !this.character.combatSuperiority.has() ||
             event.hits()
         ) {
             return
         }
         if (event.roll() >= this.low) {
-            const roll = this.character!.combatSuperiority.roll()
+            const roll = this.character.combatSuperiority.roll()
             event.situationalBonus += roll
             event.attack.addTag("used_maneuver")
         }
@@ -146,13 +146,13 @@ class TrippingAttack extends Feat {
             !event.hit ||
             event.attack.target.prone ||
             event.attack.hasTag("used_maneuver") ||
-            !this.character!.combatSuperiority.has()
+            !this.character.combatSuperiority.has()
         ) {
             return
         }
-        const roll = this.character!.combatSuperiority.roll()
+        const roll = this.character.combatSuperiority.roll()
         event.addDamage({ source: "TrippingAttack", dice: [roll] })
-        if (!event.attack.target.save(this.character!.dc("str"))) {
+        if (!event.attack.target.save(this.character.dc("str"))) {
             event.attack.target.knockProne()
         }
     }

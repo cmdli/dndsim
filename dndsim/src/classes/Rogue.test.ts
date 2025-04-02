@@ -1,4 +1,3 @@
-import { testDPR } from "../main"
 import { expectMatchesSnapshot } from "../test/classSnapshot"
 import { Rogue } from "./Rogue"
 

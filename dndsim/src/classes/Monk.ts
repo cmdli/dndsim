@@ -119,7 +119,7 @@ class OpenHandTechnique extends Feat {
 
     attackResult(event: AttackResultEvent): void {
         if (event.hit && event.attack.attack.hasTag(FlurryTag)) {
-            if (!event.attack.target.save(this.character!.dc("wis"))) {
+            if (!event.attack.target.save(this.character.dc("wis"))) {
                 event.attack.target.knockProne()
             }
         }
@@ -150,7 +150,7 @@ class StunningStrike extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
-        const character = this.character!
+        const character = this.character
         const target = event.attack.target
         if (!event.hit || this.used || !character.ki.has() || target.stunned) {
             return
@@ -190,7 +190,7 @@ class UncannyMetabolism extends Feat {
     }
 
     shortRest(): void {
-        const character = this.character!
+        const character = this.character
         if (!this.used && character.ki.count <= character.ki.max) {
             character.ki.reset()
             this.used = true
@@ -208,7 +208,7 @@ class PerfectFocus extends Feat {
     }
 
     shortRest(): void {
-        const character = this.character!
+        const character = this.character
         if (character.ki.count < 4) {
             character.ki.add(4 - character.ki.count)
         }
