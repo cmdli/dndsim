@@ -53,12 +53,13 @@ export class Weapon {
     }
 
     mod(character: Character): Stat {
-        if (this.tags.has(RangedWeapon)) {
-            return "dex"
-        } else if (
-            this.tags.has(FinesseWeapon) &&
-            character.stat("dex") > character.stat("str")
-        ) {
+        if (this.tags.has(FinesseWeapon)) {
+            if (character.stat("dex") > character.stat("str")) {
+                return "dex"
+            } else {
+                return "str"
+            }
+        } else if (this.tags.has(RangedWeapon)) {
             return "dex"
         } else {
             return "str"
