@@ -24,7 +24,11 @@
         "test-character": "ts-node scripts/testCharacter.ts",
         "prepublishOnly": "npm run build"
     },
-    "author": "Chris de la Iglesia",
+    "author": {
+        "name": "Chris de la Iglesia",
+        "email": "chris@cmdli.dev"
+    },
+    "homepage": "https://github.com/cmdli/dndsim",
     "license": "MIT",
     "description": "A library to simulate damage per round for D&D 5e characters",
     "dependencies": {

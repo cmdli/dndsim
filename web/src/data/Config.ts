@@ -1,1 +1,5 @@
-export class Config {}
+import { Class } from 'dndsim'
+
+export class Config {
+    levels: Class[] = []
+}
