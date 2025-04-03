@@ -32,10 +32,8 @@ function martialArtsDie(level: number): number {
 
 class BodyAndMind extends Feat {
     apply(character: Character): void {
-        character.increaseStatMax("dex", 4)
-        character.increaseStatMax("wis", 4)
-        character.increaseStat("dex", 4)
-        character.increaseStat("wis", 4)
+        character.increaseStatAndMax("dex", 4)
+        character.increaseStatAndMax("wis", 4)
     }
 }
 

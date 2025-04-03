@@ -121,6 +121,11 @@ export class Character {
         }
     }
 
+    increaseStatAndMax(stat: Stat, amount: number) {
+        this.increaseStatMax(stat, amount)
+        this.increaseStat(stat, amount)
+    }
+
     dc(stat: Stat): number {
         return this.mod(stat) + this.prof() + 8
     }
@@ -182,6 +187,14 @@ export class Character {
             )
         }
         return this.resources.get(name)!
+    }
+
+    hasResource(name: string): boolean {
+        return this.resources.get(name)?.has() ?? false;
+    }
+
+    useResource(name: string) {
+        this.getResource(name).use()
     }
 
     // =============================

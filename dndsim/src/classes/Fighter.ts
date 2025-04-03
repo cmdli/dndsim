@@ -29,11 +29,11 @@ class ActionSurgeOperation implements Operation {
     repeatable: boolean = false
 
     eligible(environment: Environment): boolean {
-        return environment.character.getResource(ActionSurgeResource)!.has()
+        return environment.character.hasResource(ActionSurgeResource)
     }
 
     do(environment: Environment): void {
-        environment.character.getResource(ActionSurgeResource)!.use()
+        environment.character.useResource(ActionSurgeResource)
         environment.character.actions.add(1, true)
     }
 }
