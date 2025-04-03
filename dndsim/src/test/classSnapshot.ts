@@ -12,8 +12,8 @@ export function expectMatchesSnapshot(
         creator,
         startLevel: 1,
         endLevel: 20,
-        numFights: 1,
-        numRounds: 1,
+        numFights: 3,
+        numRounds: 5,
         iterations: 5,
     })
     for (const [level, dpr] of snapshot) {
