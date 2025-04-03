@@ -23,11 +23,11 @@ export class GreatWeaponMaster extends Feat {
         if (data.attack.attack.weapon()?.hasTag(HeavyWeapon)) {
             data.addDamage({
                 source: "GreatWeaponMaster",
-                flatDmg: this.character?.prof(),
+                flatDmg: this.character.prof(),
             })
         }
-        if (data.crit && this.character?.bonus.use("GreatWeaponMaster")) {
-            this.character?.weaponAttack({
+        if (data.crit && this.character.bonus.use("GreatWeaponMaster")) {
+            this.character.weaponAttack({
                 target: data.attack.target,
                 weapon: this.weapon,
             })

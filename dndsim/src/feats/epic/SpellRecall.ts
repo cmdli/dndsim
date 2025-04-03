@@ -20,7 +20,7 @@ export class SpellRecall extends Feat {
     castSpell(event: CastSpellEvent): void {
         if (event.spell.slot > 0 && event.spell.slot <= 4) {
             if (rollDice(1, 4) === event.spell.slot) {
-                this.character?.spells.addSlot(event.spell.slot)
+                this.character.spells.addSlot(event.spell.slot)
             }
         }
     }

@@ -28,7 +28,7 @@ export class Vex extends Feat {
             data.hit &&
             weapon &&
             weapon.mastery === "Vex" &&
-            this.character?.masteries.has("Vex")
+            this.character.masteries.has("Vex")
         ) {
             this.vexing = true
         }

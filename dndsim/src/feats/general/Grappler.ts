@@ -33,7 +33,7 @@ export class Grappler extends Feat {
         const attack = event.attack
         const weapon = attack.attack.weapon()
         if (weapon && weapon.hasTag(UnarmedWeapon)) {
-            this.character!.grapple(attack.target)
+            this.character.grapple(attack.target)
         }
     }
 }

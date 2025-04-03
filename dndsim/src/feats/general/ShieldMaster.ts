@@ -26,7 +26,7 @@ export class ShieldMaster extends Feat {
         const attack = event.attack.attack
         const target = event.attack.target
         if (attack.weapon() && !attack.isRanged()) {
-            if (target.save(this.character!.dc("str"))) {
+            if (target.save(this.character.dc("str"))) {
                 this.used = true
                 target.knockProne()
             }

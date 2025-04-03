@@ -29,7 +29,7 @@ class SneakAttack extends Feat {
     attackResult(event: AttackResultEvent): void {
         if (event.hit && !this.used) {
             this.used = true
-            const level = this.character!.getClassLevel("Rogue")
+            const level = this.character.getClassLevel("Rogue")
             const diceCount = Math.ceil(level / 2)
             event.addDamage({
                 source: "SneakAttack",
@@ -49,7 +49,7 @@ class SteadyAim extends Feat {
     }
 
     beforeAction(): void {
-        if (this.character!.bonus.use("SteadyAim")) {
+        if (this.character.bonus.use("SteadyAim")) {
             this.enabled = true
         }
     }
@@ -118,7 +118,7 @@ class Assassinate extends Feat {
             // Simulate the initiative check
             const rogueRoll =
                 Math.max(rollDice(1, 20), rollDice(1, 20)) +
-                this.character!.mod("dex")
+                this.character.mod("dex")
             const enemyRoll = rollDice(1, 20)
             if (rogueRoll > enemyRoll) {
                 this.adv = true
@@ -166,7 +166,7 @@ class DeathStrike extends Feat {
     attackResult(event: AttackResultEvent): void {
         if (event.hit && this.enabled) {
             this.enabled = false
-            if (!event.attack.target.save(this.character!.dc("dex"))) {
+            if (!event.attack.target.save(this.character.dc("dex"))) {
                 event.dmgMultiplier *= 2
             }
         }
@@ -193,7 +193,7 @@ class BoomingBladeAction extends Feat {
     }
 
     action(data: ActionEvent): void {
-        this.character?.weaponAttack({
+        this.character.weaponAttack({
             target: data.target,
             weapon: this.weapon,
             tags: ["main_action", "booming_blade"],
@@ -206,7 +206,7 @@ class BoomingBladeAction extends Feat {
         }
 
         let extraDice = 0
-        const level = this.character!.level
+        const level = this.character.level
         if (level >= 17) {
             extraDice = 3
         } else if (level >= 11) {
@@ -239,14 +239,14 @@ class RogueAction extends Feat {
     }
 
     action(data: ActionEvent): void {
-        this.character!.weaponAttack({
+        this.character.weaponAttack({
             target: data.target,
             weapon: this.weapon,
             tags: ["main_action"],
         })
 
         if (this.nickWeapon) {
-            this.character!.weaponAttack({
+            this.character.weaponAttack({
                 target: data.target,
                 weapon: this.nickWeapon,
                 tags: ["light"],
