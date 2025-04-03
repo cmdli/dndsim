@@ -19,7 +19,7 @@ export class IrresistibleOffense extends Feat {
         if (args.hit && args.roll === 20) {
             args.addDamage({
                 source: "IrresistibleOffense",
-                flatDmg: this.character?.stat(this.mod),
+                flatDmg: this.character.stat(this.mod),
             })
         }
     }

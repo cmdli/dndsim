@@ -22,12 +22,12 @@ export class Poisoner extends Feat {
     }
 
     longRest(): void {
-        this.uses = this.character!.prof()
+        this.uses = this.character.prof()
     }
 
     beginTurn(): void {
         // TODO: Add ability to turn this on and off
-        if (this.character!.bonus.use()) {
+        if (this.character.bonus.use()) {
             this.uses--
             this.enabled = true
         }
@@ -39,7 +39,7 @@ export class Poisoner extends Feat {
         }
         if (this.enabled) {
             this.enabled = false
-            if (!event.attack.target.save(this.character!.dc(this.stat))) {
+            if (!event.attack.target.save(this.character.dc(this.stat))) {
                 event.addDamage({
                     source: "Poisoner",
                     dice: [8, 8],
