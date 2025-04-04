@@ -76,12 +76,6 @@ class Rage extends Feat {
     }
 }
 
-class AddRage extends Feat {
-    apply(character: Character): void {
-        character.getResource(RageResource).addMax(1)
-    }
-}
-
 class RecklessAttack extends Feat {
     apply(character: Character) {
         character.events.on("attack_roll", (event) => this.attackRoll(character, event))
@@ -111,7 +105,7 @@ class Frenzy extends Feat {
     }
 
     damageRoll(event: DamageRollEvent) {
-        if (!this.applied && event.attack?.hasTag(RecklessTag)) {
+        if (!this.applied && this.character.hasEffect(RageEffect) && event.attack?.hasTag(RecklessTag)) {
             const dice = Array(this.character.getAttribute(RageBonusDamageAttribute)).fill(6)
             event.damage.addDice(dice)
             this.applied = true
@@ -128,7 +122,7 @@ class DivineFury extends Feat {
     }
 
     damageRoll(event: DamageRollEvent) {
-        if (!this.applied && event.attack?.attack instanceof WeaponAttack) {
+        if (!this.applied && this.character.hasEffect(RageEffect) && event.attack?.attack instanceof WeaponAttack) {
             event.damage.addDice([6])
             event.damage.flatDmg += Math.floor(this.character.getClassLevel("Barbarian") / 2)
             this.applied = true
