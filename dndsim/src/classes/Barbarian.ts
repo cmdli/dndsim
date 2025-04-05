@@ -175,12 +175,13 @@ export class Barbarian {
         if (level >= 20) {
             feats.push(new PrimalChampion())
         }
-        applyFeatSchedule({
-            feats,
-            newFeats: asis,
-            schedule: [4, 8, 12, 16, 19],
-            level,
-        })
+        feats.push(
+            ...applyFeatSchedule({
+                newFeats: asis,
+                schedule: [4, 8, 12, 16, 19],
+                level,
+            })
+        )
         return feats
     }
 
