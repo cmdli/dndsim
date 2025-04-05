@@ -84,7 +84,7 @@ class RecklessAttack extends Feat {
     attackRoll(character: Character, event: AttackRollEvent) {
         if (event.attack?.attack?.weapon()?.mod(character) == "str") {
             event.adv = true
-            event.addTag(RecklessTag)
+            event.attack.addTag(RecklessTag)
         }
     }
 }
@@ -117,12 +117,16 @@ class DivineFury extends Feat {
     applied = false
 
     apply(character: Character) {
-        character.events.on("begin_turn", () => this.applied = false)
+        character.events.on("begin_turn", () => this.beginTurn())
         character.events.on("damage_roll", (event) => this.damageRoll(event))
     }
 
+    beginTurn() {
+        this.applied = false
+    }
+
     damageRoll(event: DamageRollEvent) {
-        if (!this.applied && this.character.hasEffect(RageEffect) && event.attack?.attack instanceof WeaponAttack) {
+        if (!this.applied && this.character.hasEffect(RageEffect) && event.attack?.attack.weapon()) {
             event.damage.addDice([6])
             event.damage.flatDmg += Math.floor(this.character.getClassLevel("Barbarian") / 2)
             this.applied = true

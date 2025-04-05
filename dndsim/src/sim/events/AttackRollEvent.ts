@@ -11,7 +11,6 @@ export class AttackRollEvent {
     roll2: number = 0
     situationalBonus: number = 0
     minCrit?: number
-    private tags: Set<String> = new Set()
 
     constructor(args: { attack: AttackEvent; toHit: number }) {
         this.attack = args.attack
@@ -43,13 +42,5 @@ export class AttackRollEvent {
             this.roll() + this.toHit + this.situationalBonus >=
             this.attack.target.ac
         )
-    }
-
-    addTag(name: string) {
-        this.tags.add(name)
-    }
-
-    hasTag(name: string): boolean {
-        return this.tags.has(name)
     }
 }
