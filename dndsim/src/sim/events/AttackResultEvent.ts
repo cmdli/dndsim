@@ -1,4 +1,5 @@
 import { DamageRoll } from "../helpers/DamageRoll"
+import { DamageType } from "../types"
 import { AttackEvent } from "./AttackEvent"
 
 export class AttackResultEvent {
@@ -26,8 +27,16 @@ export class AttackResultEvent {
     addDamage(args: {
         source: string
         dice?: Array<number>
-        flatDmg?: number
+        flatDmg?: number,
+        type?: DamageType,
     }): void {
-        this.damageRolls.push(new DamageRoll(args))
+        const type = args.type ?? this.attack.attack.weapon()?.damageType
+
+        if (!type) {
+            throw new Error("Must specify damage if it can't fall back to the base weapon damage type")
+        }
+
+        const damageRoll = new DamageRoll({ ...args, type })
+        this.damageRolls.push(damageRoll)
     }
 }
