@@ -1,7 +1,9 @@
 import { Character } from "./Character"
 
 export abstract class Feat {
-    character!: Character
+    // Allow feats to expect the character to be set in their implementations
+    // of apply
+    declare character: Character
 
     internalApply(character: Character): void {
         this.character = character
