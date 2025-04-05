@@ -262,12 +262,13 @@ export class Monk {
         if (level >= 20) {
             feats.push(new BodyAndMind())
         }
-        applyFeatSchedule({
-            feats,
-            newFeats: asis,
-            schedule: [4, 8, 12, 16, 19],
-            level,
-        })
+        feats.push(
+            ...applyFeatSchedule({
+                newFeats: asis,
+                schedule: [4, 8, 12, 16, 19],
+                level,
+            })
+        )
         return feats
     }
 

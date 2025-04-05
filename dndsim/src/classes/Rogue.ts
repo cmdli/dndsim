@@ -282,12 +282,13 @@ export class Rogue {
         if (level >= 20) {
             feats.push(new StrokeOfLuck())
         }
-        applyFeatSchedule({
-            feats,
-            newFeats: asis,
-            schedule: [4, 8, 10, 12, 16, 19],
-            level,
-        })
+        feats.push(
+            ...applyFeatSchedule({
+                newFeats: asis,
+                schedule: [4, 8, 10, 12, 16, 19],
+                level,
+            })
+        )
         return feats
     }
 
