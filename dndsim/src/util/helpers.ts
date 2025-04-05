@@ -15,20 +15,23 @@ export function profBonus(level: number): number {
 }
 
 export function applyFeatSchedule<T>(args: {
-    feats: Array<T>
     newFeats?: Array<T>
     schedule: Array<number>
     level: number
-}) {
-    const { feats, newFeats, schedule, level } = args
+}): Array<T> {
+    const { newFeats, schedule, level } = args
     if (!newFeats) {
-        return
+        return []
     }
+    const feats: T[] = []
     for (let i = 0; i < schedule.length; i++) {
         if (schedule[i] <= level && i < newFeats.length) {
             feats.push(newFeats[i])
+        } else {
+            break
         }
     }
+    return feats
 }
 
 export function defaultMagicBonus(level: number): number {

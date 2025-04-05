@@ -252,12 +252,13 @@ export class Fighter {
         if (level >= 20) {
             feats.push(new ExtraAttack(4))
         }
-        applyFeatSchedule({
-            feats,
-            newFeats: asis,
-            schedule: [4, 6, 8, 12, 14, 16, 19],
-            level,
-        })
+        feats.push(
+            ...applyFeatSchedule({
+                newFeats: asis,
+                schedule: [4, 6, 8, 12, 14, 16, 19],
+                level,
+            })
+        )
         return feats
     }
 
