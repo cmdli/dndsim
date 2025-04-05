@@ -340,6 +340,6 @@ export class Character {
             spell,
         })
         this.events.emit("damage_roll", damageData)
-        target.addDamage(damage.source, Math.floor(damage.total() * multiplier))
+        target.addDamage(damage.source, damage.type, Math.floor(damage.total() * multiplier))
     }
 }

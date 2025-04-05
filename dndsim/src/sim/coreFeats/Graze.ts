@@ -17,6 +17,7 @@ export class Graze extends Feat {
         ) {
             data.attack.target.addDamage(
                 "Graze",
+                weapon.damageType,
                 this.character?.mod(weapon.mod(this.character))
             )
         }

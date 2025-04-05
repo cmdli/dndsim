@@ -2,7 +2,6 @@ import { Environment } from "../sim/Environment"
 import { Operation } from "../sim/actions/Operation"
 import { Character } from "../sim/Character"
 import { Feat } from "../sim/Feat"
-import { DamageRollEvent } from "../sim/events/DamageRollEvent"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { WeaponMastery } from "../sim/types"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
@@ -17,7 +16,7 @@ import { AbilityScoreImprovement } from "../feats/general/AbilityScoreImprovemen
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { SetAttribute } from "../feats/shared/SetAttribute"
 import { IncreaseResource } from "../feats/shared/IncreaseResource"
-import { WeaponAttack } from "../sim/Attack"
+import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 
 const RageResource = "rage"
 const RageEffect = "raging"
@@ -47,13 +46,16 @@ class Rage extends Feat {
     apply(character: Character) {
         this.addResource()
         character.customTurn.addOperation("before_action", new RageOperation())
-        character.events.on("damage_roll", (event) => this.damageRoll(event))
+        character.events.on("attack_result", (event) => this.attackResult(event))
         character.events.on("short_rest", () => this.shortRest())
     }
 
-    damageRoll(event: DamageRollEvent) {
+    attackResult(event: AttackResultEvent) {
         if (event.attack?.attack?.weapon()?.mod(this.character) == "str") {
-            event.damage.flatDmg += this.character.getAttribute(RageBonusDamageAttribute);
+            event.addDamage({
+                source: "Rage",
+                flatDmg: this.character.getAttribute(RageBonusDamageAttribute),
+            })
         }
     }
 
@@ -100,14 +102,21 @@ class Frenzy extends Feat {
     applied = false
 
     apply(character: Character) {
-        character.events.on("begin_turn", () => this.applied = false)
-        character.events.on("damage_roll", (event) => this.damageRoll(event))
+        character.events.on("begin_turn", () => this.beginTurn())
+        character.events.on("attack_result", (event) => this.attackResult(event))
     }
 
-    damageRoll(event: DamageRollEvent) {
+    beginTurn() {
+        this.applied = false
+    }
+
+    attackResult(event: AttackResultEvent) {
         if (!this.applied && this.character.hasEffect(RageEffect) && event.attack?.hasTag(RecklessTag)) {
             const dice = Array(this.character.getAttribute(RageBonusDamageAttribute)).fill(6)
-            event.damage.addDice(dice)
+            event.addDamage({
+                source: "Frenzy",
+                dice,
+            })
             this.applied = true
         }
     }
@@ -118,17 +127,23 @@ class DivineFury extends Feat {
 
     apply(character: Character) {
         character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("damage_roll", (event) => this.damageRoll(event))
+        character.events.on("attack_result", (event) => this.attackResult(event))
     }
 
     beginTurn() {
         this.applied = false
     }
 
-    damageRoll(event: DamageRollEvent) {
+    attackResult(event: AttackResultEvent) {
         if (!this.applied && this.character.hasEffect(RageEffect) && event.attack?.attack.weapon()) {
-            event.damage.addDice([6])
-            event.damage.flatDmg += Math.floor(this.character.getClassLevel("Barbarian") / 2)
+            event.addDamage({
+                source: "DivineFury",
+                dice: [6],
+                flatDmg: Math.floor(this.character.getClassLevel("Barbarian") / 2),
+                // This could also be necrotic instead
+                type: 'radiant',
+
+            })
             this.applied = true
         }
     }
@@ -145,7 +160,7 @@ export class Barbarian {
         if (level >= 1) {
             feats.push(new ClassLevel("Barbarian", level))
             feats.push(new WeaponMasteries(masteries))
-            feats.push(new SetAttribute(RageBonusDamageAttribute, 2));
+            feats.push(new SetAttribute(RageBonusDamageAttribute, 2))
             feats.push(new Rage())
         }
         if (level >= 2) {
@@ -161,13 +176,13 @@ export class Barbarian {
             feats.push(new IncreaseResource(RageResource))
         }
         if (level >= 9) {
-            feats.push(new SetAttribute(RageBonusDamageAttribute, 3));
+            feats.push(new SetAttribute(RageBonusDamageAttribute, 3))
         }
         if (level >= 12) {
             feats.push(new IncreaseResource(RageResource))
         }
         if (level >= 16) {
-            feats.push(new SetAttribute(RageBonusDamageAttribute, 4));
+            feats.push(new SetAttribute(RageBonusDamageAttribute, 4))
         }
         if (level >= 17) {
             feats.push(new IncreaseResource(RageResource))
