@@ -1,18 +1,23 @@
 import { diceRolls } from "../../util/helpers"
+import { DamageType } from "../types"
 
 export class DamageRoll {
     source: string
     dice: Array<number>
     flatDmg: number
+    type: DamageType
     rolls: Array<number>
+
     constructor(args: {
         source: string
         dice?: Array<number>
         flatDmg?: number
+        type: DamageType
     }) {
         this.source = args.source
         this.dice = args.dice ?? []
         this.flatDmg = args.flatDmg ?? 0
+        this.type = args.type
         this.rolls = diceRolls(this.dice)
     }
 

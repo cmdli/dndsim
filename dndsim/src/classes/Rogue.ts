@@ -220,6 +220,7 @@ class BoomingBladeAction extends Feat {
         event.addDamage({
             source: "BoomingBlade",
             dice: Array(extraDice).fill(8),
+            type: 'thunder',
         })
     }
 }

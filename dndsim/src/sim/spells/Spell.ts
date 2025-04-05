@@ -1,6 +1,7 @@
 import { Character } from "../Character"
 import { DamageRoll } from "../helpers/DamageRoll"
 import { Target } from "../Target"
+import { DamageType } from "../types"
 import { SpellcastingSchool } from "./shared"
 
 export type SpellArgs = {
@@ -31,7 +32,7 @@ export class Spell {
         this.character = character
     }
 
-    end(character: Character): void {}
+    end(character: Character): void { }
 }
 
 export class TargetedSpell extends Spell {
@@ -43,7 +44,7 @@ export class TargetedSpell extends Spell {
         this.castTarget(character, target)
     }
 
-    castTarget(character: Character, target: Target): void {}
+    castTarget(character: Character, target: Target): void { }
 }
 
 export class ConcentrationSpell extends Spell {
@@ -65,6 +66,7 @@ export class ConcentrationSpell extends Spell {
 export class BasicSaveSpell extends Spell {
     dice: number[]
     flatDmg: number
+    type: DamageType
 
     constructor(
         args: {
@@ -72,11 +74,13 @@ export class BasicSaveSpell extends Spell {
             slot: number
             dice: number[]
             flatDmg?: number
+            type: DamageType
         } & Partial<SpellArgs>
     ) {
         super(args)
         this.dice = args.dice
-        this.flatDmg = args.flatDmg || 0
+        this.flatDmg = args.flatDmg ?? 0
+        this.type = args.type
     }
 
     cast(character: Character, target?: Target): void {
@@ -91,6 +95,7 @@ export class BasicSaveSpell extends Spell {
                 source: this.name,
                 dice: this.dice,
                 flatDmg: this.flatDmg,
+                type: this.type,
             }),
             spell: this,
             multiplier: saved ? 0.5 : 1,
