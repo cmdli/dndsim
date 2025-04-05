@@ -51,7 +51,7 @@ class Rage extends Feat {
     }
 
     attackResult(event: AttackResultEvent) {
-        if (event.attack?.attack?.weapon()?.mod(this.character) == "str") {
+        if (event.hit && event.attack?.attack?.weapon()?.mod(this.character) == "str") {
             event.addDamage({
                 source: "Rage",
                 flatDmg: this.character.getAttribute(RageBonusDamageAttribute),
@@ -111,7 +111,7 @@ class Frenzy extends Feat {
     }
 
     attackResult(event: AttackResultEvent) {
-        if (!this.applied && this.character.hasEffect(RageEffect) && event.attack?.hasTag(RecklessTag)) {
+        if (event.hit && !this.applied && this.character.hasEffect(RageEffect) && event.attack?.hasTag(RecklessTag)) {
             const dice = Array(this.character.getAttribute(RageBonusDamageAttribute)).fill(6)
             event.addDamage({
                 source: "Frenzy",
@@ -135,7 +135,7 @@ class DivineFury extends Feat {
     }
 
     attackResult(event: AttackResultEvent) {
-        if (!this.applied && this.character.hasEffect(RageEffect) && event.attack?.attack.weapon()) {
+        if (event.hit && !this.applied && this.character.hasEffect(RageEffect) && event.attack?.attack.weapon()) {
             event.addDamage({
                 source: "DivineFury",
                 dice: [6],
