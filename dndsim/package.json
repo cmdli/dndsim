@@ -21,7 +21,7 @@
         "build:esm": "tsc --module ESNext --outDir dist/esm",
         "build:cjs": "tsc --module CommonJS --outDir dist/cjs",
         "test": "jest",
-        "test-character": "ts-node scripts/testCharacter.ts",
+        "test-character": "tsx scripts/testCharacter.ts",
         "prepublishOnly": "npm run build"
     },
     "author": {
@@ -36,9 +36,11 @@
     },
     "devDependencies": {
         "@types/jest": "^29.5.14",
+        "@types/node": "^22.14.0",
+        "commander": "^13.1.0",
         "esbuild": "^0.24.2",
         "jest": "^29.7.0",
         "ts-jest": "^29.3.0",
-        "ts-node": "^10.9.2"
+        "tsx": "^4.19.3"
     }
 }
