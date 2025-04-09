@@ -15,7 +15,7 @@ export class Topple extends Feat {
             weapon.mastery === "Topple" &&
             data.hit &&
             this.character.masteries.has("Topple") &&
-            !target.save(this.character.dc(weapon.mod(this.character)))
+            !target.save(this.character.dc(weapon.stat(this.character, data.attack.attack)))
         ) {
             target.knockProne()
         }

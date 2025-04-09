@@ -1,11 +1,33 @@
+import { UnarmedWeapon } from "../../sim/Weapon"
 import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { Feat } from "../../sim/Feat"
 import { rollDice } from "../../util/helpers"
+import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 
 export class TavernBrawler extends Feat {
     apply(character: Character): void {
+        character.events.on("attack_result", (data) => this.attackResult(data))
         character.events.on("damage_roll", (data) => this.damageRoll(data))
+    }
+
+    attackResult(event: AttackResultEvent) {
+        const weapon = event.attack?.attack.weapon()
+        if (!weapon?.hasTag(UnarmedWeapon)) {
+            return
+        }
+
+        event.damageRolls
+            .filter((damageRoll) => damageRoll.hasTag("base_weapon_damage"))
+            .forEach((damageRoll) => {
+                if (damageRoll.dice.length == 0) {
+                    // It must be doing a base 1 damage. Replace it with the d4
+                    damageRoll.addDice([4])
+                    damageRoll.flatDmg -= 1
+                } else {
+                    damageRoll.replaceDice(damageRoll.dice.map((die) => Math.max(die, 4)))
+                }
+            })
     }
 
     damageRoll(args: DamageRollEvent): void {

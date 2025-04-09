@@ -1,10 +1,12 @@
 import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { Spell } from "./spells/Spell"
-import { RangedWeapon, Weapon } from "./Weapon"
+import { Stat } from "./types"
+import { FinesseWeapon, RangedWeapon, Weapon } from "./Weapon"
 
 export abstract class Attack {
     tags: Set<string> = new Set()
+    stats: Stat[] = []
 
     abstract name(): string
     abstract toHit(character: Character): number
@@ -28,6 +30,10 @@ export abstract class Attack {
     spell(): Spell | undefined {
         return undefined
     }
+
+    addStat(stat: Stat) {
+        this.stats.push(stat)
+    }
 }
 
 export class WeaponAttack extends Attack {
@@ -39,6 +45,13 @@ export class WeaponAttack extends Attack {
         if (args.tags) {
             args.tags.forEach((tag) => this.addTag(tag))
         }
+        if (this.weapon_.hasTag(FinesseWeapon)) {
+            this.stats = ["str", "dex"]
+        } else if (this.weapon_.hasTag(RangedWeapon)) {
+            this.stats = ["dex"]
+        } else {
+            this.stats = ["str"]
+        }
     }
 
     name(): string {
@@ -46,7 +59,7 @@ export class WeaponAttack extends Attack {
     }
 
     toHit(character: Character): number {
-        return this.weapon_.toHit(character)
+        return this.weapon_.toHit(character, this)
     }
 
     attackResult(args: AttackResultEvent, character: Character): void {
@@ -63,5 +76,9 @@ export class WeaponAttack extends Attack {
 
     weapon(): Weapon {
         return this.weapon_
+    }
+
+    addStat(stat: Stat) {
+        this.stats.push(stat)
     }
 }

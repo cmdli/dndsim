@@ -1,3 +1,4 @@
+import { Attack } from "./Attack"
 import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { DamageType, Stat, WeaponMastery } from "./types"
@@ -13,6 +14,8 @@ export const LoadingWeapon = "Loading"
 export const AmmunitionWeapon = "Ammunition"
 export const VersatileWeapon = "Versatile"
 export const ReachWeapon = "Reach"
+export const SimpleWeapon = "Simple"
+export const MartialWeapon = "Martial"
 
 export type WeaponArgs = {
     name: string
@@ -52,24 +55,21 @@ export class Weapon {
         this.tags = new Set(args.tags)
     }
 
-    mod(character: Character): Stat {
-        if (this.tags.has(FinesseWeapon)) {
-            if (character.stat("dex") > character.stat("str")) {
-                return "dex"
+    stat(character: Character, attack: Attack): Stat {
+        const statsWithValues = attack.stats.map((stat) => [stat, character.stat(stat)] as const);
+        return statsWithValues.reduce(([statA, valueA], [statB, valueB]) => {
+            if (valueA > valueB) {
+                return [statA, valueA]
             } else {
-                return "str"
+                return [statB, valueB]
             }
-        } else if (this.tags.has(RangedWeapon)) {
-            return "dex"
-        } else {
-            return "str"
-        }
+        })[0]
     }
 
-    toHit(character: Character): number {
+    toHit(character: Character, attack: Attack): number {
         return (
             character.prof() +
-            character.mod(this.mod(character)) +
+            character.mod(this.stat(character, attack)) +
             this.attackBonus
         )
     }
@@ -86,12 +86,13 @@ export class Weapon {
         if (args.hit) {
             let damage = this.dmgBonus
             if (!args.attack.hasTag("light")) {
-                damage += character.mod(this.mod(character))
+                damage += character.mod(this.stat(character, args.attack.attack))
             }
             args.addDamage({
                 source: this.name,
                 dice: Array(this.numDice).fill(this.die),
                 flatDmg: damage,
+                tags: new Set(["base_weapon_damage"]),
             })
         }
     }

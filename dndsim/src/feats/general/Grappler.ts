@@ -5,19 +5,23 @@ import { Feat } from "../../sim/Feat"
 import { UnarmedWeapon } from "../../sim/Weapon"
 
 export class Grappler extends Feat {
-    stat: "str" | "dex"
+    private applied = false
 
-    constructor(stat: "str" | "dex") {
+    constructor(private stat: "str" | "dex") {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {
         character.increaseStat(this.stat, 1)
+        character.events.on("begin_turn", () => this.beginTurn())
         character.events.on("attack_roll", (event) => this.attackRoll(event))
         character.events.on("attack_result", (event) =>
             this.attackResult(event)
         )
+    }
+
+    beginTurn() {
+        this.applied = false
     }
 
     attackRoll(event: AttackRollEvent): void {
@@ -27,13 +31,14 @@ export class Grappler extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
-        if (!event.hit) {
+        if (this.applied || !event.hit) {
             return
         }
         const attack = event.attack
         const weapon = attack.attack.weapon()
-        if (weapon && weapon.hasTag(UnarmedWeapon)) {
+        if (attack.attack.hasTag('attack_action') && weapon?.hasTag(UnarmedWeapon)) {
             this.character.grapple(attack.target)
+            this.applied = true
         }
     }
 }

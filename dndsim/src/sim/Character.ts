@@ -268,7 +268,7 @@ export class Character {
         const { target, attack } = args
         log.record(`Attack (${attack.name()})`, 1)
         const attackData = new AttackEvent({ target, attack })
-        this.events.emit("before_attack", new BeforeAttackEvent())
+        this.events.emit("before_attack", new BeforeAttackEvent(attackData))
         const toHit = attack.toHit(this)
         const rollResult = this.attackRoll(attackData, toHit)
 

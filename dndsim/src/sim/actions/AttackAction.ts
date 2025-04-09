@@ -46,7 +46,7 @@ export class DefaultAttackActionOperation extends AttackActionOperation {
             character.weaponAttack({
                 target: environment.target,
                 weapon,
-                tags: ["main_action"],
+                tags: ["attack_action", "main_action"],
             })
         })
     }

@@ -1,14 +1,11 @@
 import { Character } from "../../sim/Character"
 import { Feat } from "../../sim/Feat"
-import { HeavyWeapon, Weapon } from "../../sim/Weapon"
+import { HeavyWeapon, RangedWeapon, UnarmedWeapon, Weapon } from "../../sim/Weapon"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 
 export class GreatWeaponMaster extends Feat {
-    private weapon: Weapon
-
-    constructor(weapon: Weapon) {
+    constructor(private weapon: Weapon) {
         super()
-        this.weapon = weapon
     }
 
     apply(character: Character): void {
@@ -20,13 +17,19 @@ export class GreatWeaponMaster extends Feat {
         if (!data.hit) {
             return
         }
-        if (data.attack.attack.weapon()?.hasTag(HeavyWeapon)) {
+
+        const weapon = data.attack.attack.weapon()
+        if (!weapon) {
+            return
+        }
+
+        if (data.attack.attack.hasTag("attack_action") && weapon.hasTag(HeavyWeapon)) {
             data.addDamage({
                 source: "GreatWeaponMaster",
                 flatDmg: this.character.prof(),
             })
         }
-        if (data.crit && this.character.bonus.use("GreatWeaponMaster")) {
+        if (data.crit && !weapon.hasTag(RangedWeapon) && !weapon.hasTag(UnarmedWeapon) && this.character.bonus.use("GreatWeaponMaster")) {
             this.character.weaponAttack({
                 target: data.attack.target,
                 weapon: this.weapon,

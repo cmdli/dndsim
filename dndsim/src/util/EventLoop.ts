@@ -4,8 +4,8 @@ type ListenerMap<
     Event extends string,
     EventMapping extends Record<Event, any>
 > = {
-    [eventName in Event]?: Set<Listener<EventMapping[eventName]>>
-}
+        [eventName in Event]?: Set<Listener<EventMapping[eventName]>>
+    }
 
 export class EventLoop<
     Event extends string,

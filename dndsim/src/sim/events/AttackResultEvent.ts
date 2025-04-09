@@ -29,6 +29,7 @@ export class AttackResultEvent {
         dice?: Array<number>
         flatDmg?: number,
         type?: DamageType,
+        tags?: Set<string>,
     }): void {
         const type = args.type ?? this.attack.attack.weapon()?.damageType
 
