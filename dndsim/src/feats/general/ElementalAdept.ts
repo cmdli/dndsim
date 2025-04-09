@@ -3,16 +3,11 @@ import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { Feat } from "../../sim/Feat"
 
 export class ElementalAdept extends Feat {
-    stat: "int" | "wis" | "cha"
-    damageType: "acid" | "cold" | "fire" | "lightning" | "poison"
-
     constructor(
-        stat: "int" | "wis" | "cha",
-        damageType: "acid" | "cold" | "fire" | "lightning" | "poison"
+        private stat: "int" | "wis" | "cha",
+        private damageType: "acid" | "cold" | "fire" | "lightning" | "thunder"
     ) {
         super()
-        this.stat = stat
-        this.damageType = damageType
     }
 
     apply(character: Character): void {
@@ -21,8 +16,14 @@ export class ElementalAdept extends Feat {
     }
 
     damageRoll(event: DamageRollEvent): void {
-        // TODO: Turn 1's into 2's here
-        // This is so minor and tracking damage types
-        // isn't implemented yet, so I'm just not gonna do it
+        if (event.damage.type != this.damageType) {
+            return
+        }
+
+        for (let i = 0; i < event.damage.rolls.length; i++) {
+            if (event.damage.rolls[i] === 1) {
+                event.damage.rolls[i] = 2
+            }
+        }
     }
 }
