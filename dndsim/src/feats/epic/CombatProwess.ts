@@ -25,11 +25,9 @@ export class CombatProwess extends Feat {
     }
 
     attackRoll(event: AttackRollEvent): void {
-        if (event.roll() < event.attack.target.ac) {
-            if (!this.used) {
-                this.used = true
-                event.situationalBonus += 20 // Effectively hit
-            }
+        if (!this.used && !event.hits()) {
+            this.used = true
+            event.autoHit = true
         }
     }
 }
