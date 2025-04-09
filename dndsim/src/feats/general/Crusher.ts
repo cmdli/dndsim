@@ -3,14 +3,12 @@ import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
 import { Feat } from "../../sim/Feat"
-import { Stat } from "../../sim/types"
 
 export class Crusher extends Feat {
-    stat: Stat
     enabled: boolean = false
-    constructor(stat: "str" | "con") {
+
+    constructor(private stat: "str" | "con") {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {
@@ -33,16 +31,8 @@ export class Crusher extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
-        if (!event.hit) {
-            return
-        }
-        // TODO: Fix below
-        // Technically this should work on any crit that
-        // deals bludgeoning damage, but we just assume
-        // it's only weapon damage for now
         if (
-            event.crit &&
-            event.attack?.attack.weapon()?.damageType === "bludgeoning"
+            event.crit && event.damageRolls.some((damageRoll) => damageRoll.type === "bludgeoning")
         ) {
             this.enabled = true
         }

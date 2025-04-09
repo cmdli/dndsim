@@ -2,53 +2,64 @@ import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { Feat } from "../../sim/Feat"
-import { Stat } from "../../sim/types"
 import { rollDice } from "../../util/helpers"
 
 export class Piercer extends Feat {
-    stat: Stat
+    applied: boolean = false
 
-    constructor(stat: "str" | "dex") {
+    constructor(private stat: "str" | "dex") {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {
         character.increaseStat(this.stat, 1)
+        character.events.on("begin_turn", () => this.beginTurn())
         character.events.on("attack_result", (event) =>
             this.attackResult(event)
         )
         character.events.on("damage_roll", (event) => this.damageRoll(event))
     }
 
+    beginTurn(): void {
+        this.applied = false
+    }
+
     attackResult(event: AttackResultEvent): void {
-        if (!event.hit) {
-            return
-        }
-        // TODO: Fix this below
-        // This should work for all crits with piercing damage,
-        // but we are going to ignore that edge case
-        const weapon = event.attack?.attack.weapon()
-        if (weapon && weapon.damageType === "piercing" && event.crit) {
-            event.addDamage({ source: "Piercer", dice: [weapon.die] })
+        const piercingRolls = event.damageRolls.filter(({ type }) => type === "piercing")
+        if (event.crit && piercingRolls.length > 0) {
+            const biggestDie = Math.max(...piercingRolls.flatMap(({ dice }) => dice))
+            if (biggestDie > 0) {
+                event.addDamage({ source: "Piercer", dice: [biggestDie] })
+            }
         }
     }
 
+    // TODO: This assumes that every die for the attack is in this single damage roll event.
+    // When attacks have multiple damage rolls, we could want to pick the best one.
     damageRoll(event: DamageRollEvent): void {
-        if (event.attack?.attack.weapon()?.damageType === "piercing") {
-            // Reroll the lowest die
-            let minRoll = 1000
-            let minIndex = 0
-            for (let i = 0; i < event.damage.rolls.length; i++) {
-                if (event.damage.rolls[i] < minRoll) {
-                    minRoll = event.damage.rolls[i]
-                    minIndex = i
-                }
+        if (this.applied || event.damage.type !== "piercing") {
+            return
+        }
+
+        // The expected increase could potentially be affected by things like Great Weapon Fighting
+        let bestExpectedIncrease = 0
+        let minIndex: number | null = null
+
+        for (let i = 0; i < event.damage.rolls.length; i++) {
+            const expectedIncrease = (event.damage.dice[i] + 1) / 2 - event.damage.rolls[i]
+            if (expectedIncrease > bestExpectedIncrease) {
+                bestExpectedIncrease = expectedIncrease
+                minIndex = i
             }
+        }
+
+        if (minIndex !== null) {
             event.damage.rolls[minIndex] = rollDice(
                 1,
                 event.damage.dice[minIndex]
             )
+
+            this.applied = true
         }
     }
 }
