@@ -5,7 +5,7 @@ import { Feat } from "../../sim/Feat"
 import { rollDice } from "../../util/helpers"
 
 export class Piercer extends Feat {
-    applied: boolean = false
+    used: boolean = false
 
     constructor(private stat: "str" | "dex") {
         super()
@@ -21,23 +21,27 @@ export class Piercer extends Feat {
     }
 
     beginTurn(): void {
-        this.applied = false
+        this.used = false
     }
 
     attackResult(event: AttackResultEvent): void {
-        const piercingRolls = event.damageRolls.filter(({ type }) => type === "piercing")
-        if (event.crit && piercingRolls.length > 0) {
-            const biggestDie = Math.max(...piercingRolls.flatMap(({ dice }) => dice))
-            if (biggestDie > 0) {
-                event.addDamage({ source: "Piercer", dice: [biggestDie] })
-            }
+        if (!event.crit) {
+            return
+        }
+
+        const piercingDice = event.damageRolls
+            .filter(({ type }) => type === "piercing")
+            .flatMap(({ dice }) => dice)
+        if (piercingDice.length > 0) {
+            const biggestDie = Math.max(...piercingDice)
+            event.addDamage({ source: "Piercer", dice: [biggestDie] })
         }
     }
 
     // TODO: This assumes that every die for the attack is in this single damage roll event.
     // When attacks have multiple damage rolls, we could want to pick the best one.
     damageRoll(event: DamageRollEvent): void {
-        if (this.applied || event.damage.type !== "piercing") {
+        if (this.used || event.damage.type !== "piercing") {
             return
         }
 
@@ -59,7 +63,7 @@ export class Piercer extends Feat {
                 event.damage.dice[minIndex]
             )
 
-            this.applied = true
+            this.used = true
         }
     }
 }
