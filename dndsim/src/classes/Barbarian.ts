@@ -51,7 +51,7 @@ class Rage extends Feat {
     }
 
     attackResult(event: AttackResultEvent) {
-        if (event.hit && event.attack?.attack?.weapon()?.stat(this.character, event.attack.attack) == "str") {
+        if (event.hit && event.attack.attack.stat(this.character) == "str") {
             event.addDamage({
                 source: "Rage",
                 flatDmg: this.character.getAttribute(RageBonusDamageAttribute),
@@ -84,7 +84,7 @@ class RecklessAttack extends Feat {
     }
 
     attackRoll(character: Character, event: AttackRollEvent) {
-        if (event.attack?.attack?.weapon()?.stat(character, event.attack.attack) == "str") {
+        if (event.attack.attack.stat(character) == "str") {
             event.adv = true
             event.attack.addTag(RecklessTag)
         }
