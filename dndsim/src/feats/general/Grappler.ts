@@ -5,7 +5,7 @@ import { Feat } from "../../sim/Feat"
 import { UnarmedWeapon } from "../../sim/Weapon"
 
 export class Grappler extends Feat {
-    private applied = false
+    private used = false
 
     constructor(private stat: "str" | "dex") {
         super()
@@ -21,7 +21,7 @@ export class Grappler extends Feat {
     }
 
     beginTurn() {
-        this.applied = false
+        this.used = false
     }
 
     attackRoll(event: AttackRollEvent): void {
@@ -31,14 +31,14 @@ export class Grappler extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
-        if (this.applied || !event.hit) {
+        if (this.used || !event.hit) {
             return
         }
         const attack = event.attack
         const weapon = attack.attack.weapon()
         if (attack.attack.hasTag('attack_action') && weapon?.hasTag(UnarmedWeapon)) {
             this.character.grapple(attack.target)
-            this.applied = true
+            this.used = true
         }
     }
 }

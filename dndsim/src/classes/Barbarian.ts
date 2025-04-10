@@ -99,7 +99,7 @@ class PrimalChampion extends Feat {
 }
 
 class Frenzy extends Feat {
-    applied = false
+    used = false
 
     apply(character: Character) {
         character.events.on("begin_turn", () => this.beginTurn())
@@ -107,23 +107,23 @@ class Frenzy extends Feat {
     }
 
     beginTurn() {
-        this.applied = false
+        this.used = false
     }
 
     attackResult(event: AttackResultEvent) {
-        if (event.hit && !this.applied && this.character.hasEffect(RageEffect) && event.attack?.hasTag(RecklessTag)) {
+        if (event.hit && !this.used && this.character.hasEffect(RageEffect) && event.attack?.hasTag(RecklessTag)) {
             const dice = Array(this.character.getAttribute(RageBonusDamageAttribute)).fill(6)
             event.addDamage({
                 source: "Frenzy",
                 dice,
             })
-            this.applied = true
+            this.used = true
         }
     }
 }
 
 class DivineFury extends Feat {
-    applied = false
+    used = false
 
     apply(character: Character) {
         character.events.on("begin_turn", () => this.beginTurn())
@@ -131,11 +131,11 @@ class DivineFury extends Feat {
     }
 
     beginTurn() {
-        this.applied = false
+        this.used = false
     }
 
     attackResult(event: AttackResultEvent) {
-        if (event.hit && !this.applied && this.character.hasEffect(RageEffect) && event.attack?.attack.weapon()) {
+        if (event.hit && !this.used && this.character.hasEffect(RageEffect) && event.attack?.attack.weapon()) {
             event.addDamage({
                 source: "DivineFury",
                 dice: [6],
@@ -144,7 +144,7 @@ class DivineFury extends Feat {
                 type: 'radiant',
 
             })
-            this.applied = true
+            this.used = true
         }
     }
 }

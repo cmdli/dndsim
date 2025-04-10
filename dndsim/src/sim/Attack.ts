@@ -10,6 +10,7 @@ export abstract class Attack {
 
     abstract name(): string
     abstract toHit(character: Character): number
+    abstract stat(character: Character): Stat
     abstract attackResult(args: AttackResultEvent, character: Character): void
     abstract minCrit(): number
     abstract isRanged(): boolean
@@ -58,12 +59,38 @@ export class WeaponAttack extends Attack {
         return this.weapon_.name
     }
 
+    stat(character: Character): Stat {
+        const statsWithValues = this.stats.map((stat) => [stat, character.stat(stat)] as const);
+        return statsWithValues.reduce(([statA, valueA], [statB, valueB]) => {
+            if (valueA > valueB) {
+                return [statA, valueA]
+            } else {
+                return [statB, valueB]
+            }
+        })[0]
+    }
+
     toHit(character: Character): number {
-        return this.weapon_.toHit(character, this)
+        return (
+            character.prof() +
+            character.mod(this.stat(character)) +
+            this.weapon_.attackBonus
+        )
     }
 
     attackResult(args: AttackResultEvent, character: Character): void {
-        this.weapon_.attackResult(args, character)
+        if (args.hit) {
+            let damage = this.weapon_.dmgBonus
+            if (!args.attack.hasTag("light")) {
+                damage += character.mod(this.stat(character))
+            }
+            args.addDamage({
+                source: this.weapon_.name,
+                dice: Array(this.weapon_.numDice).fill(this.weapon_.die),
+                flatDmg: damage,
+                tags: new Set(["base_weapon_damage"]),
+            })
+        }
     }
 
     minCrit(): number {

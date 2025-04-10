@@ -22,7 +22,7 @@ import { BeforeAttackEvent } from "../sim/events/BeforeAttackEvent"
 const FlurryTag = "flurry"
 
 const MartialArtsDieAttribute = "martialArts"
-const flurryOfBlowsCountAttribute = "flurryOfBlowsCount"
+const FlurryOfBlowsCountAttribute = "flurryOfBlowsCount"
 
 function isUnarmedOrMonkWeapon(weapon: Weapon | undefined): boolean {
     if (!weapon) {
@@ -104,7 +104,7 @@ class FlurryOfBlowsOperation implements Operation {
     do(environment: Environment, character: Character): void {
         character.bonus.use()
         character.ki.use()
-        const numAttacks = character.getAttribute(flurryOfBlowsCountAttribute)
+        const numAttacks = character.getAttribute(FlurryOfBlowsCountAttribute)
         for (let i = 0; i < numAttacks; i++) {
             character.weaponAttack({
                 target: environment.target,
@@ -265,7 +265,7 @@ export class Monk {
         if (level >= 2) {
             feats.push(new Ki(level))
             feats.push(new UncannyMetabolism())
-            feats.push(new SetAttribute(flurryOfBlowsCountAttribute, 2))
+            feats.push(new SetAttribute(FlurryOfBlowsCountAttribute, 2))
             feats.push(new FlurryOfBlows(args.unarmedStrike))
         }
         // Level 3 (Deflect Attacks) is irrelevant/ignored
@@ -280,7 +280,7 @@ export class Monk {
         // Level 9 (Acrobatic Movement) is irrelevant
         // Level 10 (Self-Restoration) is irrelevant
         if (level >= 10) {
-            feats.push(new SetAttribute(flurryOfBlowsCountAttribute, 3))
+            feats.push(new SetAttribute(FlurryOfBlowsCountAttribute, 3))
         }
         if (level >= 11) {
             feats.push(new SetAttribute(MartialArtsDieAttribute, 10))
