@@ -39,20 +39,20 @@ export class AttackRollEvent {
         return this.roll1
     }
 
-    criticalHit(): boolean {
+    isCrit(): boolean {
         return this.roll() >= this.minCrit
     }
 
-    criticalMiss(): boolean {
+    isCritMiss(): boolean {
         return this.roll() === 1
     }
 
     hits(): boolean {
-        if (this.autoHit || this.criticalHit()) {
+        if (this.autoHit || this.isCrit()) {
             return true
         }
 
-        if (this.criticalMiss()) {
+        if (this.isCritMiss()) {
             return false
         }
 

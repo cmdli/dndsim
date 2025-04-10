@@ -277,20 +277,20 @@ export class Character {
         } else {
             log.record(`Miss (${attack.name()})`, 1)
         }
-        if (rollResult.criticalHit()) {
+        if (rollResult.isCrit()) {
             log.record(`Crit (${attack.name()})`, 1)
         }
 
         const attackResult = new AttackResultEvent({
             attack: attackData,
             hit: rollResult.hits(),
-            crit: rollResult.criticalHit(),
+            crit: rollResult.isCrit(),
             roll: rollResult.roll(),
         })
         args.attack.attackResult(attackResult, this)
         this.events.emit("attack_result", attackResult)
         for (const damage of attackResult.damageRolls) {
-            if (rollResult.criticalHit()) {
+            if (rollResult.isCrit()) {
                 damage.dice = damage.dice.concat(damage.dice)
             }
             this.doDamage({

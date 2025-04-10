@@ -8,6 +8,7 @@ import { rollDice } from "../../util/helpers"
 // might be useful for causing the target to fail a save.
 export class Fate extends Feat {
     used: boolean = false
+
     constructor(private stat: Stat) {
         super()
     }
@@ -15,16 +16,16 @@ export class Fate extends Feat {
     apply(character: Character): void {
         character.increaseStatMax(this.stat, 1)
         character.increaseStat(this.stat, 1)
-        character.events.on("short_rest", () => this.beginTurn())
+        character.events.on("short_rest", () => this.shortRest())
         character.events.on("attack_roll", (event) => this.attackRoll(event))
     }
 
-    beginTurn(): void {
+    shortRest(): void {
         this.used = false
     }
 
     attackRoll(event: AttackRollEvent): void {
-        if (!this.used && !event.hits() && !event.criticalMiss()) {
+        if (!this.used && !event.hits() && !event.isCritMiss()) {
             this.used = true
             event.situationalBonus += rollDice(2, 4)
         }
