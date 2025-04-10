@@ -10,11 +10,13 @@ export class AttackRollEvent {
     roll1: number = 0
     roll2: number = 0
     situationalBonus: number = 0
-    minCrit?: number
+    minCrit: number
+    autoHit: boolean = false
 
     constructor(args: { attack: AttackEvent; toHit: number }) {
         this.attack = args.attack
         this.toHit = args.toHit
+        this.minCrit = args.attack.attack.minCrit()
         this.roll1 = rollDice(1, 20)
         this.roll2 = rollDice(1, 20)
     }
@@ -37,7 +39,23 @@ export class AttackRollEvent {
         return this.roll1
     }
 
+    isCrit(): boolean {
+        return this.roll() >= this.minCrit
+    }
+
+    isCritMiss(): boolean {
+        return this.roll() === 1
+    }
+
     hits(): boolean {
+        if (this.autoHit || this.isCrit()) {
+            return true
+        }
+
+        if (this.isCritMiss()) {
+            return false
+        }
+
         return (
             this.roll() + this.toHit + this.situationalBonus >=
             this.attack.target.ac

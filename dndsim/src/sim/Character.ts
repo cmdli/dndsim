@@ -271,33 +271,26 @@ export class Character {
         this.events.emit("before_attack", new BeforeAttackEvent())
         const toHit = attack.toHit(this)
         const rollResult = this.attackRoll(attackData, toHit)
-        const roll = rollResult.roll()
-        const minCrit = rollResult.minCrit
-            ? rollResult.minCrit
-            : attack.minCrit()
-        const crit = roll >= minCrit
-        const rollTotal = roll + toHit + rollResult.situationalBonus
-        const hit = rollTotal >= target.ac
 
-        if (hit) {
+        if (rollResult.hits()) {
             log.record(`Hit (${attack.name()})`, 1)
         } else {
             log.record(`Miss (${attack.name()})`, 1)
         }
-        if (crit) {
+        if (rollResult.isCrit()) {
             log.record(`Crit (${attack.name()})`, 1)
         }
 
         const attackResult = new AttackResultEvent({
             attack: attackData,
-            hit,
-            crit,
-            roll,
+            hit: rollResult.hits(),
+            crit: rollResult.isCrit(),
+            roll: rollResult.roll(),
         })
         args.attack.attackResult(attackResult, this)
         this.events.emit("attack_result", attackResult)
         for (const damage of attackResult.damageRolls) {
-            if (crit) {
+            if (rollResult.isCrit()) {
                 damage.dice = damage.dice.concat(damage.dice)
             }
             this.doDamage({
