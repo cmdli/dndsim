@@ -193,8 +193,8 @@ export class Character {
         return this.resources.get(name)?.has() ?? false;
     }
 
-    useResource(name: string) {
-        this.getResource(name).use()
+    useResource(name: string, amount: number = 1) {
+        this.getResource(name).use(amount)
     }
 
     // =============================

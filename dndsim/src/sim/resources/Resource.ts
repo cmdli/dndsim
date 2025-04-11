@@ -44,13 +44,22 @@ export class Resource {
         this.count = newCount
     }
 
-    use(reason?: string): boolean {
-        if (this.count > 0) {
+    use(amount: number): boolean
+    use(reason?: string, amount?: number): boolean
+    use(reasonOrAmount?: number | string, amountIfReason?: number): boolean {
+        const reason = typeof reasonOrAmount === "string" ? reasonOrAmount : undefined
+        const amount = typeof amountIfReason === "number"
+            ? amountIfReason
+            : typeof reasonOrAmount === "number"
+                ? reasonOrAmount
+                : 1
+
+        if (this.count >= amount) {
             log.record(
                 `Resource used: ${this.name}${reason ? ` (${reason})` : ""}`,
-                1
+                amount
             )
-            this.count -= 1
+            this.count -= amount
             return true
         }
         return false

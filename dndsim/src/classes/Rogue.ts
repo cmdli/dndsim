@@ -8,9 +8,17 @@ import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Feat } from "../sim/Feat"
 import { applyFeatSchedule, rollDice } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
-import { Weapon } from "../sim/Weapon"
+import { FinesseWeapon, SimpleWeapon, ThrownWeapon, Weapon } from "../sim/Weapon"
 import { WeaponMastery } from "../sim/types"
 import { Shortsword, Scimitar, Rapier } from "../weapons/index"
+import { IncreaseResource } from "../feats/shared/IncreaseResource"
+import { SetAttribute } from "../feats/shared/SetAttribute"
+import { Resource } from "../sim/resources/Resource"
+import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
+
+const EnergyDieAttribute = "energyDie"
+const EnergyDiceResource = "energyDice"
+const SneakAttackTag = "SneakAttack"
 
 class SneakAttack extends Feat {
     used: boolean = false
@@ -35,6 +43,7 @@ class SneakAttack extends Feat {
                 source: "SneakAttack",
                 dice: Array(diceCount).fill(6),
             })
+            event.attack.addTag(SneakAttackTag)
         }
     }
 }
@@ -79,7 +88,7 @@ class StrokeOfLuck extends Feat {
     }
 
     attackRoll(event: AttackRollEvent): void {
-        if (!this.used && event.roll() < 10) {
+        if (!this.used && !event.hits()) {
             this.used = true
             event.roll1 = 20
             event.roll2 = 20
@@ -91,11 +100,9 @@ class Assassinate extends Feat {
     firstTurn: boolean = true
     usedDmg: boolean = false
     adv: boolean = false
-    level: number
 
-    constructor(level: number) {
+    constructor(private level: number) {
         super()
-        this.level = level
     }
 
     apply(character: Character): void {
@@ -133,7 +140,7 @@ class Assassinate extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
-        if (event.hit && this.firstTurn && !this.usedDmg) {
+        if (event.hit && this.firstTurn && !this.usedDmg && event.attack.hasTag(SneakAttackTag)) {
             this.usedDmg = true
             event.addDamage({
                 source: "Assassinate",
@@ -164,7 +171,7 @@ class DeathStrike extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
-        if (event.hit && this.enabled) {
+        if (event.hit && this.enabled && event.attack.hasTag(SneakAttackTag)) {
             this.enabled = false
             if (!event.attack.target.save(this.character.dc("dex"))) {
                 event.dmgMultiplier *= 2
@@ -177,12 +184,120 @@ class DeathStrike extends Feat {
     }
 }
 
-class BoomingBladeAction extends Feat {
-    weapon: Weapon
+class PsychicBlades extends Feat {
+    apply(character: Character): void {
+        this.addResource()
+        character.events.on("action", (data) => this.action(data))
+    }
 
-    constructor(weapon: Weapon) {
+    addResource() {
+        this.character.resources.set(
+            EnergyDiceResource,
+            new Resource({
+                name: EnergyDiceResource,
+                character: this.character,
+                initialMax: 4,
+                incrementOnShortRest: true,
+                resetOnLongRest: true,
+            })
+        )
+    }
+
+    psychicBlade({ isBonusAction = false } = {}): Weapon {
+        return new Weapon({
+            name: "Psychic Blade",
+            mastery: "Vex",
+            die: isBonusAction ? 4 : 6,
+            damageType: "psychic",
+            tags: [SimpleWeapon, ThrownWeapon, FinesseWeapon]
+        })
+    }
+
+    action(data: ActionEvent): void {
+        this.character.weaponAttack({
+            target: data.target,
+            weapon: this.psychicBlade(),
+            tags: ["main_action", "attack_action"],
+        })
+        if (this.character.bonus.use()) {
+            this.character.weaponAttack({
+                target: data.target,
+                weapon: this.psychicBlade({ isBonusAction: true }),
+                tags: ["bonus_action"],
+            })
+        }
+    }
+}
+
+class SoulBlades extends Feat {
+    apply(character: Character): void {
+        character.events.on("attack_roll", (event) => this.attackRoll(event))
+    }
+
+    attackRoll(event: AttackRollEvent) {
+        if (event.hits() || event.isCritMiss() || this.character.getResource(EnergyDiceResource).count === 0) {
+            return
+        }
+
+        event.situationalBonus += rollDice(1, this.character.getAttribute(EnergyDieAttribute))
+
+        // TODO: It's possible that this doesn't cause them to hit, but adding another feature like Boon of Fate does,
+        // at which point this should probably still be expended.
+        if (event.hits()) {
+            this.character.useResource(EnergyDiceResource)
+        }
+    }
+}
+
+class RendMind extends Feat {
+    used: boolean = false
+
+    apply(character: Character): void {
+        character.events.on("long_rest", () => this.longRest())
+        character.events.on("begin_turn", (event) => this.beginTurn(event))
+        character.events.on("attack_result", (event) => this.attackResult(event))
+    }
+
+    longRest() {
+        this.used = false
+    }
+
+    beginTurn({ target }: BeginTurnEvent) {
+        if (!target.stunned) {
+            return
+        }
+
+        if (target.save(this.character.dc("dex"))) {
+            target.stunned = false
+        }
+    }
+
+    attackResult(event: AttackResultEvent) {
+        const { target } = event.attack
+
+        if (!event.hit || !event.attack.hasTag(SneakAttackTag) || target.stunned) {
+            return
+        }
+
+        if (this.used && this.character.getResource(EnergyDiceResource).count < 3) {
+            return
+        }
+
+        if (!this.used) {
+            this.used = true
+        } else {
+            this.character.useResource(EnergyDiceResource, 3)
+        }
+
+        if (!target.save(this.character.dc("dex"))) {
+            target.stunned = true
+        }
+    }
+}
+
+class BoomingBladeAction extends Feat {
+    constructor(private weapon: Weapon) {
         super()
-        this.weapon = weapon
     }
 
     apply(character: Character): void {
@@ -307,6 +422,34 @@ export class Rogue {
         return feats
     }
 
+    static soulKnifeFeats(level: number): Feat[] {
+        const feats: Feat[] = []
+        if (level >= 3) {
+            feats.push(new PsychicBlades())
+            feats.push(new SetAttribute(EnergyDieAttribute, 6))
+        }
+        if (level >= 5) {
+            feats.push(new IncreaseResource(EnergyDiceResource, 2))
+            feats.push(new SetAttribute(EnergyDieAttribute, 8))
+        }
+        if (level >= 9) {
+            feats.push(new IncreaseResource(EnergyDiceResource, 2))
+            feats.push(new SoulBlades())
+        }
+        if (level >= 11) {
+            feats.push(new SetAttribute(EnergyDieAttribute, 10))
+        }
+        if (level >= 13) {
+            feats.push(new IncreaseResource(EnergyDiceResource, 2))
+        }
+        if (level >= 17) {
+            feats.push(new SetAttribute(EnergyDieAttribute, 12))
+            feats.push(new IncreaseResource(EnergyDiceResource, 2))
+            feats.push(new RendMind())
+        }
+        return feats
+    }
+
     static createAssassinRogue(
         level: number,
         useBoomingBlade: boolean = false
@@ -378,6 +521,40 @@ export class Rogue {
             })
         )
         // TODO: Arcane Trickster specific feats
+        feats.forEach((feat) => character.addFeat(feat))
+        return character
+    }
+
+    static createSoulKnifeRogue(level: number): Character {
+        const character = new Character({
+            stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
+        })
+        let feats: Feat[] = []
+        // We begin using psychic blades once we reach level 3
+        if (level < 3) {
+            const shortsword = new Shortsword()
+            const scimitar = new Scimitar()
+            feats.push(
+                new RogueAction({
+                    weapon: shortsword,
+                    nickWeapon: scimitar,
+                })
+            )
+        }
+        feats.push(
+            ...Rogue.baseFeats({
+                level,
+                masteries: ["Vex", "Nick"],
+                asis: [
+                    new AbilityScoreImprovement("dex"),
+                    new AbilityScoreImprovement("dex", "wis"),
+                    new AbilityScoreImprovement("dex"),
+                    new AbilityScoreImprovement("dex"),
+                    new IrresistibleOffense("dex"),
+                ],
+            })
+        )
+        feats.push(...Rogue.soulKnifeFeats(level))
         feats.forEach((feat) => character.addFeat(feat))
         return character
     }
