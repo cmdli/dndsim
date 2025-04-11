@@ -214,7 +214,7 @@ class ToppleIfNecessaryAttackAction extends ActionOperation {
             character.weaponAttack({
                 target,
                 weapon,
-                tags: ["main_action"],
+                tags: ["main_action", "attack_action"],
             })
         }
     }

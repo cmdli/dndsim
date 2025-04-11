@@ -8,25 +8,77 @@ import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { Feat } from "../sim/Feat"
-import { applyFeatSchedule } from "../util/helpers"
+import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
-import { FinesseWeapon, UnarmedWeapon, Weapon } from "../sim/Weapon"
+import { LightWeapon, MartialWeapon, RangedWeapon, SimpleWeapon, UnarmedWeapon, Weapon } from "../sim/Weapon"
 import { WeaponMastery } from "../sim/types"
 import { Operation } from "../sim/actions/Operation"
 import { Environment } from "../sim/Environment"
 import { ExtraAttack } from "../feats/shared/ExtraAttack"
+import { SetAttribute } from "../feats/shared/SetAttribute"
+import { UnarmedStrike } from "../weapons/other/UnarmedStrike"
+import { BeforeAttackEvent } from "../sim/events/BeforeAttackEvent"
 
 const FlurryTag = "flurry"
 
-function martialArtsDie(level: number): number {
-    if (level >= 17) {
-        return 12
-    } else if (level >= 11) {
-        return 10
-    } else if (level >= 5) {
-        return 8
-    } else {
-        return 6
+const MartialArtsDieAttribute = "martialArts"
+const FlurryOfBlowsCountAttribute = "flurryOfBlowsCount"
+
+function isUnarmedOrMonkWeapon(weapon: Weapon | undefined): boolean {
+    if (!weapon) {
+        return false
+    }
+
+    if (weapon.hasTag(UnarmedWeapon)) {
+        return true
+    }
+
+    if (weapon.hasTag(RangedWeapon)) {
+        return false
+    }
+
+    if (weapon.hasTag(SimpleWeapon)) {
+        return true
+    }
+
+    if (weapon.hasTag(MartialWeapon) && weapon.hasTag(LightWeapon)) {
+        return true
+    }
+
+    return false
+}
+
+class MartialArts extends Feat {
+    apply(character: Character) {
+        character.events.on("before_attack", (event) => this.beforeAttack(event))
+        character.events.on("attack_result", (event) => this.attackResult(event))
+    }
+
+    beforeAttack(event: BeforeAttackEvent) {
+        if (isUnarmedOrMonkWeapon(event.attackEvent.attack.weapon())) {
+            event.attackEvent.attack.addStat("dex")
+        }
+    }
+
+    attackResult(event: AttackResultEvent) {
+        const weapon = event.attack?.attack.weapon()
+        if (!isUnarmedOrMonkWeapon(weapon)) {
+            return
+        }
+
+        const martialArtsDie = this.character.getAttribute(MartialArtsDieAttribute)
+
+        event.damageRolls
+            .filter((damageRoll) => damageRoll.hasTag("base_weapon_damage"))
+            .forEach((damageRoll) => {
+                if (damageRoll.dice.length == 0) {
+                    // It must be doing a base 1 damage. Replace it with the martial arts die
+                    damageRoll.addDice([martialArtsDie])
+                    damageRoll.flatDmg -= 1
+                } else {
+                    damageRoll.replaceDice(damageRoll.dice.map((die) => Math.max(die, martialArtsDie)))
+                }
+            })
     }
 }
 
@@ -40,13 +92,7 @@ class BodyAndMind extends Feat {
 class FlurryOfBlowsOperation implements Operation {
     repeatable: boolean = false
 
-    numAttacks: number
-    weapon: Weapon
-
-    constructor(numAttacks: number, weapon: Weapon) {
-        this.numAttacks = numAttacks
-        this.weapon = weapon
-    }
+    constructor(private unarmedStrike: UnarmedStrike) { }
 
     eligible(environment: Environment, character: Character): boolean {
         return character.ki.has() && character.bonus.has()
@@ -55,10 +101,11 @@ class FlurryOfBlowsOperation implements Operation {
     do(environment: Environment, character: Character): void {
         character.bonus.use()
         character.ki.use()
-        for (let i = 0; i < this.numAttacks; i++) {
+        const numAttacks = character.getAttribute(FlurryOfBlowsCountAttribute)
+        for (let i = 0; i < numAttacks; i++) {
             character.weaponAttack({
                 target: environment.target,
-                weapon: this.weapon,
+                weapon: this.unarmedStrike,
                 tags: [FlurryTag],
             })
         }
@@ -68,10 +115,7 @@ class FlurryOfBlowsOperation implements Operation {
 class BonusActionAttackOperation implements Operation {
     repeatable: boolean = false
 
-    weapon: Weapon
-    constructor(weapon: Weapon) {
-        this.weapon = weapon
-    }
+    constructor(private weapon: Weapon) { }
 
     eligible(environment: Environment, character: Character): boolean {
         return character.bonus.has()
@@ -87,23 +131,14 @@ class BonusActionAttackOperation implements Operation {
 }
 
 class FlurryOfBlows extends Feat {
-    numAttacks: number
-    weapon: Weapon
-
-    constructor(numAttacks: number, weapon: Weapon) {
+    constructor(private unarmedStrike: UnarmedStrike) {
         super()
-        this.numAttacks = numAttacks
-        this.weapon = weapon
     }
 
     apply(character: Character): void {
         character.customTurn.addOperation(
             "after_action",
-            new FlurryOfBlowsOperation(this.numAttacks, this.weapon)
-        )
-        character.customTurn.addOperation(
-            "after_action",
-            new BonusActionAttackOperation(this.weapon)
+            new FlurryOfBlowsOperation(this.unarmedStrike)
         )
     }
 }
@@ -125,14 +160,10 @@ class OpenHandTechnique extends Feat {
 }
 
 class StunningStrike extends Feat {
-    weaponDie: number
     used: boolean = false
-    avoidOnGrapple: boolean
 
-    constructor(level: number, avoidOnGrapple: boolean = false) {
+    constructor(private avoidOnGrapple: boolean = false) {
         super()
-        this.weaponDie = martialArtsDie(level)
-        this.avoidOnGrapple = avoidOnGrapple
     }
 
     apply(character: Character): void {
@@ -168,11 +199,9 @@ class StunningStrike extends Feat {
 }
 
 class Ki extends Feat {
-    maxKi: number
 
-    constructor(maxKi: number) {
+    constructor(private maxKi: number) {
         super()
-        this.maxKi = maxKi
     }
 
     apply(character: Character): void {
@@ -213,23 +242,12 @@ class PerfectFocus extends Feat {
     }
 }
 
-class Fists extends Weapon {
-    constructor(args: { weaponDie: number; magicBonus?: number }) {
-        super({
-            name: "Fists",
-            numDice: 1,
-            die: args.weaponDie,
-            magicBonus: args.magicBonus,
-            tags: [FinesseWeapon, UnarmedWeapon],
-        })
-    }
-}
-
 export class Monk {
     static baseFeats(args: {
         level: number
         asis: Array<Feat>
-        masteries: WeaponMastery[]
+        masteries: WeaponMastery[],
+        unarmedStrike: UnarmedStrike,
     }): Feat[] {
         const { level, asis, masteries } = args
         const feats: Feat[] = []
@@ -237,26 +255,40 @@ export class Monk {
         if (level >= 1) {
             feats.push(new ClassLevel("Monk", level))
             feats.push(new WeaponMasteries(masteries))
+            feats.push(new SetAttribute(MartialArtsDieAttribute, 6))
+            feats.push(new MartialArts())
         }
         // Level 1 (Unarmored Defense) is irrelevant
         if (level >= 2) {
             feats.push(new Ki(level))
             feats.push(new UncannyMetabolism())
+            feats.push(new SetAttribute(FlurryOfBlowsCountAttribute, 2))
+            feats.push(new FlurryOfBlows(args.unarmedStrike))
         }
         // Level 3 (Deflect Attacks) is irrelevant/ignored
         // Level 4 (Slow Fall) is irrelevant
         if (level >= 5) {
-            feats.push(new StunningStrike(level, true))
+            feats.push(new StunningStrike(true))
             feats.push(new ExtraAttack(2))
+            feats.push(new SetAttribute(MartialArtsDieAttribute, 8))
         }
         // Level 6 (Empowered Strikes) is irrelevant
         // Level 7 (Evasion) is irrelevant
         // Level 9 (Acrobatic Movement) is irrelevant
         // Level 10 (Self-Restoration) is irrelevant
+        if (level >= 10) {
+            feats.push(new SetAttribute(FlurryOfBlowsCountAttribute, 3))
+        }
+        if (level >= 11) {
+            feats.push(new SetAttribute(MartialArtsDieAttribute, 10))
+        }
         // Level 13 (Deflect Energy) is irrelevant
         // Level 14 (Disciplined Survivor) is irrelevant
         if (level >= 15) {
             feats.push(new PerfectFocus())
+        }
+        if (level >= 17) {
+            feats.push(new SetAttribute(MartialArtsDieAttribute, 12))
         }
         // Level 18 (Superior Defense) is irrelevant
         if (level >= 20) {
@@ -284,20 +316,14 @@ export class Monk {
     }
 
     static createOpenHandMonk(level: number): Character {
+        const unarmedStrike = new UnarmedStrike({ magicBonus: defaultMagicBonus(level) })
+
         const character = new Character({
             stats: { str: 10, dex: 17, con: 10, int: 10, wis: 16, cha: 10 },
         })
 
-        const weaponDie = martialArtsDie(level)
-        const magicBonus = Math.floor(level / 4)
-        const fists = new Fists({ weaponDie, magicBonus })
-
         const feats: Feat[] = []
         feats.push(new TavernBrawler())
-
-        // Add flurry of blows
-        const numFlurryAttacks = level >= 10 ? 3 : 2
-        feats.push(new FlurryOfBlows(numFlurryAttacks, fists))
 
         feats.push(
             ...Monk.baseFeats({
@@ -310,6 +336,7 @@ export class Monk {
                     new AbilityScoreImprovement("wis"),
                     new IrresistibleOffense("dex"),
                 ],
+                unarmedStrike,
             })
         )
 
@@ -319,8 +346,12 @@ export class Monk {
 
         character.customTurn.addOperation(
             "action",
-            new DefaultAttackActionOperation(fists)
+            new DefaultAttackActionOperation(unarmedStrike)
         )
+
+        // This is out here instead of part of level 1 so that Flurry of Blows will always
+        // be prioritized over it
+        character.customTurn.addOperation("after_action", new BonusActionAttackOperation(unarmedStrike))
 
         return character
     }

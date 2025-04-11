@@ -196,7 +196,7 @@ class BoomingBladeAction extends Feat {
         this.character.weaponAttack({
             target: data.target,
             weapon: this.weapon,
-            tags: ["main_action", "booming_blade"],
+            tags: ["main_action", "booming_blade", "magic_action"],
         })
     }
 
@@ -243,7 +243,7 @@ class RogueAction extends Feat {
         this.character.weaponAttack({
             target: data.target,
             weapon: this.weapon,
-            tags: ["main_action"],
+            tags: ["main_action", "attack_action"],
         })
 
         if (this.nickWeapon) {

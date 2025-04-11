@@ -1,6 +1,4 @@
-import { Character } from "./Character"
-import { AttackResultEvent } from "./events/AttackResultEvent"
-import { DamageType, Stat, WeaponMastery } from "./types"
+import { DamageType, WeaponMastery } from "./types"
 
 export const HeavyWeapon = "Heavy"
 export const TwoHandedWeapon = "TwoHanded"
@@ -13,6 +11,8 @@ export const LoadingWeapon = "Loading"
 export const AmmunitionWeapon = "Ammunition"
 export const VersatileWeapon = "Versatile"
 export const ReachWeapon = "Reach"
+export const SimpleWeapon = "Simple"
+export const MartialWeapon = "Martial"
 
 export type WeaponArgs = {
     name: string
@@ -52,48 +52,12 @@ export class Weapon {
         this.tags = new Set(args.tags)
     }
 
-    mod(character: Character): Stat {
-        if (this.tags.has(FinesseWeapon)) {
-            if (character.stat("dex") > character.stat("str")) {
-                return "dex"
-            } else {
-                return "str"
-            }
-        } else if (this.tags.has(RangedWeapon)) {
-            return "dex"
-        } else {
-            return "str"
-        }
-    }
-
-    toHit(character: Character): number {
-        return (
-            character.prof() +
-            character.mod(this.mod(character)) +
-            this.attackBonus
-        )
-    }
-
     rolls(crit: boolean): Array<number> {
         let numDice = this.numDice
         if (crit) {
             numDice *= 2
         }
         return Array(numDice).fill(this.die)
-    }
-
-    attackResult(args: AttackResultEvent, character: Character): void {
-        if (args.hit) {
-            let damage = this.dmgBonus
-            if (!args.attack.hasTag("light")) {
-                damage += character.mod(this.mod(character))
-            }
-            args.addDamage({
-                source: this.name,
-                dice: Array(this.numDice).fill(this.die),
-                flatDmg: damage,
-            })
-        }
     }
 
     hasTag(tag: string): boolean {
