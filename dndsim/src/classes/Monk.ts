@@ -55,12 +55,9 @@ class MartialArts extends Feat {
     }
 
     beforeAttack(event: BeforeAttackEvent) {
-        const weapon = event.attackEvent.attack.weapon()
-        if (weapon && !isUnarmedOrMonkWeapon(weapon)) {
-            return
+        if (isUnarmedOrMonkWeapon(event.attackEvent.attack.weapon())) {
+            event.attackEvent.attack.addStat("dex")
         }
-
-        event.attackEvent.attack.addStat("dex")
     }
 
     attackResult(event: AttackResultEvent) {
