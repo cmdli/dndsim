@@ -6,7 +6,7 @@ import { ActionEvent } from "../sim/events/ActionEvent"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Feat } from "../sim/Feat"
-import { applyFeatSchedule, rollDice } from "../util/helpers"
+import { applyFeatSchedule, defaultMagicBonus, rollDice } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import {
     FinesseWeapon,
@@ -341,37 +341,6 @@ class BoomingBladeAction extends ActionOperation {
     }
 }
 
-class RogueAction extends Feat {
-    weapon: Weapon
-    nickWeapon?: Weapon
-
-    constructor(args: { weapon: Weapon; nickWeapon?: Weapon }) {
-        super()
-        this.weapon = args.weapon
-        this.nickWeapon = args.nickWeapon
-    }
-
-    apply(character: Character): void {
-        character.events.on("action", (data) => this.action(data))
-    }
-
-    action(data: ActionEvent): void {
-        this.character.weaponAttack({
-            target: data.target,
-            weapon: this.weapon,
-            tags: ["main_action", "attack_action"],
-        })
-
-        if (this.nickWeapon) {
-            this.character.weaponAttack({
-                target: data.target,
-                weapon: this.nickWeapon,
-                tags: ["light"],
-            })
-        }
-    }
-}
-
 export class Rogue {
     static baseFeats(args: {
         level: number
@@ -455,19 +424,20 @@ export class Rogue {
         level: number,
         useBoomingBlade: boolean = false
     ): Character {
+        const magicBonus = defaultMagicBonus(level)
         const character = new Character({
             stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
         })
         let feats: Feat[] = []
         if (level >= 5 && useBoomingBlade) {
-            const rapier = new Rapier()
+            const rapier = new Rapier({ magicBonus })
             character.customTurn.addOperation(
                 "action",
                 new BoomingBladeAction(rapier)
             )
         } else {
-            const shortsword = new Shortsword()
-            const scimitar = new Scimitar()
+            const shortsword = new Shortsword({ magicBonus })
+            const scimitar = new Scimitar({ magicBonus })
             character.customTurn.addOperation(
                 "action",
                 new DefaultAttackActionOperation(shortsword)
@@ -496,19 +466,20 @@ export class Rogue {
     }
 
     static createArcaneTricksterRogue(level: number): Character {
+        const magicBonus = defaultMagicBonus(level)
         const character = new Character({
             stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
         })
         let feats: Feat[] = []
         if (level >= 5) {
-            const rapier = new Rapier()
+            const rapier = new Rapier({ magicBonus })
             character.customTurn.addOperation(
                 "action",
                 new BoomingBladeAction(rapier)
             )
         } else {
-            const shortsword = new Shortsword()
-            const scimitar = new Scimitar()
+            const shortsword = new Shortsword({ magicBonus })
+            const scimitar = new Scimitar({ magicBonus })
             character.customTurn.addOperation(
                 "action",
                 new DefaultAttackActionOperation(shortsword)
