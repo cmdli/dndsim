@@ -16,7 +16,7 @@ export const MartialWeapon = "Martial"
 
 export type WeaponArgs = {
     name: string
-    numDice: number
+    numDice?: number
     die: number
     damageType?: DamageType
     minCrit?: number
@@ -41,7 +41,7 @@ export class Weapon {
 
     constructor(args: WeaponArgs) {
         this.name = args.name
-        this.numDice = args.numDice
+        this.numDice = args.numDice ?? 1
         this.die = args.die
         this.damageType = args.damageType ?? "unknown"
         this.minCrit = args.minCrit ?? 20

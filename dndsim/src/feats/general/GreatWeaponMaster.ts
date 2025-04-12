@@ -29,7 +29,7 @@ export class GreatWeaponMaster extends Feat {
                 flatDmg: this.character.prof(),
             })
         }
-        if (data.crit && !weapon.hasTag(RangedWeapon) && !weapon.hasTag(UnarmedWeapon) && this.character.bonus.use("GreatWeaponMaster")) {
+        if (data.crit && !weapon.hasTag(RangedWeapon) && !weapon.hasTag(UnarmedWeapon) && this.character.bonus.use(1, "GreatWeaponMaster")) {
             this.character.weaponAttack({
                 target: data.attack.target,
                 weapon: this.weapon,

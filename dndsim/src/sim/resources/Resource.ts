@@ -44,20 +44,19 @@ export class Resource {
         this.count = newCount
     }
 
-    use(reason?: string): boolean {
-        if (this.count > 0) {
+    use(amount: number = 1, reason?: string): boolean {
+        if (this.count >= amount) {
             log.record(
                 `Resource used: ${this.name}${reason ? ` (${reason})` : ""}`,
-                1
+                amount
             )
-            this.count -= 1
+            this.count -= amount
             return true
         }
         return false
     }
 
-    has(amount?: number): boolean {
-        amount = amount ?? 1
+    has(amount: number = 1): boolean {
         return this.count >= amount
     }
 
