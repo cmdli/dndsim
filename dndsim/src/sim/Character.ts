@@ -189,8 +189,8 @@ export class Character {
         return this.resources.get(name)!
     }
 
-    hasResource(name: string): boolean {
-        return this.resources.get(name)?.has() ?? false;
+    hasResource(name: string, amount: number = 1): boolean {
+        return this.resources.get(name)?.has(amount) ?? false;
     }
 
     useResource(name: string, amount: number = 1) {

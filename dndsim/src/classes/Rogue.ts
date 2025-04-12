@@ -19,6 +19,7 @@ import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 const EnergyDieAttribute = "energyDie"
 const EnergyDiceResource = "energyDice"
 const SneakAttackTag = "SneakAttack"
+const HomingStrikesTag = "HomingStrikes"
 
 class SneakAttack extends Feat {
     used: boolean = false
@@ -58,7 +59,7 @@ class SteadyAim extends Feat {
     }
 
     beforeAction(): void {
-        if (this.character.bonus.use("SteadyAim")) {
+        if (this.character.bonus.use(1, "SteadyAim")) {
             this.enabled = true
         }
     }
@@ -232,19 +233,24 @@ class PsychicBlades extends Feat {
 class SoulBlades extends Feat {
     apply(character: Character): void {
         character.events.on("attack_roll", (event) => this.attackRoll(event))
+        character.events.on("attack_result", (event) => this.attackResult(event))
     }
 
     attackRoll(event: AttackRollEvent) {
-        if (event.hits() || event.isCritMiss() || this.character.getResource(EnergyDiceResource).count === 0) {
+        if (event.hits() || event.isCritMiss() || !this.character.hasResource(EnergyDiceResource)) {
             return
         }
 
         event.situationalBonus += rollDice(1, this.character.getAttribute(EnergyDieAttribute))
+        event.attack.attack.addTag(HomingStrikesTag)
 
-        // TODO: It's possible that this doesn't cause them to hit, but adding another feature like Boon of Fate does,
-        // at which point this should probably still be expended.
-        if (event.hits()) {
-            this.character.useResource(EnergyDiceResource)
+        this.character.useResource(EnergyDiceResource)
+    }
+
+    attackResult(event: AttackResultEvent) {
+        // We consume it then restore it later on a miss so that we don't accidentally overspend
+        if (!event.hit && event.attack.attack.hasTag(HomingStrikesTag)) {
+            this.character.getResource(EnergyDiceResource).add(1)
         }
     }
 }
@@ -279,7 +285,7 @@ class RendMind extends Feat {
             return
         }
 
-        if (this.used && this.character.getResource(EnergyDiceResource).count < 3) {
+        if (this.used && !this.character.hasResource(EnergyDiceResource, 3)) {
             return
         }
 
