@@ -13,7 +13,7 @@ import { Spell } from "./Spell"
 
 export class Spellcasting {
     character: Character
-    mod: Stat = "int"
+    stat: Stat = "int"
     spellcasterLevels: Array<[Spellcaster, number]>
     pactSpellcasterLevel: number
     concentration?: Spell
@@ -35,7 +35,7 @@ export class Spellcasting {
     }
 
     setMod(mod: Stat): void {
-        this.mod = mod
+        this.stat = mod
     }
 
     addSpellcasterLevel(spellcaster: Spellcaster, level: number): void {
@@ -65,7 +65,7 @@ export class Spellcasting {
     }
 
     dc(): number {
-        return 8 + this.character.mod(this.mod) + this.character.prof()
+        return 8 + this.character.mod(this.stat) + this.character.prof()
     }
 
     pactSlot(maxSlot: number = 9, minSlot: number = 1): number {
@@ -92,13 +92,13 @@ export class Spellcasting {
 
     cast(args: { spell: Spell; target?: Target; ignoreSlot?: boolean }): void {
         const { spell, target, ignoreSlot } = args
-        if (spell.slot > 0 && !ignoreSlot) {
-            if (this.pactSlot() === spell.slot) {
+        if (spell.level > 0 && !ignoreSlot) {
+            if (this.pactSlot() === spell.level) {
                 this.pactSlots.pop()
-            } else if (this.slots[spell.slot] > 0) {
-                this.slots[spell.slot] -= 1
+            } else if (this.slots[spell.level] > 0) {
+                this.slots[spell.level] -= 1
             } else {
-                throw new Error(`Trying to use spell slot ${spell.slot}`)
+                throw new Error(`Trying to use spell slot ${spell.level}`)
             }
         }
         if (spell.concentration) {
@@ -144,7 +144,7 @@ export class Spellcasting {
 
     toHit(): number {
         return (
-            this.character.mod(this.mod) +
+            this.character.mod(this.stat) +
             this.character.prof() +
             this.toHitBonus
         )

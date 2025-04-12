@@ -25,7 +25,7 @@ export class TavernBrawler extends Feat {
                     damageRoll.addDice([4])
                     damageRoll.flatDmg -= 1
                 } else {
-                    damageRoll.replaceDice(damageRoll.dice.map((die) => Math.max(die, 4)))
+                    damageRoll.maybeReplaceDice([4])
                 }
             })
     }

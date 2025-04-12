@@ -31,7 +31,7 @@ export class AttackResultEvent {
         type?: DamageType,
         tags?: Set<string>,
     }): void {
-        const type = args.type ?? this.attack.attack.weapon()?.damageType
+        const type = args.type ?? this.attack.attack.damageType
 
         if (!type) {
             throw new Error("Must specify damage if it can't fall back to the base weapon damage type")

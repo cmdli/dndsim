@@ -6,36 +6,36 @@ import { SpellcastingSchool } from "./shared"
 
 export type SpellArgs = {
     name: string
-    slot: number
+    level: number
     concentration?: boolean
     duration?: number
     school?: SpellcastingSchool
 }
 
-export class Spell {
+export class Spell<T = Target> {
     name: string
-    slot: number
+    level: number
     concentration: boolean
     duration: number
     school?: SpellcastingSchool
-    character?: Character
+    declare character: Character
 
     constructor(args: SpellArgs) {
         this.name = args.name
-        this.slot = args.slot
+        this.level = args.level
         this.concentration = args.concentration || false
         this.duration = args.duration || 0
         this.school = args.school
     }
 
-    cast(character: Character, target?: Target): void {
+    cast(character: Character, target?: T): void {
         this.character = character
     }
 
     end(character: Character): void { }
 }
 
-export class TargetedSpell extends Spell {
+export class TargetedSpell extends Spell<Target> {
     cast(character: Character, target?: Target): void {
         super.cast(character, target)
         if (!target) {
@@ -47,8 +47,8 @@ export class TargetedSpell extends Spell {
     castTarget(character: Character, target: Target): void { }
 }
 
-export class ConcentrationSpell extends Spell {
-    constructor(args: { name: string; slot: number } & Partial<SpellArgs>) {
+export class ConcentrationSpell extends Spell<Target> {
+    constructor(args: { name: string; level: number } & Partial<SpellArgs>) {
         super({ ...args, concentration: true })
     }
 
@@ -71,7 +71,7 @@ export class BasicSaveSpell extends Spell {
     constructor(
         args: {
             name: string
-            slot: number
+            level: number
             dice: number[]
             flatDmg?: number
             type: DamageType

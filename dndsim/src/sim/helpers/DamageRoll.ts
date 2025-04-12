@@ -33,6 +33,16 @@ export class DamageRoll {
         this.reroll()
     }
 
+    // Only replace the dice if the new dice have a higher expected value
+    maybeReplaceDice(dice: Array<number>): void {
+        const currentExpectedValue = this.dice.map((die) => (die + 1) / 2).reduce((a, b) => a + b, 0)
+        const newExpectedValue = dice.map((die) => (die + 1) / 2).reduce((a, b) => a + b, 0)
+
+        if (newExpectedValue > currentExpectedValue) {
+            this.replaceDice(dice)
+        }
+    }
+
     reroll(): void {
         this.rolls = diceRolls(this.dice)
     }
