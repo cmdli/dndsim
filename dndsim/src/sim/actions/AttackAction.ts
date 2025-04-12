@@ -14,7 +14,11 @@ export function attackAction(args: {
     const { character, target, weapon } = args
     const numAttacks = args.character.getAttribute(NumAttacksAttribute)
     for (let i = 0; i < numAttacks; i++) {
-        character.weaponAttack({ target, weapon, tags: ["main_action", "attack_action"] })
+        character.weaponAttack({
+            target,
+            weapon,
+            tags: ["main_action", "attack_action"],
+        })
     }
 }
 

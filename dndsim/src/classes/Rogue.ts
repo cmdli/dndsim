@@ -19,6 +19,11 @@ import { Shortsword, Scimitar, Rapier } from "../weapons/index"
 import { IncreaseResource } from "../feats/shared/IncreaseResource"
 import { SetAttribute } from "../feats/shared/SetAttribute"
 import { Resource } from "../sim/resources/Resource"
+import { ActionOperation } from "../sim/actions/ActionOperation"
+import { Environment } from "../sim/Environment"
+import { BoomingBlade } from "../spells/BoomingBlade"
+import { DefaultAttackActionOperation } from "../sim/actions/AttackAction"
+import { NickAttackOperation } from "../sim/actions/NickAttackOperation"
 
 const EnergyDieAttribute = "energyDie"
 const EnergyDiceResource = "energyDice"
@@ -321,47 +326,17 @@ class RendMind extends Feat {
     }
 }
 
-class BoomingBladeAction extends Feat {
+class BoomingBladeAction extends ActionOperation {
+    repeatable: boolean = false
     constructor(private weapon: Weapon) {
         super()
     }
 
-    apply(character: Character): void {
-        character.events.on("action", (data) => this.action(data))
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
-
-    action(data: ActionEvent): void {
-        this.character.weaponAttack({
-            target: data.target,
-            weapon: this.weapon,
-            tags: ["main_action", "booming_blade", "magic_action"],
-        })
-    }
-
-    attackResult(event: AttackResultEvent): void {
-        if (!event.hit || !event.attack.attack.hasTag("booming_blade")) {
-            return
-        }
-
-        let extraDice = 0
-        const level = this.character.level
-        if (level >= 17) {
-            extraDice = 3
-        } else if (level >= 11) {
-            extraDice = 2
-        } else if (level >= 5) {
-            extraDice = 1
-        } else {
-            return
-        }
-
-        event.addDamage({
-            source: "BoomingBlade",
-            dice: Array(extraDice).fill(8),
-            type: "thunder",
+    action(environment: Environment): void {
+        const spell = new BoomingBlade(this.weapon)
+        environment.character.spells.cast({
+            spell,
+            target: environment.target,
         })
     }
 }
@@ -486,15 +461,20 @@ export class Rogue {
         let feats: Feat[] = []
         if (level >= 5 && useBoomingBlade) {
             const rapier = new Rapier()
-            feats.push(new BoomingBladeAction(rapier))
+            character.customTurn.addOperation(
+                "action",
+                new BoomingBladeAction(rapier)
+            )
         } else {
             const shortsword = new Shortsword()
             const scimitar = new Scimitar()
-            feats.push(
-                new RogueAction({
-                    weapon: shortsword,
-                    nickWeapon: scimitar,
-                })
+            character.customTurn.addOperation(
+                "action",
+                new DefaultAttackActionOperation(shortsword)
+            )
+            character.customTurn.addOperation(
+                "after_action",
+                new NickAttackOperation(scimitar)
             )
         }
         feats.push(
@@ -522,15 +502,20 @@ export class Rogue {
         let feats: Feat[] = []
         if (level >= 5) {
             const rapier = new Rapier()
-            feats.push(new BoomingBladeAction(rapier))
+            character.customTurn.addOperation(
+                "action",
+                new BoomingBladeAction(rapier)
+            )
         } else {
             const shortsword = new Shortsword()
             const scimitar = new Scimitar()
-            feats.push(
-                new RogueAction({
-                    weapon: shortsword,
-                    nickWeapon: scimitar,
-                })
+            character.customTurn.addOperation(
+                "action",
+                new DefaultAttackActionOperation(shortsword)
+            )
+            character.customTurn.addOperation(
+                "after_action",
+                new NickAttackOperation(scimitar)
             )
         }
         feats = feats.concat(
@@ -560,11 +545,13 @@ export class Rogue {
         if (level < 3) {
             const shortsword = new Shortsword()
             const scimitar = new Scimitar()
-            feats.push(
-                new RogueAction({
-                    weapon: shortsword,
-                    nickWeapon: scimitar,
-                })
+            character.customTurn.addOperation(
+                "action",
+                new DefaultAttackActionOperation(shortsword)
+            )
+            character.customTurn.addOperation(
+                "after_action",
+                new NickAttackOperation(scimitar)
             )
         }
         feats.push(

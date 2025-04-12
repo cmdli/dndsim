@@ -269,10 +269,12 @@ export class Character {
         target: Target
         weapon: Weapon
         tags?: string[]
+        onResult?: (event: AttackResultEvent) => void
     }): void {
         const attack = new WeaponAttack({
             weapon: args.weapon,
             tags: args.tags,
+            onResult: args.onResult,
         })
         this.attack({ target: args.target, attack })
     }

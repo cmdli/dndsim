@@ -39,8 +39,13 @@ export abstract class Attack {
 
 export class WeaponAttack extends Attack {
     private readonly weapon_: Weapon
+    private readonly onResult?: (event: AttackResultEvent) => void
 
-    constructor(args: { weapon: Weapon; tags?: string[] }) {
+    constructor(args: {
+        weapon: Weapon
+        tags?: string[]
+        onResult?: (event: AttackResultEvent) => void
+    }) {
         super()
         this.weapon_ = args.weapon
         if (args.tags) {
@@ -53,6 +58,7 @@ export class WeaponAttack extends Attack {
         } else {
             this.stats = ["str"]
         }
+        this.onResult = args.onResult
     }
 
     name(): string {
@@ -86,6 +92,7 @@ export class WeaponAttack extends Attack {
                 tags: new Set(["base_weapon_damage"]),
             })
         }
+        this.onResult?.(args)
     }
 
     minCrit(): number {
