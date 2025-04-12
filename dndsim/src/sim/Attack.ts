@@ -1,12 +1,13 @@
 import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { Spell } from "./spells/Spell"
-import { Stat } from "./types"
+import { DamageType, Stat } from "./types"
 import { FinesseWeapon, RangedWeapon, Weapon } from "./Weapon"
 
 export abstract class Attack {
     tags: Set<string> = new Set()
     stats: Stat[] = []
+    abstract damageType: DamageType
 
     abstract name(): string
     abstract toHit(character: Character): number
@@ -39,8 +40,9 @@ export abstract class Attack {
 
 export class WeaponAttack extends Attack {
     readonly weapon_: Weapon
+    readonly damageType: DamageType
 
-    constructor(args: { weapon: Weapon; tags?: string[] }) {
+    constructor(args: { weapon: Weapon; tags?: string[], damageType?: DamageType }) {
         super()
         this.weapon_ = args.weapon
         if (args.tags) {
@@ -53,6 +55,8 @@ export class WeaponAttack extends Attack {
         } else {
             this.stats = ["str"]
         }
+
+        this.damageType = args.damageType ?? this.weapon_.damageType
     }
 
     name(): string {
@@ -79,18 +83,19 @@ export class WeaponAttack extends Attack {
     }
 
     attackResult(args: AttackResultEvent, character: Character): void {
-        if (args.hit) {
-            let damage = this.weapon_.dmgBonus
-            if (!args.attack.hasTag("light")) {
-                damage += character.mod(this.stat(character))
-            }
-            args.addDamage({
-                source: this.weapon_.name,
-                dice: Array(this.weapon_.numDice).fill(this.weapon_.die),
-                flatDmg: damage,
-                tags: new Set(["base_weapon_damage"]),
-            })
+        if (!args.hit) {
+            return
         }
+        let damage = this.weapon_.dmgBonus
+        if (!args.attack.hasTag("light")) {
+            damage += character.mod(this.stat(character))
+        }
+        args.addDamage({
+            source: this.weapon_.name,
+            dice: Array(this.weapon_.numDice).fill(this.weapon_.die),
+            flatDmg: damage,
+            tags: new Set(["base_weapon_damage"]),
+        })
     }
 
     minCrit(): number {

@@ -23,7 +23,7 @@ export class UnarmedFighting extends Feat {
                     damageRoll.addDice([8])
                     damageRoll.flatDmg -= 1
                 } else {
-                    damageRoll.replaceDice(damageRoll.dice.map((die) => Math.max(die, 8)))
+                    damageRoll.maybeReplaceDice([8])
                 }
             })
     }

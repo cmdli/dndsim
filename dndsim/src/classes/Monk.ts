@@ -76,7 +76,7 @@ class MartialArts extends Feat {
                     damageRoll.addDice([martialArtsDie])
                     damageRoll.flatDmg -= 1
                 } else {
-                    damageRoll.replaceDice(damageRoll.dice.map((die) => Math.max(die, martialArtsDie)))
+                    damageRoll.maybeReplaceDice([martialArtsDie])
                 }
             })
     }

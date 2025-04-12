@@ -38,6 +38,7 @@ export class Weapon {
     readonly attackBonus: number
     readonly dmgBonus: number
     readonly tags: Set<string>
+    readonly effects: Set<string>
 
     constructor(args: WeaponArgs) {
         this.name = args.name
@@ -50,6 +51,7 @@ export class Weapon {
         this.attackBonus = this.magicBonus + (args.attackBonus ?? 0)
         this.dmgBonus = this.magicBonus + (args.dmgBonus ?? 0)
         this.tags = new Set(args.tags)
+        this.effects = new Set()
     }
 
     rolls(crit: boolean): Array<number> {
@@ -62,5 +64,17 @@ export class Weapon {
 
     hasTag(tag: string): boolean {
         return this.tags.has(tag)
+    }
+
+    hasEffect(effect: string): boolean {
+        return this.effects.has(effect)
+    }
+
+    addEffect(effect: string): void {
+        this.effects.add(effect)
+    }
+
+    removeEffect(effect: string): void {
+        this.effects.delete(effect)
     }
 }

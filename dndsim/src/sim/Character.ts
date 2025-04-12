@@ -4,7 +4,7 @@ import {
 } from "./events/CharacterEvent"
 import { Feat } from "./Feat"
 import { EventLoop } from "../util/EventLoop"
-import { Class, Stat, WeaponMastery } from "./types"
+import { Class, DamageType, Stat, WeaponMastery } from "./types"
 import { Resource } from "./resources/Resource"
 import { Target } from "./Target"
 import { Weapon } from "./Weapon"
@@ -57,6 +57,7 @@ export class Character {
     minions: Set<Character> = new Set()
 
     spells: Spellcasting = new Spellcasting(this)
+    weapons: Weapon[] = []
     masteries: Set<WeaponMastery> = new Set()
     classLevels: Map<Class, number> = new Map()
     attributes: Map<string, number> = new Map([[NumAttacksAttribute, 1]])
@@ -255,10 +256,12 @@ export class Character {
     weaponAttack(args: {
         target: Target
         weapon: Weapon
+        damageType?: DamageType
         tags?: string[]
     }): void {
         const attack = new WeaponAttack({
             weapon: args.weapon,
+            damageType: args.damageType,
             tags: args.tags,
         })
         this.attack({ target: args.target, attack })
@@ -334,5 +337,17 @@ export class Character {
         })
         this.events.emit("damage_roll", damageData)
         target.addDamage(damage.source, damage.type, Math.floor(damage.total() * multiplier))
+    }
+
+    cantripTier(): 1 | 2 | 3 | 4 {
+        if (this.level >= 17) {
+            return 4
+        } else if (this.level >= 11) {
+            return 3
+        } else if (this.level >= 5) {
+            return 2
+        } else {
+            return 1
+        }
     }
 }

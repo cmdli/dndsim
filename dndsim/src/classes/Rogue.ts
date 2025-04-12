@@ -326,23 +326,15 @@ class BoomingBladeAction extends Feat {
             return
         }
 
-        let extraDice = 0
-        const level = this.character.level
-        if (level >= 17) {
-            extraDice = 3
-        } else if (level >= 11) {
-            extraDice = 2
-        } else if (level >= 5) {
-            extraDice = 1
-        } else {
-            return
-        }
+        const extraDiceCount = this.character.cantripTier() - 1
 
-        event.addDamage({
-            source: "BoomingBlade",
-            dice: Array(extraDice).fill(8),
-            type: 'thunder',
-        })
+        if (extraDiceCount > 0) {
+            event.addDamage({
+                source: "BoomingBlade",
+                dice: Array(extraDiceCount).fill(8),
+                type: 'thunder',
+            })
+        }
     }
 }
 
