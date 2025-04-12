@@ -38,7 +38,7 @@ export abstract class Attack {
 }
 
 export class WeaponAttack extends Attack {
-    readonly weapon_: Weapon
+    private readonly weapon_: Weapon
 
     constructor(args: { weapon: Weapon; tags?: string[] }) {
         super()
@@ -60,14 +60,9 @@ export class WeaponAttack extends Attack {
     }
 
     stat(character: Character): Stat {
-        const statsWithValues = this.stats.map((stat) => [stat, character.stat(stat)] as const);
-        return statsWithValues.reduce(([statA, valueA], [statB, valueB]) => {
-            if (valueA > valueB) {
-                return [statA, valueA]
-            } else {
-                return [statB, valueB]
-            }
-        })[0]
+        return this.stats.reduce((best, stat) =>
+            character.stat(best) > character.stat(stat) ? best : stat
+        )
     }
 
     toHit(character: Character): number {
