@@ -190,11 +190,24 @@ export class Character {
     }
 
     hasResource(name: string, amount: number = 1): boolean {
-        return this.resources.get(name)?.has(amount) ?? false;
+        return this.resources.get(name)?.has(amount) ?? false
     }
 
     useResource(name: string, amount: number = 1) {
         this.getResource(name).use(amount)
+    }
+
+    // Adds a recurring effect on a particular event. If the effect function returns true, the effect is removed.
+    addTriggerEffect<Event extends CharacterEventName>(
+        trigger: Event,
+        effect: (event: CharacterEventMapping[Event]) => "continue" | "stop"
+    ): void {
+        const listener = (event: CharacterEventMapping[Event]) => {
+            if (effect(event) === "stop") {
+                this.events.removeListener(trigger, listener)
+            }
+        }
+        this.events.on(trigger, listener)
     }
 
     // =============================
@@ -305,13 +318,15 @@ export class Character {
     attackRoll(attackData: AttackEvent, toHit: number): AttackRollEvent {
         const { target, attack } = attackData
         const data = new AttackRollEvent({ attack: attackData, toHit })
-        // TODO: Stunned and semistunned
-        if (target.prone) {
+        if (target.hasCondition("prone")) {
             if (attack.isRanged()) {
                 data.disadv = true
             } else {
                 data.adv = true
             }
+        }
+        if (target.hasCondition("stunned")) {
+            data.adv = true
         }
         this.events.emit("attack_roll", data)
         return data
@@ -333,6 +348,10 @@ export class Character {
             spell,
         })
         this.events.emit("damage_roll", damageData)
-        target.addDamage(damage.source, damage.type, Math.floor(damage.total() * multiplier))
+        target.addDamage(
+            damage.source,
+            damage.type,
+            Math.floor(damage.total() * multiplier)
+        )
     }
 }

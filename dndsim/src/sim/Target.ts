@@ -1,6 +1,6 @@
 import { profBonus, rollDice } from "../util/helpers"
 import { log } from "../util/Log"
-import { DamageType } from "./types"
+import { Condition, DamageType } from "./types"
 
 const TARGET_AC = [
     13, // 1
@@ -30,11 +30,8 @@ export class Target {
     mod: number
     prof: number
 
-    prone: boolean = false
-    stunned: boolean = false
-    semistunned: boolean = false
-    grappled: boolean = false
     damage: number = 0
+    conditions: Map<Condition, number> = new Map()
 
     constructor(args: { level: number }) {
         this.ac = TARGET_AC[args.level - 1]
@@ -54,22 +51,19 @@ export class Target {
     }
 
     shortRest(): void {
-        this.stunned = false
-        this.semistunned = false
-        this.grappled = false
-        this.prone = false
+        this.conditions.clear()
     }
 
     turn(): void {
-        this.prone = false
+        this.removeCondition("prone")
     }
 
     knockProne(): void {
-        this.prone = true
+        this.addCondition("prone")
     }
 
     grapple(): void {
-        this.grappled = true
+        this.addCondition("grappled")
     }
 
     addDamage(source: string, type: DamageType, amount: number): void {
@@ -79,5 +73,23 @@ export class Target {
 
     save(dc: number): boolean {
         return rollDice(1, 20) + this.mod + this.prof >= dc
+    }
+
+    hasCondition(condition: Condition): boolean {
+        return (this.conditions.get(condition) ?? 0) > 0
+    }
+
+    addCondition(condition: Condition): void {
+        this.conditions.set(
+            condition,
+            (this.conditions.get(condition) ?? 0) + 1
+        )
+    }
+
+    removeCondition(condition: Condition): void {
+        const count = this.conditions.get(condition)
+        if (count) {
+            this.conditions.set(condition, count - 1)
+        }
     }
 }

@@ -25,7 +25,7 @@ export class Grappler extends Feat {
     }
 
     attackRoll(event: AttackRollEvent): void {
-        if (event.attack?.target.grappled) {
+        if (event.attack?.target.hasCondition("grappled")) {
             event.adv = true
         }
     }
@@ -36,7 +36,10 @@ export class Grappler extends Feat {
         }
         const attack = event.attack
         const weapon = attack.attack.weapon()
-        if (attack.attack.hasTag('attack_action') && weapon?.hasTag(UnarmedWeapon)) {
+        if (
+            attack.attack.hasTag("attack_action") &&
+            weapon?.hasTag(UnarmedWeapon)
+        ) {
             this.character.grapple(attack.target)
             this.used = true
         }

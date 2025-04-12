@@ -10,7 +10,14 @@ import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { Feat } from "../sim/Feat"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
-import { LightWeapon, MartialWeapon, RangedWeapon, SimpleWeapon, UnarmedWeapon, Weapon } from "../sim/Weapon"
+import {
+    LightWeapon,
+    MartialWeapon,
+    RangedWeapon,
+    SimpleWeapon,
+    UnarmedWeapon,
+    Weapon,
+} from "../sim/Weapon"
 import { WeaponMastery } from "../sim/types"
 import { Operation } from "../sim/actions/Operation"
 import { Environment } from "../sim/Environment"
@@ -50,8 +57,12 @@ function isUnarmedOrMonkWeapon(weapon: Weapon | undefined): boolean {
 
 class MartialArts extends Feat {
     apply(character: Character) {
-        character.events.on("before_attack", (event) => this.beforeAttack(event))
-        character.events.on("attack_result", (event) => this.attackResult(event))
+        character.events.on("before_attack", (event) =>
+            this.beforeAttack(event)
+        )
+        character.events.on("attack_result", (event) =>
+            this.attackResult(event)
+        )
     }
 
     beforeAttack(event: BeforeAttackEvent) {
@@ -66,7 +77,9 @@ class MartialArts extends Feat {
             return
         }
 
-        const martialArtsDie = this.character.getAttribute(MartialArtsDieAttribute)
+        const martialArtsDie = this.character.getAttribute(
+            MartialArtsDieAttribute
+        )
 
         event.damageRolls
             .filter((damageRoll) => damageRoll.hasTag("base_weapon_damage"))
@@ -76,7 +89,11 @@ class MartialArts extends Feat {
                     damageRoll.addDice([martialArtsDie])
                     damageRoll.flatDmg -= 1
                 } else {
-                    damageRoll.replaceDice(damageRoll.dice.map((die) => Math.max(die, martialArtsDie)))
+                    damageRoll.replaceDice(
+                        damageRoll.dice.map((die) =>
+                            Math.max(die, martialArtsDie)
+                        )
+                    )
                 }
             })
     }
@@ -92,7 +109,7 @@ class BodyAndMind extends Feat {
 class FlurryOfBlowsOperation implements Operation {
     repeatable: boolean = false
 
-    constructor(private unarmedStrike: UnarmedStrike) { }
+    constructor(private unarmedStrike: UnarmedStrike) {}
 
     eligible(environment: Environment, character: Character): boolean {
         return character.ki.has() && character.bonus.has()
@@ -115,7 +132,7 @@ class FlurryOfBlowsOperation implements Operation {
 class BonusActionAttackOperation implements Operation {
     repeatable: boolean = false
 
-    constructor(private weapon: Weapon) { }
+    constructor(private weapon: Weapon) {}
 
     eligible(environment: Environment, character: Character): boolean {
         return character.bonus.has()
@@ -175,31 +192,42 @@ class StunningStrike extends Feat {
 
     beginTurn(event: BeginTurnEvent): void {
         this.used = false
-        event.target.stunned = false
     }
 
     attackResult(event: AttackResultEvent): void {
         const character = this.character
         const target = event.attack.target
-        if (!event.hit || this.used || !character.ki.has() || target.stunned) {
+        if (
+            !event.hit ||
+            this.used ||
+            !character.ki.has() ||
+            target.hasCondition("stunned")
+        ) {
             return
         }
-        if (target.grappled && this.avoidOnGrapple) {
+        if (target.hasCondition("grappled") && this.avoidOnGrapple) {
             return
         }
 
         this.used = true
         character.ki.use()
         if (!target.save(character.dc("wis"))) {
-            target.stunned = true
+            target.addCondition("stunned")
+            this.character.addTriggerEffect("begin_turn", (event) => {
+                event.target.removeCondition("stunned")
+                return "stop"
+            })
         } else {
-            target.semistunned = true
+            target.addCondition("semistunned")
+            this.character.addTriggerEffect("begin_turn", (event) => {
+                event.target.removeCondition("semistunned")
+                return "stop"
+            })
         }
     }
 }
 
 class Ki extends Feat {
-
     constructor(private maxKi: number) {
         super()
     }
@@ -246,8 +274,8 @@ export class Monk {
     static baseFeats(args: {
         level: number
         asis: Array<Feat>
-        masteries: WeaponMastery[],
-        unarmedStrike: UnarmedStrike,
+        masteries: WeaponMastery[]
+        unarmedStrike: UnarmedStrike
     }): Feat[] {
         const { level, asis, masteries } = args
         const feats: Feat[] = []
@@ -316,7 +344,9 @@ export class Monk {
     }
 
     static createOpenHandMonk(level: number): Character {
-        const unarmedStrike = new UnarmedStrike({ magicBonus: defaultMagicBonus(level) })
+        const unarmedStrike = new UnarmedStrike({
+            magicBonus: defaultMagicBonus(level),
+        })
 
         const character = new Character({
             stats: { str: 10, dex: 17, con: 10, int: 10, wis: 16, cha: 10 },
@@ -351,7 +381,10 @@ export class Monk {
 
         // This is out here instead of part of level 1 so that Flurry of Blows will always
         // be prioritized over it
-        character.customTurn.addOperation("after_action", new BonusActionAttackOperation(unarmedStrike))
+        character.customTurn.addOperation(
+            "after_action",
+            new BonusActionAttackOperation(unarmedStrike)
+        )
 
         return character
     }

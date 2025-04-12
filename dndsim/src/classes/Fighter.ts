@@ -144,7 +144,7 @@ class TrippingAttack extends Feat {
     attackResult(event: AttackResultEvent): void {
         if (
             !event.hit ||
-            event.attack.target.prone ||
+            event.attack.target.hasCondition("prone") ||
             event.attack.hasTag("used_maneuver") ||
             !this.character.combatSuperiority.has()
         ) {
@@ -208,7 +208,7 @@ class ToppleIfNecessaryAttackAction extends ActionOperation {
         const numAttacks = character.getAttribute(NumAttacksAttribute)
         for (let i = 0; i < numAttacks; i++) {
             let weapon = this.weapon
-            if (!target.prone && i < numAttacks - 1) {
+            if (!target.hasCondition("prone") && i < numAttacks - 1) {
                 weapon = this.toppleWeapon
             }
             character.weaponAttack({

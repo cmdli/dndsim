@@ -8,13 +8,17 @@ import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Feat } from "../sim/Feat"
 import { applyFeatSchedule, rollDice } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
-import { FinesseWeapon, SimpleWeapon, ThrownWeapon, Weapon } from "../sim/Weapon"
+import {
+    FinesseWeapon,
+    SimpleWeapon,
+    ThrownWeapon,
+    Weapon,
+} from "../sim/Weapon"
 import { WeaponMastery } from "../sim/types"
 import { Shortsword, Scimitar, Rapier } from "../weapons/index"
 import { IncreaseResource } from "../feats/shared/IncreaseResource"
 import { SetAttribute } from "../feats/shared/SetAttribute"
 import { Resource } from "../sim/resources/Resource"
-import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 
 const EnergyDieAttribute = "energyDie"
 const EnergyDiceResource = "energyDice"
@@ -141,7 +145,12 @@ class Assassinate extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
-        if (event.hit && this.firstTurn && !this.usedDmg && event.attack.hasTag(SneakAttackTag)) {
+        if (
+            event.hit &&
+            this.firstTurn &&
+            !this.usedDmg &&
+            event.attack.hasTag(SneakAttackTag)
+        ) {
             this.usedDmg = true
             event.addDamage({
                 source: "Assassinate",
@@ -210,7 +219,7 @@ class PsychicBlades extends Feat {
             mastery: "Vex",
             die: isBonusAction ? 4 : 6,
             damageType: "psychic",
-            tags: [SimpleWeapon, ThrownWeapon, FinesseWeapon]
+            tags: [SimpleWeapon, ThrownWeapon, FinesseWeapon],
         })
     }
 
@@ -233,15 +242,24 @@ class PsychicBlades extends Feat {
 class SoulBlades extends Feat {
     apply(character: Character): void {
         character.events.on("attack_roll", (event) => this.attackRoll(event))
-        character.events.on("attack_result", (event) => this.attackResult(event))
+        character.events.on("attack_result", (event) =>
+            this.attackResult(event)
+        )
     }
 
     attackRoll(event: AttackRollEvent) {
-        if (event.hits() || event.isCritMiss() || !this.character.hasResource(EnergyDiceResource)) {
+        if (
+            event.hits() ||
+            event.isCritMiss() ||
+            !this.character.hasResource(EnergyDiceResource)
+        ) {
             return
         }
 
-        event.situationalBonus += rollDice(1, this.character.getAttribute(EnergyDieAttribute))
+        event.situationalBonus += rollDice(
+            1,
+            this.character.getAttribute(EnergyDieAttribute)
+        )
         event.attack.attack.addTag(HomingStrikesTag)
 
         this.character.useResource(EnergyDiceResource)
@@ -260,28 +278,23 @@ class RendMind extends Feat {
 
     apply(character: Character): void {
         character.events.on("long_rest", () => this.longRest())
-        character.events.on("begin_turn", (event) => this.beginTurn(event))
-        character.events.on("attack_result", (event) => this.attackResult(event))
+        character.events.on("attack_result", (event) =>
+            this.attackResult(event)
+        )
     }
 
     longRest() {
         this.used = false
     }
 
-    beginTurn({ target }: BeginTurnEvent) {
-        if (!target.stunned) {
-            return
-        }
-
-        if (target.save(this.character.dc("dex"))) {
-            target.stunned = false
-        }
-    }
-
     attackResult(event: AttackResultEvent) {
         const { target } = event.attack
 
-        if (!event.hit || !event.attack.hasTag(SneakAttackTag) || target.stunned) {
+        if (
+            !event.hit ||
+            !event.attack.hasTag(SneakAttackTag) ||
+            target.hasCondition("stunned")
+        ) {
             return
         }
 
@@ -296,7 +309,14 @@ class RendMind extends Feat {
         }
 
         if (!target.save(this.character.dc("dex"))) {
-            target.stunned = true
+            target.addCondition("stunned")
+            this.character.addTriggerEffect("begin_turn", (event) => {
+                if (target.save(this.character.dc("dex"))) {
+                    event.target.removeCondition("stunned")
+                    return "stop"
+                }
+                return "continue"
+            })
         }
     }
 }
@@ -341,7 +361,7 @@ class BoomingBladeAction extends Feat {
         event.addDamage({
             source: "BoomingBlade",
             dice: Array(extraDice).fill(8),
-            type: 'thunder',
+            type: "thunder",
         })
     }
 }
