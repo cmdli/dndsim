@@ -1,5 +1,7 @@
 import { DamageType, WeaponMastery } from "./types"
 
+export const BaseWeaponDamageTag = "BaseWeaponDamage"
+
 export const HeavyWeapon = "Heavy"
 export const TwoHandedWeapon = "TwoHanded"
 export const UnarmedWeapon = "Unarmed"

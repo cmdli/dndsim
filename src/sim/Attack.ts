@@ -2,7 +2,12 @@ import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { Spell } from "./spells/Spell"
 import { Stat } from "./types"
-import { FinesseWeapon, RangedWeapon, Weapon } from "./Weapon"
+import {
+    BaseWeaponDamageTag,
+    FinesseWeapon,
+    RangedWeapon,
+    Weapon,
+} from "./Weapon"
 
 export abstract class Attack {
     tags: Set<string> = new Set()
@@ -89,7 +94,7 @@ export class WeaponAttack extends Attack {
                 source: this.weapon_.name,
                 dice: Array(this.weapon_.numDice).fill(this.weapon_.die),
                 flatDmg: damage,
-                tags: new Set(["base_weapon_damage"]),
+                tags: [BaseWeaponDamageTag],
             })
         }
         this.onResult?.(args)

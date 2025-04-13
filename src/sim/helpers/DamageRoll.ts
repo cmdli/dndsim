@@ -13,15 +13,15 @@ export class DamageRoll {
         source: string
         dice?: Array<number>
         flatDmg?: number
-        type: DamageType,
-        tags?: Set<string>,
+        type: DamageType
+        tags?: Array<string>
     }) {
         this.source = args.source
         this.dice = args.dice ?? []
         this.flatDmg = args.flatDmg ?? 0
         this.type = args.type
         this.rolls = diceRolls(this.dice)
-        this.tags = args.tags ?? new Set()
+        this.tags = new Set(args.tags ?? [])
     }
 
     total(): number {

@@ -11,6 +11,7 @@ import { Feat } from "../sim/Feat"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import {
+    BaseWeaponDamageTag,
     LightWeapon,
     MartialWeapon,
     RangedWeapon,
@@ -82,7 +83,7 @@ class MartialArts extends Feat {
         )
 
         event.damageRolls
-            .filter((damageRoll) => damageRoll.hasTag("base_weapon_damage"))
+            .filter((damageRoll) => damageRoll.hasTag(BaseWeaponDamageTag))
             .forEach((damageRoll) => {
                 if (damageRoll.dice.length == 0) {
                     // It must be doing a base 1 damage. Replace it with the martial arts die
