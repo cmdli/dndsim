@@ -1,7 +1,7 @@
 import { expectMatchesSnapshot } from "../test/classSnapshot"
 import { Rogue } from "./Rogue"
 
-const snapshot = [
+const assassinRogueSnapshot = [
     [1, 11.424],
     [2, 11.1],
     [3, 17.597333333333335],
@@ -24,11 +24,65 @@ const snapshot = [
     [20, 66.56866666666667],
 ]
 
+const arcaneTricksterRogueSnapshot = [
+    [1, 11.4],
+    [2, 11.680666666666667],
+    [3, 16.656],
+    [4, 18.198],
+    [5, 22.271333333333335],
+    [6, 22.134666666666668],
+    [7, 25.164],
+    [8, 26.746666666666666],
+    [9, 30.273333333333333],
+    [10, 31.421333333333333],
+    [11, 38.98],
+    [12, 38.62266666666667],
+    [13, 42.483333333333334],
+    [14, 41.547333333333334],
+    [15, 47.536],
+    [16, 47.714],
+    [17, 55.285333333333334],
+    [18, 55.376],
+    [19, 58.59133333333333],
+    [20, 61.082],
+]
+
+const soulKnifeRogueSnapshot = [
+    [1, 11.468666666666667],
+    [2, 11.612666666666666],
+    [3, 11.774666666666667],
+    [4, 12.746666666666666],
+    [5, 15.767333333333333],
+    [6, 15.902],
+    [7, 18.974],
+    [8, 19.813333333333333],
+    [9, 25.644666666666666],
+    [10, 25.136666666666667],
+    [11, 28.574],
+    [12, 29.08],
+    [13, 32.36666666666667],
+    [14, 32.12866666666667],
+    [15, 35.56066666666667],
+    [16, 35.93066666666667],
+    [17, 37.84],
+    [18, 38.02733333333333],
+    [19, 41.031333333333336],
+    [20, 43.618],
+]
+
 describe("Rogue class", () => {
-    it("should simulate a rogue", () => {
+    it("matches the snapshots", () => {
         expectMatchesSnapshot(
             (level: number) => Rogue.createAssassinRogue(level),
-            snapshot
+            assassinRogueSnapshot
+        )
+        expectMatchesSnapshot(
+            (level: number) => Rogue.createArcaneTricksterRogue(level),
+            arcaneTricksterRogueSnapshot
+        )
+        expectMatchesSnapshot(
+            (level: number) => Rogue.createSoulKnifeRogue(level),
+            soulKnifeRogueSnapshot
         )
     })
 })
