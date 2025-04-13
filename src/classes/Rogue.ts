@@ -2,7 +2,6 @@ import { AbilityScoreImprovement } from "../feats/general/AbilityScoreImprovemen
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
-import { ActionEvent } from "../sim/events/ActionEvent"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Feat } from "../sim/Feat"
@@ -24,6 +23,7 @@ import { Environment } from "../sim/Environment"
 import { BoomingBlade } from "../spells/BoomingBlade"
 import { DefaultAttackActionOperation } from "../sim/actions/AttackAction"
 import { NickAttackOperation } from "../sim/actions/NickAttackOperation"
+import { Operation } from "../sim/actions/Operation"
 
 const EnergyDieAttribute = "energyDie"
 const EnergyDiceResource = "energyDice"
@@ -199,13 +199,55 @@ class DeathStrike extends Feat {
     }
 }
 
-class PsychicBlades extends Feat {
-    apply(character: Character): void {
-        this.addResource()
-        character.events.on("action", (data) => this.action(data))
+function psychicBlade({ isBonusAction = false } = {}): Weapon {
+    return new Weapon({
+        name: "Psychic Blade",
+        mastery: "Vex",
+        die: isBonusAction ? 4 : 6,
+        damageType: "psychic",
+        tags: [SimpleWeapon, ThrownWeapon, FinesseWeapon],
+    })
+}
+
+class PsychicBladesBonusAction implements Operation {
+    repeatable: boolean = false
+
+    constructor(private psychicBlade: Weapon) {}
+
+    eligible(environment: Environment, character: Character): boolean {
+        return character.bonus.has()
     }
 
-    addResource() {
+    do(environment: Environment, character: Character): void {
+        character.bonus.use()
+        character.weaponAttack({
+            target: environment.target,
+            weapon: this.psychicBlade,
+            tags: ["bonus_action"],
+        })
+    }
+}
+
+class PsychicBladesAction extends ActionOperation {
+    repeatable: boolean = false
+
+    constructor(private psychicBlade: Weapon) {
+        super()
+    }
+
+    action(environment: Environment): void {
+        const target = environment.target
+        const character = environment.character
+        character.weaponAttack({
+            target,
+            weapon: this.psychicBlade,
+            tags: ["main_action", "attack_action"],
+        })
+    }
+}
+
+class PsychicBlades extends Feat {
+    apply(character: Character): void {
         this.character.resources.set(
             EnergyDiceResource,
             new Resource({
@@ -216,31 +258,6 @@ class PsychicBlades extends Feat {
                 resetOnLongRest: true,
             })
         )
-    }
-
-    psychicBlade({ isBonusAction = false } = {}): Weapon {
-        return new Weapon({
-            name: "Psychic Blade",
-            mastery: "Vex",
-            die: isBonusAction ? 4 : 6,
-            damageType: "psychic",
-            tags: [SimpleWeapon, ThrownWeapon, FinesseWeapon],
-        })
-    }
-
-    action(data: ActionEvent): void {
-        this.character.weaponAttack({
-            target: data.target,
-            weapon: this.psychicBlade(),
-            tags: ["main_action", "attack_action"],
-        })
-        if (this.character.bonus.use()) {
-            this.character.weaponAttack({
-                target: data.target,
-                weapon: this.psychicBlade({ isBonusAction: true }),
-                tags: ["bonus_action"],
-            })
-        }
     }
 }
 
@@ -523,6 +540,17 @@ export class Rogue {
             character.customTurn.addOperation(
                 "after_action",
                 new NickAttackOperation(scimitar)
+            )
+        } else {
+            character.customTurn.addOperation(
+                "action",
+                new PsychicBladesAction(psychicBlade())
+            )
+            character.customTurn.addOperation(
+                "after_action",
+                new PsychicBladesBonusAction(
+                    psychicBlade({ isBonusAction: true })
+                )
             )
         }
         feats.push(

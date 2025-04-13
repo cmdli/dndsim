@@ -12,16 +12,11 @@ import { Attack, WeaponAttack } from "./Attack"
 import { DamageRoll } from "./helpers/DamageRoll"
 import { Spellcasting } from "./spells/Spellcasting"
 import { Spell } from "./spells/Spell"
-import { ActionEvent } from "./events/ActionEvent"
 import { AttackEvent } from "./events/AttackEvent"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { AttackRollEvent } from "./events/AttackRollEvent"
 import { DamageRollEvent } from "./events/DamageRollEvent"
 import { BeforeAttackEvent } from "./events/BeforeAttackEvent"
-import { BeforeActionEvent } from "./events/BeforeActionEvent"
-import { AfterActionEvent } from "./events/AfterActionEvent"
-import { EndTurnEvent } from "./events/EndTurnEvent"
-import { BeginTurnEvent } from "./events/BeginTurnEvent"
 import { ShortRestEvent } from "./events/ShortRestEvent"
 import { LongRestEvent } from "./events/LongRestEvent"
 import { EnemyTurnEvent } from "./events/EnemyTurnEvent"
@@ -228,20 +223,10 @@ export class Character {
         log.record("Turn", 1)
         this.actions.reset()
         this.bonus.reset()
-        if (this.customTurn.hasOperations()) {
-            this.customTurn.doTurn(
-                new Environment({ character: this, target }),
-                this
-            )
-        } else {
-            this.events.emit("begin_turn", new BeginTurnEvent({ target }))
-            this.events.emit("before_action", new BeforeActionEvent({ target }))
-            while (this.actions.use()) {
-                this.events.emit("action", new ActionEvent({ target }))
-            }
-            this.events.emit("after_action", new AfterActionEvent({ target }))
-            this.events.emit("end_turn", new EndTurnEvent({ target }))
-        }
+        this.customTurn.doTurn(
+            new Environment({ character: this, target }),
+            this
+        )
         for (const minion of this.minions) {
             minion.turn(target)
         }
