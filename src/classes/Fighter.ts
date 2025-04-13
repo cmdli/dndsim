@@ -18,7 +18,11 @@ import { Greatsword } from "../weapons/index"
 import { Maul } from "../weapons/index"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Environment } from "../sim/Environment"
-import { NumAttacksAttribute } from "../sim/actions/AttackAction"
+import {
+    AttackActionTag,
+    MainActionTag,
+    NumAttacksAttribute,
+} from "../sim/actions/AttackAction"
 import { Resource } from "../sim/resources/Resource"
 import { Operation } from "../sim/actions/Operation"
 import { ActionOperation } from "../sim/actions/ActionOperation"
@@ -220,7 +224,7 @@ class ToppleIfNecessaryAttackAction extends ActionOperation {
             character.weaponAttack({
                 target,
                 weapon,
-                tags: ["main_action", "attack_action"],
+                tags: [MainActionTag, AttackActionTag],
             })
         }
     }

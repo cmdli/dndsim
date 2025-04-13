@@ -1,6 +1,7 @@
 import { Character } from "../Character"
 import { Environment } from "../Environment"
 import { Weapon } from "../Weapon"
+import { AttackActionTag, MainActionTag } from "./AttackAction"
 import { Operation } from "./Operation"
 
 export class NickAttackOperation implements Operation {
@@ -23,7 +24,7 @@ export class NickAttackOperation implements Operation {
         character.weaponAttack({
             target: environment.target,
             weapon: this.weapon,
-            tags: ["attack_action", "main_action"],
+            tags: [AttackActionTag, MainActionTag],
         })
     }
 }

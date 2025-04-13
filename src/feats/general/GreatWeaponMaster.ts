@@ -1,3 +1,4 @@
+import { AttackActionTag } from "../../sim/actions/AttackAction"
 import { Character } from "../../sim/Character"
 import { Feat } from "../../sim/Feat"
 import {
@@ -29,7 +30,7 @@ export class GreatWeaponMaster extends Feat {
         }
 
         if (
-            data.attack.attack.hasTag("attack_action") &&
+            data.attack.attack.hasTag(AttackActionTag) &&
             weapon.hasTag(HeavyWeapon)
         ) {
             data.addDamage({

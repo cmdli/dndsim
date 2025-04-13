@@ -4,6 +4,8 @@ import { Weapon } from "../Weapon"
 import { Environment } from "../Environment"
 import { ActionOperation } from "./ActionOperation"
 
+export const AttackActionTag = "AttackAction"
+export const MainActionTag = "MainAction"
 export const NumAttacksAttribute = "NumAttacks"
 
 export function attackAction(args: {
@@ -17,7 +19,7 @@ export function attackAction(args: {
         character.weaponAttack({
             target,
             weapon,
-            tags: ["main_action", "attack_action"],
+            tags: [MainActionTag, AttackActionTag],
         })
     }
 }
@@ -50,7 +52,7 @@ export class DefaultAttackActionOperation extends AttackActionOperation {
             character.weaponAttack({
                 target: environment.target,
                 weapon,
-                tags: ["attack_action", "main_action"],
+                tags: [AttackActionTag, MainActionTag],
             })
         })
     }

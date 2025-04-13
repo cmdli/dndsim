@@ -1,3 +1,4 @@
+import { AttackActionTag } from "../../sim/actions/AttackAction"
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
@@ -37,7 +38,7 @@ export class Grappler extends Feat {
         const attack = event.attack
         const weapon = attack.attack.weapon()
         if (
-            attack.attack.hasTag("attack_action") &&
+            attack.attack.hasTag(AttackActionTag) &&
             weapon?.hasTag(UnarmedWeapon)
         ) {
             this.character.grapple(attack.target)

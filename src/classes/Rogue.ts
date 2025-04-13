@@ -21,7 +21,11 @@ import { Resource } from "../sim/resources/Resource"
 import { ActionOperation } from "../sim/actions/ActionOperation"
 import { Environment } from "../sim/Environment"
 import { BoomingBlade } from "../spells/BoomingBlade"
-import { DefaultAttackActionOperation } from "../sim/actions/AttackAction"
+import {
+    AttackActionTag,
+    DefaultAttackActionOperation,
+    MainActionTag,
+} from "../sim/actions/AttackAction"
 import { NickAttackOperation } from "../sim/actions/NickAttackOperation"
 import { Operation } from "../sim/actions/Operation"
 
@@ -246,7 +250,7 @@ class PsychicBladesAction extends ActionOperation {
         character.weaponAttack({
             target,
             weapon: this.psychicBlade,
-            tags: ["main_action", "attack_action"],
+            tags: [MainActionTag, AttackActionTag],
         })
     }
 }
