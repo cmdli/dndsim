@@ -34,7 +34,11 @@ export class Piercer extends Feat {
             .flatMap(({ dice }) => dice)
         if (piercingDice.length > 0) {
             const biggestDie = Math.max(...piercingDice)
-            event.addDamage({ source: "Piercer", dice: [biggestDie] })
+            event.addDamage({
+                source: "Piercer",
+                dice: [biggestDie],
+                type: "piercing",
+            })
         }
     }
 
@@ -50,7 +54,8 @@ export class Piercer extends Feat {
         let minIndex: number | null = null
 
         for (let i = 0; i < event.damage.rolls.length; i++) {
-            const expectedIncrease = (event.damage.dice[i] + 1) / 2 - event.damage.rolls[i]
+            const expectedIncrease =
+                (event.damage.dice[i] + 1) / 2 - event.damage.rolls[i]
             if (expectedIncrease > bestExpectedIncrease) {
                 bestExpectedIncrease = expectedIncrease
                 minIndex = i

@@ -28,18 +28,10 @@ export class AttackResultEvent {
         source: string
         dice?: Array<number>
         flatDmg?: number
-        type?: DamageType
+        type: DamageType
         tags?: Array<string>
     }): void {
-        const type = args.type ?? this.attack.attack.weapon()?.damageType
-
-        if (!type) {
-            throw new Error(
-                "Must specify damage if it can't fall back to the base weapon damage type"
-            )
-        }
-
-        const damageRoll = new DamageRoll({ ...args, type })
+        const damageRoll = new DamageRoll(args)
         this.damageRolls.push(damageRoll)
     }
 }

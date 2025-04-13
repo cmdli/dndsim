@@ -142,7 +142,9 @@ class TrippingAttack extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
+        const weapon = event.attack?.attack.weapon()
         if (
+            !weapon ||
             !event.hit ||
             event.attack.target.hasCondition("prone") ||
             event.attack.hasTag("used_maneuver") ||
@@ -151,7 +153,11 @@ class TrippingAttack extends Feat {
             return
         }
         const roll = this.character.combatSuperiority.roll()
-        event.addDamage({ source: "TrippingAttack", dice: [roll] })
+        event.addDamage({
+            source: "TrippingAttack",
+            dice: [roll],
+            type: weapon.damageType,
+        })
         if (!event.attack.target.save(this.character.dc("str"))) {
             event.attack.target.knockProne()
         }

@@ -95,6 +95,7 @@ export class WeaponAttack extends Attack {
                 dice: Array(this.weapon_.numDice).fill(this.weapon_.die),
                 flatDmg: damage,
                 tags: [BaseWeaponDamageTag],
+                type: this.weapon_.damageType,
             })
         }
         this.onResult?.(args)

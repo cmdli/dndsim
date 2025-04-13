@@ -43,6 +43,7 @@ export class Poisoner extends Feat {
                 event.addDamage({
                     source: "Poisoner",
                     dice: [8, 8],
+                    type: "poison",
                 })
                 // Poisoned condition is untracked
             }

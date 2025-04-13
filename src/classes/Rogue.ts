@@ -45,13 +45,15 @@ class SneakAttack extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
-        if (event.hit && !this.used) {
+        const weapon = event.attack?.attack.weapon()
+        if (weapon && event.hit && !this.used) {
             this.used = true
             const level = this.character.getClassLevel("Rogue")
             const diceCount = Math.ceil(level / 2)
             event.addDamage({
                 source: "SneakAttack",
                 dice: Array(diceCount).fill(6),
+                type: weapon.damageType,
             })
             event.attack.addTag(SneakAttackTag)
         }
@@ -150,7 +152,9 @@ class Assassinate extends Feat {
     }
 
     attackResult(event: AttackResultEvent): void {
+        const weapon = event.attack?.attack.weapon()
         if (
+            weapon &&
             event.hit &&
             this.firstTurn &&
             !this.usedDmg &&
@@ -160,6 +164,7 @@ class Assassinate extends Feat {
             event.addDamage({
                 source: "Assassinate",
                 flatDmg: this.level,
+                type: weapon.damageType,
             })
         }
     }

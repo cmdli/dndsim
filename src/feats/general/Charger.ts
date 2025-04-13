@@ -30,13 +30,12 @@ export class Charger extends Feat {
         if (!event.hit || this.used) {
             return
         }
-        if (
-            event.attack?.attack.weapon() !== undefined &&
-            !event.attack?.attack.isRanged()
-        ) {
+        const weapon = event.attack?.attack.weapon()
+        if (weapon && !event.attack?.attack.isRanged()) {
             event.addDamage({
                 source: "Charger",
                 dice: [8],
+                type: weapon.damageType,
             })
             this.used = true
         }

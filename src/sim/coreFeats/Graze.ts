@@ -15,6 +15,7 @@ export class Graze extends Feat {
             weapon.mastery === "Graze" &&
             this.character?.masteries.has("Graze")
         ) {
+            // Add damage directly because this is a miss
             data.attack.target.addDamage(
                 "Graze",
                 weapon.damageType,

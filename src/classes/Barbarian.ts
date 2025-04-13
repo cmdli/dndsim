@@ -28,9 +28,11 @@ class RageOperation implements Operation {
     eligible(_environment: Environment, character: Character): boolean {
         // While it is techically possible to rage while raging, at this time
         // there is no benefit to doing so
-        return character.hasResource(RageResource)
-            && character.bonus.has()
-            && !character.hasEffect(RageEffect)
+        return (
+            character.hasResource(RageResource) &&
+            character.bonus.has() &&
+            !character.hasEffect(RageEffect)
+        )
     }
 
     do(_environment: Environment, character: Character): void {
@@ -46,15 +48,23 @@ class Rage extends Feat {
     apply(character: Character) {
         this.addResource()
         character.customTurn.addOperation("before_action", new RageOperation())
-        character.events.on("attack_result", (event) => this.attackResult(event))
+        character.events.on("attack_result", (event) =>
+            this.attackResult(event)
+        )
         character.events.on("short_rest", () => this.shortRest())
     }
 
     attackResult(event: AttackResultEvent) {
+        const weapon = event.attack?.attack.weapon()
+        if (!weapon) {
+            return
+        }
+
         if (event.hit && event.attack.attack.stat(this.character) == "str") {
             event.addDamage({
                 source: "Rage",
                 flatDmg: this.character.getAttribute(RageBonusDamageAttribute),
+                type: weapon.damageType,
             })
         }
     }
@@ -72,7 +82,6 @@ class Rage extends Feat {
                 initialMax: 2,
                 incrementOnShortRest: true,
                 resetOnLongRest: true,
-
             })
         )
     }
@@ -80,7 +89,9 @@ class Rage extends Feat {
 
 class RecklessAttack extends Feat {
     apply(character: Character) {
-        character.events.on("attack_roll", (event) => this.attackRoll(character, event))
+        character.events.on("attack_roll", (event) =>
+            this.attackRoll(character, event)
+        )
     }
 
     attackRoll(character: Character, event: AttackRollEvent) {
@@ -103,7 +114,9 @@ class Frenzy extends Feat {
 
     apply(character: Character) {
         character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_result", (event) => this.attackResult(event))
+        character.events.on("attack_result", (event) =>
+            this.attackResult(event)
+        )
     }
 
     beginTurn() {
@@ -111,11 +124,21 @@ class Frenzy extends Feat {
     }
 
     attackResult(event: AttackResultEvent) {
-        if (event.hit && !this.used && this.character.hasEffect(RageEffect) && event.attack?.hasTag(RecklessTag)) {
-            const dice = Array(this.character.getAttribute(RageBonusDamageAttribute)).fill(6)
+        const weapon = event.attack?.attack.weapon()
+        if (
+            weapon &&
+            event.hit &&
+            !this.used &&
+            this.character.hasEffect(RageEffect) &&
+            event.attack?.hasTag(RecklessTag)
+        ) {
+            const dice = Array(
+                this.character.getAttribute(RageBonusDamageAttribute)
+            ).fill(6)
             event.addDamage({
                 source: "Frenzy",
                 dice,
+                type: weapon.damageType,
             })
             this.used = true
         }
@@ -127,7 +150,9 @@ class DivineFury extends Feat {
 
     apply(character: Character) {
         character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_result", (event) => this.attackResult(event))
+        character.events.on("attack_result", (event) =>
+            this.attackResult(event)
+        )
     }
 
     beginTurn() {
@@ -135,14 +160,20 @@ class DivineFury extends Feat {
     }
 
     attackResult(event: AttackResultEvent) {
-        if (event.hit && !this.used && this.character.hasEffect(RageEffect) && event.attack?.attack.weapon()) {
+        if (
+            event.hit &&
+            !this.used &&
+            this.character.hasEffect(RageEffect) &&
+            event.attack?.attack.weapon()
+        ) {
             event.addDamage({
                 source: "DivineFury",
                 dice: [6],
-                flatDmg: Math.floor(this.character.getClassLevel("Barbarian") / 2),
+                flatDmg: Math.floor(
+                    this.character.getClassLevel("Barbarian") / 2
+                ),
                 // This could also be necrotic instead
-                type: 'radiant',
-
+                type: "radiant",
             })
             this.used = true
         }
@@ -235,7 +266,7 @@ export class Barbarian {
                 ],
                 masteries: ["Topple", "Graze"],
             }),
-            ...this.berserkerFeats(level)
+            ...this.berserkerFeats(level),
         ]
         feats.forEach((feat) => character.addFeat(feat))
         return character
@@ -260,7 +291,7 @@ export class Barbarian {
                 ],
                 masteries: ["Topple", "Graze"],
             }),
-            ...this.zealotFeats(level)
+            ...this.zealotFeats(level),
         ]
         feats.forEach((feat) => character.addFeat(feat))
         return character
