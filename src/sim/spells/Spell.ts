@@ -1,4 +1,5 @@
 import { Character } from "../Character"
+import { Effect, EffectDuration } from "../Effect"
 import { DamageRoll } from "../helpers/DamageRoll"
 import { Target } from "../Target"
 import { DamageType } from "../types"
@@ -32,7 +33,7 @@ export class Spell {
         this.character = character
     }
 
-    end(character: Character): void { }
+    end(character: Character): void {}
 }
 
 export class TargetedSpell extends Spell {
@@ -44,7 +45,24 @@ export class TargetedSpell extends Spell {
         this.castTarget(character, target)
     }
 
-    castTarget(character: Character, target: Target): void { }
+    castTarget(character: Character, target: Target): void {}
+}
+
+export class ConcentrationSpellEffect extends Effect {
+    name_: string
+    duration: EffectDuration = "until_short_rest"
+
+    constructor(name: string) {
+        super()
+        this.name_ = name
+    }
+
+    get name(): string {
+        return this.name_
+    }
+
+    apply(character: Character): void {}
+    end(character: Character): void {}
 }
 
 export class ConcentrationSpell extends Spell {
@@ -54,12 +72,17 @@ export class ConcentrationSpell extends Spell {
 
     cast(character: Character, target?: Target): void {
         super.cast(character, target)
-        character.addEffect(this.name)
+        character.addEffect(this.effect())
     }
 
     end(character: Character): void {
         super.end(character)
         character.removeEffect(this.name)
+    }
+
+    // Override this to change the effect of the spell
+    effect(): Effect {
+        return new ConcentrationSpellEffect(this.name)
     }
 }
 

@@ -17,10 +17,39 @@ import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { SetAttribute } from "../feats/shared/SetAttribute"
 import { IncreaseResource } from "../feats/shared/IncreaseResource"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
+import { Effect, EffectDuration } from "../sim/Effect"
 
 const RageResource = "rage"
-const RageEffect = "raging"
+const RageEffectName = "raging"
 const RecklessTag = "reckless"
+
+class RageEffect extends Effect {
+    name = RageEffectName
+    duration: EffectDuration = "until_short_rest"
+
+    apply(character: Character): void {
+        character.events.on("attack_result", this.attackResult)
+    }
+
+    end(character: Character): void {
+        character.events.removeListener("attack_result", this.attackResult)
+    }
+
+    attackResult = (event: AttackResultEvent): void => {
+        const weapon = event.attack?.attack.weapon()
+        if (
+            weapon &&
+            event.hit &&
+            event.attack.attack.stat(this.character) == "str"
+        ) {
+            event.addDamage({
+                source: "Rage",
+                flatDmg: this.character.getAttribute(RageBonusDamageAttribute),
+                type: weapon.damageType,
+            })
+        }
+    }
+}
 
 class RageOperation implements Operation {
     repeatable = false
@@ -31,14 +60,14 @@ class RageOperation implements Operation {
         return (
             character.hasResource(RageResource) &&
             character.bonus.has() &&
-            !character.hasEffect(RageEffect)
+            !character.hasEffect(RageEffectName)
         )
     }
 
     do(_environment: Environment, character: Character): void {
         character.useResource(RageResource)
         character.bonus.use()
-        character.addEffect(RageEffect)
+        character.addEffect(new RageEffect())
     }
 }
 
@@ -48,29 +77,6 @@ class Rage extends Feat {
     apply(character: Character) {
         this.addResource()
         character.customTurn.addOperation("before_action", new RageOperation())
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-        character.events.on("short_rest", () => this.shortRest())
-    }
-
-    attackResult(event: AttackResultEvent) {
-        const weapon = event.attack?.attack.weapon()
-        if (!weapon) {
-            return
-        }
-
-        if (event.hit && event.attack.attack.stat(this.character) == "str") {
-            event.addDamage({
-                source: "Rage",
-                flatDmg: this.character.getAttribute(RageBonusDamageAttribute),
-                type: weapon.damageType,
-            })
-        }
-    }
-
-    shortRest() {
-        this.character.removeEffect(RageEffect)
     }
 
     addResource() {
@@ -129,7 +135,7 @@ class Frenzy extends Feat {
             weapon &&
             event.hit &&
             !this.used &&
-            this.character.hasEffect(RageEffect) &&
+            this.character.hasEffect(RageEffectName) &&
             event.attack?.hasTag(RecklessTag)
         ) {
             const dice = Array(
@@ -163,7 +169,7 @@ class DivineFury extends Feat {
         if (
             event.hit &&
             !this.used &&
-            this.character.hasEffect(RageEffect) &&
+            this.character.hasEffect(RageEffectName) &&
             event.attack?.attack.weapon()
         ) {
             event.addDamage({

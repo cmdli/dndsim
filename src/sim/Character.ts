@@ -28,6 +28,7 @@ import { log } from "../util/Log"
 import { CombatSuperiority } from "./resources/CombatSuperiority"
 import { CustomTurn } from "./actions/CustomTurn"
 import { Environment } from "./Environment"
+import { Effect } from "./Effect"
 
 const DEFAULT_STAT_MAX = 20
 
@@ -48,7 +49,7 @@ export class Character {
     feats: Array<Feat> = []
     events: EventLoop<CharacterEventName, CharacterEventMapping> =
         new EventLoop()
-    effects: Set<string> = new Set()
+    effects: Map<string, Effect> = new Map()
     minions: Set<Character> = new Set()
 
     spells: Spellcasting = new Spellcasting(this)
@@ -141,12 +142,16 @@ export class Character {
         return this.effects.has(effect)
     }
 
-    addEffect(effect: string): void {
-        this.effects.add(effect)
+    addEffect(effect: Effect): void {
+        this.effects.set(effect.name, effect)
+        effect.internalApply(this)
     }
 
     removeEffect(effect: string): void {
-        this.effects.delete(effect)
+        if (this.effects.has(effect)) {
+            this.effects.get(effect)?.end(this)
+            this.effects.delete(effect)
+        }
     }
 
     getAttribute(attribute: string): number {
@@ -233,8 +238,12 @@ export class Character {
     }
 
     shortRest(): void {
-        this.effects = new Set()
         this.events.emit("short_rest", new ShortRestEvent())
+        for (const effect of this.effects.keys()) {
+            if (this.effects.get(effect)?.duration === "until_short_rest") {
+                this.removeEffect(effect)
+            }
+        }
     }
 
     longRest(): void {

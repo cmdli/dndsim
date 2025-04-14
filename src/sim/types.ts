@@ -20,6 +20,7 @@ export type Class =
     | "Monk"
     | "Paladin"
     | "Rogue"
+    | "Ranger"
     | "Sorcerer"
     | "Warlock"
     | "Wizard"
