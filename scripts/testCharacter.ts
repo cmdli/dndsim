@@ -61,6 +61,9 @@ function getCharacterCreator(character: string) {
         case "fighter":
             return (level: number) =>
                 dndsim.classes.Fighter.createChampionFighter(level)
+        case "barbarian":
+            return (level: number) =>
+                dndsim.classes.Barbarian.createZealotBarbarian(level)
         default:
             throw new Error(`Unknown character: ${character}`)
     }

@@ -18,6 +18,7 @@ import { SetAttribute } from "../feats/shared/SetAttribute"
 import { IncreaseResource } from "../feats/shared/IncreaseResource"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Effect, EffectDuration } from "../sim/Effect"
+import { DefaultAttackActionOperation } from "../sim/actions/AttackAction"
 
 const RageResource = "rage"
 const RageEffectName = "raging"
@@ -242,6 +243,9 @@ export class Barbarian {
         if (level >= 3) {
             feats.push(new Frenzy())
         }
+        // Level 6 (Mindless Rage) is ignored
+        // Level 10 (Retaliation) is ignored
+        // Level 14 (Intimidating Presence) is ignored
         return feats
     }
 
@@ -275,6 +279,11 @@ export class Barbarian {
             ...this.berserkerFeats(level),
         ]
         feats.forEach((feat) => character.addFeat(feat))
+
+        character.customTurn.addOperation(
+            "action",
+            new DefaultAttackActionOperation(weapon)
+        )
         return character
     }
 
@@ -300,6 +309,11 @@ export class Barbarian {
             ...this.zealotFeats(level),
         ]
         feats.forEach((feat) => character.addFeat(feat))
+
+        character.customTurn.addOperation(
+            "action",
+            new DefaultAttackActionOperation(weapon)
+        )
         return character
     }
 }
