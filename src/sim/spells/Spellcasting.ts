@@ -13,7 +13,7 @@ import { Spell } from "./Spell"
 
 export class Spellcasting {
     character: Character
-    mod: Stat = "int"
+    mod: Stat = "none"
     spellcasterLevels: Array<[Spellcaster, number]>
     pactSpellcasterLevel: number
     concentration?: Spell
