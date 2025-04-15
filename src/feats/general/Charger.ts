@@ -2,15 +2,12 @@ import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
 import { Feat } from "../../sim/Feat"
-import { Stat } from "../../sim/types"
 
 export class Charger extends Feat {
-    stat: Stat
     used: boolean = false
 
-    constructor(stat: "str" | "dex") {
+    constructor(private stat: "str" | "dex") {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

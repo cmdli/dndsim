@@ -2,11 +2,8 @@ import { Character } from "../../sim/Character"
 import { Feat } from "../../sim/Feat"
 
 export class DualWielder extends Feat {
-    stat: "str" | "dex"
-
-    constructor(stat: "str" | "dex") {
+    constructor(private stat: "str" | "dex") {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

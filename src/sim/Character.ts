@@ -4,7 +4,7 @@ import {
 } from "./events/CharacterEvent"
 import { Feat } from "./Feat"
 import { EventLoop } from "../util/EventLoop"
-import { Class, Stat, WeaponMastery } from "./types"
+import { Class, Stat, StatOrNone, WeaponMastery } from "./types"
 import { Resource } from "./resources/Resource"
 import { Target } from "./Target"
 import { Weapon } from "./Weapon"
@@ -35,7 +35,7 @@ const DEFAULT_STAT_MAX = 20
 export class Character {
     // Stats
     level: number = 0
-    stats: Record<Stat, number>
+    stats: Record<StatOrNone, number>
     statMax: Record<Stat, number> = {
         str: DEFAULT_STAT_MAX,
         dex: DEFAULT_STAT_MAX,
@@ -43,7 +43,6 @@ export class Character {
         int: DEFAULT_STAT_MAX,
         wis: DEFAULT_STAT_MAX,
         cha: DEFAULT_STAT_MAX,
-        none: DEFAULT_STAT_MAX,
     }
 
     feats: Array<Feat> = []
@@ -82,7 +81,7 @@ export class Character {
     resources: Map<string, Resource> = new Map()
     // TODO: Add other class resources
     // TODO: Handle actions better
-    grappleStat: Stat = "str"
+    grappleStat: StatOrNone = "str"
     customTurn: CustomTurn = new CustomTurn()
 
     constructor(args: { stats: Omit<Record<Stat, number>, "none"> }) {
@@ -98,11 +97,11 @@ export class Character {
         feat.internalApply(this)
     }
 
-    stat(stat: Stat): number {
+    stat(stat: StatOrNone): number {
         return this.stats[stat]
     }
 
-    mod(stat: Stat): number {
+    mod(stat: StatOrNone): number {
         return Math.floor((this.stat(stat) - 10) / 2)
     }
 
@@ -122,7 +121,7 @@ export class Character {
         this.increaseStat(stat, amount)
     }
 
-    dc(stat: Stat): number {
+    dc(stat: StatOrNone): number {
         return this.mod(stat) + this.prof() + 8
     }
 

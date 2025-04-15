@@ -5,12 +5,10 @@ import { Feat } from "../../sim/Feat"
 import { Stat } from "../../sim/types"
 
 export class CombatProwess extends Feat {
-    stat: Stat
     used: boolean = false
 
-    constructor(stat: Stat) {
+    constructor(private stat: Stat) {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

@@ -1,14 +1,10 @@
 import { Character } from "../../sim/Character"
 import { Feat } from "../../sim/Feat"
-import { Stat, WeaponMastery } from "../../sim/types"
+import { WeaponMastery } from "../../sim/types"
 
 export class WeaponMaster extends Feat {
-    stat: Stat
-    mastery: WeaponMastery
-    constructor(stat: "str" | "dex", mastery: WeaponMastery) {
+    constructor(private stat: "str" | "dex", private mastery: WeaponMastery) {
         super()
-        this.stat = stat
-        this.mastery = mastery
     }
 
     apply(character: Character): void {

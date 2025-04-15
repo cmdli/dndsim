@@ -1,7 +1,7 @@
 import { Character } from "./Character"
 import { AttackResultEvent } from "./events/AttackResultEvent"
 import { Spell } from "./spells/Spell"
-import { Stat } from "./types"
+import { StatOrNone } from "./types"
 import {
     BaseWeaponDamageTag,
     FinesseWeapon,
@@ -11,11 +11,11 @@ import {
 
 export abstract class Attack {
     tags: Set<string> = new Set()
-    stats: Stat[] = []
+    stats: StatOrNone[] = []
 
     abstract name(): string
     abstract toHit(character: Character): number
-    abstract stat(character: Character): Stat
+    abstract stat(character: Character): StatOrNone
     abstract attackResult(args: AttackResultEvent, character: Character): void
     abstract minCrit(): number
     abstract isRanged(): boolean
@@ -37,7 +37,7 @@ export abstract class Attack {
         return undefined
     }
 
-    addStat(stat: Stat) {
+    addStat(stat: StatOrNone) {
         this.stats.push(stat)
     }
 }
@@ -70,7 +70,7 @@ export class WeaponAttack extends Attack {
         return this.weapon_.name
     }
 
-    stat(character: Character): Stat {
+    stat(character: Character): StatOrNone {
         return this.stats.reduce((best, stat) =>
             character.stat(best) > character.stat(stat) ? best : stat
         )
@@ -113,7 +113,7 @@ export class WeaponAttack extends Attack {
         return this.weapon_
     }
 
-    addStat(stat: Stat) {
+    addStat(stat: StatOrNone) {
         this.stats.push(stat)
     }
 }

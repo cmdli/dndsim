@@ -1,6 +1,6 @@
 import { Character } from "../Character"
 import { Target } from "../Target"
-import { Stat } from "../types"
+import { StatOrNone } from "../types"
 import {
     Spellcaster,
     spellcasterLevel,
@@ -13,7 +13,7 @@ import { Spell } from "./Spell"
 
 export class Spellcasting {
     character: Character
-    mod: Stat = "none"
+    mod: StatOrNone = "none"
     spellcasterLevels: Array<[Spellcaster, number]>
     pactSpellcasterLevel: number
     concentration?: Spell
@@ -34,7 +34,7 @@ export class Spellcasting {
         this.character.events.on("long_rest", () => this.longRest())
     }
 
-    setMod(mod: Stat): void {
+    setMod(mod: StatOrNone): void {
         this.mod = mod
     }
 

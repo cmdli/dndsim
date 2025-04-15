@@ -1,15 +1,11 @@
 import { Character } from "../../sim/Character"
 import { CastSpellEvent } from "../../sim/events/CastSpellEvent"
 import { Feat } from "../../sim/Feat"
-import { Stat } from "../../sim/types"
 import { rollDice } from "../../util/helpers"
 
 export class SpellRecall extends Feat {
-    stat: Stat
-
-    constructor(stat: "int" | "wis" | "cha") {
+    constructor(private stat: "int" | "wis" | "cha") {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

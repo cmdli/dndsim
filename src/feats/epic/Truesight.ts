@@ -4,11 +4,8 @@ import { Stat } from "../../sim/types"
 
 // Mostly no-op since truesight does affect the sim
 export class Truesight extends Feat {
-    stat: Stat
-
-    constructor(stat: Stat) {
+    constructor(private stat: Stat) {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

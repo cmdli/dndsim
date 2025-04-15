@@ -6,11 +6,8 @@ import { Stat } from "../../sim/types"
 // Dim light and the opponent to not have truesight or blindsight,
 // which is relatively situational at level 19+.
 export class NightSpirit extends Feat {
-    stat: Stat
-
-    constructor(stat: Stat) {
+    constructor(private stat: Stat) {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

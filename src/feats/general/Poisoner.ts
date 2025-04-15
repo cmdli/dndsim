@@ -1,16 +1,13 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { Feat } from "../../sim/Feat"
-import { Stat } from "../../sim/types"
 
 export class Poisoner extends Feat {
-    stat: Stat
     uses: number = 0
     enabled: boolean = false
 
-    constructor(stat: "dex" | "int") {
+    constructor(private stat: "dex" | "int") {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

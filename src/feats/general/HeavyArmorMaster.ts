@@ -1,13 +1,9 @@
 import { Character } from "../../sim/Character"
 import { Feat } from "../../sim/Feat"
-import { Stat } from "../../sim/types"
 
 export class HeavyArmorMaster extends Feat {
-    stat: Stat
-
-    constructor(stat: "str" | "con") {
+    constructor(private stat: "str" | "con") {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

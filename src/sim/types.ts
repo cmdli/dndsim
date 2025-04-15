@@ -1,4 +1,6 @@
-export type Stat = "str" | "dex" | "con" | "int" | "wis" | "cha" | "none"
+export type Stat = "str" | "dex" | "con" | "int" | "wis" | "cha"
+// d20 checks can have no ability associated with them
+export type StatOrNone = Stat | "none"
 
 export type WeaponMastery =
     | "Vex"

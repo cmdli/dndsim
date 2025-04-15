@@ -4,11 +4,8 @@ import { Stat } from "../../sim/types"
 
 // We are ignoring energy redirection for now
 export class EnergyResistance extends Feat {
-    stat: Stat
-
-    constructor(stat: Stat) {
+    constructor(private stat: Stat) {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {

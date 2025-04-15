@@ -3,11 +3,8 @@ import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { Feat } from "../../sim/Feat"
 
 export class IrresistibleOffense extends Feat {
-    private mod: "str" | "dex"
-
-    constructor(mod: "str" | "dex") {
+    constructor(private mod: "str" | "dex") {
         super()
-        this.mod = mod
     }
 
     apply(character: Character): void {

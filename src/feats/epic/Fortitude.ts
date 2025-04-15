@@ -4,11 +4,8 @@ import { Stat } from "../../sim/types"
 
 // We ignore the hit point attributes here
 export class Fortitude extends Feat {
-    stat: Stat
-
-    constructor(stat: Stat) {
+    constructor(private stat: Stat) {
         super()
-        this.stat = stat
     }
 
     apply(character: Character): void {
