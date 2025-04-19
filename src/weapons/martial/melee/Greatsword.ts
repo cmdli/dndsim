@@ -3,16 +3,16 @@ import {
     TwoHandedWeapon,
     Weapon,
     WeaponArgs,
-} from "../../sim/Weapon"
+} from "../../../sim/Weapon"
 
-export class Maul extends Weapon {
+export class Greatsword extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
         super({
-            name: "Maul",
+            name: "Greatsword",
             numDice: 2,
             die: 6,
-            damageType: "bludgeoning",
-            mastery: "Topple",
+            damageType: "slashing",
+            mastery: "Graze",
             tags: [HeavyWeapon, TwoHandedWeapon],
             ...args,
         })

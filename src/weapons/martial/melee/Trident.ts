@@ -3,7 +3,7 @@ import {
     VersatileWeapon,
     Weapon,
     WeaponArgs,
-} from "../../sim/Weapon"
+} from "../../../sim/Weapon"
 
 export class Trident extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {

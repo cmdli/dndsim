@@ -1,4 +1,4 @@
-import { LightWeapon, Weapon, WeaponArgs } from "../../sim/Weapon"
+import { LightWeapon, Weapon, WeaponArgs } from "../../../sim/Weapon"
 
 export class Sickle extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {

@@ -14,7 +14,7 @@ import {
     Weapon,
 } from "../sim/Weapon"
 import { WeaponMastery } from "../sim/types"
-import { Shortsword, Scimitar, Rapier } from "../weapons/index"
+import { Rapier } from "../weapons/martial/melee/Rapier"
 import { IncreaseResource } from "../feats/shared/IncreaseResource"
 import { SetAttribute } from "../feats/shared/SetAttribute"
 import { Resource } from "../sim/resources/Resource"
@@ -28,6 +28,8 @@ import {
 } from "../sim/actions/AttackAction"
 import { NickAttackOperation } from "../sim/actions/NickAttackOperation"
 import { Operation } from "../sim/actions/Operation"
+import { Shortsword } from "../weapons/martial/melee/Shortsword"
+import { Scimitar } from "../weapons/martial/melee/Scimitar"
 
 const EnergyDieAttribute = "energyDie"
 const EnergyDiceResource = "energyDice"
@@ -462,8 +464,12 @@ export class Rogue {
                 new BoomingBladeAction(rapier)
             )
         } else {
-            const shortsword = new Shortsword({ magicBonus })
-            const scimitar = new Scimitar({ magicBonus })
+            const shortsword = new Shortsword({
+                magicBonus,
+            })
+            const scimitar = new Scimitar({
+                magicBonus,
+            })
             character.customTurn.addOperation(
                 "action",
                 new DefaultAttackActionOperation(shortsword)
@@ -504,8 +510,12 @@ export class Rogue {
                 new BoomingBladeAction(rapier)
             )
         } else {
-            const shortsword = new Shortsword({ magicBonus })
-            const scimitar = new Scimitar({ magicBonus })
+            const shortsword = new Shortsword({
+                magicBonus,
+            })
+            const scimitar = new Scimitar({
+                magicBonus,
+            })
             character.customTurn.addOperation(
                 "action",
                 new DefaultAttackActionOperation(shortsword)

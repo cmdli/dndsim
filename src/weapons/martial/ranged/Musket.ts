@@ -5,23 +5,24 @@ import {
     TwoHandedWeapon,
     Weapon,
     WeaponArgs,
-} from "../../sim/Weapon"
+} from "../../../sim/Weapon"
 
-export class LightCrossbow extends Weapon {
+export class Musket extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
         super({
-            name: "LightCrossbow",
+            ...args,
+            name: "Musket",
             numDice: 1,
-            die: 6,
+            die: 12,
             damageType: "piercing",
             mastery: "Slow",
             tags: [
-                TwoHandedWeapon,
-                LoadingWeapon,
                 AmmunitionWeapon,
                 RangedWeapon,
+                LoadingWeapon,
+                TwoHandedWeapon,
+                ...(args?.tags ?? []),
             ],
-            ...args,
         })
     }
 }

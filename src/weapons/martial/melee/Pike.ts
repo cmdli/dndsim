@@ -4,7 +4,7 @@ import {
     TwoHandedWeapon,
     Weapon,
     WeaponArgs,
-} from "../../sim/Weapon"
+} from "../../../sim/Weapon"
 
 export class Pike extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {

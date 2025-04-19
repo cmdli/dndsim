@@ -14,8 +14,6 @@ import { Weapon } from "../sim/Weapon"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { SavageAttacker } from "../feats/origin/SavageAttacker"
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
-import { Greatsword } from "../weapons/index"
-import { Maul } from "../weapons/index"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Environment } from "../sim/Environment"
 import {
@@ -26,6 +24,8 @@ import {
 import { Resource } from "../sim/resources/Resource"
 import { Operation } from "../sim/actions/Operation"
 import { ActionOperation } from "../sim/actions/ActionOperation"
+import { Greatsword } from "../weapons/martial/melee/Greatsword"
+import { Maul } from "../weapons/martial/melee/Maul"
 
 const ActionSurgeResource = "ActionSurge"
 

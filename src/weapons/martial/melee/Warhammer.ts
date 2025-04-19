@@ -1,14 +1,14 @@
-import { TwoHandedWeapon, Weapon, WeaponArgs } from "../../sim/Weapon"
+import { VersatileWeapon, Weapon, WeaponArgs } from "../../../sim/Weapon"
 
-export class Greatclub extends Weapon {
+export class Warhammer extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
         super({
-            name: "Greatclub",
+            name: "Warhammer",
             numDice: 1,
             die: 8,
             damageType: "bludgeoning",
             mastery: "Push",
-            tags: [TwoHandedWeapon],
+            tags: [VersatileWeapon],
             ...args,
         })
     }

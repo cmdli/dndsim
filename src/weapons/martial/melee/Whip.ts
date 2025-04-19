@@ -1,19 +1,19 @@
 import {
     FinesseWeapon,
-    LightWeapon,
+    ReachWeapon,
     Weapon,
     WeaponArgs,
-} from "../../sim/Weapon"
+} from "../../../sim/Weapon"
 
-export class Scimitar extends Weapon {
+export class Whip extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
         super({
-            name: "Scimitar",
+            name: "Whip",
             numDice: 1,
-            die: 6,
+            die: 4,
             damageType: "slashing",
-            mastery: "Nick",
-            tags: [FinesseWeapon, LightWeapon],
+            mastery: "Slow",
+            tags: [FinesseWeapon, ReachWeapon],
             ...args,
         })
     }
