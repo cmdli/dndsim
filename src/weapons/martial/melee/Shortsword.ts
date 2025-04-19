@@ -7,14 +7,16 @@ import {
 
 export class Shortsword extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
-        super({
-            name: "Shortsword",
-            numDice: 1,
-            die: 6,
-            damageType: "slashing",
-            mastery: "Vex",
-            tags: [FinesseWeapon, LightWeapon],
-            ...args,
-        })
+        super(
+            {
+                name: "Shortsword",
+                numDice: 1,
+                die: 6,
+                damageType: "slashing",
+                mastery: "Vex",
+                tags: [FinesseWeapon, LightWeapon],
+            },
+            args
+        )
     }
 }

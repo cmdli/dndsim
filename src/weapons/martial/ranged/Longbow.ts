@@ -10,21 +10,22 @@ import {
 
 export class Longbow extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
-        super({
-            ...args,
-            name: "Longbow",
-            numDice: 1,
-            die: 8,
-            damageType: "piercing",
-            mastery: "Slow",
-            tags: [
-                AmmunitionWeapon,
-                RangedWeapon,
-                HeavyWeapon,
-                TwoHandedWeapon,
-                LoadingWeapon,
-                ...(args?.tags ?? []),
-            ],
-        })
+        super(
+            {
+                name: "Longbow",
+                numDice: 1,
+                die: 8,
+                damageType: "piercing",
+                mastery: "Slow",
+                tags: [
+                    AmmunitionWeapon,
+                    RangedWeapon,
+                    HeavyWeapon,
+                    TwoHandedWeapon,
+                    LoadingWeapon,
+                ],
+            },
+            args
+        )
     }
 }

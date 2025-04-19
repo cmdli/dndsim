@@ -41,17 +41,18 @@ export class Weapon {
     readonly dmgBonus: number
     readonly tags: Set<string>
 
-    constructor(args: WeaponArgs) {
-        this.name = args.name
-        this.numDice = args.numDice ?? 1
-        this.die = args.die
-        this.damageType = args.damageType ?? "unknown"
-        this.minCrit = args.minCrit ?? 20
-        this.mastery = args.mastery
-        this.magicBonus = args.magicBonus ?? 0
-        this.attackBonus = this.magicBonus + (args.attackBonus ?? 0)
-        this.dmgBonus = this.magicBonus + (args.dmgBonus ?? 0)
-        this.tags = new Set(args.tags)
+    constructor(args: WeaponArgs, overrideArgs?: Partial<WeaponArgs>) {
+        const merged = mergeArgs(args, overrideArgs)
+        this.name = merged.name
+        this.numDice = merged.numDice ?? 1
+        this.die = merged.die
+        this.damageType = merged.damageType ?? "unknown"
+        this.minCrit = merged.minCrit ?? 20
+        this.mastery = merged.mastery
+        this.magicBonus = merged.magicBonus ?? 0
+        this.attackBonus = this.magicBonus + (merged.attackBonus ?? 0)
+        this.dmgBonus = this.magicBonus + (merged.dmgBonus ?? 0)
+        this.tags = new Set(merged.tags)
     }
 
     rolls(crit: boolean): Array<number> {
@@ -64,5 +65,16 @@ export class Weapon {
 
     hasTag(tag: string): boolean {
         return this.tags.has(tag)
+    }
+}
+
+function mergeArgs(
+    args: WeaponArgs,
+    overrideArgs?: Partial<WeaponArgs>
+): WeaponArgs {
+    return {
+        ...args,
+        ...overrideArgs,
+        tags: [...(args.tags ?? []), ...(overrideArgs?.tags ?? [])],
     }
 }

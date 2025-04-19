@@ -9,20 +9,21 @@ import {
 
 export class Musket extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
-        super({
-            ...args,
-            name: "Musket",
-            numDice: 1,
-            die: 12,
-            damageType: "piercing",
-            mastery: "Slow",
-            tags: [
-                AmmunitionWeapon,
-                RangedWeapon,
-                LoadingWeapon,
-                TwoHandedWeapon,
-                ...(args?.tags ?? []),
-            ],
-        })
+        super(
+            {
+                name: "Musket",
+                numDice: 1,
+                die: 12,
+                damageType: "piercing",
+                mastery: "Slow",
+                tags: [
+                    AmmunitionWeapon,
+                    RangedWeapon,
+                    LoadingWeapon,
+                    TwoHandedWeapon,
+                ],
+            },
+            args
+        )
     }
 }

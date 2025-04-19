@@ -10,21 +10,22 @@ import { Weapon } from "../../../sim/Weapon"
 
 export class HeavyCrossbow extends Weapon {
     constructor(args?: Partial<WeaponArgs>) {
-        super({
-            ...args,
-            name: "Heavy Crossbow",
-            numDice: 1,
-            die: 10,
-            damageType: "piercing",
-            mastery: "Push",
-            tags: [
-                AmmunitionWeapon,
-                RangedWeapon,
-                LoadingWeapon,
-                HeavyWeapon,
-                TwoHandedWeapon,
-                ...(args?.tags ?? []),
-            ],
-        })
+        super(
+            {
+                name: "Heavy Crossbow",
+                numDice: 1,
+                die: 10,
+                damageType: "piercing",
+                mastery: "Push",
+                tags: [
+                    AmmunitionWeapon,
+                    RangedWeapon,
+                    LoadingWeapon,
+                    HeavyWeapon,
+                    TwoHandedWeapon,
+                ],
+            },
+            args
+        )
     }
 }
