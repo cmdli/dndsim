@@ -33,6 +33,7 @@ export abstract class Attack {
     weapon(): Weapon | undefined {
         return undefined
     }
+
     spell(): Spell | undefined {
         return undefined
     }

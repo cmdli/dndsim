@@ -5,12 +5,15 @@ import { Target } from "../Target"
 import { DamageType } from "../types"
 import { SpellcastingSchool } from "./shared"
 
+export type CastingTime = "action" | "bonus_action" | "reaction"
+
 export type SpellArgs = {
     name: string
     slot: number
     concentration?: boolean
     duration?: number
     school?: SpellcastingSchool
+    castingTime: CastingTime
 }
 
 export class Spell {
@@ -20,13 +23,14 @@ export class Spell {
     duration: number
     school?: SpellcastingSchool
     character?: Character
-
+    castingTime: CastingTime
     constructor(args: SpellArgs) {
         this.name = args.name
         this.slot = args.slot
         this.concentration = args.concentration || false
         this.duration = args.duration || 0
         this.school = args.school
+        this.castingTime = args.castingTime || "action"
     }
 
     cast(character: Character, target?: Target): void {
@@ -66,7 +70,13 @@ export class ConcentrationSpellEffect extends Effect {
 }
 
 export class ConcentrationSpell extends Spell {
-    constructor(args: { name: string; slot: number } & Partial<SpellArgs>) {
+    constructor(
+        args: {
+            name: string
+            slot: number
+            castingTime: CastingTime
+        } & Partial<SpellArgs>
+    ) {
         super({ ...args, concentration: true })
     }
 
@@ -98,6 +108,7 @@ export class BasicSaveSpell extends Spell {
             dice: number[]
             flatDmg?: number
             type: DamageType
+            castingTime: CastingTime
         } & Partial<SpellArgs>
     ) {
         super(args)
