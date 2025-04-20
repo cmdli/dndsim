@@ -13,6 +13,7 @@ export class BoomingBlade extends Spell {
             name: "BoomingBlade",
             slot: 0,
             school: SpellcastingSchool.Evocation,
+            castingTime: "action",
         })
     }
 
