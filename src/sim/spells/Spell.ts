@@ -22,7 +22,7 @@ export class Spell {
     concentration: boolean
     duration: number
     school?: SpellcastingSchool
-    character?: Character
+    character!: Character
     castingTime: CastingTime
     constructor(args: SpellArgs) {
         this.name = args.name

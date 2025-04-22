@@ -66,7 +66,7 @@ export class CustomTurn {
             for (let i = 0; i < stepList.length; i++) {
                 const step = stepList[i]
                 if (step.eligible(environment, character)) {
-                    log.record(`Operation: ${step.constructor.name}`, 1)
+                    log.record(`Operation (${step.constructor.name})`, 1)
                     step.do(environment, character)
                     if (!step.repeatable) {
                         stepList.splice(i, 1)

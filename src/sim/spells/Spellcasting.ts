@@ -1,3 +1,4 @@
+import { log } from "../../util/Log"
 import { Character } from "../Character"
 import { Target } from "../Target"
 import { StatOrNone } from "../types"
@@ -81,17 +82,34 @@ export class Spellcasting {
     highestSlot(maxSlot: number = 9): number {
         const regularSlot = highestSpellSlot(this.slots, maxSlot)
         const pactSlot = this.pactSlot(maxSlot)
+        if (!pactSlot) {
+            return regularSlot
+        }
+        if (!regularSlot) {
+            return pactSlot
+        }
         return Math.max(regularSlot, pactSlot)
     }
 
     lowestSlot(minSlot: number = 1): number {
         const regularSlot = lowestSpellSlot(this.slots, minSlot)
         const pactSlot = this.pactSlot(undefined, minSlot)
+        if (!pactSlot) {
+            return regularSlot
+        }
+        if (!regularSlot) {
+            return pactSlot
+        }
         return Math.min(regularSlot, pactSlot)
+    }
+
+    hasSpellSlot(slot: number): boolean {
+        return this.slots[slot] > 0 || this.pactSlots.includes(slot)
     }
 
     cast(args: { spell: Spell; target?: Target; ignoreSlot?: boolean }): void {
         const { spell, target, ignoreSlot } = args
+        log.record(`Cast (${spell.name})`, 1)
         if (spell.slot > 0 && !ignoreSlot) {
             if (this.pactSlot() === spell.slot) {
                 this.pactSlots.pop()
@@ -124,11 +142,14 @@ export class Spellcasting {
     }
 
     concentratingOn(name: string): boolean {
-        return this.concentration !== null && this.concentration?.name === name
+        return (
+            this.concentration !== undefined &&
+            this.concentration?.name === name
+        )
     }
 
     isConcentrating(): boolean {
-        return this.concentration !== null
+        return this.concentration !== undefined
     }
 
     cantripDice(): number {

@@ -87,12 +87,22 @@ export function highestSpellSlot(
     slots: Array<number>,
     maxSlot: number = 9
 ): number {
-    return Math.max(...slots.filter((slot) => slot <= maxSlot))
+    for (let i = maxSlot; i > 0; i--) {
+        if (slots[i] > 0) {
+            return i
+        }
+    }
+    return 0
 }
 
 export function lowestSpellSlot(
     slots: Array<number>,
     minSlot: number = 1
 ): number {
-    return Math.min(...slots.filter((slot) => slot >= minSlot))
+    for (let i = minSlot; i <= 9; i++) {
+        if (slots[i] > 0) {
+            return i
+        }
+    }
+    return 0
 }

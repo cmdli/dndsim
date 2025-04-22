@@ -22,12 +22,8 @@ export class Resource {
         this.name = args.name
         this.count = args.initialCount ?? args.initialMax ?? 0
         this.max = args.initialMax ?? 0
-        args.character.events.on("short_rest", () =>
-            this.shortRest()
-        )
-        args.character.events.on("long_rest", () =>
-            this.longRest()
-        )
+        args.character.events.on("short_rest", () => this.shortRest())
+        args.character.events.on("long_rest", () => this.longRest())
         this.resetOnShortRest = args.resetOnShortRest ?? false
         this.resetOnLongRest = args.resetOnLongRest ?? false
     }
@@ -47,7 +43,7 @@ export class Resource {
     use(amount: number = 1, reason?: string): boolean {
         if (this.count >= amount) {
             log.record(
-                `Resource used: ${this.name}${reason ? ` (${reason})` : ""}`,
+                `Resource used (${this.name}${reason ? ` (${reason})` : ""})`,
                 amount
             )
             this.count -= amount
