@@ -1,5 +1,5 @@
 import { Character } from "../../sim/Character"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { Stat } from "../../sim/types"
 
 // Mostly no-op since truesight does affect the sim

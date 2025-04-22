@@ -1,5 +1,5 @@
 import { Character } from "../Character"
-import { Feature } from "../Feat"
+import { Feature } from "../Feature"
 import { Class } from "../types"
 
 export class ClassLevel extends Feature {

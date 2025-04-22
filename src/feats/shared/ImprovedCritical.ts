@@ -1,6 +1,6 @@
 import { Character } from "../../sim/Character"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 
 export class ImprovedCritical extends Feature {
     constructor(private minCrit: number) {

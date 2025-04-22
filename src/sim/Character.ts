@@ -2,7 +2,7 @@ import {
     CharacterEventMapping,
     CharacterEventName,
 } from "./events/CharacterEvent"
-import { Feature } from "./Feat"
+import { Feature } from "./Feature"
 import { EventLoop } from "../util/EventLoop"
 import { Class, Stat, StatOrNone, WeaponMastery } from "./types"
 import { Resource } from "./resources/Resource"

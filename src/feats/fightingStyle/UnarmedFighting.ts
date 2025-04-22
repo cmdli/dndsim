@@ -1,6 +1,6 @@
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { Character } from "../../sim/Character"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { BaseWeaponDamageTag, UnarmedWeapon } from "../../sim/Weapon"
 
 export class UnarmedFighting extends Feature {

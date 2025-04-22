@@ -1,6 +1,6 @@
 import { AttackActionTag } from "../../sim/actions/AttackAction"
 import { Character } from "../../sim/Character"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import {
     HeavyWeapon,
     RangedWeapon,

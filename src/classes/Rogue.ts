@@ -4,7 +4,7 @@ import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
-import { Feature } from "../sim/Feat"
+import { Feature } from "../sim/Feature"
 import { applyFeatSchedule, defaultMagicBonus, rollDice } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import {

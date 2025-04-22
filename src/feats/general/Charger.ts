@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 
 export class Charger extends Feature {
     used: boolean = false

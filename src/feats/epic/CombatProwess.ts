@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { Stat } from "../../sim/types"
 
 export class CombatProwess extends Feature {

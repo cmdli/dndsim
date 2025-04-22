@@ -1,4 +1,4 @@
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { rollDice } from "../../util/helpers"

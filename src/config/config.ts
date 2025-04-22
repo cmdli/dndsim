@@ -1,5 +1,5 @@
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
-import { Feature } from "../sim/Feat"
+import { Feature } from "../sim/Feature"
 import { Class } from "../sim/types"
 
 type ChoiceOption = {

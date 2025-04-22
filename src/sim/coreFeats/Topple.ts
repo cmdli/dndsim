@@ -1,6 +1,6 @@
 import { Character } from "../Character"
 import { AttackResultEvent } from "../events/AttackResultEvent"
-import { Feature } from "../Feat"
+import { Feature } from "../Feature"
 
 export class Topple extends Feature {
     apply(character: Character): void {

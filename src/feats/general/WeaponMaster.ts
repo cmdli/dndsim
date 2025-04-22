@@ -1,5 +1,5 @@
 import { Character } from "../../sim/Character"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { WeaponMastery } from "../../sim/types"
 
 export class WeaponMaster extends Feature {

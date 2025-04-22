@@ -1,7 +1,7 @@
 import { BaseWeaponDamageTag, UnarmedWeapon } from "../../sim/Weapon"
 import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { rollDice } from "../../util/helpers"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 

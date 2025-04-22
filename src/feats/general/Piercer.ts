@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { rollDice } from "../../util/helpers"
 
 export class Piercer extends Feature {

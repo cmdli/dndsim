@@ -1,6 +1,6 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 
 export class Poisoner extends Feature {
     uses: number = 0

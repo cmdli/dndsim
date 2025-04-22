@@ -1,5 +1,5 @@
 import { WeaponMastery } from "../sim/types"
-import { Feature } from "../sim/Feat"
+import { Feature } from "../sim/Feature"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"

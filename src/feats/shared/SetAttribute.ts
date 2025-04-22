@@ -1,5 +1,5 @@
 import { Character } from "../../sim/Character"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 
 export class SetAttribute extends Feature {
     constructor(private attribute: string, private value: number) {

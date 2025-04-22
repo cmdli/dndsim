@@ -1,6 +1,6 @@
 import { Character } from "../../sim/Character"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 
 export class TwoWeaponFighting extends Feature {
     apply(character: Character): void {

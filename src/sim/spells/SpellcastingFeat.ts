@@ -1,4 +1,4 @@
-import { Feature } from "../Feat"
+import { Feature } from "../Feature"
 import { Character } from "../Character"
 import { Spellcaster } from "./shared"
 import { Stat } from "../types"

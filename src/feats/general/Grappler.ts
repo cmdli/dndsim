@@ -2,7 +2,7 @@ import { AttackActionTag } from "../../sim/actions/AttackAction"
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { UnarmedWeapon } from "../../sim/Weapon"
 
 export class Grappler extends Feature {

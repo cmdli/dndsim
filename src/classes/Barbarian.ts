@@ -1,7 +1,7 @@
 import { Environment } from "../sim/Environment"
 import { Operation } from "../sim/actions/Operation"
 import { Character } from "../sim/Character"
-import { Feature } from "../sim/Feat"
+import { Feature } from "../sim/Feature"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { WeaponMastery } from "../sim/types"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"

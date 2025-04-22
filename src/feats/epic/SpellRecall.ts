@@ -1,6 +1,6 @@
 import { Character } from "../../sim/Character"
 import { CastSpellEvent } from "../../sim/events/CastSpellEvent"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { rollDice } from "../../util/helpers"
 
 export class SpellRecall extends Feature {

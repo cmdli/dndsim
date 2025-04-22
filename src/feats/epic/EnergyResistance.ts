@@ -1,5 +1,5 @@
 import { Character } from "../../sim/Character"
-import { Feature } from "../../sim/Feat"
+import { Feature } from "../../sim/Feature"
 import { Stat } from "../../sim/types"
 
 // We are ignoring energy redirection for now

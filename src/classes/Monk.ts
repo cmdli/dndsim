@@ -7,7 +7,7 @@ import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
-import { Feature } from "../sim/Feat"
+import { Feature } from "../sim/Feature"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import {
