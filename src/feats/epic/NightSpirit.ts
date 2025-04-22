@@ -1,11 +1,11 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { Stat } from "../../sim/types"
 
 // Ignoring the offensive benefits since they require
 // Dim light and the opponent to not have truesight or blindsight,
 // which is relatively situational at level 19+.
-export class NightSpirit extends Feat {
+export class NightSpirit extends Feature {
     constructor(private stat: Stat) {
         super()
     }

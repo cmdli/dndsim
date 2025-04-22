@@ -1,9 +1,9 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { Stat } from "../../sim/types"
 
 // We ignore the hit point attributes here
-export class Fortitude extends Feat {
+export class Fortitude extends Feature {
     constructor(private stat: Stat) {
         super()
     }

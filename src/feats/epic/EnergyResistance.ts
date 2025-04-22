@@ -1,9 +1,9 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { Stat } from "../../sim/types"
 
 // We are ignoring energy redirection for now
-export class EnergyResistance extends Feat {
+export class EnergyResistance extends Feature {
     constructor(private stat: Stat) {
         super()
     }

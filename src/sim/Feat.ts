@@ -1,6 +1,6 @@
 import { Character } from "./Character"
 
-export abstract class Feat {
+export abstract class Feature {
     // Allow feats to expect the character to be set in their implementations
     // of apply
     declare character: Character

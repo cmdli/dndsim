@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class KeenMind extends Feat {
+export class KeenMind extends Feature {
     apply(character: Character): void {
         // Both skills and the Study action are unused
         character.increaseStatMax("int", 1)

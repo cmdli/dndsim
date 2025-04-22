@@ -1,9 +1,9 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { Stat } from "../../sim/types"
 
 // Mostly a no-op since hit points are ignored
-export class Recovery extends Feat {
+export class Recovery extends Feature {
     constructor(private stat: Stat) {
         super()
     }

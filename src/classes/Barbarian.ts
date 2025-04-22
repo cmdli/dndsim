@@ -1,7 +1,7 @@
 import { Environment } from "../sim/Environment"
 import { Operation } from "../sim/actions/Operation"
 import { Character } from "../sim/Character"
-import { Feat } from "../sim/Feat"
+import { Feature } from "../sim/Feat"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { WeaponMastery } from "../sim/types"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
@@ -74,7 +74,7 @@ class RageOperation implements Operation {
 
 const RageBonusDamageAttribute = "rageBonusDamage"
 
-class Rage extends Feat {
+class Rage extends Feature {
     apply(character: Character) {
         this.addResource()
         character.customTurn.addOperation("before_action", new RageOperation())
@@ -94,7 +94,7 @@ class Rage extends Feat {
     }
 }
 
-class RecklessAttack extends Feat {
+class RecklessAttack extends Feature {
     apply(character: Character) {
         character.events.on("attack_roll", (event) =>
             this.attackRoll(character, event)
@@ -109,14 +109,14 @@ class RecklessAttack extends Feat {
     }
 }
 
-class PrimalChampion extends Feat {
+class PrimalChampion extends Feature {
     apply(character: Character) {
         character.increaseStatAndMax("str", 4)
         character.increaseStatAndMax("con", 4)
     }
 }
 
-class Frenzy extends Feat {
+class Frenzy extends Feature {
     used = false
 
     apply(character: Character) {
@@ -152,7 +152,7 @@ class Frenzy extends Feat {
     }
 }
 
-class DivineFury extends Feat {
+class DivineFury extends Feature {
     used = false
 
     apply(character: Character) {
@@ -188,73 +188,73 @@ class DivineFury extends Feat {
 }
 
 export class Barbarian {
-    static baseFeats(args: {
+    static baseFeatures(args: {
         level: number
-        asis: Array<Feat>
+        asis: Array<Feature>
         masteries: WeaponMastery[]
-    }): Feat[] {
+    }): Feature[] {
         const { level, asis, masteries } = args
-        const feats: Feat[] = []
+        const features: Feature[] = []
         if (level >= 1) {
-            feats.push(new ClassLevel("Barbarian", level))
-            feats.push(new WeaponMasteries(masteries))
-            feats.push(new SetAttribute(RageBonusDamageAttribute, 2))
-            feats.push(new Rage())
+            features.push(new ClassLevel("Barbarian", level))
+            features.push(new WeaponMasteries(masteries))
+            features.push(new SetAttribute(RageBonusDamageAttribute, 2))
+            features.push(new Rage())
         }
         if (level >= 2) {
-            feats.push(new RecklessAttack())
+            features.push(new RecklessAttack())
         }
         if (level >= 3) {
-            feats.push(new IncreaseResource(RageResource))
+            features.push(new IncreaseResource(RageResource))
         }
         if (level >= 5) {
-            feats.push(new ExtraAttack(2))
+            features.push(new ExtraAttack(2))
         }
         if (level >= 6) {
-            feats.push(new IncreaseResource(RageResource))
+            features.push(new IncreaseResource(RageResource))
         }
         if (level >= 9) {
-            feats.push(new SetAttribute(RageBonusDamageAttribute, 3))
+            features.push(new SetAttribute(RageBonusDamageAttribute, 3))
         }
         if (level >= 12) {
-            feats.push(new IncreaseResource(RageResource))
+            features.push(new IncreaseResource(RageResource))
         }
         if (level >= 16) {
-            feats.push(new SetAttribute(RageBonusDamageAttribute, 4))
+            features.push(new SetAttribute(RageBonusDamageAttribute, 4))
         }
         if (level >= 17) {
-            feats.push(new IncreaseResource(RageResource))
+            features.push(new IncreaseResource(RageResource))
         }
         if (level >= 20) {
-            feats.push(new PrimalChampion())
+            features.push(new PrimalChampion())
         }
-        feats.push(
+        features.push(
             ...applyFeatSchedule({
                 newFeats: asis,
                 schedule: [4, 8, 12, 16, 19],
                 level,
             })
         )
-        return feats
+        return features
     }
 
-    static berserkerFeats(level: number): Feat[] {
-        const feats: Feat[] = []
+    static berserkerFeatures(level: number): Feature[] {
+        const features: Feature[] = []
         if (level >= 3) {
-            feats.push(new Frenzy())
+            features.push(new Frenzy())
         }
         // Level 6 (Mindless Rage) is ignored
         // Level 10 (Retaliation) is ignored
         // Level 14 (Intimidating Presence) is ignored
-        return feats
+        return features
     }
 
-    static zealotFeats(level: number): Feat[] {
-        const feats: Feat[] = []
+    static zealotFeatures(level: number): Feature[] {
+        const features: Feature[] = []
         if (level >= 3) {
-            feats.push(new DivineFury())
+            features.push(new DivineFury())
         }
-        return feats
+        return features
     }
 
     static createBerserkerBarbarian(level: number): Character {
@@ -263,9 +263,9 @@ export class Barbarian {
         })
         const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
 
-        const feats = [
+        const features = [
             new SavageAttacker(),
-            ...Barbarian.baseFeats({
+            ...Barbarian.baseFeatures({
                 level,
                 asis: [
                     new GreatWeaponMaster(weapon),
@@ -276,9 +276,9 @@ export class Barbarian {
                 ],
                 masteries: ["Topple", "Graze"],
             }),
-            ...this.berserkerFeats(level),
+            ...this.berserkerFeatures(level),
         ]
-        feats.forEach((feat) => character.addFeat(feat))
+        features.forEach((feat) => character.addFeature(feat))
 
         character.customTurn.addOperation(
             "action",
@@ -295,7 +295,7 @@ export class Barbarian {
 
         const feats = [
             new SavageAttacker(),
-            ...Barbarian.baseFeats({
+            ...Barbarian.baseFeatures({
                 level,
                 asis: [
                     new GreatWeaponMaster(weapon),
@@ -306,9 +306,9 @@ export class Barbarian {
                 ],
                 masteries: ["Topple", "Graze"],
             }),
-            ...this.zealotFeats(level),
+            ...this.zealotFeatures(level),
         ]
-        feats.forEach((feat) => character.addFeat(feat))
+        feats.forEach((feat) => character.addFeature(feat))
 
         character.customTurn.addOperation(
             "action",

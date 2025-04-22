@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class Musician extends Feat {
+export class Musician extends Feature {
     apply(character: Character): void {
         character.heroicInspiration.resetOnShortRest = true
     }

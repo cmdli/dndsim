@@ -1,10 +1,10 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { rollDice } from "../../util/helpers"
 
-export class Piercer extends Feat {
+export class Piercer extends Feature {
     used: boolean = false
 
     constructor(private stat: "str" | "dex") {

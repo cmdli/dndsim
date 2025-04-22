@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class MagicInitiate extends Feat {
+export class MagicInitiate extends Feature {
     // No-op since we really don't track spells
     // TODO: Track level 1 spell usage and cantrips
     apply(character: Character): void {}

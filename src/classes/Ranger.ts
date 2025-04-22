@@ -1,5 +1,5 @@
 import { WeaponMastery } from "../sim/types"
-import { Feat } from "../sim/Feat"
+import { Feature } from "../sim/Feat"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
@@ -21,7 +21,7 @@ import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { ShortRestEvent } from "../sim/events/ShortRestEvent"
 
-class PreciseHunter extends Feat {
+class PreciseHunter extends Feature {
     apply(character: Character): void {
         character.events.on("attack_roll", (event: AttackRollEvent) => {
             this.attackRoll(event)
@@ -35,7 +35,7 @@ class PreciseHunter extends Feat {
     }
 }
 
-class FoeSlayer extends Feat {
+class FoeSlayer extends Feature {
     apply(character: Character): void {
         character.events.on("damage_roll", (event: DamageRollEvent) => {
             this.damageRoll(event)
@@ -49,7 +49,7 @@ class FoeSlayer extends Feat {
     }
 }
 
-class ColossusSlayer extends Feat {
+class ColossusSlayer extends Feature {
     used: boolean = false
     doneDamage: boolean = false
 
@@ -95,25 +95,25 @@ class ColossusSlayer extends Feat {
 }
 
 export class Ranger {
-    static baseFeats(args: {
+    static baseFeatures(args: {
         level: number
-        asis: Array<Feat>
+        asis: Array<Feature>
         masteries: WeaponMastery[]
-        fightingStyle: Feat
-    }): Feat[] {
+        fightingStyle: Feature
+    }): Feature[] {
         const { level, asis, masteries, fightingStyle } = args
-        const feats: Feat[] = []
+        const features: Feature[] = []
         if (level >= 1) {
-            feats.push(new ClassLevel("Ranger", level))
-            feats.push(new WeaponMasteries(masteries))
-            feats.push(new SpellcastingFeat("wis", Spellcaster.Half, level))
+            features.push(new ClassLevel("Ranger", level))
+            features.push(new WeaponMasteries(masteries))
+            features.push(new SpellcastingFeat("wis", Spellcaster.Half, level))
         }
         // Level 2 (Deft Explorer) is irrelevant
         if (level >= 2) {
-            feats.push(fightingStyle)
+            features.push(fightingStyle)
         }
         if (level >= 5) {
-            feats.push(new ExtraAttack(2))
+            features.push(new ExtraAttack(2))
         }
         // Level 6 (Roving) is irrelevant
         // Level 9 (Expertise) is irrelevant
@@ -121,32 +121,32 @@ export class Ranger {
         // Level 13 (Relentless Hunter) is irrelevant
         // TODO: Level 14 (Nature's Veil)
         if (level >= 17) {
-            feats.push(new PreciseHunter())
+            features.push(new PreciseHunter())
         }
         // Level 18 (Feral Senses) is irrelevant
         if (level >= 20) {
-            feats.push(new FoeSlayer())
+            features.push(new FoeSlayer())
         }
-        feats.push(
+        features.push(
             ...applyFeatSchedule({
                 newFeats: asis,
                 schedule: [4, 8, 12, 16, 19],
                 level,
             })
         )
-        return feats
+        return features
     }
 
-    static hunterFeats(level: number): Feat[] {
-        const feats: Feat[] = []
+    static hunterFeatures(level: number): Feature[] {
+        const features: Feature[] = []
         if (level >= 3) {
             // Level 3 (Hunter's Lore) is irrelevant
-            feats.push(new ColossusSlayer())
+            features.push(new ColossusSlayer())
         }
         // Level 7 (Defensive Tactics) is irrelevant
         // Level 11 (Superior Hunter's Prey) is just bad
         // Level 15 (Superior Hunter's Defense) is irrelevant
-        return feats
+        return features
     }
 
     static hunterRanger(level: number): Character {
@@ -161,9 +161,9 @@ export class Ranger {
                 cha: 10,
             },
         })
-        const feats: Feat[] = []
-        feats.push(
-            ...this.baseFeats({
+        const features: Feature[] = []
+        features.push(
+            ...this.baseFeatures({
                 level,
                 asis: [
                     new AbilityScoreImprovement("dex"),
@@ -176,8 +176,8 @@ export class Ranger {
                 fightingStyle: new Archery(),
             })
         )
-        feats.push(...this.hunterFeats(level))
-        feats.forEach((feat) => character.addFeat(feat))
+        features.push(...this.hunterFeatures(level))
+        features.forEach((feat) => character.addFeature(feat))
 
         character.customTurn.addOperation(
             "action",

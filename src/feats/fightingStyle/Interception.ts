@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class Interception extends Feat {
+export class Interception extends Feature {
     // No-op since we have no allies
     apply(character: Character): void {}
 }

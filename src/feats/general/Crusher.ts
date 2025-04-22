@@ -2,9 +2,9 @@ import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class Crusher extends Feat {
+export class Crusher extends Feature {
     enabled: boolean = false
 
     constructor(private stat: "str" | "con") {
@@ -32,7 +32,10 @@ export class Crusher extends Feat {
 
     attackResult(event: AttackResultEvent): void {
         if (
-            event.crit && event.damageRolls.some((damageRoll) => damageRoll.type === "bludgeoning")
+            event.crit &&
+            event.damageRolls.some(
+                (damageRoll) => damageRoll.type === "bludgeoning"
+            )
         ) {
             this.enabled = true
         }

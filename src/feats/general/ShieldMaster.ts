@@ -1,8 +1,8 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class ShieldMaster extends Feat {
+export class ShieldMaster extends Feature {
     used: boolean = false
 
     apply(character: Character): void {

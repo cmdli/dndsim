@@ -1,8 +1,8 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class IrresistibleOffense extends Feat {
+export class IrresistibleOffense extends Feature {
     constructor(private mod: "str" | "dex") {
         super()
     }

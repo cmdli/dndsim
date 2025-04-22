@@ -7,7 +7,7 @@ import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
-import { Feat } from "../sim/Feat"
+import { Feature } from "../sim/Feat"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import {
@@ -56,7 +56,7 @@ function isUnarmedOrMonkWeapon(weapon: Weapon | undefined): boolean {
     return false
 }
 
-class MartialArts extends Feat {
+class MartialArts extends Feature {
     apply(character: Character) {
         character.events.on("before_attack", (event) =>
             this.beforeAttack(event)
@@ -100,7 +100,7 @@ class MartialArts extends Feat {
     }
 }
 
-class BodyAndMind extends Feat {
+class BodyAndMind extends Feature {
     apply(character: Character): void {
         character.increaseStatAndMax("dex", 4)
         character.increaseStatAndMax("wis", 4)
@@ -148,7 +148,7 @@ class BonusActionAttackOperation implements Operation {
     }
 }
 
-class FlurryOfBlows extends Feat {
+class FlurryOfBlows extends Feature {
     constructor(private unarmedStrike: UnarmedStrike) {
         super()
     }
@@ -161,7 +161,7 @@ class FlurryOfBlows extends Feat {
     }
 }
 
-class OpenHandTechnique extends Feat {
+class OpenHandTechnique extends Feature {
     apply(character: Character): void {
         character.events.on("attack_result", (event) =>
             this.attackResult(event)
@@ -177,7 +177,7 @@ class OpenHandTechnique extends Feat {
     }
 }
 
-class StunningStrike extends Feat {
+class StunningStrike extends Feature {
     used: boolean = false
 
     constructor(private avoidOnGrapple: boolean = false) {
@@ -228,7 +228,7 @@ class StunningStrike extends Feat {
     }
 }
 
-class Ki extends Feat {
+class Ki extends Feature {
     constructor(private maxKi: number) {
         super()
     }
@@ -238,7 +238,7 @@ class Ki extends Feat {
     }
 }
 
-class UncannyMetabolism extends Feat {
+class UncannyMetabolism extends Feature {
     used: boolean = false
 
     apply(character: Character): void {
@@ -258,7 +258,7 @@ class UncannyMetabolism extends Feat {
     }
 }
 
-class PerfectFocus extends Feat {
+class PerfectFocus extends Feature {
     apply(character: Character): void {
         character.events.on("short_rest", () => this.shortRest())
     }
@@ -272,76 +272,76 @@ class PerfectFocus extends Feat {
 }
 
 export class Monk {
-    static baseFeats(args: {
+    static baseFeatures(args: {
         level: number
-        asis: Array<Feat>
+        asis: Array<Feature>
         masteries: WeaponMastery[]
         unarmedStrike: UnarmedStrike
-    }): Feat[] {
+    }): Feature[] {
         const { level, asis, masteries } = args
-        const feats: Feat[] = []
+        const features: Feature[] = []
 
         if (level >= 1) {
-            feats.push(new ClassLevel("Monk", level))
-            feats.push(new WeaponMasteries(masteries))
-            feats.push(new SetAttribute(MartialArtsDieAttribute, 6))
-            feats.push(new MartialArts())
+            features.push(new ClassLevel("Monk", level))
+            features.push(new WeaponMasteries(masteries))
+            features.push(new SetAttribute(MartialArtsDieAttribute, 6))
+            features.push(new MartialArts())
         }
         // Level 1 (Unarmored Defense) is irrelevant
         if (level >= 2) {
-            feats.push(new Ki(level))
-            feats.push(new UncannyMetabolism())
-            feats.push(new SetAttribute(FlurryOfBlowsCountAttribute, 2))
-            feats.push(new FlurryOfBlows(args.unarmedStrike))
+            features.push(new Ki(level))
+            features.push(new UncannyMetabolism())
+            features.push(new SetAttribute(FlurryOfBlowsCountAttribute, 2))
+            features.push(new FlurryOfBlows(args.unarmedStrike))
         }
         // Level 3 (Deflect Attacks) is irrelevant/ignored
         // Level 4 (Slow Fall) is irrelevant
         if (level >= 5) {
-            feats.push(new StunningStrike(true))
-            feats.push(new ExtraAttack(2))
-            feats.push(new SetAttribute(MartialArtsDieAttribute, 8))
+            features.push(new StunningStrike(true))
+            features.push(new ExtraAttack(2))
+            features.push(new SetAttribute(MartialArtsDieAttribute, 8))
         }
         // Level 6 (Empowered Strikes) is irrelevant
         // Level 7 (Evasion) is irrelevant
         // Level 9 (Acrobatic Movement) is irrelevant
         // Level 10 (Self-Restoration) is irrelevant
         if (level >= 10) {
-            feats.push(new SetAttribute(FlurryOfBlowsCountAttribute, 3))
+            features.push(new SetAttribute(FlurryOfBlowsCountAttribute, 3))
         }
         if (level >= 11) {
-            feats.push(new SetAttribute(MartialArtsDieAttribute, 10))
+            features.push(new SetAttribute(MartialArtsDieAttribute, 10))
         }
         // Level 13 (Deflect Energy) is irrelevant
         // Level 14 (Disciplined Survivor) is irrelevant
         if (level >= 15) {
-            feats.push(new PerfectFocus())
+            features.push(new PerfectFocus())
         }
         if (level >= 17) {
-            feats.push(new SetAttribute(MartialArtsDieAttribute, 12))
+            features.push(new SetAttribute(MartialArtsDieAttribute, 12))
         }
         // Level 18 (Superior Defense) is irrelevant
         if (level >= 20) {
-            feats.push(new BodyAndMind())
+            features.push(new BodyAndMind())
         }
-        feats.push(
+        features.push(
             ...applyFeatSchedule({
                 newFeats: asis,
                 schedule: [4, 8, 12, 16, 19],
                 level,
             })
         )
-        return feats
+        return features
     }
 
-    static openHandFeats(level: number): Feat[] {
-        const feats: Feat[] = []
+    static openHandFeatures(level: number): Feature[] {
+        const features: Feature[] = []
         if (level >= 3) {
-            feats.push(new OpenHandTechnique())
+            features.push(new OpenHandTechnique())
         }
         // Level 6 (Wholeness of Body) is irrelevant
         // Level 11 (Fleet Step) is irrelevant
         // Level 17 (Quivering Palm) - TODO
-        return feats
+        return features
     }
 
     static createOpenHandMonk(level: number): Character {
@@ -353,11 +353,11 @@ export class Monk {
             stats: { str: 10, dex: 17, con: 10, int: 10, wis: 16, cha: 10 },
         })
 
-        const feats: Feat[] = []
-        feats.push(new TavernBrawler())
+        const features: Feature[] = []
+        features.push(new TavernBrawler())
 
-        feats.push(
-            ...Monk.baseFeats({
+        features.push(
+            ...Monk.baseFeatures({
                 level,
                 masteries: ["Vex", "Topple"],
                 asis: [
@@ -371,9 +371,9 @@ export class Monk {
             })
         )
 
-        feats.push(...Monk.openHandFeats(level))
+        features.push(...Monk.openHandFeatures(level))
 
-        feats.forEach((feat) => character.addFeat(feat))
+        features.forEach((feature) => character.addFeature(feature))
 
         character.customTurn.addOperation(
             "action",

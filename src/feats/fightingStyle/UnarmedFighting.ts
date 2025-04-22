@@ -1,9 +1,9 @@
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { BaseWeaponDamageTag, UnarmedWeapon } from "../../sim/Weapon"
 
-export class UnarmedFighting extends Feat {
+export class UnarmedFighting extends Feature {
     apply(character: Character): void {
         character.events.on("attack_result", (event) =>
             this.attackResult(event)

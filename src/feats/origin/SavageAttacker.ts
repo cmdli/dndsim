@@ -1,11 +1,11 @@
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { rollDice } from "../../util/helpers"
 import { log } from "../../util/Log"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
 
-export class SavageAttacker extends Feat {
+export class SavageAttacker extends Feature {
     used: boolean = false
 
     apply(character: Character): void {

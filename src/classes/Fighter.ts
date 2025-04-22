@@ -8,7 +8,7 @@ import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
-import { Feat } from "../sim/Feat"
+import { Feature } from "../sim/Feat"
 import { WeaponMastery } from "../sim/types"
 import { Weapon } from "../sim/Weapon"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
@@ -42,7 +42,7 @@ class ActionSurgeOperation implements Operation {
     }
 }
 
-class AddActionSurge extends Feat {
+class AddActionSurge extends Feature {
     apply(character: Character): void {
         if (!character.resources.has(ActionSurgeResource)) {
             character.resources.set(
@@ -59,7 +59,7 @@ class AddActionSurge extends Feat {
     }
 }
 
-class StudiedAttacks extends Feat {
+class StudiedAttacks extends Feature {
     enabled: boolean = false
 
     apply(character: Character): void {
@@ -83,7 +83,7 @@ class StudiedAttacks extends Feat {
     }
 }
 
-class HeroicAdvantage extends Feat {
+class HeroicAdvantage extends Feature {
     used: boolean = false
 
     apply(character: Character): void {
@@ -109,7 +109,7 @@ class HeroicAdvantage extends Feat {
     }
 }
 
-class PrecisionAttack extends Feat {
+class PrecisionAttack extends Feature {
     low: number
 
     constructor(low: number) {
@@ -138,7 +138,7 @@ class PrecisionAttack extends Feat {
 }
 
 // @ts-ignore
-class TrippingAttack extends Feat {
+class TrippingAttack extends Feature {
     apply(character: Character): void {
         character.events.on("attack_result", (event) =>
             this.attackResult(event)
@@ -168,7 +168,7 @@ class TrippingAttack extends Feat {
     }
 }
 
-class CombatSuperiority extends Feat {
+class CombatSuperiority extends Feature {
     level: number
 
     constructor(level: number) {
@@ -195,7 +195,7 @@ class CombatSuperiority extends Feat {
     }
 }
 
-class Relentless extends Feat {
+class Relentless extends Feature {
     apply(character: Character): void {
         character.combatSuperiority.enableRelentless()
     }
@@ -231,70 +231,70 @@ class ToppleIfNecessaryAttackAction extends ActionOperation {
 }
 
 export class Fighter {
-    static baseFeats(args: {
+    static baseFeatures(args: {
         level: number
-        asis: Array<Feat>
+        asis: Array<Feature>
         masteries: WeaponMastery[]
-        fightingStyle: Feat
-    }): Feat[] {
+        fightingStyle: Feature
+    }): Feature[] {
         const { level, asis, masteries, fightingStyle } = args
-        const feats: Feat[] = []
+        const features: Feature[] = []
         if (level >= 1) {
-            feats.push(new ClassLevel("Fighter", level))
-            feats.push(new WeaponMasteries(masteries))
-            feats.push(fightingStyle)
+            features.push(new ClassLevel("Fighter", level))
+            features.push(new WeaponMasteries(masteries))
+            features.push(fightingStyle)
         }
         if (level >= 2) {
-            feats.push(new AddActionSurge())
+            features.push(new AddActionSurge())
         }
         if (level >= 5) {
-            feats.push(new ExtraAttack(2))
+            features.push(new ExtraAttack(2))
         }
         if (level >= 11) {
-            feats.push(new ExtraAttack(3))
+            features.push(new ExtraAttack(3))
         }
         if (level >= 13) {
-            feats.push(new StudiedAttacks())
+            features.push(new StudiedAttacks())
         }
         if (level >= 17) {
-            feats.push(new AddActionSurge())
+            features.push(new AddActionSurge())
         }
         if (level >= 20) {
-            feats.push(new ExtraAttack(4))
+            features.push(new ExtraAttack(4))
         }
-        feats.push(
+        features.push(
             ...applyFeatSchedule({
                 newFeats: asis,
                 schedule: [4, 6, 8, 12, 14, 16, 19],
                 level,
             })
         )
-        return feats
+        return features
     }
 
-    static championFeats(level: number): Feat[] {
-        const feats: Feat[] = []
+    static championFeatures(level: number): Feature[] {
+        const features: Feature[] = []
         if (level >= 3) {
-            feats.push(new ImprovedCritical(19))
+            features.push(new ImprovedCritical(19))
         }
         if (level >= 10) {
-            feats.push(new HeroicAdvantage())
+            features.push(new HeroicAdvantage())
         }
         if (level >= 15) {
-            feats.push(new ImprovedCritical(18))
+            features.push(new ImprovedCritical(18))
         }
-        return feats
+        return features
     }
 
-    static battlemasterFeats(level: number): Feat[] {
-        const feats: Feat[] = []
+    static battlemasterFeatures(level: number): Feature[] {
+        const features: Feature[] = []
         if (level >= 3) {
-            feats.push(new CombatSuperiority(level))
+            features.push(new CombatSuperiority(level))
         }
         if (level >= 15) {
-            feats.push(new Relentless())
+            features.push(new Relentless())
         }
-        return feats
+        return features
     }
 
     static createBattlemasterFighter(level: number): Character {
@@ -303,10 +303,10 @@ export class Fighter {
         })
         const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
         const toppleWeapon = new Maul({ magicBonus: defaultMagicBonus(level) })
-        const feats = []
-        feats.push(new SavageAttacker())
-        feats.push(
-            ...Fighter.baseFeats({
+        const features: Feature[] = []
+        features.push(new SavageAttacker())
+        features.push(
+            ...Fighter.baseFeatures({
                 level,
                 asis: [
                     new GreatWeaponMaster(weapon),
@@ -321,8 +321,8 @@ export class Fighter {
                 fightingStyle: new GreatWeaponFighting(),
             })
         )
-        feats.push(...Fighter.battlemasterFeats(level))
-        feats.push(new PrecisionAttack(8))
+        features.push(...Fighter.battlemasterFeatures(level))
+        features.push(new PrecisionAttack(8))
         character.customTurn.addOperation(
             "before_action",
             new ActionSurgeOperation()
@@ -331,7 +331,7 @@ export class Fighter {
             "action",
             new ToppleIfNecessaryAttackAction(weapon, toppleWeapon)
         )
-        feats.forEach((feat) => character.addFeat(feat))
+        features.forEach((feature) => character.addFeature(feature))
         return character
     }
 
@@ -341,10 +341,10 @@ export class Fighter {
         })
         const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
         const toppleWeapon = new Maul({ magicBonus: defaultMagicBonus(level) })
-        const feats = []
-        feats.push(new SavageAttacker())
-        feats.push(
-            ...Fighter.baseFeats({
+        const features: Feature[] = []
+        features.push(new SavageAttacker())
+        features.push(
+            ...Fighter.baseFeatures({
                 level,
                 asis: [
                     new GreatWeaponMaster(weapon),
@@ -359,7 +359,7 @@ export class Fighter {
                 fightingStyle: new GreatWeaponFighting(),
             })
         )
-        feats.push(...Fighter.championFeats(level))
+        features.push(...Fighter.championFeatures(level))
         character.customTurn.addOperation(
             "before_action",
             new ActionSurgeOperation()
@@ -368,7 +368,7 @@ export class Fighter {
             "action",
             new ToppleIfNecessaryAttackAction(weapon, toppleWeapon)
         )
-        feats.forEach((feat) => character.addFeat(feat))
+        features.forEach((feature) => character.addFeature(feature))
         return character
     }
 }

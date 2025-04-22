@@ -1,8 +1,8 @@
 import { NumAttacksAttribute } from "../../sim/actions/AttackAction"
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class ExtraAttack extends Feat {
+export class ExtraAttack extends Feature {
     numAttacks: number
 
     constructor(numAttacks: number) {

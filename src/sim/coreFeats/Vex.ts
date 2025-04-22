@@ -2,9 +2,9 @@ import { Character } from "../Character"
 import { AttackResultEvent } from "../events/AttackResultEvent"
 import { AttackRollEvent } from "../events/AttackRollEvent"
 import { ShortRestEvent } from "../events/ShortRestEvent"
-import { Feat } from "../Feat"
+import { Feature } from "../Feat"
 
-export class Vex extends Feat {
+export class Vex extends Feature {
     vexing: boolean = false
 
     apply(character: Character): void {

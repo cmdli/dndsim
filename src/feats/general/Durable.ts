@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class Durable extends Feat {
+export class Durable extends Feature {
     apply(character: Character): void {
         // We ignore death saving throws
         // and hit points

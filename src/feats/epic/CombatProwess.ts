@@ -1,10 +1,10 @@
 import { Character } from "../../sim/Character"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { Stat } from "../../sim/types"
 
-export class CombatProwess extends Feat {
+export class CombatProwess extends Feature {
     used: boolean = false
 
     constructor(private stat: Stat) {

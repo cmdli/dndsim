@@ -1,10 +1,10 @@
 import { Character } from "../../sim/Character"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
 const CROSSBOWS = ["HandCrossbow", "LightCrossbow", "HeavyCrossbow"]
 
-export class CrossbowExpert extends Feat {
+export class CrossbowExpert extends Feature {
     apply(character: Character): void {
         // We ignore firing in melee and the loading property
         character.increaseStat("dex", 1)

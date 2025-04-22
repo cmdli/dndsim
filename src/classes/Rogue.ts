@@ -4,7 +4,7 @@ import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
-import { Feat } from "../sim/Feat"
+import { Feature } from "../sim/Feat"
 import { applyFeatSchedule, defaultMagicBonus, rollDice } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import {
@@ -36,7 +36,7 @@ const EnergyDiceResource = "energyDice"
 const SneakAttackTag = "SneakAttack"
 const HomingStrikesTag = "HomingStrikes"
 
-class SneakAttack extends Feat {
+class SneakAttack extends Feature {
     used: boolean = false
 
     apply(character: Character): void {
@@ -66,7 +66,7 @@ class SneakAttack extends Feat {
     }
 }
 
-class SteadyAim extends Feat {
+class SteadyAim extends Feature {
     enabled: boolean = false
 
     apply(character: Character): void {
@@ -93,7 +93,7 @@ class SteadyAim extends Feat {
     }
 }
 
-class StrokeOfLuck extends Feat {
+class StrokeOfLuck extends Feature {
     used: boolean = false
 
     apply(character: Character): void {
@@ -114,7 +114,7 @@ class StrokeOfLuck extends Feat {
     }
 }
 
-class Assassinate extends Feat {
+class Assassinate extends Feature {
     firstTurn: boolean = true
     usedDmg: boolean = false
     adv: boolean = false
@@ -181,7 +181,7 @@ class Assassinate extends Feat {
     }
 }
 
-class DeathStrike extends Feat {
+class DeathStrike extends Feature {
     enabled: boolean = false
 
     apply(character: Character): void {
@@ -257,7 +257,7 @@ class PsychicBladesAction extends ActionOperation {
     }
 }
 
-class PsychicBlades extends Feat {
+class PsychicBlades extends Feature {
     apply(character: Character): void {
         this.character.resources.set(
             EnergyDiceResource,
@@ -272,7 +272,7 @@ class PsychicBlades extends Feat {
     }
 }
 
-class SoulBlades extends Feat {
+class SoulBlades extends Feature {
     apply(character: Character): void {
         character.events.on("attack_roll", (event) => this.attackRoll(event))
         character.events.on("attack_result", (event) =>
@@ -306,7 +306,7 @@ class SoulBlades extends Feat {
     }
 }
 
-class RendMind extends Feat {
+class RendMind extends Feature {
     used: boolean = false
 
     apply(character: Character): void {
@@ -370,21 +370,21 @@ class BoomingBladeAction extends ActionOperation {
 }
 
 export class Rogue {
-    static baseFeats(args: {
+    static baseFeatures(args: {
         level: number
-        asis: Array<Feat>
+        asis: Array<Feature>
         masteries: WeaponMastery[]
-    }): Feat[] {
+    }): Feature[] {
         const { level, asis, masteries } = args
-        const feats: Feat[] = []
+        const features: Feature[] = []
         if (level >= 1) {
-            feats.push(new ClassLevel("Rogue", level))
-            feats.push(new SneakAttack())
-            feats.push(new WeaponMasteries(masteries))
+            features.push(new ClassLevel("Rogue", level))
+            features.push(new SneakAttack())
+            features.push(new WeaponMasteries(masteries))
         }
         // Level 2 (Cunning Action) is irrelevant for now
         if (level >= 3) {
-            feats.push(new SteadyAim())
+            features.push(new SteadyAim())
         }
         // Level 5 (Cunning Strike) is mostly useless for DPR
         // Level 7 (Evasion) is irrelevant
@@ -394,58 +394,58 @@ export class Rogue {
         // Level 15 (Slippery Mind) is irrelevant
         // Level 18 (Elusive) is irrelevant
         if (level >= 20) {
-            feats.push(new StrokeOfLuck())
+            features.push(new StrokeOfLuck())
         }
-        feats.push(
+        features.push(
             ...applyFeatSchedule({
                 newFeats: asis,
                 schedule: [4, 8, 10, 12, 16, 19],
                 level,
             })
         )
-        return feats
+        return features
     }
 
-    static assassinFeats(level: number): Feat[] {
-        const feats: Feat[] = []
+    static assassinFeatures(level: number): Feature[] {
+        const features: Feature[] = []
         if (level >= 3) {
-            feats.push(new Assassinate(level))
+            features.push(new Assassinate(level))
         }
         // Level 3 (Assassin's Tools) is irrelevant
         // Level 9 (Infiltration Expertise) is irrelevant
         // TODO: Level 13 (Envenom Weapons)
         if (level >= 17) {
-            feats.push(new DeathStrike())
+            features.push(new DeathStrike())
         }
-        return feats
+        return features
     }
 
-    static soulKnifeFeats(level: number): Feat[] {
-        const feats: Feat[] = []
+    static soulKnifeFeatures(level: number): Feature[] {
+        const features: Feature[] = []
         if (level >= 3) {
-            feats.push(new PsychicBlades())
-            feats.push(new SetAttribute(EnergyDieAttribute, 6))
+            features.push(new PsychicBlades())
+            features.push(new SetAttribute(EnergyDieAttribute, 6))
         }
         if (level >= 5) {
-            feats.push(new IncreaseResource(EnergyDiceResource, 2))
-            feats.push(new SetAttribute(EnergyDieAttribute, 8))
+            features.push(new IncreaseResource(EnergyDiceResource, 2))
+            features.push(new SetAttribute(EnergyDieAttribute, 8))
         }
         if (level >= 9) {
-            feats.push(new IncreaseResource(EnergyDiceResource, 2))
-            feats.push(new SoulBlades())
+            features.push(new IncreaseResource(EnergyDiceResource, 2))
+            features.push(new SoulBlades())
         }
         if (level >= 11) {
-            feats.push(new SetAttribute(EnergyDieAttribute, 10))
+            features.push(new SetAttribute(EnergyDieAttribute, 10))
         }
         if (level >= 13) {
-            feats.push(new IncreaseResource(EnergyDiceResource, 2))
+            features.push(new IncreaseResource(EnergyDiceResource, 2))
         }
         if (level >= 17) {
-            feats.push(new SetAttribute(EnergyDieAttribute, 12))
-            feats.push(new IncreaseResource(EnergyDiceResource, 2))
-            feats.push(new RendMind())
+            features.push(new SetAttribute(EnergyDieAttribute, 12))
+            features.push(new IncreaseResource(EnergyDiceResource, 2))
+            features.push(new RendMind())
         }
-        return feats
+        return features
     }
 
     static createAssassinRogue(
@@ -456,7 +456,7 @@ export class Rogue {
         const character = new Character({
             stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
         })
-        let feats: Feat[] = []
+        let features: Feature[] = []
         if (level >= 5 && useBoomingBlade) {
             const rapier = new Rapier({ magicBonus })
             character.customTurn.addOperation(
@@ -479,8 +479,8 @@ export class Rogue {
                 new NickAttackOperation(scimitar)
             )
         }
-        feats.push(
-            ...Rogue.baseFeats({
+        features.push(
+            ...Rogue.baseFeatures({
                 level,
                 masteries: ["Vex", "Nick"],
                 asis: [
@@ -492,8 +492,8 @@ export class Rogue {
                 ],
             })
         )
-        feats.push(...Rogue.assassinFeats(level))
-        feats.forEach((feat) => character.addFeat(feat))
+        features.push(...Rogue.assassinFeatures(level))
+        features.forEach((feature) => character.addFeature(feature))
         return character
     }
 
@@ -502,7 +502,7 @@ export class Rogue {
         const character = new Character({
             stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
         })
-        let feats: Feat[] = []
+        let features: Feature[] = []
         if (level >= 5) {
             const rapier = new Rapier({ magicBonus })
             character.customTurn.addOperation(
@@ -525,8 +525,8 @@ export class Rogue {
                 new NickAttackOperation(scimitar)
             )
         }
-        feats = feats.concat(
-            Rogue.baseFeats({
+        features = features.concat(
+            Rogue.baseFeatures({
                 level,
                 masteries: ["Vex", "Nick"],
                 asis: [
@@ -539,7 +539,7 @@ export class Rogue {
             })
         )
         // TODO: Arcane Trickster specific feats
-        feats.forEach((feat) => character.addFeat(feat))
+        features.forEach((feature) => character.addFeature(feature))
         return character
     }
 
@@ -547,7 +547,7 @@ export class Rogue {
         const character = new Character({
             stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
         })
-        let feats: Feat[] = []
+        let features: Feature[] = []
         // We begin using psychic blades once we reach level 3
         if (level < 3) {
             const shortsword = new Shortsword()
@@ -572,8 +572,8 @@ export class Rogue {
                 )
             )
         }
-        feats.push(
-            ...Rogue.baseFeats({
+        features.push(
+            ...Rogue.baseFeatures({
                 level,
                 masteries: ["Vex", "Nick"],
                 asis: [
@@ -585,8 +585,8 @@ export class Rogue {
                 ],
             })
         )
-        feats.push(...Rogue.soulKnifeFeats(level))
-        feats.forEach((feat) => character.addFeat(feat))
+        features.push(...Rogue.soulKnifeFeatures(level))
+        features.forEach((feature) => character.addFeature(feature))
         return character
     }
 }

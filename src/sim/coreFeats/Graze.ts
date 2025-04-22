@@ -1,8 +1,8 @@
 import { Character } from "../Character"
 import { AttackResultEvent } from "../events/AttackResultEvent"
-import { Feat } from "../Feat"
+import { Feature } from "../Feat"
 
-export class Graze extends Feat {
+export class Graze extends Feature {
     apply(character: Character): void {
         character.events.on("attack_result", (data) => this.attackResult(data))
     }

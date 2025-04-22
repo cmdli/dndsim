@@ -1,9 +1,9 @@
 import { Character } from "../../sim/Character"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class Charger extends Feat {
+export class Charger extends Feature {
     used: boolean = false
 
     constructor(private stat: "str" | "dex") {

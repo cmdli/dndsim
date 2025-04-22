@@ -1,8 +1,8 @@
 import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class ElementalAdept extends Feat {
+export class ElementalAdept extends Feature {
     constructor(
         private stat: "int" | "wis" | "cha",
         private damageType: "acid" | "cold" | "fire" | "lightning" | "thunder"

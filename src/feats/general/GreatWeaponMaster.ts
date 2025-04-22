@@ -1,6 +1,6 @@
 import { AttackActionTag } from "../../sim/actions/AttackAction"
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import {
     HeavyWeapon,
     RangedWeapon,
@@ -9,7 +9,7 @@ import {
 } from "../../sim/Weapon"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 
-export class GreatWeaponMaster extends Feat {
+export class GreatWeaponMaster extends Feature {
     constructor(private weapon: Weapon) {
         super()
     }

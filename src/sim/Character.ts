@@ -2,7 +2,7 @@ import {
     CharacterEventMapping,
     CharacterEventName,
 } from "./events/CharacterEvent"
-import { Feat } from "./Feat"
+import { Feature } from "./Feat"
 import { EventLoop } from "../util/EventLoop"
 import { Class, Stat, StatOrNone, WeaponMastery } from "./types"
 import { Resource } from "./resources/Resource"
@@ -45,7 +45,7 @@ export class Character {
         cha: DEFAULT_STAT_MAX,
     }
 
-    feats: Array<Feat> = []
+    features: Array<Feature> = []
     events: EventLoop<CharacterEventName, CharacterEventMapping> =
         new EventLoop()
     effects: Map<string, Effect> = new Map()
@@ -87,14 +87,14 @@ export class Character {
     constructor(args: { stats: Omit<Record<Stat, number>, "none"> }) {
         const { stats } = args
         this.stats = { ...stats, none: 10 }
-        for (const feat of [new Graze(), new Topple(), new Vex()]) {
-            this.addFeat(feat)
+        for (const feature of [new Graze(), new Topple(), new Vex()]) {
+            this.addFeature(feature)
         }
     }
 
-    addFeat(feat: Feat): void {
-        this.feats.push(feat)
-        feat.internalApply(this)
+    addFeature(feature: Feature): void {
+        this.features.push(feature)
+        feature.internalApply(this)
     }
 
     stat(stat: StatOrNone): number {

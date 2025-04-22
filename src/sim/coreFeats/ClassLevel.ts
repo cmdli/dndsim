@@ -1,8 +1,8 @@
 import { Character } from "../Character"
-import { Feat } from "../Feat"
+import { Feature } from "../Feat"
 import { Class } from "../types"
 
-export class ClassLevel extends Feat {
+export class ClassLevel extends Feature {
     class_: Class
     level_: number
     constructor(class_: Class, level?: number) {

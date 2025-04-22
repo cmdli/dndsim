@@ -1,9 +1,9 @@
 import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { TwoHandedWeapon } from "../../sim/Weapon"
 
-export class Dueling extends Feat {
+export class Dueling extends Feature {
     apply(character: Character): void {
         character.events.on("damage_roll", (event) => this.damageRoll(event))
     }

@@ -1,8 +1,8 @@
 import { Character } from "../../sim/Character"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class Lucky extends Feat {
+export class Lucky extends Feature {
     maxPoints: number = 0
     points: number = 0
     apply(character: Character): void {

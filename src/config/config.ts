@@ -1,5 +1,5 @@
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
-import { Feat } from "../sim/Feat"
+import { Feature } from "../sim/Feat"
 import { Class } from "../sim/types"
 
 type ChoiceOption = {
@@ -17,7 +17,7 @@ export class Choice {
         this.options = args.options
     }
 
-    apply(choices: Set<string>): Feat[] {
+    apply(choices: Set<string>): Feature[] {
         for (const option of this.options) {
             if (choices.has(option.key)) {
                 return option.featConfig.apply(choices)
@@ -28,14 +28,14 @@ export class Choice {
 }
 
 export class FeatConfig {
-    feats: Feat[]
+    feats: Feature[]
     choices: Choice[]
-    constructor(feats: Feat[], choices?: Choice[]) {
+    constructor(feats: Feature[], choices?: Choice[]) {
         this.feats = feats
         this.choices = choices ?? []
     }
 
-    apply(choices: Set<string>): Feat[] {
+    apply(choices: Set<string>): Feature[] {
         const feats = []
         feats.push(...this.feats)
         for (const choice of this.choices) {
@@ -51,7 +51,7 @@ export class Schedule {
         this.schedule = schedule
     }
 
-    apply(level: number, choices: Set<string>): Feat[] {
+    apply(level: number, choices: Set<string>): Feature[] {
         const feats = []
         for (let i = 1; i <= level; i++) {
             const featConfig = this.schedule[i]
@@ -70,7 +70,7 @@ export class ClassSchedule extends Schedule {
         this.class_ = class_
     }
 
-    apply(level: number, choices: Set<string>): Feat[] {
+    apply(level: number, choices: Set<string>): Feature[] {
         const feats = []
         feats.push(...super.apply(level, choices))
         feats.push(new ClassLevel(this.class_, level))

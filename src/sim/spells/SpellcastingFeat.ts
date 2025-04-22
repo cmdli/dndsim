@@ -1,9 +1,9 @@
-import { Feat } from "../Feat"
+import { Feature } from "../Feat"
 import { Character } from "../Character"
 import { Spellcaster } from "./shared"
 import { Stat } from "../types"
 
-export class SpellcastingFeat extends Feat {
+export class SpellcastingFeat extends Feature {
     constructor(
         private stat: Stat,
         private spellcaster: Spellcaster,

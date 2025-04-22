@@ -1,8 +1,8 @@
 import { Character } from "../Character"
 import { AttackResultEvent } from "../events/AttackResultEvent"
-import { Feat } from "../Feat"
+import { Feature } from "../Feat"
 
-export class Topple extends Feat {
+export class Topple extends Feature {
     apply(character: Character): void {
         character.events.on("attack_result", (data) => this.attackResult(data))
     }
@@ -15,7 +15,9 @@ export class Topple extends Feat {
             weapon.mastery === "Topple" &&
             data.hit &&
             this.character.masteries.has("Topple") &&
-            !target.save(this.character.dc(data.attack.attack.stat(this.character)))
+            !target.save(
+                this.character.dc(data.attack.attack.stat(this.character))
+            )
         ) {
             target.knockProne()
         }

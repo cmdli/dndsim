@@ -1,7 +1,7 @@
 import { Character } from "../../sim/Character"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 
-export class Alert extends Feat {
+export class Alert extends Feature {
     // No-Op feat since we don't have initiative
     apply(character: Character): void {}
 }

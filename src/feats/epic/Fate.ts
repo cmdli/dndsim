@@ -1,12 +1,12 @@
 import { Character } from "../../sim/Character"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
-import { Feat } from "../../sim/Feat"
+import { Feature } from "../../sim/Feat"
 import { Stat } from "../../sim/types"
 import { rollDice } from "../../util/helpers"
 
 // We only use Fate on attack rolls. In the future, it
 // might be useful for causing the target to fail a save.
-export class Fate extends Feat {
+export class Fate extends Feature {
     used: boolean = false
 
     constructor(private stat: Stat) {
