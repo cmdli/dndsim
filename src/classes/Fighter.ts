@@ -62,13 +62,6 @@ class AddActionSurge extends Feature {
 class StudiedAttacks extends Feature {
     enabled: boolean = false
 
-    apply(character: Character): void {
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
-
     attackRoll(event: AttackRollEvent): void {
         if (this.enabled) {
             event.adv = true
@@ -85,11 +78,6 @@ class StudiedAttacks extends Feature {
 
 class HeroicAdvantage extends Feature {
     used: boolean = false
-
-    apply(character: Character): void {
-        character.events.on("begin_turn", (event) => this.beginTurn(event))
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
-    }
 
     beginTurn(event: BeginTurnEvent): void {
         this.character.heroicInspiration.add(1)
@@ -117,10 +105,6 @@ class PrecisionAttack extends Feature {
         this.low = low
     }
 
-    apply(character: Character): void {
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
-    }
-
     attackRoll(event: AttackRollEvent): void {
         if (
             event.attack.hasTag("used_maneuver") ||
@@ -139,12 +123,6 @@ class PrecisionAttack extends Feature {
 
 // @ts-ignore
 class TrippingAttack extends Feature {
-    apply(character: Character): void {
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
-
     attackResult(event: AttackResultEvent): void {
         const weapon = event.attack?.attack.weapon()
         if (

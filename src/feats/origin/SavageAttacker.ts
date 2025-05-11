@@ -1,5 +1,4 @@
 import { Feature } from "../../sim/Feature"
-import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { rollDice } from "../../util/helpers"
 import { log } from "../../util/Log"
@@ -7,11 +6,6 @@ import { BeginTurnEvent } from "../../sim/events/BeginTurnEvent"
 
 export class SavageAttacker extends Feature {
     used: boolean = false
-
-    apply(character: Character): void {
-        character.events.on("begin_turn", (data) => this.beginTurn(data))
-        character.events.on("damage_roll", (data) => this.damageRoll(data))
-    }
 
     beginTurn(data: BeginTurnEvent): void {
         this.used = false

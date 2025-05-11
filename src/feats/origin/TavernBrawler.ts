@@ -1,16 +1,10 @@
 import { BaseWeaponDamageTag, UnarmedWeapon } from "../../sim/Weapon"
-import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { Feature } from "../../sim/Feature"
 import { rollDice } from "../../util/helpers"
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 
 export class TavernBrawler extends Feature {
-    apply(character: Character): void {
-        character.events.on("attack_result", (data) => this.attackResult(data))
-        character.events.on("damage_roll", (data) => this.damageRoll(data))
-    }
-
     attackResult(event: AttackResultEvent) {
         const weapon = event.attack?.attack.weapon()
         if (!weapon?.hasTag(UnarmedWeapon)) {

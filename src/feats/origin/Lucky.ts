@@ -7,8 +7,6 @@ export class Lucky extends Feature {
     points: number = 0
     apply(character: Character): void {
         this.maxPoints = character.prof()
-        character.events.on("long_rest", () => this.longRest())
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
     }
 
     longRest(): void {

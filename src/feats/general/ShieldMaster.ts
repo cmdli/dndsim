@@ -8,10 +8,6 @@ export class ShieldMaster extends Feature {
     apply(character: Character): void {
         // We ignore the Dex save benefits
         character.increaseStat("str", 1)
-        character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
     }
 
     beginTurn(): void {

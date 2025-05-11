@@ -14,10 +14,6 @@ export class Crusher extends Feature {
     apply(character: Character): void {
         // We ignore the movement portion of the feat
         character.increaseStat(this.stat, 1)
-        character.events.on("begin_turn", (event) => this.beginTurn(event))
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
     }
 
     beginTurn(event: BeginTurnEvent): void {

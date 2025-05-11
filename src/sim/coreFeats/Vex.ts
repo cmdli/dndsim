@@ -1,4 +1,3 @@
-import { Character } from "../Character"
 import { AttackResultEvent } from "../events/AttackResultEvent"
 import { AttackRollEvent } from "../events/AttackRollEvent"
 import { ShortRestEvent } from "../events/ShortRestEvent"
@@ -6,10 +5,6 @@ import { Feature } from "../Feature"
 
 export class Vex extends Feature {
     vexing: boolean = false
-
-    apply(character: Character): void {
-        character.events.on("attack_roll", (data) => this.attackRoll(data))
-    }
 
     shortRest(data: ShortRestEvent): void {
         this.vexing = false

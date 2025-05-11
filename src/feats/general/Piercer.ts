@@ -13,11 +13,6 @@ export class Piercer extends Feature {
 
     apply(character: Character): void {
         character.increaseStat(this.stat, 1)
-        character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-        character.events.on("damage_roll", (event) => this.damageRoll(event))
     }
 
     beginTurn(): void {

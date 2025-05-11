@@ -14,22 +14,24 @@ import { LongRestEvent } from "./LongRestEvent"
 import { ShortRestEvent } from "./ShortRestEvent"
 import { WeaponRollEvent } from "./WeaponRollEvent"
 
-export type CharacterEventName =
-    | "begin_turn"
-    | "before_action"
-    | "action"
-    | "after_action"
-    | "before_attack"
-    | "attack"
-    | "attack_roll"
-    | "attack_result"
-    | "end_turn"
-    | "enemy_turn"
-    | "short_rest"
-    | "long_rest"
-    | "weapon_roll"
-    | "cast_spell"
-    | "damage_roll"
+export const CharacterEventNames = [
+    "begin_turn",
+    "before_action",
+    "action",
+    "after_action",
+    "before_attack",
+    "attack",
+    "attack_roll",
+    "attack_result",
+    "end_turn",
+    "enemy_turn",
+    "short_rest",
+    "long_rest",
+    "weapon_roll",
+    "cast_spell",
+    "damage_roll",
+] as const
+export type CharacterEventName = (typeof CharacterEventNames)[number]
 
 export abstract class CharacterEvent {
     abstract readonly name: CharacterEventName

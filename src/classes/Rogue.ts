@@ -39,13 +39,6 @@ const HomingStrikesTag = "HomingStrikes"
 class SneakAttack extends Feature {
     used: boolean = false
 
-    apply(character: Character): void {
-        character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
-
     beginTurn(): void {
         this.used = false
     }
@@ -69,12 +62,6 @@ class SneakAttack extends Feature {
 class SteadyAim extends Feature {
     enabled: boolean = false
 
-    apply(character: Character): void {
-        character.events.on("before_action", () => this.beforeAction())
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
-        character.events.on("end_turn", () => this.endTurn())
-    }
-
     beforeAction(): void {
         if (this.character.bonus.use(1, "SteadyAim")) {
             this.enabled = true
@@ -96,11 +83,6 @@ class SteadyAim extends Feature {
 class StrokeOfLuck extends Feature {
     used: boolean = false
 
-    apply(character: Character): void {
-        character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
-    }
-
     beginTurn(): void {
         this.used = false
     }
@@ -121,16 +103,6 @@ class Assassinate extends Feature {
 
     constructor(private level: number) {
         super()
-    }
-
-    apply(character: Character): void {
-        character.events.on("short_rest", () => this.shortRest())
-        character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-        character.events.on("end_turn", () => this.endTurn())
     }
 
     shortRest(): void {
@@ -183,14 +155,6 @@ class Assassinate extends Feature {
 
 class DeathStrike extends Feature {
     enabled: boolean = false
-
-    apply(character: Character): void {
-        character.events.on("short_rest", () => this.shortRest())
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-        character.events.on("end_turn", () => this.endTurn())
-    }
 
     shortRest(): void {
         this.enabled = true
@@ -273,13 +237,6 @@ class PsychicBlades extends Feature {
 }
 
 class SoulBlades extends Feature {
-    apply(character: Character): void {
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
-
     attackRoll(event: AttackRollEvent) {
         if (
             event.hits() ||
@@ -308,13 +265,6 @@ class SoulBlades extends Feature {
 
 class RendMind extends Feature {
     used: boolean = false
-
-    apply(character: Character): void {
-        character.events.on("long_rest", () => this.longRest())
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
 
     longRest() {
         this.used = false

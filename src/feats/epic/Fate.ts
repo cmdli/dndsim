@@ -16,8 +16,6 @@ export class Fate extends Feature {
     apply(character: Character): void {
         character.increaseStatMax(this.stat, 1)
         character.increaseStat(this.stat, 1)
-        character.events.on("short_rest", () => this.shortRest())
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
     }
 
     shortRest(): void {

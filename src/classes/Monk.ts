@@ -57,15 +57,6 @@ function isUnarmedOrMonkWeapon(weapon: Weapon | undefined): boolean {
 }
 
 class MartialArts extends Feature {
-    apply(character: Character) {
-        character.events.on("before_attack", (event) =>
-            this.beforeAttack(event)
-        )
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
-
     beforeAttack(event: BeforeAttackEvent) {
         if (isUnarmedOrMonkWeapon(event.attackEvent.attack.weapon())) {
             event.attackEvent.attack.addStat("dex")
@@ -162,12 +153,6 @@ class FlurryOfBlows extends Feature {
 }
 
 class OpenHandTechnique extends Feature {
-    apply(character: Character): void {
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
-
     attackResult(event: AttackResultEvent): void {
         if (event.hit && event.attack.attack.hasTag(FlurryTag)) {
             if (!event.attack.target.save(this.character.dc("wis"))) {
@@ -182,13 +167,6 @@ class StunningStrike extends Feature {
 
     constructor(private avoidOnGrapple: boolean = false) {
         super()
-    }
-
-    apply(character: Character): void {
-        character.events.on("begin_turn", (event) => this.beginTurn(event))
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
     }
 
     beginTurn(event: BeginTurnEvent): void {
@@ -241,10 +219,6 @@ class Ki extends Feature {
 class UncannyMetabolism extends Feature {
     used: boolean = false
 
-    apply(character: Character): void {
-        character.events.on("short_rest", () => this.shortRest())
-    }
-
     shortRest(): void {
         const character = this.character
         if (!this.used && character.ki.count <= character.ki.max) {
@@ -259,10 +233,6 @@ class UncannyMetabolism extends Feature {
 }
 
 class PerfectFocus extends Feature {
-    apply(character: Character): void {
-        character.events.on("short_rest", () => this.shortRest())
-    }
-
     shortRest(): void {
         const character = this.character
         if (character.ki.count < 4) {

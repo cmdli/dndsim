@@ -95,14 +95,8 @@ class Rage extends Feature {
 }
 
 class RecklessAttack extends Feature {
-    apply(character: Character) {
-        character.events.on("attack_roll", (event) =>
-            this.attackRoll(character, event)
-        )
-    }
-
-    attackRoll(character: Character, event: AttackRollEvent) {
-        if (event.attack.attack.stat(character) == "str") {
+    attackRoll(event: AttackRollEvent) {
+        if (event.attack.attack.stat(this.character) == "str") {
             event.adv = true
             event.attack.addTag(RecklessTag)
         }
@@ -118,13 +112,6 @@ class PrimalChampion extends Feature {
 
 class Frenzy extends Feature {
     used = false
-
-    apply(character: Character) {
-        character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
 
     beginTurn() {
         this.used = false
@@ -154,13 +141,6 @@ class Frenzy extends Feature {
 
 class DivineFury extends Feature {
     used = false
-
-    apply(character: Character) {
-        character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
 
     beginTurn() {
         this.used = false

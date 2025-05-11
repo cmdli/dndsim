@@ -1,15 +1,8 @@
 import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
-import { Character } from "../../sim/Character"
 import { Feature } from "../../sim/Feature"
 import { BaseWeaponDamageTag, UnarmedWeapon } from "../../sim/Weapon"
 
 export class UnarmedFighting extends Feature {
-    apply(character: Character): void {
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-    }
-
     attackResult(event: AttackResultEvent) {
         const weapon = event.attack?.attack.weapon()
         if (!weapon?.hasTag(UnarmedWeapon)) {

@@ -1,14 +1,9 @@
-import { Character } from "../../sim/Character"
 import { DamageRollEvent } from "../../sim/events/DamageRollEvent"
 import { Feature } from "../../sim/Feature"
 import { TwoHandedWeapon } from "../../sim/Weapon"
 import { log } from "../../util/Log"
 
 export class GreatWeaponFighting extends Feature {
-    apply(character: Character): void {
-        character.events.on("damage_roll", (data) => this.damageRoll(data))
-    }
-
     damageRoll(args: DamageRollEvent): void {
         const weapon = args.attack?.attack.weapon()
         if (weapon && weapon.hasTag(TwoHandedWeapon)) {

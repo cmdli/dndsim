@@ -12,7 +12,6 @@ export class ElementalAdept extends Feature {
 
     apply(character: Character): void {
         character.increaseStat(this.stat, 1)
-        character.events.on("damage_roll", (event) => this.damageRoll(event))
     }
 
     damageRoll(event: DamageRollEvent): void {

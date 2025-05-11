@@ -10,7 +10,6 @@ export class IrresistibleOffense extends Feature {
     apply(character: Character): void {
         character.increaseStatMax(this.mod, 1)
         character.increaseStat(this.mod, 1)
-        character.events.on("attack_result", (args) => this.attackResult(args))
     }
 
     attackResult(args: AttackResultEvent): void {

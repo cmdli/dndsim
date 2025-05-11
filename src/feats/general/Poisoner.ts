@@ -12,10 +12,6 @@ export class Poisoner extends Feature {
 
     apply(character: Character): void {
         character.increaseStat(this.stat, 1)
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
-        character.events.on("begin_turn", () => this.beginTurn())
     }
 
     longRest(): void {

@@ -1,4 +1,3 @@
-import { Character } from "../../sim/Character"
 import { AttackRollEvent } from "../../sim/events/AttackRollEvent"
 import { Feature } from "../../sim/Feature"
 
@@ -7,11 +6,9 @@ export class ImprovedCritical extends Feature {
         super()
     }
 
-    apply(character: Character): void {
-        character.events.on("attack_roll", (data: AttackRollEvent) => {
-            if (data.minCrit >= this.minCrit) {
-                data.minCrit = this.minCrit
-            }
-        })
+    attackRoll(event: AttackRollEvent): void {
+        if (event.minCrit >= this.minCrit) {
+            event.minCrit = this.minCrit
+        }
     }
 }

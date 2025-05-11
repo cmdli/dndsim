@@ -8,7 +8,6 @@ export class CrossbowExpert extends Feature {
     apply(character: Character): void {
         // We ignore firing in melee and the loading property
         character.increaseStat("dex", 1)
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
     }
 
     attackRoll(event: AttackRollEvent): void {

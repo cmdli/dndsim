@@ -14,8 +14,6 @@ export class CombatProwess extends Feature {
     apply(character: Character): void {
         character.increaseStatMax(this.stat, 1)
         character.increaseStat(this.stat, 1)
-        character.events.on("begin_turn", (event) => this.beginTurn(event))
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
     }
 
     beginTurn(event: BeginTurnEvent): void {

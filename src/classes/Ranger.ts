@@ -22,12 +22,6 @@ import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { ShortRestEvent } from "../sim/events/ShortRestEvent"
 
 class PreciseHunter extends Feature {
-    apply(character: Character): void {
-        character.events.on("attack_roll", (event: AttackRollEvent) => {
-            this.attackRoll(event)
-        })
-    }
-
     attackRoll(event: AttackRollEvent): void {
         if (this.character.hasEffect("HuntersMark")) {
             event.adv = true
@@ -36,12 +30,6 @@ class PreciseHunter extends Feature {
 }
 
 class FoeSlayer extends Feature {
-    apply(character: Character): void {
-        character.events.on("damage_roll", (event: DamageRollEvent) => {
-            this.damageRoll(event)
-        })
-    }
-
     damageRoll(event: DamageRollEvent): void {
         if (event.damage.source === "HuntersMark") {
             event.damage.replaceDice([10])
@@ -52,21 +40,6 @@ class FoeSlayer extends Feature {
 class ColossusSlayer extends Feature {
     used: boolean = false
     doneDamage: boolean = false
-
-    apply(character: Character): void {
-        character.events.on("short_rest", (event: ShortRestEvent) => {
-            this.shortRest(event)
-        })
-        character.events.on("begin_turn", (event: BeginTurnEvent) => {
-            this.beginTurn(event)
-        })
-        character.events.on("attack_result", (event: AttackResultEvent) => {
-            this.attackResult(event)
-        })
-        character.events.on("damage_roll", (event: DamageRollEvent) => {
-            this.damageRoll(event)
-        })
-    }
 
     shortRest(event: ShortRestEvent): void {
         this.used = false

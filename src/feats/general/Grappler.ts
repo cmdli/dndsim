@@ -14,11 +14,6 @@ export class Grappler extends Feature {
 
     apply(character: Character): void {
         character.increaseStat(this.stat, 1)
-        character.events.on("begin_turn", () => this.beginTurn())
-        character.events.on("attack_roll", (event) => this.attackRoll(event))
-        character.events.on("attack_result", (event) =>
-            this.attackResult(event)
-        )
     }
 
     beginTurn() {
