@@ -1,4 +1,3 @@
-import * as simple from "./simple/exports"
-import * as martial from "./martial/exports"
-
-export { simple, martial }
+export * from "./simple/exports"
+export * from "./martial/exports"
+export * from "./other/exports"

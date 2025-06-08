@@ -1,39 +1,18 @@
-import { Battleaxe } from "./Battleaxe"
-import { Flail } from "./Flail"
-import { Greataxe } from "./Greataxe"
-import { Longsword } from "./Longsword"
-import { Halberd } from "./Halberd"
-import { Lance } from "./Lance"
-import { Morningstar } from "./Morningstar"
-import { Pike } from "./Pike"
-import { Rapier } from "./Rapier"
-import { Scimitar } from "./Scimitar"
-import { Shortsword } from "./Shortsword"
-import { Trident } from "./Trident"
-import { Warhammer } from "./Warhammer"
-import { WarPick } from "./WarPick"
-import { Whip } from "./Whip"
-import { Greatsword } from "./Greatsword"
-import { Glaive } from "./Glaive"
-import { Maul } from "./Maul"
-
-export {
-    Battleaxe,
-    Flail,
-    Glaive,
-    Greataxe,
-    Greatsword,
-    Halberd,
-    Lance,
-    Longsword,
-    Maul,
-    Morningstar,
-    Pike,
-    Rapier,
-    Scimitar,
-    Shortsword,
-    Trident,
-    Warhammer,
-    WarPick,
-    Whip,
-}
+export * from "./Battleaxe"
+export * from "./Flail"
+export * from "./Greataxe"
+export * from "./Longsword"
+export * from "./Halberd"
+export * from "./Lance"
+export * from "./Morningstar"
+export * from "./Pike"
+export * from "./Rapier"
+export * from "./Scimitar"
+export * from "./Shortsword"
+export * from "./Trident"
+export * from "./Warhammer"
+export * from "./WarPick"
+export * from "./Whip"
+export * from "./Greatsword"
+export * from "./Glaive"
+export * from "./Maul"

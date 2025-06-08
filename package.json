@@ -10,6 +10,21 @@
             "import": "./dist/esm/index.js",
             "require": "./dist/cjs/index.js",
             "types": "./dist/types/index.d.ts"
+        },
+        "./weapons": {
+            "import": "./dist/esm/weapons/exports.js",
+            "require": "./dist/cjs/weapons/exports.js",
+            "types": "./dist/types/weapons/exports.d.ts"
+        },
+        "./classes": {
+            "import": "./dist/esm/classes/index.js",
+            "require": "./dist/cjs/classes/index.js",
+            "types": "./dist/types/classes/index.d.ts"
+        },
+        "./features": {
+            "import": "./dist/esm/features/index.js",
+            "require": "./dist/cjs/features/index.js",
+            "types": "./dist/types/features/index.d.ts"
         }
     },
     "files": [
