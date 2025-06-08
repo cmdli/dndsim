@@ -3,8 +3,9 @@ import { Character } from "./sim/Character"
 import { testDPR } from "./sim/Simulation"
 import * as weapons from "./weapons/exports"
 import * as classes from "./classes/index"
-import { Class } from "./sim/types"
+import { Class, Stat, WeaponMastery } from "./sim/types"
+import { Feature } from "./sim/Feature"
 
-export type { Class }
+export type { Class, Stat, WeaponMastery }
 
-export { Character, feats, weapons, testDPR, classes }
+export { Character, feats, weapons, testDPR, classes, Feature }
