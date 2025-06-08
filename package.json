@@ -1,6 +1,6 @@
 {
     "name": "dndsim",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "type": "module",
     "main": "./dist/cjs/index.js",
     "module": "./dist/esm/index.js",
@@ -21,10 +21,10 @@
             "require": "./dist/cjs/classes/index.js",
             "types": "./dist/types/classes/index.d.ts"
         },
-        "./features": {
-            "import": "./dist/esm/features/index.js",
-            "require": "./dist/cjs/features/index.js",
-            "types": "./dist/types/features/index.d.ts"
+        "./feats": {
+            "import": "./dist/esm/feats/index.js",
+            "require": "./dist/cjs/feats/index.js",
+            "types": "./dist/types/feats/index.d.ts"
         }
     },
     "files": [
