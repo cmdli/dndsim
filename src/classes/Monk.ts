@@ -2,7 +2,7 @@ import { AbilityScoreImprovement } from "../feats/general/AbilityScoreImprovemen
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { Grappler } from "../feats/general/Grappler"
 import { TavernBrawler } from "../feats/origin/TavernBrawler"
-import { DefaultAttackActionOperation } from "../sim/actions/AttackAction"
+import { DefaultAttackActionOperation } from "../operations/DefaultAttackActionOperation"
 import { Character } from "../sim/Character"
 import { ClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
@@ -139,19 +139,6 @@ class BonusActionAttackOperation implements Operation {
     }
 }
 
-class FlurryOfBlows extends Feature {
-    constructor(private unarmedStrike: UnarmedStrike) {
-        super()
-    }
-
-    apply(character: Character): void {
-        character.customTurn.addOperation(
-            "after_action",
-            new FlurryOfBlowsOperation(this.unarmedStrike)
-        )
-    }
-}
-
 class OpenHandTechnique extends Feature {
     attackResult(event: AttackResultEvent): void {
         if (event.hit && event.attack.attack.hasTag(FlurryTag)) {
@@ -242,11 +229,15 @@ class PerfectFocus extends Feature {
 }
 
 export class Monk {
+    static operations = {
+        BonusActionAttackOperation,
+        FlurryOfBlowsOperation,
+    }
+
     static baseFeatures(args: {
         level: number
         asis: Array<Feature>
         masteries: WeaponMastery[]
-        unarmedStrike: UnarmedStrike
     }): Feature[] {
         const { level, asis, masteries } = args
         const features: Feature[] = []
@@ -262,7 +253,6 @@ export class Monk {
             features.push(new Ki(level))
             features.push(new UncannyMetabolism())
             features.push(new SetAttribute(FlurryOfBlowsCountAttribute, 2))
-            features.push(new FlurryOfBlows(args.unarmedStrike))
         }
         // Level 3 (Deflect Attacks) is irrelevant/ignored
         // Level 4 (Slow Fall) is irrelevant
@@ -337,7 +327,6 @@ export class Monk {
                     new AbilityScoreImprovement("wis"),
                     new IrresistibleOffense("dex"),
                 ],
-                unarmedStrike,
             })
         )
 
@@ -350,6 +339,12 @@ export class Monk {
             new DefaultAttackActionOperation(unarmedStrike)
         )
 
+        if (level >= 3) {
+            character.customTurn.addOperation(
+                "after_action",
+                new Monk.operations.FlurryOfBlowsOperation(unarmedStrike)
+            )
+        }
         // This is out here instead of part of level 1 so that Flurry of Blows will always
         // be prioritized over it
         character.customTurn.addOperation(

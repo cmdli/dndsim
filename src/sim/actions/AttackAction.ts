@@ -45,15 +45,3 @@ export class AttackActionOperation extends ActionOperation {
         }
     }
 }
-
-export class DefaultAttackActionOperation extends AttackActionOperation {
-    constructor(weapon: Weapon) {
-        super((environment, character) => {
-            character.weaponAttack({
-                target: environment.target,
-                weapon,
-                tags: [AttackActionTag, MainActionTag],
-            })
-        })
-    }
-}

@@ -209,6 +209,11 @@ class ToppleIfNecessaryAttackAction extends ActionOperation {
 }
 
 export class Fighter {
+    static operations = {
+        ActionSurgeOperation,
+        ToppleIfNecessaryAttackAction,
+    }
+
     static baseFeatures(args: {
         level: number
         asis: Array<Feature>

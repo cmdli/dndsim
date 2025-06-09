@@ -26,7 +26,7 @@ import {
     DefaultAttackActionOperation,
     MainActionTag,
 } from "../sim/actions/AttackAction"
-import { NickAttackOperation } from "../sim/actions/NickAttackOperation"
+import { NickAttackOperation } from "../operations/NickAttackOperation"
 import { Operation } from "../sim/actions/Operation"
 import { Shortsword } from "../weapons/martial/melee/Shortsword"
 import { Scimitar } from "../weapons/martial/melee/Scimitar"

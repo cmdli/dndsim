@@ -17,7 +17,7 @@ import { SetAttribute } from "../feats/shared/SetAttribute"
 import { IncreaseResource } from "../feats/shared/IncreaseResource"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Effect, EffectDuration } from "../sim/Effect"
-import { DefaultAttackActionOperation } from "../sim/actions/AttackAction"
+import { DefaultAttackActionOperation } from "../operations/DefaultAttackActionOperation"
 import { Greatsword } from "../weapons/martial/melee/Greatsword"
 
 const RageResource = "rage"
@@ -168,6 +168,10 @@ class DivineFury extends Feature {
 }
 
 export class Barbarian {
+    static operations = {
+        RageOperation,
+    }
+
     static baseFeatures(args: {
         level: number
         asis: Array<Feature>

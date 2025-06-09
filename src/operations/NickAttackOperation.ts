@@ -1,8 +1,8 @@
-import { Character } from "../Character"
-import { Environment } from "../Environment"
-import { Weapon } from "../Weapon"
-import { AttackActionTag, MainActionTag } from "./AttackAction"
-import { Operation } from "./Operation"
+import { Character } from "../sim/Character"
+import { Environment } from "../sim/Environment"
+import { Weapon } from "../sim/Weapon"
+import { AttackActionTag, MainActionTag } from "../sim/actions/AttackAction"
+import { Operation } from "../sim/actions/Operation"
 
 export class NickAttackOperation implements Operation {
     repeatable: boolean = false

@@ -1,7 +1,7 @@
-import { Character } from "../Character"
-import { Environment } from "../Environment"
-import { Spell } from "../spells/Spell"
-import { Operation } from "./Operation"
+import { Character } from "../sim/Character"
+import { Environment } from "../sim/Environment"
+import { Spell } from "../sim/spells/Spell"
+import { Operation } from "../sim/actions/Operation"
 
 export class CastSpellOperation implements Operation {
     repeatable = false

@@ -25,6 +25,11 @@
             "import": "./dist/esm/feats/index.js",
             "require": "./dist/cjs/feats/index.js",
             "types": "./dist/types/feats/index.d.ts"
+        },
+        "./operations": {
+            "import": "./dist/esm/operations/index.js",
+            "require": "./dist/cjs/operations/index.js",
+            "types": "./dist/types/operations/index.d.ts"
         }
     },
     "files": [
