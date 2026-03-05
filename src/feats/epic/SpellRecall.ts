@@ -4,7 +4,7 @@ import { Feature } from "../../sim/Feature"
 import { rollDice } from "../../util/helpers"
 
 export class SpellRecall extends Feature {
-    constructor(private stat: "int" | "wis" | "cha") {
+    constructor(private stat: "Int" | "Wis" | "Cha") {
         super()
     }
 

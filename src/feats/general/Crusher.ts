@@ -7,7 +7,7 @@ import { Feature } from "../../sim/Feature"
 export class Crusher extends Feature {
     enabled: boolean = false
 
-    constructor(private stat: "str" | "con") {
+    constructor(private stat: "Str" | "Con") {
         super()
     }
 

@@ -4,7 +4,7 @@ import sim.feat
 
 
 class IrresistibleOffense(sim.feat.Feat):
-    def __init__(self, mod: Literal["str", "dex"]) -> None:
+    def __init__(self, mod: Literal["Str", "Dex"]) -> None:
         self.mod = mod
 
     def apply(self, character):

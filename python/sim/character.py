@@ -21,7 +21,7 @@ import sim.target
 import sim.weapons
 import sim.resource
 
-STATS = ["str", "dex", "con", "int", "wis", "cha"]
+STATS = ["Str", "Dex", "Con", "Int", "Wis", "Cha"]
 DEFAULT_STAT_MAX = 20
 
 
@@ -38,12 +38,12 @@ class Character:
         self.level = level
         self.prof = prof_bonus(level)
         self.stats = {
-            "str": stats[0],
-            "dex": stats[1],
-            "con": stats[2],
-            "int": stats[3],
-            "wis": stats[4],
-            "cha": stats[5],
+            "Str": stats[0],
+            "Dex": stats[1],
+            "Con": stats[2],
+            "Int": stats[3],
+            "Wis": stats[4],
+            "Cha": stats[5],
         }
         self.stat_max = {stat: DEFAULT_STAT_MAX for stat in STATS}
         self.minions: List[Character] = []

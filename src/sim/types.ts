@@ -1,4 +1,4 @@
-export type Stat = "str" | "dex" | "con" | "int" | "wis" | "cha"
+export type Stat = "Str" | "Dex" | "Con" | "Int" | "Wis" | "Cha"
 // d20 checks can have no ability associated with them
 export type StatOrNone = Stat | "none"
 

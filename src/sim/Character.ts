@@ -38,12 +38,12 @@ export class Character {
     level: number = 0
     stats: Record<StatOrNone, number>
     statMax: Record<Stat, number> = {
-        str: DEFAULT_STAT_MAX,
-        dex: DEFAULT_STAT_MAX,
-        con: DEFAULT_STAT_MAX,
-        int: DEFAULT_STAT_MAX,
-        wis: DEFAULT_STAT_MAX,
-        cha: DEFAULT_STAT_MAX,
+        Str: DEFAULT_STAT_MAX,
+        Dex: DEFAULT_STAT_MAX,
+        Con: DEFAULT_STAT_MAX,
+        Int: DEFAULT_STAT_MAX,
+        Wis: DEFAULT_STAT_MAX,
+        Cha: DEFAULT_STAT_MAX,
     }
 
     features: Array<Feature> = []
@@ -82,7 +82,7 @@ export class Character {
     resources: Map<string, Resource> = new Map()
     // TODO: Add other class resources
     // TODO: Handle actions better
-    grappleStat: StatOrNone = "str"
+    grappleStat: StatOrNone = "Str"
     customTurn: CustomTurn = new CustomTurn()
 
     availableOperations: Map<string, Operation> = new Map()

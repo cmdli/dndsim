@@ -6,7 +6,7 @@ import { Feature } from "../../sim/Feature"
 export class Charger extends Feature {
     used: boolean = false
 
-    constructor(private stat: "str" | "dex") {
+    constructor(private stat: "Str" | "Dex") {
         super()
     }
 

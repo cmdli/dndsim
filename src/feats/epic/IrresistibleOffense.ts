@@ -3,7 +3,7 @@ import { AttackResultEvent } from "../../sim/events/AttackResultEvent"
 import { Feature } from "../../sim/Feature"
 
 export class IrresistibleOffense extends Feature {
-    constructor(private mod: "str" | "dex") {
+    constructor(private mod: "Str" | "Dex") {
         super()
     }
 

@@ -96,7 +96,7 @@ class DreadAmbusher(sim.feat.Feat):
         self.uses = 0
 
     def long_rest(self):
-        self.uses = self.character.mod("wis")
+        self.uses = self.character.mod("Wis")
 
     def begin_turn(self, target: "sim.target.Target"):
         self.used = False
@@ -116,7 +116,7 @@ class BeastChargeFeat(sim.feat.Feat):
         if args.hits() and isinstance(args.attack.weapon, BeastMaul):
             args.add_damage(source="Charge", dice=[6])
             if not args.attack.target.prone and not args.attack.target.save(
-                self.character.dc("wis")
+                self.character.dc("Wis")
             ):
                 args.attack.target.knock_prone()
 
@@ -193,10 +193,10 @@ class GloomstalkerRanger(sim.character.Character):
                 fighting_style=Archery(),
                 asis=[
                     CrossbowExpert(weapon),
-                    ASI(["dex"]),
-                    ASI(["wis"]),
-                    ASI(["wis"]),
-                    IrresistibleOffense("dex"),
+                    ASI(["Dex"]),
+                    ASI(["Wis"]),
+                    ASI(["Wis"]),
+                    IrresistibleOffense("Dex"),
                 ],
             )
         )
@@ -205,7 +205,7 @@ class GloomstalkerRanger(sim.character.Character):
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
             base_feats=feats,
-            spell_mod="wis",
+            spell_mod="Wis",
         )
 
 
@@ -248,7 +248,7 @@ class BeastMaul(sim.weapons.Weapon):
         args.add_damage(
             source=self.name,
             dice=num_dice * [8],
-            damage=2 + self.ranger.mod("wis"),
+            damage=2 + self.ranger.mod("Wis"),
         )
 
 
@@ -321,11 +321,11 @@ class BeastMasterRanger(sim.character.Character):
                 masteries=["Vex", "Nick"],
                 fighting_style=TwoWeaponFighting(),
                 asis=[
-                    DualWielder("dex", shortsword),
-                    ASI(["dex"]),
-                    ASI(["wis"]),
-                    ASI(["wis"]),
-                    IrresistibleOffense("dex"),
+                    DualWielder("Dex", shortsword),
+                    ASI(["Dex"]),
+                    ASI(["Wis"]),
+                    ASI(["Wis"]),
+                    IrresistibleOffense("Dex"),
                 ],
             )
         )
@@ -334,6 +334,6 @@ class BeastMasterRanger(sim.character.Character):
             level=level,
             stats=[10, 17, 10, 10, 16, 10],
             base_feats=feats,
-            spell_mod="wis",
+            spell_mod="Wis",
         )
         self.add_minion(beast)

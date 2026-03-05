@@ -34,10 +34,10 @@ class MonkLevel(sim.core_feats.ClassLevels):
 class BodyAndMind(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
-        character.increase_stat_max("dex", 4)
-        character.increase_stat_max("wis", 4)
-        character.increase_stat("dex", 4)
-        character.increase_stat("wis", 4)
+        character.increase_stat_max("Dex", 4)
+        character.increase_stat_max("Wis", 4)
+        character.increase_stat("Dex", 4)
+        character.increase_stat("Wis", 4)
 
 
 class FlurryOfBlows(sim.feat.Feat):
@@ -57,7 +57,7 @@ class FlurryOfBlows(sim.feat.Feat):
 class OpenHandTechnique(sim.feat.Feat):
     def attack_result(self, args):
         if args.hits() and args.attack.has_tag("flurry"):
-            if not args.attack.target.save(self.character.dc("wis")):
+            if not args.attack.target.save(self.character.dc("Wis")):
                 args.attack.target.knock_prone()
 
 
@@ -81,7 +81,7 @@ class StunningStrike(sim.feat.Feat):
             return
         self.used = True
         self.character.ki.use()
-        if not target.save(self.character.dc("wis")):
+        if not target.save(self.character.dc("Wis")):
             target.stunned = True
         else:
             target.semistunned = True
@@ -182,11 +182,11 @@ class OpenHandMonk(sim.character.Character):
             monk_feats(
                 level=level,
                 asis=[
-                    Grappler("dex"),
-                    ASI(["dex"]),
-                    ASI(["wis"]),
-                    ASI(["wis"]),
-                    IrresistibleOffense("dex"),
+                    Grappler("Dex"),
+                    ASI(["Dex"]),
+                    ASI(["Wis"]),
+                    ASI(["Wis"]),
+                    IrresistibleOffense("Dex"),
                 ],
             )
         )

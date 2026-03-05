@@ -66,10 +66,10 @@ class Retaliation(sim.feat.Feat):
 class PrimalChampion(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
-        character.increase_stat_max("str", 4)
-        character.increase_stat_max("con", 4)
-        character.increase_stat("str", 4)
-        character.increase_stat("con", 4)
+        character.increase_stat_max("Str", 4)
+        character.increase_stat_max("Con", 4)
+        character.increase_stat("Str", 4)
+        character.increase_stat("Con", 4)
 
 
 class Rage(sim.feat.Feat):
@@ -159,9 +159,9 @@ class PolearmBarbarian(sim.character.Character):
                 asis=[
                     GreatWeaponMaster(weapon),
                     PolearmMaster(GlaiveButt(magic_bonus=magic_weapon)),
-                    ASI(["dex", "str"]),
-                    ASI(["dex"]),
-                    IrresistibleOffense("str"),
+                    ASI(["Dex", "Str"]),
+                    ASI(["Dex"]),
+                    IrresistibleOffense("Str"),
                 ],
             )
         )
@@ -185,10 +185,10 @@ class BerserkerBarbarian(sim.character.Character):
                 level,
                 asis=[
                     GreatWeaponMaster(weapon),
-                    ASI(["str"]),
-                    ASI(["dex"]),
-                    ASI(["dex"]),
-                    IrresistibleOffense("str"),
+                    ASI(["Str"]),
+                    ASI(["Dex"]),
+                    ASI(["Dex"]),
+                    IrresistibleOffense("Str"),
                 ],
             )
         )

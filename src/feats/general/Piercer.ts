@@ -7,7 +7,7 @@ import { rollDice } from "../../util/helpers"
 export class Piercer extends Feature {
     used: boolean = false
 
-    constructor(private stat: "str" | "dex") {
+    constructor(private stat: "Str" | "Dex") {
         super()
     }
 

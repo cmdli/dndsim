@@ -21,7 +21,7 @@ class OldCrossbowExpert(sim.feat.Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.increase_stat("dex", 1)
+        character.increase_stat("Dex", 1)
 
     def end_turn(self, target):
         if self.character.use_bonus("CrossbowExpert"):
@@ -31,7 +31,7 @@ class OldCrossbowExpert(sim.feat.Feat):
 class OldSharpshooter(sim.feat.Feat):
     def apply(self, character):
         super().apply(character)
-        character.increase_stat("dex", 1)
+        character.increase_stat("Dex", 1)
 
     def attack_roll(self, args):
         args.situational_bonus -= 5
@@ -115,7 +115,7 @@ class AssaultUnit(sim.character.Character):
         if level >= 6:
             base_feats.append(OldSharpshooter())
         if level >= 8:
-            base_feats.append(ASI(["dex", "str"]))
+            base_feats.append(ASI(["Dex", "Str"]))
         if level >= 15:
             base_feats.append(RapidStrike())
         if blessed:

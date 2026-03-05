@@ -37,7 +37,7 @@ def inspiration_die(level: int):
 
 class PactHandCrossbow(HandCrossbow):
     def mod(self, character):
-        return "cha"
+        return "Cha"
 
 
 class BardLevel(sim.core_feats.ClassLevels):
@@ -54,12 +54,12 @@ class BardicInspiration(sim.feat.Feat):
         character.bardic_inspiration.die = inspiration_die(self.level)
 
     def long_rest(self):
-        self.character.bardic_inspiration.num = self.character.mod("cha")
+        self.character.bardic_inspiration.num = self.character.mod("Cha")
 
 
 class FontOfInspiration(sim.feat.Feat):
     def short_rest(self):
-        self.character.bardic_inspiration.num = self.character.mod("cha")
+        self.character.bardic_inspiration.num = self.character.mod("Cha")
 
 
 class SuperiorInspiration(sim.feat.Feat):
@@ -155,10 +155,10 @@ class ValorBard(sim.character.Character):
             bard_feats(
                 level=level,
                 asis=[
-                    ASI(["cha"]),
-                    ASI(["cha", "dex"]),
-                    ASI(["dex"]),
-                    ASI(["dex", "wis"]),
+                    ASI(["Cha"]),
+                    ASI(["Cha", "Dex"]),
+                    ASI(["Dex"]),
+                    ASI(["Dex", "Wis"]),
                 ],
             )
         )
@@ -170,7 +170,7 @@ class ValorBard(sim.character.Character):
             level=level,
             stats=[10, 16, 10, 10, 10, 17],
             base_feats=feats,
-            spell_mod="cha",
+            spell_mod="Cha",
         )
 
 
@@ -263,10 +263,10 @@ class CMEMulticlass(sim.character.Character):
             bard_feats(
                 class_levels["bard"],
                 asis=[
-                    WarCaster("cha"),
-                    SpellSniper("cha"),
-                    ElvenAccuracy("cha"),
-                    ASI(["dex"]),
+                    WarCaster("Cha"),
+                    SpellSniper("Cha"),
+                    ElvenAccuracy("Cha"),
+                    ASI(["Dex"]),
                 ],
             )
         )
@@ -286,5 +286,5 @@ class CMEMulticlass(sim.character.Character):
             level=level,
             stats=[10, 16, 10, 10, 10, 17],
             base_feats=feats,
-            spell_mod="cha",
+            spell_mod="Cha",
         )

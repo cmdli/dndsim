@@ -12,7 +12,10 @@ import { StatOrNone } from "../sim/types"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 
 class FeyBladeAttack extends Attack {
-    constructor(private level: number, private caster: Character) {
+    constructor(
+        private level: number,
+        private caster: Character
+    ) {
         super()
     }
 
@@ -58,7 +61,10 @@ class FumingOperation extends BonusActionOperation {
 }
 
 class MultiattackOperation extends ActionOperation {
-    constructor(private level: number, private caster: Character) {
+    constructor(
+        private level: number,
+        private caster: Character
+    ) {
         super()
     }
 
@@ -75,12 +81,12 @@ class MultiattackOperation extends ActionOperation {
 function feySummon(level: number, caster: Character): Character {
     const summon = new Character({
         stats: {
-            str: 13,
-            dex: 16,
-            con: 14,
-            int: 14,
-            wis: 11,
-            cha: 16,
+            Str: 13,
+            Dex: 16,
+            Con: 14,
+            Int: 14,
+            Wis: 11,
+            Cha: 16,
         },
     })
     summon.customTurn.addOperation("before_action", new FumingOperation())
@@ -94,7 +100,10 @@ function feySummon(level: number, caster: Character): Character {
 
 class SummonFeyEffect extends ConcentrationSpellEffect {
     private minion?: Character
-    constructor(private level: number, private caster: Character) {
+    constructor(
+        private level: number,
+        private caster: Character
+    ) {
         super("SummonFey")
     }
 

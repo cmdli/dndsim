@@ -2,7 +2,7 @@ import { Character } from "../../sim/Character"
 import { Feature } from "../../sim/Feature"
 
 export class Speedy extends Feature {
-    constructor(private stat: "dex" | "con") {
+    constructor(private stat: "Dex" | "Con") {
         super()
     }
 

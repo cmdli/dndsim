@@ -2,7 +2,7 @@ import { Character } from "../../sim/Character"
 import { Feature } from "../../sim/Feature"
 
 export class Telepathic extends Feature {
-    constructor(private stat: "int" | "wis" | "cha") {
+    constructor(private stat: "Int" | "Wis" | "Cha") {
         super()
     }
 

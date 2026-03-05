@@ -59,7 +59,7 @@ function isUnarmedOrMonkWeapon(weapon: Weapon | undefined): boolean {
 class MartialArts extends Feature {
     beforeAttack(event: BeforeAttackEvent) {
         if (isUnarmedOrMonkWeapon(event.attackEvent.attack.weapon())) {
-            event.attackEvent.attack.addStat("dex")
+            event.attackEvent.attack.addStat("Dex")
         }
     }
 
@@ -93,8 +93,8 @@ class MartialArts extends Feature {
 
 class BodyAndMind extends Feature {
     apply(character: Character): void {
-        character.increaseStatAndMax("dex", 4)
-        character.increaseStatAndMax("wis", 4)
+        character.increaseStatAndMax("Dex", 4)
+        character.increaseStatAndMax("Wis", 4)
     }
 }
 
@@ -142,7 +142,7 @@ class BonusActionAttackOperation implements Operation {
 class OpenHandTechnique extends Feature {
     attackResult(event: AttackResultEvent): void {
         if (event.hit && event.attack.attack.hasTag(FlurryTag)) {
-            if (!event.attack.target.save(this.character.dc("wis"))) {
+            if (!event.attack.target.save(this.character.dc("Wis"))) {
                 event.attack.target.knockProne()
             }
         }
@@ -177,7 +177,7 @@ class StunningStrike extends Feature {
 
         this.used = true
         character.ki.use()
-        if (!target.save(character.dc("wis"))) {
+        if (!target.save(character.dc("Wis"))) {
             target.addCondition("stunned")
             this.character.addTriggerEffect("begin_turn", (event) => {
                 event.target.removeCondition("stunned")
@@ -310,7 +310,7 @@ export class Monk {
         })
 
         const character = new Character({
-            stats: { str: 10, dex: 17, con: 10, int: 10, wis: 16, cha: 10 },
+            stats: { Str: 10, Dex: 17, Con: 10, Int: 10, Wis: 16, Cha: 10 },
         })
 
         const features: Feature[] = []
@@ -321,11 +321,11 @@ export class Monk {
                 level,
                 masteries: ["Vex", "Topple"],
                 asis: [
-                    new Grappler("dex"),
-                    new AbilityScoreImprovement("dex"),
-                    new AbilityScoreImprovement("wis"),
-                    new AbilityScoreImprovement("wis"),
-                    new IrresistibleOffense("dex"),
+                    new Grappler("Dex"),
+                    new AbilityScoreImprovement("Dex"),
+                    new AbilityScoreImprovement("Wis"),
+                    new AbilityScoreImprovement("Wis"),
+                    new IrresistibleOffense("Dex"),
                 ],
             })
         )

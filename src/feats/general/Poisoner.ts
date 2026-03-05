@@ -6,7 +6,7 @@ export class Poisoner extends Feature {
     uses: number = 0
     enabled: boolean = false
 
-    constructor(private stat: "dex" | "int") {
+    constructor(private stat: "Dex" | "Int") {
         super()
     }
 

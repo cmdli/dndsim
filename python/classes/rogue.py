@@ -71,7 +71,7 @@ class Assassinate(sim.feat.Feat):
 
     def begin_turn(self, target):
         if self.first_turn:
-            if do_roll(adv=True) + self.character.mod("dex") > do_roll():
+            if do_roll(adv=True) + self.character.mod("Dex") > do_roll():
                 self.adv = True
 
     def attack_roll(self, args):
@@ -95,7 +95,7 @@ class DeathStrike(sim.feat.Feat):
     def attack_result(self, args):
         if args.hits() and self.enabled:
             self.enabled = False
-            if not args.attack.target.save(self.character.dc("dex")):
+            if not args.attack.target.save(self.character.dc("Dex")):
                 args.dmg_multiplier *= 2
 
     def end_turn(self, target):
@@ -182,11 +182,11 @@ class AssassinRogue(sim.character.Character):
                 level=level,
                 masteries=["Vex", "Nick"],
                 asis=[
-                    ASI(["dex"]),
-                    ASI(["dex", "wis"]),
+                    ASI(["Dex"]),
+                    ASI(["Dex", "Wis"]),
                     ASI(),
                     ASI(),
-                    IrresistibleOffense("dex"),
+                    IrresistibleOffense("Dex"),
                 ],
             )
         )
@@ -214,11 +214,11 @@ class ArcaneTricksterRogue(sim.character.Character):
                 level=level,
                 masteries=["Vex", "Nick"],
                 asis=[
-                    ASI(["dex"]),
-                    ASI(["dex", "wis"]),
+                    ASI(["Dex"]),
+                    ASI(["Dex", "Wis"]),
                     ASI(),
                     ASI(),
-                    IrresistibleOffense("dex"),
+                    IrresistibleOffense("Dex"),
                 ],
             )
         )

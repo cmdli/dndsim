@@ -6,12 +6,12 @@ import { Choice, Option, StaticOption } from "../config"
 class StatChoice implements Choice {
     options(character: Character): Option[] {
         return [
-            new StaticOption("str"),
-            new StaticOption("dex"),
-            new StaticOption("con"),
-            new StaticOption("int"),
-            new StaticOption("wis"),
-            new StaticOption("cha"),
+            new StaticOption("Str"),
+            new StaticOption("Dex"),
+            new StaticOption("Con"),
+            new StaticOption("Int"),
+            new StaticOption("Wis"),
+            new StaticOption("Cha"),
             new StaticOption("none"),
         ]
     }

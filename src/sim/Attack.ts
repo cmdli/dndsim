@@ -58,11 +58,11 @@ export class WeaponAttack extends Attack {
             args.tags.forEach((tag) => this.addTag(tag))
         }
         if (this.weapon_.hasTag(FinesseWeapon)) {
-            this.stats = ["str", "dex"]
+            this.stats = ["Str", "Dex"]
         } else if (this.weapon_.hasTag(RangedWeapon)) {
-            this.stats = ["dex"]
+            this.stats = ["Dex"]
         } else {
-            this.stats = ["str"]
+            this.stats = ["Str"]
         }
         this.onResult = args.onResult
     }

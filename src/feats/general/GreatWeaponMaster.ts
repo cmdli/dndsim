@@ -15,7 +15,7 @@ export class GreatWeaponMaster extends Feature {
     }
 
     apply(character: Character): void {
-        character.increaseStat("str", 1)
+        character.increaseStat("Str", 1)
     }
 
     attackResult(data: AttackResultEvent): void {

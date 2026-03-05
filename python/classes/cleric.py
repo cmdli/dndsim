@@ -46,7 +46,7 @@ class WarPriest(sim.feat.Feat):
         self.weapon = weapon
 
     def short_rest(self):
-        self.uses = self.character.mod("wis")
+        self.uses = self.character.mod("Wis")
 
     def after_action(self, target: sim.target.Target):
         if self.uses > 0 and self.character.use_bonus("WarPriest"):
@@ -109,7 +109,7 @@ class Cleric(sim.character.Character):
         feats.extend(
             cleric_feats(
                 level,
-                asis=[ASI(["wis"]), ASI(["wis", "str"]), ASI(["str"]), ASI(["str"])],
+                asis=[ASI(["Wis"]), ASI(["Wis", "Str"]), ASI(["Str"]), ASI(["Str"])],
             )
         )
         feats.extend(war_cleric_feats(level, weapon))
@@ -118,5 +118,5 @@ class Cleric(sim.character.Character):
             level=level,
             stats=[15, 10, 10, 10, 17, 10],
             base_feats=feats,
-            spell_mod="wis",
+            spell_mod="Wis",
         )

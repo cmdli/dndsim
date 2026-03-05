@@ -4,7 +4,7 @@ import { Feature } from "../../sim/Feature"
 
 export class ElementalAdept extends Feature {
     constructor(
-        private stat: "int" | "wis" | "cha",
+        private stat: "Int" | "Wis" | "Cha",
         private damageType: "acid" | "cold" | "fire" | "lightning" | "thunder"
     ) {
         super()

@@ -7,7 +7,7 @@ const CROSSBOWS = ["HandCrossbow", "LightCrossbow", "HeavyCrossbow"]
 export class CrossbowExpert extends Feature {
     apply(character: Character): void {
         // We ignore firing in melee and the loading property
-        character.increaseStat("dex", 1)
+        character.increaseStat("Dex", 1)
     }
 
     attackRoll(event: AttackRollEvent): void {

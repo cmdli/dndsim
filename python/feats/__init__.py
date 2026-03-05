@@ -16,7 +16,7 @@ class PolearmMaster(sim.feat.Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.increase_stat("str", 1)
+        character.increase_stat("Str", 1)
 
     def begin_turn(self, target):
         self.enabled = False
@@ -37,7 +37,7 @@ class GreatWeaponMaster(sim.feat.Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.increase_stat("str", 1)
+        character.increase_stat("Str", 1)
 
     def attack_result(self, args):
         if args.misses():
@@ -49,7 +49,7 @@ class GreatWeaponMaster(sim.feat.Feat):
 
 
 class ElvenAccuracy(sim.feat.Feat):
-    def __init__(self, mod: Literal["dex", "int", "wis", "cha"]):
+    def __init__(self, mod: Literal["Dex", "Int", "Wis", "Cha"]):
         self.mod = mod
 
     def apply(self, character):
@@ -71,7 +71,7 @@ class CrossbowExpert(sim.feat.Feat):
 
     def apply(self, character):
         super().apply(character)
-        character.increase_stat("dex", 1)
+        character.increase_stat("Dex", 1)
 
     def attack(self, args):
         if args.has_tag("light"):
@@ -129,7 +129,7 @@ class WeaponMasteries(sim.feat.Feat):
 
 class WeaponMaster(sim.feat.Feat):
     def __init__(
-        self, mod: Literal["str", "dex"], mastery: "sim.weapons.WeaponMastery"
+        self, mod: Literal["Str", "Dex"], mastery: "sim.weapons.WeaponMastery"
     ) -> None:
         self.mod = mod
         self.mastery = mastery
@@ -142,7 +142,7 @@ class WeaponMaster(sim.feat.Feat):
 
 class DualWielder(sim.feat.Feat):
     def __init__(
-        self, mod: Literal["str", "dex"], weapon: "sim.weapons.Weapon"
+        self, mod: Literal["Str", "Dex"], weapon: "sim.weapons.Weapon"
     ) -> None:
         self.mod = mod
         self.weapon = weapon
@@ -157,7 +157,7 @@ class DualWielder(sim.feat.Feat):
 
 
 class Piercer(sim.feat.Feat):
-    def __init__(self, mod: Literal["str", "dex"]) -> None:
+    def __init__(self, mod: Literal["Str", "Dex"]) -> None:
         self.mod = mod
         self.used = False
 
@@ -187,7 +187,7 @@ class Piercer(sim.feat.Feat):
 
 
 class WarCaster(sim.feat.Feat):
-    def __init__(self, mod: Literal["int", "wis", "cha"]):
+    def __init__(self, mod: Literal["Int", "Wis", "Cha"]):
         self.mod = mod
 
     def apply(self, character):
@@ -196,7 +196,7 @@ class WarCaster(sim.feat.Feat):
 
 
 class SpellSniper(sim.feat.Feat):
-    def __init__(self, mod: Literal["int", "wis", "cha"]):
+    def __init__(self, mod: Literal["Int", "Wis", "Cha"]):
         self.mod = mod
 
     def apply(self, character):
@@ -205,7 +205,7 @@ class SpellSniper(sim.feat.Feat):
 
 
 class Grappler(sim.feat.Feat):
-    def __init__(self, mod: Literal["str", "dex"]):
+    def __init__(self, mod: Literal["Str", "Dex"]):
         self.mod = mod
 
     def apply(self, character):

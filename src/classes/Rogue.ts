@@ -112,7 +112,7 @@ class Assassinate extends Feature {
             // Simulate the initiative check
             const rogueRoll =
                 Math.max(rollDice(1, 20), rollDice(1, 20)) +
-                this.character.mod("dex")
+                this.character.mod("Dex")
             const enemyRoll = rollDice(1, 20)
             if (rogueRoll > enemyRoll) {
                 this.adv = true
@@ -160,7 +160,7 @@ class DeathStrike extends Feature {
     attackResult(event: AttackResultEvent): void {
         if (event.hit && this.enabled && event.attack.hasTag(SneakAttackTag)) {
             this.enabled = false
-            if (!event.attack.target.save(this.character.dc("dex"))) {
+            if (!event.attack.target.save(this.character.dc("Dex"))) {
                 event.dmgMultiplier *= 2
             }
         }
@@ -288,10 +288,10 @@ class RendMind extends Feature {
             this.character.useResource(EnergyDiceResource, 3)
         }
 
-        if (!target.save(this.character.dc("dex"))) {
+        if (!target.save(this.character.dc("Dex"))) {
             target.addCondition("stunned")
             this.character.addTriggerEffect("begin_turn", (event) => {
-                if (target.save(this.character.dc("dex"))) {
+                if (target.save(this.character.dc("Dex"))) {
                     event.target.removeCondition("stunned")
                     return "stop"
                 }
@@ -401,7 +401,7 @@ export class Rogue {
     ): Character {
         const magicBonus = defaultMagicBonus(level)
         const character = new Character({
-            stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
+            stats: { Str: 10, Dex: 17, Con: 10, Int: 10, Wis: 10, Cha: 10 },
         })
         let features: Feature[] = []
         if (level >= 5 && useBoomingBlade) {
@@ -431,11 +431,11 @@ export class Rogue {
                 level,
                 masteries: ["Vex", "Nick"],
                 asis: [
-                    new AbilityScoreImprovement("dex"),
-                    new AbilityScoreImprovement("dex", "wis"),
-                    new AbilityScoreImprovement("dex"),
-                    new AbilityScoreImprovement("dex"),
-                    new IrresistibleOffense("dex"),
+                    new AbilityScoreImprovement("Dex"),
+                    new AbilityScoreImprovement("Dex", "Wis"),
+                    new AbilityScoreImprovement("Dex"),
+                    new AbilityScoreImprovement("Dex"),
+                    new IrresistibleOffense("Dex"),
                 ],
             })
         )
@@ -447,7 +447,7 @@ export class Rogue {
     static createArcaneTricksterRogue(level: number): Character {
         const magicBonus = defaultMagicBonus(level)
         const character = new Character({
-            stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
+            stats: { Str: 10, Dex: 17, Con: 10, Int: 10, Wis: 10, Cha: 10 },
         })
         let features: Feature[] = []
         if (level >= 5) {
@@ -477,11 +477,11 @@ export class Rogue {
                 level,
                 masteries: ["Vex", "Nick"],
                 asis: [
-                    new AbilityScoreImprovement("dex"),
-                    new AbilityScoreImprovement("dex", "wis"),
-                    new AbilityScoreImprovement("dex"),
-                    new AbilityScoreImprovement("dex"),
-                    new IrresistibleOffense("dex"),
+                    new AbilityScoreImprovement("Dex"),
+                    new AbilityScoreImprovement("Dex", "Wis"),
+                    new AbilityScoreImprovement("Dex"),
+                    new AbilityScoreImprovement("Dex"),
+                    new IrresistibleOffense("Dex"),
                 ],
             })
         )
@@ -492,7 +492,7 @@ export class Rogue {
 
     static createSoulKnifeRogue(level: number): Character {
         const character = new Character({
-            stats: { str: 10, dex: 17, con: 10, int: 10, wis: 10, cha: 10 },
+            stats: { Str: 10, Dex: 17, Con: 10, Int: 10, Wis: 10, Cha: 10 },
         })
         let features: Feature[] = []
         // We begin using psychic blades once we reach level 3
@@ -524,11 +524,11 @@ export class Rogue {
                 level,
                 masteries: ["Vex", "Nick"],
                 asis: [
-                    new AbilityScoreImprovement("dex"),
-                    new AbilityScoreImprovement("dex", "wis"),
-                    new AbilityScoreImprovement("dex"),
-                    new AbilityScoreImprovement("dex"),
-                    new IrresistibleOffense("dex"),
+                    new AbilityScoreImprovement("Dex"),
+                    new AbilityScoreImprovement("Dex", "Wis"),
+                    new AbilityScoreImprovement("Dex"),
+                    new AbilityScoreImprovement("Dex"),
+                    new IrresistibleOffense("Dex"),
                 ],
             })
         )

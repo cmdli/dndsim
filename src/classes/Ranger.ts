@@ -79,7 +79,7 @@ export class Ranger {
         if (level >= 1) {
             features.push(new ClassLevel("Ranger", level))
             features.push(new WeaponMasteries(masteries))
-            features.push(new SpellcastingFeat("wis", Spellcaster.Half, level))
+            features.push(new SpellcastingFeat("Wis", Spellcaster.Half, level))
         }
         // Level 2 (Deft Explorer) is irrelevant
         if (level >= 2) {
@@ -126,12 +126,12 @@ export class Ranger {
         const magicBonus = defaultMagicBonus(level)
         const character = new Character({
             stats: {
-                str: 10,
-                dex: 17,
-                con: 10,
-                int: 10,
-                wis: 16,
-                cha: 10,
+                Str: 10,
+                Dex: 17,
+                Con: 10,
+                Int: 10,
+                Wis: 16,
+                Cha: 10,
             },
         })
         const features: Feature[] = []
@@ -139,11 +139,11 @@ export class Ranger {
             ...this.baseFeatures({
                 level,
                 asis: [
-                    new AbilityScoreImprovement("dex"),
-                    new AbilityScoreImprovement("dex", "wis"),
-                    new AbilityScoreImprovement("wis"),
-                    new AbilityScoreImprovement("wis"),
-                    new IrresistibleOffense("dex"),
+                    new AbilityScoreImprovement("Dex"),
+                    new AbilityScoreImprovement("Dex", "Wis"),
+                    new AbilityScoreImprovement("Wis"),
+                    new AbilityScoreImprovement("Wis"),
+                    new IrresistibleOffense("Dex"),
                 ],
                 masteries: ["Topple"],
                 fightingStyle: new Archery(),

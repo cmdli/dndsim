@@ -12,7 +12,7 @@ def test_weapon():
     target = sim.target.Target(level=5)
     weapon = sample_weapon()
     character = sim.test_helpers.sample_character()
-    assert weapon.mod(character) == "str"
+    assert weapon.mod(character) == "Str"
     assert weapon.to_hit(character) == 4
     attack = sim.events.AttackArgs(character, target, weapon)
     dmg = weapon.damage(character, attack, crit=False)
@@ -22,8 +22,8 @@ def test_weapon():
 def test_mod():
     shortsword = sim.weapons.Shortsword()
     character = sim.test_helpers.sample_character()
-    character.stats["str"] = 10
-    character.stats["dex"] = 14
-    assert shortsword.mod(character) == "dex"
+    character.stats["Str"] = 10
+    character.stats["Dex"] = 14
+    assert shortsword.mod(character) == "Dex"
     glaive = sim.weapons.Glaive()
-    assert glaive.mod(character) == "str"
+    assert glaive.mod(character) == "Str"

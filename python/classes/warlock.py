@@ -30,7 +30,7 @@ class AgonizingBlast(sim.feat.Feat):
             and args.attack.spell is not None
             and args.attack.spell.name == "EldritchBlast"
         ):
-            args.add_damage(source="Agonizing Blast", damage=self.character.mod("cha"))
+            args.add_damage(source="Agonizing Blast", damage=self.character.mod("Cha"))
 
 
 class MysticArcanum(sim.feat.Feat):
@@ -115,7 +115,7 @@ class FiendWarlock(sim.character.Character):
         feats.extend(
             warlock_feats(
                 level,
-                asis=[ASI(["cha"]), ASI(["cha", "dex"])],
+                asis=[ASI(["Cha"]), ASI(["Cha", "Dex"])],
                 invocations=[AgonizingBlast()],
                 arcanums=[
                     "SummonFiend",
@@ -135,5 +135,5 @@ class FiendWarlock(sim.character.Character):
             level=level,
             stats=[10, 10, 10, 10, 10, 17],
             base_feats=feats,
-            spell_mod="cha",
+            spell_mod="Cha",
         )

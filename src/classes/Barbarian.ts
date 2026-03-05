@@ -41,7 +41,7 @@ class RageEffect extends Effect {
         if (
             weapon &&
             event.hit &&
-            event.attack.attack.stat(this.character) == "str"
+            event.attack.attack.stat(this.character) == "Str"
         ) {
             event.addDamage({
                 source: "Rage",
@@ -96,7 +96,7 @@ class Rage extends Feature {
 
 class RecklessAttack extends Feature {
     attackRoll(event: AttackRollEvent) {
-        if (event.attack.attack.stat(this.character) == "str") {
+        if (event.attack.attack.stat(this.character) == "Str") {
             event.adv = true
             event.attack.addTag(RecklessTag)
         }
@@ -105,8 +105,8 @@ class RecklessAttack extends Feature {
 
 class PrimalChampion extends Feature {
     apply(character: Character) {
-        character.increaseStatAndMax("str", 4)
-        character.increaseStatAndMax("con", 4)
+        character.increaseStatAndMax("Str", 4)
+        character.increaseStatAndMax("Con", 4)
     }
 }
 
@@ -243,7 +243,7 @@ export class Barbarian {
 
     static createBerserkerBarbarian(level: number): Character {
         const character = new Character({
-            stats: { str: 17, dex: 10, con: 16, int: 10, wis: 10, cha: 10 },
+            stats: { Str: 17, Dex: 10, Con: 16, Int: 10, Wis: 10, Cha: 10 },
         })
         const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
 
@@ -253,10 +253,10 @@ export class Barbarian {
                 level,
                 asis: [
                     new GreatWeaponMaster(weapon),
-                    new AbilityScoreImprovement("str"),
-                    new AbilityScoreImprovement("con"),
-                    new AbilityScoreImprovement("con"),
-                    new IrresistibleOffense("str"),
+                    new AbilityScoreImprovement("Str"),
+                    new AbilityScoreImprovement("Con"),
+                    new AbilityScoreImprovement("Con"),
+                    new IrresistibleOffense("Str"),
                 ],
                 masteries: ["Topple", "Graze"],
             }),
@@ -273,7 +273,7 @@ export class Barbarian {
 
     static createZealotBarbarian(level: number): Character {
         const character = new Character({
-            stats: { str: 17, dex: 10, con: 16, int: 10, wis: 10, cha: 10 },
+            stats: { Str: 17, Dex: 10, Con: 16, Int: 10, Wis: 10, Cha: 10 },
         })
         const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
 
@@ -283,10 +283,10 @@ export class Barbarian {
                 level,
                 asis: [
                     new GreatWeaponMaster(weapon),
-                    new AbilityScoreImprovement("str"),
-                    new AbilityScoreImprovement("con"),
-                    new AbilityScoreImprovement("con"),
-                    new IrresistibleOffense("str"),
+                    new AbilityScoreImprovement("Str"),
+                    new AbilityScoreImprovement("Con"),
+                    new AbilityScoreImprovement("Con"),
+                    new IrresistibleOffense("Str"),
                 ],
                 masteries: ["Topple", "Graze"],
             }),

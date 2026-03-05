@@ -3,7 +3,10 @@ import { Feature } from "../../sim/Feature"
 import { WeaponMastery } from "../../sim/types"
 
 export class WeaponMaster extends Feature {
-    constructor(private stat: "str" | "dex", private mastery: WeaponMastery) {
+    constructor(
+        private stat: "Str" | "Dex",
+        private mastery: WeaponMastery
+    ) {
         super()
     }
 

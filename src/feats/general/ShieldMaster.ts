@@ -7,7 +7,7 @@ export class ShieldMaster extends Feature {
 
     apply(character: Character): void {
         // We ignore the Dex save benefits
-        character.increaseStat("str", 1)
+        character.increaseStat("Str", 1)
     }
 
     beginTurn(): void {
@@ -22,7 +22,7 @@ export class ShieldMaster extends Feature {
         const attack = event.attack.attack
         const target = event.attack.target
         if (attack.weapon() && !attack.isRanged()) {
-            if (target.save(this.character.dc("str"))) {
+            if (target.save(this.character.dc("Str"))) {
                 this.used = true
                 target.knockProne()
             }

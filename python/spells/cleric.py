@@ -100,7 +100,7 @@ class SpiritualWeapon(sim.spells.Spell, sim.event_loop.Listener):
                 damage=DamageRoll(
                     source=self.name,
                     dice=(self.slot - 1) * [8],
-                    flat_dmg=self.character.mod("wis"),
+                    flat_dmg=self.character.mod("Wis"),
                 ),
             )
 

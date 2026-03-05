@@ -2,7 +2,7 @@ import { Character } from "../../sim/Character"
 import { Feature } from "../../sim/Feature"
 
 export class MountedCombatant extends Feature {
-    constructor(private stat: "str" | "dex" | "wis") {
+    constructor(private stat: "Str" | "Dex" | "Wis") {
         super()
     }
 

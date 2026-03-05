@@ -144,7 +144,7 @@ class TrippingAttack extends Feature {
             dice: [roll],
             type: weapon.damageType,
         })
-        if (!event.attack.target.save(this.character.dc("str"))) {
+        if (!event.attack.target.save(this.character.dc("Str"))) {
             event.attack.target.knockProne()
         }
     }
@@ -286,7 +286,7 @@ export class Fighter {
 
     static createBattlemasterFighter(level: number): Character {
         const character = new Character({
-            stats: { str: 17, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+            stats: { Str: 17, Dex: 10, Con: 10, Int: 10, Wis: 10, Cha: 10 },
         })
         const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
         const toppleWeapon = new Maul({ magicBonus: defaultMagicBonus(level) })
@@ -297,12 +297,12 @@ export class Fighter {
                 level,
                 asis: [
                     new GreatWeaponMaster(weapon),
-                    new AbilityScoreImprovement("str"),
-                    new AbilityScoreImprovement("con"),
-                    new AbilityScoreImprovement("con"),
-                    new AbilityScoreImprovement("con"),
-                    new AbilityScoreImprovement("con"),
-                    new IrresistibleOffense("str"),
+                    new AbilityScoreImprovement("Str"),
+                    new AbilityScoreImprovement("Con"),
+                    new AbilityScoreImprovement("Con"),
+                    new AbilityScoreImprovement("Con"),
+                    new AbilityScoreImprovement("Con"),
+                    new IrresistibleOffense("Str"),
                 ],
                 masteries: ["Topple", "Graze"],
                 fightingStyle: new GreatWeaponFighting(),
@@ -324,7 +324,7 @@ export class Fighter {
 
     static createChampionFighter(level: number): Character {
         const character = new Character({
-            stats: { str: 17, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+            stats: { Str: 17, Dex: 10, Con: 10, Int: 10, Wis: 10, Cha: 10 },
         })
         const weapon = new Greatsword({ magicBonus: defaultMagicBonus(level) })
         const toppleWeapon = new Maul({ magicBonus: defaultMagicBonus(level) })
@@ -335,12 +335,12 @@ export class Fighter {
                 level,
                 asis: [
                     new GreatWeaponMaster(weapon),
-                    new AbilityScoreImprovement("str"),
-                    new AbilityScoreImprovement("con"),
-                    new AbilityScoreImprovement("con"),
-                    new AbilityScoreImprovement("con"),
-                    new AbilityScoreImprovement("con"),
-                    new IrresistibleOffense("str"),
+                    new AbilityScoreImprovement("Str"),
+                    new AbilityScoreImprovement("Con"),
+                    new AbilityScoreImprovement("Con"),
+                    new AbilityScoreImprovement("Con"),
+                    new AbilityScoreImprovement("Con"),
+                    new IrresistibleOffense("Str"),
                 ],
                 masteries: ["Graze", "Topple"],
                 fightingStyle: new GreatWeaponFighting(),
@@ -413,7 +413,7 @@ export class FighterLevel5 extends StandardOption {
 }
 
 const character = new Character({
-    stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    stats: { Str: 10, Dex: 10, Con: 10, Int: 10, Wis: 10, Cha: 10 },
 })
 
 new FighterLevel1().apply(character, {

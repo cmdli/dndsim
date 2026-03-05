@@ -2,7 +2,7 @@ import { Character } from "../../sim/Character"
 import { Feature } from "../../sim/Feature"
 
 export class Observant extends Feature {
-    constructor(private stat: "int" | "wis") {
+    constructor(private stat: "Int" | "Wis") {
         super()
     }
 

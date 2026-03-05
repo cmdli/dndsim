@@ -8,7 +8,7 @@ import { UnarmedWeapon } from "../../sim/Weapon"
 export class Grappler extends Feature {
     private used = false
 
-    constructor(private stat: "str" | "dex") {
+    constructor(private stat: "Str" | "Dex") {
         super()
     }
 

@@ -10,7 +10,7 @@ def sample_character():
         stats=[10, 10, 10, 10, 10, 10],
         base_feats=[],
         spellcaster=sim.spells.Spellcaster.FULL,
-        spell_mod="int",
+        spell_mod="Int",
     )
     return character
 

@@ -67,7 +67,7 @@ class EmpoweredEvocation(sim.feat.Feat):
             and args.spell.school is School.Evocation
         ):
             args.spell.add_tag("EmpoweredEvocationUsed")
-            args.damage.flat_dmg += self.character.mod("int")
+            args.damage.flat_dmg += self.character.mod("Int")
 
 
 class Overchannel(sim.feat.Feat):
@@ -153,8 +153,8 @@ class EvocationWizard(sim.character.Character):
             wizard_feats(
                 level,
                 asis=[
-                    ASI(["int"]),
-                    ASI(["int", "wis"]),
+                    ASI(["Int"]),
+                    ASI(["Int", "Wis"]),
                     ASI(),
                     ASI(),
                     ASI(),
@@ -166,5 +166,5 @@ class EvocationWizard(sim.character.Character):
             level=level,
             stats=[10, 10, 10, 17, 10, 10],
             base_feats=feats,
-            spell_mod="int",
+            spell_mod="Int",
         )

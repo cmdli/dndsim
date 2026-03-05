@@ -116,7 +116,7 @@ class TrippingAttack(sim.feat.Feat):
         die = self.character.maneuvers.use()
         if die > 0:
             args.add_damage(source="TrippingAttack", dice=[die])
-            if not args.attack.target.save(self.character.dc("str")):
+            if not args.attack.target.save(self.character.dc("Str")):
                 args.attack.target.knock_prone()
             args.attack.add_tag("used_maneuver")
 
@@ -281,12 +281,12 @@ class Fighter(sim.character.Character):
                 fighting_style=GreatWeaponFighting(),
                 asis=[
                     GreatWeaponMaster(weapon),
-                    PolearmMaster(butt) if use_pam else ASI(["str"]),
-                    ASI(["str"]),
+                    PolearmMaster(butt) if use_pam else ASI(["Str"]),
+                    ASI(["Str"]),
                     ASI(),
                     ASI(),
                     ASI(),
-                    IrresistibleOffense("str"),
+                    IrresistibleOffense("Str"),
                 ],
             )
         )
@@ -356,12 +356,12 @@ class TWFFighter(sim.character.Character):
                 fighting_style=TwoWeaponFighting(),
                 asis=[
                     GreatWeaponMaster(weapon),
-                    DualWielder("str", weapon),
-                    ASI(["str"]),
+                    DualWielder("Str", weapon),
+                    ASI(["Str"]),
                     ASI(),
                     ASI(),
                     ASI(),
-                    IrresistibleOffense("str"),
+                    IrresistibleOffense("Str"),
                 ],
             )
         )

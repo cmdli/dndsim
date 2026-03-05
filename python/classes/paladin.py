@@ -53,7 +53,7 @@ class SacredWeapon(sim.feat.Feat):
 
     def attack_roll(self, args):
         if self.enabled:
-            args.situational_bonus += self.character.mod("cha")
+            args.situational_bonus += self.character.mod("Cha")
 
 
 class DivineFavorFeat(sim.feat.Feat):
@@ -125,7 +125,7 @@ class DevotionPaladin(sim.character.Character):
         else:
             attacks = [weapon]
         feats.append(AttackAction(attacks=attacks, nick_attacks=nick_attacks))
-        first_feat = ASI(["str", "con"]) if use_twf else GreatWeaponMaster(weapon)
+        first_feat = ASI(["Str", "Con"]) if use_twf else GreatWeaponMaster(weapon)
         feats.extend(
             paladin_feats(
                 level,
@@ -133,10 +133,10 @@ class DevotionPaladin(sim.character.Character):
                 fighting_style=fighting_style,
                 asis=[
                     first_feat,
-                    ASI(["str"]),
-                    ASI(["cha"]),
-                    ASI(["cha"]),
-                    IrresistibleOffense("str"),
+                    ASI(["Str"]),
+                    ASI(["Cha"]),
+                    ASI(["Cha"]),
+                    IrresistibleOffense("Str"),
                 ],
             )
         )
@@ -145,5 +145,5 @@ class DevotionPaladin(sim.character.Character):
             level=level,
             stats=[17, 10, 10, 10, 10, 16],
             base_feats=feats,
-            spell_mod="cha",
+            spell_mod="Cha",
         )

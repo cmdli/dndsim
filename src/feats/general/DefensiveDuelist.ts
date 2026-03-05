@@ -4,6 +4,6 @@ import { Feature } from "../../sim/Feature"
 export class DefensiveDuelist extends Feature {
     apply(character: Character): void {
         // AC Reaction is ignored here
-        character.increaseStat("dex", 1)
+        character.increaseStat("Dex", 1)
     }
 }

@@ -80,5 +80,5 @@ class DraconicSorcerer(sim.character.Character):
             stats=[10, 10, 10, 10, 10, 17],
             base_feats=feats,
             spellcaster=sim.spells.Spellcaster.FULL,
-            spell_mod="cha",
+            spell_mod="Cha",
         )

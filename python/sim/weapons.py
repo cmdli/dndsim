@@ -61,13 +61,13 @@ class Weapon(Taggable):
 
     def mod(self, character: "sim.character.Character"):
         if self.has_tag("ranged"):
-            return "dex"
+            return "Dex"
         elif self.has_tag("finesse") and (
-            character.stat("dex") > character.stat("str")
+            character.stat("Dex") > character.stat("Str")
         ):
-            return "dex"
+            return "Dex"
         else:
-            return "str"
+            return "Str"
 
     def to_hit(self, character: "sim.character.Character"):
         mod = self.mod(character)
