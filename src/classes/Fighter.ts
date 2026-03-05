@@ -26,6 +26,10 @@ import { Operation } from "../sim/actions/Operation"
 import { ActionOperation } from "../sim/actions/ActionOperation"
 import { Greatsword } from "../weapons/martial/melee/Greatsword"
 import { Maul } from "../weapons/martial/melee/Maul"
+import { StandardOption } from "../config/config"
+import { WeaponMasteryChoice } from "../config/WeaponMasteryChoice"
+import { FightingStyleChoice } from "../config/FightingStyleChoice"
+import { FeatChoice } from "../config/featChoice/FeatChoice"
 
 const ActionSurgeResource = "ActionSurge"
 
@@ -355,3 +359,65 @@ export class Fighter {
         return character
     }
 }
+
+export class FighterLevel1 extends StandardOption {
+    constructor() {
+        super({
+            id: "FighterLevel1",
+            choices: {
+                mastery1: new WeaponMasteryChoice(),
+                mastery2: new WeaponMasteryChoice(),
+                fightingStyle: new FightingStyleChoice(),
+            },
+            feats: [new ClassLevel("Fighter", 1)],
+        })
+    }
+}
+
+export class FighterLevel2 extends StandardOption {
+    constructor() {
+        super({
+            id: "FighterLevel2",
+            feats: [new AddActionSurge()],
+        })
+    }
+}
+
+export class FighterLevel3 extends StandardOption {
+    constructor() {
+        super({
+            id: "FighterLevel3",
+            // TODO: Subclass choices
+        })
+    }
+}
+
+export class FighterLevel4 extends StandardOption {
+    constructor() {
+        super({
+            id: "FighterLevel4",
+            choices: {
+                feat: new FeatChoice(),
+            },
+        })
+    }
+}
+
+export class FighterLevel5 extends StandardOption {
+    constructor() {
+        super({
+            id: "FighterLevel5",
+            feats: [new ExtraAttack(2)],
+        })
+    }
+}
+
+const character = new Character({
+    stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+})
+
+new FighterLevel1().apply(character, {
+    mastery1: "Graze",
+    mastery2: "Nick",
+    fightingStyle: "GreatWeaponFighting",
+})

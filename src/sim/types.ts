@@ -2,15 +2,17 @@ export type Stat = "str" | "dex" | "con" | "int" | "wis" | "cha"
 // d20 checks can have no ability associated with them
 export type StatOrNone = Stat | "none"
 
-export type WeaponMastery =
-    | "Vex"
-    | "Topple"
-    | "Slow"
-    | "Nick"
-    | "Cleave"
-    | "Graze"
-    | "Sap"
-    | "Push"
+export const WEAPON_MASTERIES = [
+    "Vex",
+    "Topple",
+    "Slow",
+    "Nick",
+    "Cleave",
+    "Graze",
+    "Sap",
+    "Push",
+] as const
+export type WeaponMastery = (typeof WEAPON_MASTERIES)[number]
 
 export type Class =
     | "Artificer"

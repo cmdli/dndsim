@@ -21,15 +21,12 @@ import { Resource } from "../sim/resources/Resource"
 import { ActionOperation } from "../sim/actions/ActionOperation"
 import { Environment } from "../sim/Environment"
 import { BoomingBlade } from "../spells/BoomingBlade"
-import {
-    AttackActionTag,
-    DefaultAttackActionOperation,
-    MainActionTag,
-} from "../sim/actions/AttackAction"
+import { AttackActionTag, MainActionTag } from "../sim/actions/AttackAction"
 import { NickAttackOperation } from "../operations/NickAttackOperation"
 import { Operation } from "../sim/actions/Operation"
 import { Shortsword } from "../weapons/martial/melee/Shortsword"
 import { Scimitar } from "../weapons/martial/melee/Scimitar"
+import { DefaultAttackActionOperation } from "../operations/DefaultAttackActionOperation"
 
 const EnergyDieAttribute = "energyDie"
 const EnergyDiceResource = "energyDice"

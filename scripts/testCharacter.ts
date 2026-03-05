@@ -1,6 +1,11 @@
-import * as dndsim from "../src/index"
+import { Monk } from "../src/classes/Monk"
+import { Rogue } from "../src/classes/Rogue"
+import { Fighter } from "../src/classes/Fighter"
+import { Barbarian } from "../src/classes/Barbarian"
+import { Ranger } from "../src/classes/Ranger"
 import { log } from "../src/util/Log"
 import { program } from "commander"
+import { testDPR } from "../src/index"
 
 type Args = {
     character: string
@@ -53,26 +58,22 @@ function parseArgs(): Args {
 function getCharacterCreator(character: string) {
     switch (character) {
         case "monk":
-            return (level: number) =>
-                dndsim.classes.Monk.createOpenHandMonk(level)
+            return (level: number) => Monk.createOpenHandMonk(level)
         case "rogue":
-            return (level: number) =>
-                dndsim.classes.Rogue.createAssassinRogue(level)
+            return (level: number) => Rogue.createAssassinRogue(level)
         case "fighter":
-            return (level: number) =>
-                dndsim.classes.Fighter.createChampionFighter(level)
+            return (level: number) => Fighter.createChampionFighter(level)
         case "barbarian":
-            return (level: number) =>
-                dndsim.classes.Barbarian.createZealotBarbarian(level)
+            return (level: number) => Barbarian.createZealotBarbarian(level)
         case "ranger":
-            return (level: number) => dndsim.classes.Ranger.hunterRanger(level)
+            return (level: number) => Ranger.hunterRanger(level)
         default:
             throw new Error(`Unknown character: ${character}`)
     }
 }
 
 function testCharacter(args: Args) {
-    const results = dndsim.testDPR({
+    const results = testDPR({
         creator: getCharacterCreator(args.character),
         startLevel: args.startLevel,
         endLevel: args.endLevel,

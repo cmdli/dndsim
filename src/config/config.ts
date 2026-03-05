@@ -1,79 +1,82 @@
-import { ClassLevel } from "../sim/coreFeats/ClassLevel"
+/**
+ * - List of operations in priority order
+ * - Button to add operation from list of available operations
+ * - Each operation can have configuration choices
+ *   - Select a weapon from available weapons
+ *   - Select a spell from available spells
+ *   - Select one of several static options
+ * - Once every choice is configured, then the operation is added
+ * - Each operation can be statically configured in code
+ *
+ *
+ * ==== Choice Types ====
+ *
+ *
+ * ClassLevel {
+ *   feats: Feature[]
+ *   choices: {
+ *     mastery1: "string"
+ *     mastery2: "string"
+ *     fightingStyle: "string"
+ *   }
+ * }
+ */
+
 import { Feature } from "../sim/Feature"
-import { Class } from "../sim/types"
+import { Character } from "../sim/Character"
 
-type ChoiceOption = {
-    key: string
-    name: string
-    description: string
-    featConfig: FeatConfig
+export interface Option {
+    id: string
+    choices(): Record<string, Choice>
+    apply(character: Character, choices: Record<string, string>): void
 }
 
-export class Choice {
-    name: string
-    options: ChoiceOption[]
-    constructor(args: { name: string; options: ChoiceOption[] }) {
-        this.name = args.name
-        this.options = args.options
-    }
-
-    apply(choices: Set<string>): Feature[] {
-        for (const option of this.options) {
-            if (choices.has(option.key)) {
-                return option.featConfig.apply(choices)
-            }
-        }
-        return []
-    }
+export interface Choice {
+    options(character: Character): Option[]
+    apply(character: Character, optionId: string): void
 }
 
-export class FeatConfig {
+export class StandardOption implements Option {
+    id: string
+    _choices: Record<string, Choice>
     feats: Feature[]
-    choices: Choice[]
-    constructor(feats: Feature[], choices?: Choice[]) {
-        this.feats = feats
-        this.choices = choices ?? []
+
+    constructor(args: {
+        id: string
+        choices?: Record<string, Choice>
+        feats?: Feature[]
+    }) {
+        this.id = args.id
+        this._choices = args.choices ?? {}
+        this.feats = args.feats ?? []
     }
 
-    apply(choices: Set<string>): Feature[] {
-        const feats = []
-        feats.push(...this.feats)
-        for (const choice of this.choices) {
-            feats.push(...choice.apply(choices))
-        }
-        return feats
-    }
-}
-
-export class Schedule {
-    schedule: Record<number, FeatConfig>
-    constructor(schedule: Record<number, FeatConfig>) {
-        this.schedule = schedule
+    choices(): Record<string, Choice> {
+        return this._choices
     }
 
-    apply(level: number, choices: Set<string>): Feature[] {
-        const feats = []
-        for (let i = 1; i <= level; i++) {
-            const featConfig = this.schedule[i]
-            if (featConfig) {
-                feats.push(...featConfig.apply(choices))
+    apply(character: Character, choices: Record<string, string>): void {
+        for (const choiceId of Object.keys(this._choices)) {
+            if (choices[choiceId]) {
+                this._choices[choiceId].apply(character, choices[choiceId])
             }
         }
-        return feats
+        for (const feat of this.feats) {
+            character.addFeature(feat)
+        }
     }
 }
 
-export class ClassSchedule extends Schedule {
-    class_: Class
-    constructor(class_: Class, schedule: Record<number, FeatConfig>) {
-        super(schedule)
-        this.class_ = class_
+export class StaticOption implements Option {
+    id: string
+
+    constructor(id: string) {
+        this.id = id
     }
 
-    apply(level: number, choices: Set<string>): Feature[] {
-        const feats = []
-        feats.push(...super.apply(level, choices))
-        feats.push(new ClassLevel(this.class_, level))
-        return feats
+    choices(): Record<string, Choice> {
+        return {}
     }
+
+    apply(character: Character, choices: Record<string, string>): void {}
 }

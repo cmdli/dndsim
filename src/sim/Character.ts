@@ -29,6 +29,7 @@ import { CombatSuperiority } from "./resources/CombatSuperiority"
 import { CustomTurn } from "./actions/CustomTurn"
 import { Environment } from "./Environment"
 import { Effect } from "./Effect"
+import { Operation } from "./actions/Operation"
 
 const DEFAULT_STAT_MAX = 20
 
@@ -83,6 +84,8 @@ export class Character {
     // TODO: Handle actions better
     grappleStat: StatOrNone = "str"
     customTurn: CustomTurn = new CustomTurn()
+
+    availableOperations: Map<string, Operation> = new Map()
 
     constructor(args: { stats: Omit<Record<Stat, number>, "none"> }) {
         const { stats } = args
