@@ -2,7 +2,7 @@ import { WeaponMastery } from "../sim/types"
 import { Feature } from "../sim/Feature"
 import { AddClassLevel } from "../sim/coreFeats/ClassLevel"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
-import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
+import { defaultMagicBonus, unreachable } from "../util/helpers"
 import { Character } from "../sim/Character"
 import { ExtraAttack } from "../feats/shared/ExtraAttack"
 import { DamageRollEvent } from "../sim/events/DamageRollEvent"
@@ -20,6 +20,7 @@ import { SpellcastingFeat } from "../sim/spells/SpellcastingFeat"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { ShortRestEvent } from "../sim/events/ShortRestEvent"
+import { FeatureGroup } from "../sim/helpers/FeatureGroup"
 
 class PreciseHunter extends Feature {
     attackRoll(event: AttackRollEvent): void {
@@ -67,89 +68,132 @@ class ColossusSlayer extends Feature {
     }
 }
 
+type RangerSubclass = "Hunter"
+
 export class Ranger {
-    static baseFeatures(args: {
+    static features(args: {
         level: number
-        asis: Array<Feature>
+        asis: Feature[]
         masteries: WeaponMastery[]
         fightingStyle: Feature
+        subclass: RangerSubclass
     }): Feature[] {
-        const { level, asis, masteries, fightingStyle } = args
+        const { level, asis, masteries, fightingStyle, subclass } = args
         const features: Feature[] = []
         if (level >= 1) {
-            features.push(new AddClassLevel("Ranger", level))
-            features.push(new WeaponMasteries(masteries))
-            features.push(new SpellcastingFeat("Wis", Spellcaster.Half, level))
+            features.push(Ranger.level1(level, masteries))
         }
         // Level 2 (Deft Explorer) is irrelevant
         if (level >= 2) {
-            features.push(fightingStyle)
+            features.push(Ranger.level2(fightingStyle))
+        }
+        if (level >= 3) {
+            features.push(Ranger.level3(subclass))
+        }
+        if (level >= 4) {
+            features.push(Ranger.level4(asis[0]))
         }
         if (level >= 5) {
-            features.push(new ExtraAttack(2))
+            features.push(Ranger.level5())
         }
         // Level 6 (Roving) is irrelevant
+        if (level >= 8) {
+            features.push(Ranger.level8(asis[1]))
+        }
         // Level 9 (Expertise) is irrelevant
         // Level 10 (Tireless) is irrelevant
+        if (level >= 12) {
+            features.push(Ranger.level12(asis[2]))
+        }
         // Level 13 (Relentless Hunter) is irrelevant
         // TODO: Level 14 (Nature's Veil)
+        if (level >= 16) {
+            features.push(Ranger.level16(asis[3]))
+        }
         if (level >= 17) {
-            features.push(new PreciseHunter())
+            features.push(Ranger.level17())
         }
         // Level 18 (Feral Senses) is irrelevant
-        if (level >= 20) {
-            features.push(new FoeSlayer())
+        if (level >= 19) {
+            features.push(Ranger.level19(asis[4]))
         }
-        features.push(
-            ...applyFeatSchedule({
-                newFeats: asis,
-                schedule: [4, 8, 12, 16, 19],
-                level,
-            })
-        )
+        if (level >= 20) {
+            features.push(Ranger.level20())
+        }
         return features
     }
 
-    static hunterFeatures(level: number): Feature[] {
-        const features: Feature[] = []
-        if (level >= 3) {
+    static level1(level: number, masteries: WeaponMastery[]): Feature {
+        return new FeatureGroup([
+            new AddClassLevel("Ranger", level),
+            new WeaponMasteries(masteries),
+            new SpellcastingFeat("Wis", Spellcaster.Half, level),
+        ])
+    }
+
+    static level2(fightingStyle: Feature): Feature {
+        return new FeatureGroup([fightingStyle])
+    }
+
+    static level3(subclass: RangerSubclass): Feature {
+        if (subclass === "Hunter") {
             // Level 3 (Hunter's Lore) is irrelevant
-            features.push(new ColossusSlayer())
+            return new FeatureGroup([new ColossusSlayer()])
+        } else {
+            unreachable(subclass)
         }
-        // Level 7 (Defensive Tactics) is irrelevant
-        // Level 11 (Superior Hunter's Prey) is just bad
-        // Level 15 (Superior Hunter's Defense) is irrelevant
-        return features
+    }
+
+    static level4(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level5(): Feature {
+        return new FeatureGroup([new ExtraAttack(2)])
+    }
+
+    static level8(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level12(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level16(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level17(): Feature {
+        return new FeatureGroup([new PreciseHunter()])
+    }
+
+    static level19(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level20(): Feature {
+        return new FeatureGroup([new FoeSlayer()])
     }
 
     static hunterRanger(level: number): Character {
         const magicBonus = defaultMagicBonus(level)
         const character = new Character({
-            stats: {
-                Str: 10,
-                Dex: 17,
-                Con: 10,
-                Int: 10,
-                Wis: 16,
-                Cha: 10,
-            },
+            stats: { Str: 10, Dex: 17, Con: 10, Int: 10, Wis: 16, Cha: 10 },
         })
-        const features: Feature[] = []
-        features.push(
-            ...this.baseFeatures({
-                level,
-                asis: [
-                    new AbilityScoreImprovement("Dex"),
-                    new AbilityScoreImprovement("Dex", "Wis"),
-                    new AbilityScoreImprovement("Wis"),
-                    new AbilityScoreImprovement("Wis"),
-                    new IrresistibleOffense("Dex"),
-                ],
-                masteries: ["Topple"],
-                fightingStyle: new Archery(),
-            })
-        )
-        features.push(...this.hunterFeatures(level))
+        const features = Ranger.features({
+            level,
+            subclass: "Hunter",
+            masteries: ["Topple"],
+            fightingStyle: new Archery(),
+            asis: [
+                new AbilityScoreImprovement("Dex"),
+                new AbilityScoreImprovement("Dex", "Wis"),
+                new AbilityScoreImprovement("Wis"),
+                new AbilityScoreImprovement("Wis"),
+                new IrresistibleOffense("Dex"),
+            ],
+        })
         features.forEach((feat) => character.addFeature(feat))
 
         character.customTurn.addOperation(
@@ -173,7 +217,6 @@ export class Ranger {
                 return new HuntersMark(character.spells.lowestSlot())
             })
         )
-
         character.customTurn.addOperation(
             "action",
             new DefaultAttackActionOperation(new Longbow({ magicBonus }))
