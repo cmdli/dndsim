@@ -8,7 +8,7 @@ import { AddClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { Feature } from "../sim/Feature"
-import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
+import { defaultMagicBonus, unreachable } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import {
     BaseWeaponDamageTag,
@@ -26,6 +26,7 @@ import { ExtraAttack } from "../feats/shared/ExtraAttack"
 import { SetAttribute } from "../feats/shared/SetAttribute"
 import { UnarmedStrike } from "../weapons/other/UnarmedStrike"
 import { BeforeAttackEvent } from "../sim/events/BeforeAttackEvent"
+import { FeatureGroup } from "../sim/helpers/FeatureGroup"
 
 const FlurryTag = "flurry"
 
@@ -228,80 +229,158 @@ class PerfectFocus extends Feature {
     }
 }
 
+type MonkSubclass = "OpenHand"
+
 export class Monk {
     static operations = {
         BonusActionAttackOperation,
         FlurryOfBlowsOperation,
     }
 
-    static baseFeatures(args: {
+    static features(args: {
         level: number
-        asis: Array<Feature>
+        asis: Feature[]
         masteries: WeaponMastery[]
+        subclass: MonkSubclass
     }): Feature[] {
-        const { level, asis, masteries } = args
+        const { level, asis, masteries, subclass } = args
         const features: Feature[] = []
-
         if (level >= 1) {
-            features.push(new AddClassLevel("Monk", level))
-            features.push(new WeaponMasteries(masteries))
-            features.push(new SetAttribute(MartialArtsDieAttribute, 6))
-            features.push(new MartialArts())
+            features.push(Monk.level1(level, masteries))
         }
         // Level 1 (Unarmored Defense) is irrelevant
         if (level >= 2) {
-            features.push(new Ki(level))
-            features.push(new UncannyMetabolism())
-            features.push(new SetAttribute(FlurryOfBlowsCountAttribute, 2))
+            features.push(Monk.level2(level))
+        }
+        if (level >= 3) {
+            features.push(Monk.level3(subclass))
         }
         // Level 3 (Deflect Attacks) is irrelevant/ignored
         // Level 4 (Slow Fall) is irrelevant
+        if (level >= 4) {
+            features.push(Monk.level4(asis[0]))
+        }
         if (level >= 5) {
-            features.push(new StunningStrike(true))
-            features.push(new ExtraAttack(2))
-            features.push(new SetAttribute(MartialArtsDieAttribute, 8))
+            features.push(Monk.level5())
         }
         // Level 6 (Empowered Strikes) is irrelevant
         // Level 7 (Evasion) is irrelevant
+        if (level >= 8) {
+            features.push(Monk.level8(asis[1]))
+        }
         // Level 9 (Acrobatic Movement) is irrelevant
         // Level 10 (Self-Restoration) is irrelevant
         if (level >= 10) {
-            features.push(new SetAttribute(FlurryOfBlowsCountAttribute, 3))
+            features.push(Monk.level10())
         }
         if (level >= 11) {
-            features.push(new SetAttribute(MartialArtsDieAttribute, 10))
+            features.push(Monk.level11(subclass))
+        }
+        if (level >= 12) {
+            features.push(Monk.level12(asis[2]))
         }
         // Level 13 (Deflect Energy) is irrelevant
         // Level 14 (Disciplined Survivor) is irrelevant
         if (level >= 15) {
-            features.push(new PerfectFocus())
+            features.push(Monk.level15())
+        }
+        if (level >= 16) {
+            features.push(Monk.level16(asis[3]))
         }
         if (level >= 17) {
-            features.push(new SetAttribute(MartialArtsDieAttribute, 12))
+            features.push(Monk.level17(subclass))
         }
         // Level 18 (Superior Defense) is irrelevant
-        if (level >= 20) {
-            features.push(new BodyAndMind())
+        if (level >= 19) {
+            features.push(Monk.level19(asis[4]))
         }
-        features.push(
-            ...applyFeatSchedule({
-                newFeats: asis,
-                schedule: [4, 8, 12, 16, 19],
-                level,
-            })
-        )
+        if (level >= 20) {
+            features.push(Monk.level20())
+        }
         return features
     }
 
-    static openHandFeatures(level: number): Feature[] {
-        const features: Feature[] = []
-        if (level >= 3) {
-            features.push(new OpenHandTechnique())
+    static level1(level: number, masteries: WeaponMastery[]): Feature {
+        return new FeatureGroup([
+            new AddClassLevel("Monk", level),
+            new WeaponMasteries(masteries),
+            new SetAttribute(MartialArtsDieAttribute, 6),
+            new MartialArts(),
+        ])
+    }
+
+    static level2(level: number): Feature {
+        return new FeatureGroup([
+            new Ki(level),
+            new UncannyMetabolism(),
+            new SetAttribute(FlurryOfBlowsCountAttribute, 2),
+        ])
+    }
+
+    static level3(subclass: MonkSubclass): Feature {
+        if (subclass === "OpenHand") {
+            return new FeatureGroup([new OpenHandTechnique()])
+        } else {
+            unreachable(subclass)
         }
-        // Level 6 (Wholeness of Body) is irrelevant
-        // Level 11 (Fleet Step) is irrelevant
-        // Level 17 (Quivering Palm) - TODO
-        return features
+    }
+
+    static level4(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level5(): Feature {
+        return new FeatureGroup([
+            new StunningStrike(true),
+            new ExtraAttack(2),
+            new SetAttribute(MartialArtsDieAttribute, 8),
+        ])
+    }
+
+    static level8(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level10(): Feature {
+        return new FeatureGroup([new SetAttribute(FlurryOfBlowsCountAttribute, 3)])
+    }
+
+    static level11(subclass: MonkSubclass): Feature {
+        if (subclass === "OpenHand") {
+            // Level 11 (Fleet Step) is irrelevant
+            return new FeatureGroup([new SetAttribute(MartialArtsDieAttribute, 10)])
+        } else {
+            unreachable(subclass)
+        }
+    }
+
+    static level12(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level15(): Feature {
+        return new FeatureGroup([new PerfectFocus()])
+    }
+
+    static level16(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level17(subclass: MonkSubclass): Feature {
+        if (subclass === "OpenHand") {
+            // TODO: Quivering Palm
+            return new FeatureGroup([new SetAttribute(MartialArtsDieAttribute, 12)])
+        } else {
+            unreachable(subclass)
+        }
+    }
+
+    static level19(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level20(): Feature {
+        return new FeatureGroup([new BodyAndMind()])
     }
 
     static createOpenHandMonk(level: number): Character {
@@ -315,10 +394,10 @@ export class Monk {
 
         const features: Feature[] = []
         features.push(new TavernBrawler())
-
         features.push(
-            ...Monk.baseFeatures({
+            ...Monk.features({
                 level,
+                subclass: "OpenHand",
                 masteries: ["Vex", "Topple"],
                 asis: [
                     new Grappler("Dex"),
@@ -329,16 +408,12 @@ export class Monk {
                 ],
             })
         )
-
-        features.push(...Monk.openHandFeatures(level))
-
         features.forEach((feature) => character.addFeature(feature))
 
         character.customTurn.addOperation(
             "action",
             new DefaultAttackActionOperation(unarmedStrike)
         )
-
         if (level >= 3) {
             character.customTurn.addOperation(
                 "after_action",

@@ -8,7 +8,7 @@ export class FeatureGroup extends Feature {
 
     apply(character: Character): void {
         for (const feature of this.features) {
-            feature.apply(character)
+            character.addFeature(feature)
         }
     }
 }

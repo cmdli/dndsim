@@ -372,7 +372,7 @@ export class Rogue {
             features.push(Rogue.level17(subclass))
         }
         // Level 18 (Elusive) is irrelevant
-        if (level >= 19) {
+        if (level >= 19 && asis[5] !== undefined) {
             features.push(Rogue.level19(asis[5]))
         }
         if (level >= 20) {
