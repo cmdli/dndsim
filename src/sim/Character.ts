@@ -94,9 +94,9 @@ export class Character {
         if (originFeat) {
             this.addFeature(originFeat)
         }
-        for (const feature of [new Graze(), new Topple(), new Vex()]) {
-            this.addFeature(feature)
-        }
+        this.addFeature(new Graze())
+        this.addFeature(new Topple())
+        this.addFeature(new Vex())
     }
 
     addFeature(feature: Feature): void {

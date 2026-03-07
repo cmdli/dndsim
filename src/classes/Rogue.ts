@@ -5,7 +5,7 @@ import { AddClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Feature } from "../sim/Feature"
-import { applyFeatSchedule, defaultMagicBonus, rollDice } from "../util/helpers"
+import { defaultMagicBonus, rollDice, unreachable } from "../util/helpers"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import {
     FinesseWeapon,
@@ -27,6 +27,7 @@ import { Operation } from "../sim/actions/Operation"
 import { Shortsword } from "../weapons/martial/melee/Shortsword"
 import { Scimitar } from "../weapons/martial/melee/Scimitar"
 import { DefaultAttackActionOperation } from "../operations/DefaultAttackActionOperation"
+import { FeatureGroup } from "../sim/helpers/FeatureGroup"
 
 const EnergyDieAttribute = "energyDie"
 const EnergyDiceResource = "energyDice"
@@ -316,83 +317,192 @@ class BoomingBladeAction extends ActionOperation {
     }
 }
 
+type RogueSubclass = "Assassin" | "ArcaneTrickster" | "SoulKnife"
+
 export class Rogue {
-    static baseFeatures(args: {
+    static features(args: {
         level: number
-        asis: Array<Feature>
+        asis: Feature[]
         masteries: WeaponMastery[]
+        subclass: RogueSubclass
     }): Feature[] {
-        const { level, asis, masteries } = args
+        const { level, asis, masteries, subclass } = args
         const features: Feature[] = []
         if (level >= 1) {
-            features.push(new AddClassLevel("Rogue", level))
-            features.push(new SneakAttack())
-            features.push(new WeaponMasteries(masteries))
+            features.push(Rogue.level1(level, masteries))
         }
         // Level 2 (Cunning Action) is irrelevant for now
         if (level >= 3) {
-            features.push(new SteadyAim())
+            features.push(Rogue.level3(subclass, level))
+        }
+        if (level >= 4) {
+            features.push(Rogue.level4(asis[0]))
+        }
+        if (level >= 5) {
+            features.push(Rogue.level5(subclass))
         }
         // Level 5 (Cunning Strike) is mostly useless for DPR
         // Level 7 (Evasion) is irrelevant
         // Level 7 (Reliable Talent) is irrelevant
-        // Level 11 (Improved Cunning Strike) is unused
-        // Level 14 (Devious Strikes) is unused
-        // Level 15 (Slippery Mind) is irrelevant
-        // Level 18 (Elusive) is irrelevant
-        if (level >= 20) {
-            features.push(new StrokeOfLuck())
-        }
-        features.push(
-            ...applyFeatSchedule({
-                newFeats: asis,
-                schedule: [4, 8, 10, 12, 16, 19],
-                level,
-            })
-        )
-        return features
-    }
-
-    static assassinFeatures(level: number): Feature[] {
-        const features: Feature[] = []
-        if (level >= 3) {
-            features.push(new Assassinate(level))
-        }
-        // Level 3 (Assassin's Tools) is irrelevant
-        // Level 9 (Infiltration Expertise) is irrelevant
-        // TODO: Level 13 (Envenom Weapons)
-        if (level >= 17) {
-            features.push(new DeathStrike())
-        }
-        return features
-    }
-
-    static soulKnifeFeatures(level: number): Feature[] {
-        const features: Feature[] = []
-        if (level >= 3) {
-            features.push(new PsychicBlades())
-            features.push(new SetAttribute(EnergyDieAttribute, 6))
-        }
-        if (level >= 5) {
-            features.push(new IncreaseResource(EnergyDiceResource, 2))
-            features.push(new SetAttribute(EnergyDieAttribute, 8))
+        if (level >= 8) {
+            features.push(Rogue.level8(asis[1]))
         }
         if (level >= 9) {
-            features.push(new IncreaseResource(EnergyDiceResource, 2))
-            features.push(new SoulBlades())
+            features.push(Rogue.level9(subclass))
+        }
+        if (level >= 10) {
+            features.push(Rogue.level10(asis[2]))
         }
         if (level >= 11) {
-            features.push(new SetAttribute(EnergyDieAttribute, 10))
+            features.push(Rogue.level11(subclass))
+        }
+        // Level 11 (Improved Cunning Strike) is unused
+        if (level >= 12) {
+            features.push(Rogue.level12(asis[3]))
         }
         if (level >= 13) {
-            features.push(new IncreaseResource(EnergyDiceResource, 2))
+            features.push(Rogue.level13(subclass))
+        }
+        // Level 14 (Devious Strikes) is unused
+        // Level 15 (Slippery Mind) is irrelevant
+        if (level >= 16) {
+            features.push(Rogue.level16(asis[4]))
         }
         if (level >= 17) {
-            features.push(new SetAttribute(EnergyDieAttribute, 12))
-            features.push(new IncreaseResource(EnergyDiceResource, 2))
-            features.push(new RendMind())
+            features.push(Rogue.level17(subclass))
+        }
+        // Level 18 (Elusive) is irrelevant
+        if (level >= 19) {
+            features.push(Rogue.level19(asis[5]))
+        }
+        if (level >= 20) {
+            features.push(Rogue.level20())
         }
         return features
+    }
+
+    static level1(level: number, masteries: WeaponMastery[]): Feature {
+        return new FeatureGroup([
+            new AddClassLevel("Rogue", level),
+            new SneakAttack(),
+            new WeaponMasteries(masteries),
+        ])
+    }
+
+    static level3(subclass: RogueSubclass, level: number): Feature {
+        const subclassFeatures: Feature[] = []
+        if (subclass === "Assassin") {
+            // Level 3 (Assassin's Tools) is irrelevant
+            subclassFeatures.push(new Assassinate(level))
+        } else if (subclass === "ArcaneTrickster") {
+            // TODO: Arcane Trickster specific feats
+        } else if (subclass === "SoulKnife") {
+            subclassFeatures.push(new PsychicBlades())
+            subclassFeatures.push(new SetAttribute(EnergyDieAttribute, 6))
+        } else {
+            unreachable(subclass)
+        }
+        return new FeatureGroup([new SteadyAim(), ...subclassFeatures])
+    }
+
+    static level4(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level5(subclass: RogueSubclass): Feature {
+        if (subclass === "Assassin") {
+            return new FeatureGroup([])
+        } else if (subclass === "ArcaneTrickster") {
+            return new FeatureGroup([])
+        } else if (subclass === "SoulKnife") {
+            return new FeatureGroup([
+                new IncreaseResource(EnergyDiceResource, 2),
+                new SetAttribute(EnergyDieAttribute, 8),
+            ])
+        } else {
+            unreachable(subclass)
+        }
+    }
+
+    static level8(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level9(subclass: RogueSubclass): Feature {
+        if (subclass === "Assassin") {
+            // Level 9 (Infiltration Expertise) is irrelevant
+            return new FeatureGroup([])
+        } else if (subclass === "ArcaneTrickster") {
+            return new FeatureGroup([])
+        } else if (subclass === "SoulKnife") {
+            return new FeatureGroup([
+                new IncreaseResource(EnergyDiceResource, 2),
+                new SoulBlades(),
+            ])
+        } else {
+            unreachable(subclass)
+        }
+    }
+
+    static level10(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level11(subclass: RogueSubclass): Feature {
+        if (subclass === "Assassin") {
+            return new FeatureGroup([])
+        } else if (subclass === "ArcaneTrickster") {
+            return new FeatureGroup([])
+        } else if (subclass === "SoulKnife") {
+            return new FeatureGroup([new SetAttribute(EnergyDieAttribute, 10)])
+        } else {
+            unreachable(subclass)
+        }
+    }
+
+    static level12(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level13(subclass: RogueSubclass): Feature {
+        if (subclass === "Assassin") {
+            // TODO: Level 13 (Envenom Weapons)
+            return new FeatureGroup([])
+        } else if (subclass === "ArcaneTrickster") {
+            return new FeatureGroup([])
+        } else if (subclass === "SoulKnife") {
+            return new FeatureGroup([new IncreaseResource(EnergyDiceResource, 2)])
+        } else {
+            unreachable(subclass)
+        }
+    }
+
+    static level16(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level17(subclass: RogueSubclass): Feature {
+        if (subclass === "Assassin") {
+            return new FeatureGroup([new DeathStrike()])
+        } else if (subclass === "ArcaneTrickster") {
+            return new FeatureGroup([])
+        } else if (subclass === "SoulKnife") {
+            return new FeatureGroup([
+                new SetAttribute(EnergyDieAttribute, 12),
+                new IncreaseResource(EnergyDiceResource, 2),
+                new RendMind(),
+            ])
+        } else {
+            unreachable(subclass)
+        }
+    }
+
+    static level19(asi: Feature): Feature {
+        return new FeatureGroup([asi])
+    }
+
+    static level20(): Feature {
+        return new FeatureGroup([new StrokeOfLuck()])
     }
 
     static createAssassinRogue(
@@ -403,7 +513,6 @@ export class Rogue {
         const character = new Character({
             stats: { Str: 10, Dex: 17, Con: 10, Int: 10, Wis: 10, Cha: 10 },
         })
-        let features: Feature[] = []
         if (level >= 5 && useBoomingBlade) {
             const rapier = new Rapier({ magicBonus })
             character.customTurn.addOperation(
@@ -411,12 +520,8 @@ export class Rogue {
                 new BoomingBladeAction(rapier)
             )
         } else {
-            const shortsword = new Shortsword({
-                magicBonus,
-            })
-            const scimitar = new Scimitar({
-                magicBonus,
-            })
+            const shortsword = new Shortsword({ magicBonus })
+            const scimitar = new Scimitar({ magicBonus })
             character.customTurn.addOperation(
                 "action",
                 new DefaultAttackActionOperation(shortsword)
@@ -426,20 +531,18 @@ export class Rogue {
                 new NickAttackOperation(scimitar)
             )
         }
-        features.push(
-            ...Rogue.baseFeatures({
-                level,
-                masteries: ["Vex", "Nick"],
-                asis: [
-                    new AbilityScoreImprovement("Dex"),
-                    new AbilityScoreImprovement("Dex", "Wis"),
-                    new AbilityScoreImprovement("Dex"),
-                    new AbilityScoreImprovement("Dex"),
-                    new IrresistibleOffense("Dex"),
-                ],
-            })
-        )
-        features.push(...Rogue.assassinFeatures(level))
+        const features = Rogue.features({
+            level,
+            subclass: "Assassin",
+            masteries: ["Vex", "Nick"],
+            asis: [
+                new AbilityScoreImprovement("Dex"),
+                new AbilityScoreImprovement("Dex", "Wis"),
+                new AbilityScoreImprovement("Dex"),
+                new AbilityScoreImprovement("Dex"),
+                new IrresistibleOffense("Dex"),
+            ],
+        })
         features.forEach((feature) => character.addFeature(feature))
         return character
     }
@@ -449,7 +552,6 @@ export class Rogue {
         const character = new Character({
             stats: { Str: 10, Dex: 17, Con: 10, Int: 10, Wis: 10, Cha: 10 },
         })
-        let features: Feature[] = []
         if (level >= 5) {
             const rapier = new Rapier({ magicBonus })
             character.customTurn.addOperation(
@@ -457,12 +559,8 @@ export class Rogue {
                 new BoomingBladeAction(rapier)
             )
         } else {
-            const shortsword = new Shortsword({
-                magicBonus,
-            })
-            const scimitar = new Scimitar({
-                magicBonus,
-            })
+            const shortsword = new Shortsword({ magicBonus })
+            const scimitar = new Scimitar({ magicBonus })
             character.customTurn.addOperation(
                 "action",
                 new DefaultAttackActionOperation(shortsword)
@@ -472,20 +570,18 @@ export class Rogue {
                 new NickAttackOperation(scimitar)
             )
         }
-        features = features.concat(
-            Rogue.baseFeatures({
-                level,
-                masteries: ["Vex", "Nick"],
-                asis: [
-                    new AbilityScoreImprovement("Dex"),
-                    new AbilityScoreImprovement("Dex", "Wis"),
-                    new AbilityScoreImprovement("Dex"),
-                    new AbilityScoreImprovement("Dex"),
-                    new IrresistibleOffense("Dex"),
-                ],
-            })
-        )
-        // TODO: Arcane Trickster specific feats
+        const features = Rogue.features({
+            level,
+            subclass: "ArcaneTrickster",
+            masteries: ["Vex", "Nick"],
+            asis: [
+                new AbilityScoreImprovement("Dex"),
+                new AbilityScoreImprovement("Dex", "Wis"),
+                new AbilityScoreImprovement("Dex"),
+                new AbilityScoreImprovement("Dex"),
+                new IrresistibleOffense("Dex"),
+            ],
+        })
         features.forEach((feature) => character.addFeature(feature))
         return character
     }
@@ -494,7 +590,6 @@ export class Rogue {
         const character = new Character({
             stats: { Str: 10, Dex: 17, Con: 10, Int: 10, Wis: 10, Cha: 10 },
         })
-        let features: Feature[] = []
         // We begin using psychic blades once we reach level 3
         if (level < 3) {
             const shortsword = new Shortsword()
@@ -514,25 +609,21 @@ export class Rogue {
             )
             character.customTurn.addOperation(
                 "after_action",
-                new PsychicBladesBonusAction(
-                    psychicBlade({ isBonusAction: true })
-                )
+                new PsychicBladesBonusAction(psychicBlade({ isBonusAction: true }))
             )
         }
-        features.push(
-            ...Rogue.baseFeatures({
-                level,
-                masteries: ["Vex", "Nick"],
-                asis: [
-                    new AbilityScoreImprovement("Dex"),
-                    new AbilityScoreImprovement("Dex", "Wis"),
-                    new AbilityScoreImprovement("Dex"),
-                    new AbilityScoreImprovement("Dex"),
-                    new IrresistibleOffense("Dex"),
-                ],
-            })
-        )
-        features.push(...Rogue.soulKnifeFeatures(level))
+        const features = Rogue.features({
+            level,
+            subclass: "SoulKnife",
+            masteries: ["Vex", "Nick"],
+            asis: [
+                new AbilityScoreImprovement("Dex"),
+                new AbilityScoreImprovement("Dex", "Wis"),
+                new AbilityScoreImprovement("Dex"),
+                new AbilityScoreImprovement("Dex"),
+                new IrresistibleOffense("Dex"),
+            ],
+        })
         features.forEach((feature) => character.addFeature(feature))
         return character
     }
