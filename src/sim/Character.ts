@@ -80,16 +80,20 @@ export class Character {
         resetOnLongRest: true,
     })
     resources: Map<string, Resource> = new Map()
-    // TODO: Add other class resources
-    // TODO: Handle actions better
     grappleStat: StatOrNone = "Str"
     customTurn: CustomTurn = new CustomTurn()
 
     availableOperations: Map<string, Operation> = new Map()
 
-    constructor(args: { stats: Omit<Record<Stat, number>, "none"> }) {
-        const { stats } = args
+    constructor(args: {
+        stats: Omit<Record<Stat, number>, "none">
+        originFeat?: Feature
+    }) {
+        const { stats, originFeat } = args
         this.stats = { ...stats, none: 10 }
+        if (originFeat) {
+            this.addFeature(originFeat)
+        }
         for (const feature of [new Graze(), new Topple(), new Vex()]) {
             this.addFeature(feature)
         }

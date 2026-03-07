@@ -44,3 +44,7 @@ export function defaultMagicBonus(level: number): number {
     }
     return 0
 }
+
+export function unreachable(value: never): never {
+    throw new Error(`Unreachable code: ${value}`)
+}

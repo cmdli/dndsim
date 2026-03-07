@@ -92,7 +92,7 @@ export class ConcentrationSpell extends Spell {
 
     // Override this to change the effect of the spell
     effect(): Effect {
-        return new ConcentrationSpellEffect(this.name)
+        throw new Error("Not implemented")
     }
 }
 

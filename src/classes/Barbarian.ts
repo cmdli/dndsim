@@ -5,7 +5,7 @@ import { Feature } from "../sim/Feature"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { WeaponMastery } from "../sim/types"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
-import { ClassLevel } from "../sim/coreFeats/ClassLevel"
+import { AddClassLevel } from "../sim/coreFeats/ClassLevel"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { ExtraAttack } from "../feats/shared/ExtraAttack"
 import { Resource } from "../sim/resources/Resource"
@@ -180,7 +180,7 @@ export class Barbarian {
         const { level, asis, masteries } = args
         const features: Feature[] = []
         if (level >= 1) {
-            features.push(new ClassLevel("Barbarian", level))
+            features.push(new AddClassLevel("Barbarian", level))
             features.push(new WeaponMasteries(masteries))
             features.push(new SetAttribute(RageBonusDamageAttribute, 2))
             features.push(new Rage())

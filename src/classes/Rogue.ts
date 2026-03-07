@@ -1,7 +1,7 @@
 import { AbilityScoreImprovement } from "../feats/general/AbilityScoreImprovement"
 import { IrresistibleOffense } from "../feats/epic/IrresistibleOffense"
 import { Character } from "../sim/Character"
-import { ClassLevel } from "../sim/coreFeats/ClassLevel"
+import { AddClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackRollEvent } from "../sim/events/AttackRollEvent"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { Feature } from "../sim/Feature"
@@ -325,7 +325,7 @@ export class Rogue {
         const { level, asis, masteries } = args
         const features: Feature[] = []
         if (level >= 1) {
-            features.push(new ClassLevel("Rogue", level))
+            features.push(new AddClassLevel("Rogue", level))
             features.push(new SneakAttack())
             features.push(new WeaponMasteries(masteries))
         }

@@ -1,6 +1,6 @@
 import { WeaponMastery } from "../sim/types"
 import { Feature } from "../sim/Feature"
-import { ClassLevel } from "../sim/coreFeats/ClassLevel"
+import { AddClassLevel } from "../sim/coreFeats/ClassLevel"
 import { WeaponMasteries } from "../feats/shared/WeaponMasteries"
 import { applyFeatSchedule, defaultMagicBonus } from "../util/helpers"
 import { Character } from "../sim/Character"
@@ -77,7 +77,7 @@ export class Ranger {
         const { level, asis, masteries, fightingStyle } = args
         const features: Feature[] = []
         if (level >= 1) {
-            features.push(new ClassLevel("Ranger", level))
+            features.push(new AddClassLevel("Ranger", level))
             features.push(new WeaponMasteries(masteries))
             features.push(new SpellcastingFeat("Wis", Spellcaster.Half, level))
         }

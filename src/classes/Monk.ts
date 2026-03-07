@@ -4,7 +4,7 @@ import { Grappler } from "../feats/general/Grappler"
 import { TavernBrawler } from "../feats/origin/TavernBrawler"
 import { DefaultAttackActionOperation } from "../operations/DefaultAttackActionOperation"
 import { Character } from "../sim/Character"
-import { ClassLevel } from "../sim/coreFeats/ClassLevel"
+import { AddClassLevel } from "../sim/coreFeats/ClassLevel"
 import { AttackResultEvent } from "../sim/events/AttackResultEvent"
 import { BeginTurnEvent } from "../sim/events/BeginTurnEvent"
 import { Feature } from "../sim/Feature"
@@ -243,7 +243,7 @@ export class Monk {
         const features: Feature[] = []
 
         if (level >= 1) {
-            features.push(new ClassLevel("Monk", level))
+            features.push(new AddClassLevel("Monk", level))
             features.push(new WeaponMasteries(masteries))
             features.push(new SetAttribute(MartialArtsDieAttribute, 6))
             features.push(new MartialArts())
